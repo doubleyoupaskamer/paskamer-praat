@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="admin-version" content="v177">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DoubleYou · Admin v3.2</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<style>
+:root {
+  --bg:     #09090f;
+  --bg2:    #0f1018;
+  --bg3:    #161720;
+  --bg4:    #1c1d28;
+  --border: rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.10);
+  --text:   #dde1ee;
+  --text2:  #6b7590;
+  --text3:  #353a50;
+  --gold:   #c67d06;
+  --gold2:  rgba(198,125,6,0.10);
+  --green:  #16a34a;
+  --green2: rgba(22,163,74,0.10);
+  --red:    #dc2626;
+  --red2:   rgba(220,38,38,0.10);
+  --blue:   #2563eb;
+  --blue2:  rgba(37,99,235,0.10);
+  --amber:  #d97706;
+  --amber2: rgba(217,119,6,0.10);
+  --nav:    200px;
+  --top:    52px;
+  --r:      7px;
+  --font:   'SF Pro Display',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:   'SF Mono','Fira Code',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;overflow:hidden}
+button{font-family:var(--font)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+
+/* ── Layout ── */
+#shell{display:flex;height:100vh;height:100dvh}
+#nav{width:var(--nav);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+#main{flex:1;display:flex;flex-direction:column;min-width:0}
+#topbar{height:var(--top);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:10px;flex-shrink:0}
+#content{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:16px}
+
+/* ── Nav ── */
+.nav-logo{padding:14px 14px 10px;border-bottom:1px solid var(--border)}
+.nav-logo-name{font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.05em}
+.nav-logo-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.nav-sect{padding:10px 14px 4px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;margin:1px 6px;border-radius:var(--r);cursor:pointer;color:var(--text2);font-size:12px;transition:all .12s;user-select:none}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.on{background:var(--gold2);color:var(--gold)}
+.nav-item svg{flex-shrink:0;opacity:.7;width:13px;height:13px}
+.nav-item.on svg{opacity:1}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;min-width:16px;text-align:center;line-height:14px}
+.nav-badge.green{background:var(--green)}
+.nav-foot{margin-top:auto;padding:10px;border-top:1px solid var(--border)}
+.nav-user{font-size:11px;color:var(--text3);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Topbar ── */
+.tb-title{font-size:14px;font-weight:600}
+.tb-sep{color:var(--text3)}
+.tb-sub{font-size:12px;color:var(--text2)}
+.tb-space{flex:1}
+.tb-pill{display:flex;align-items:center;gap:5px;padding:4px 9px;border:1px solid var(--border);border-radius:100px;font-size:11px;color:var(--text2)}
+.tb-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:glow 2s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 4px var(--green)}50%{box-shadow:0 0 8px var(--green),0 0 12px var(--green)}}
+.btn{padding:5px 11px;border-radius:var(--r);font-size:12px;cursor:pointer;transition:all .12s;border:1px solid var(--border);background:var(--bg3);color:var(--text2)}
+/* Hamburger: verborgen op desktop, zichtbaar op mobiel */
+#nav-toggle{display:none}
+.btn:hover{border-color:var(--border2);color:var(--text)}
+.btn-gold{background:var(--gold);border-color:var(--gold);color:#fff}
+.btn-gold:hover{opacity:.9}
+.btn-red{border-color:rgba(220,38,38,.3);color:var(--red)}
+.btn-red:hover{background:var(--red2)}
+.btn-sm{padding:4px 8px;font-size:11px}
+
+/* ── Tabs ── */
+.tab{display:none;flex-direction:column;gap:14px;min-width:0;max-width:100%}
+.tab.on{display:flex}
+
+/* ── Grid ── */
+.grid{display:grid;gap:12px;min-width:0;max-width:100%}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1300px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Tablet (≤900px) ─────────────────────────────────────── */
+@media(max-width:900px){
+  :root{--nav:180px}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(2,1fr)}
+  .g2{grid-template-columns:1fr}
+  .row{flex-direction:column}
+  .row .col{max-width:100%!important}
+  #ud-pane-profiel{grid-template-columns:1fr!important}
+  #ud-pane-device{grid-template-columns:1fr!important}
+  #ud-pane-gedrag{grid-template-columns:1fr!important}
+  .nav-logo-name{font-size:12px}
+}
+
+/* ── Mobile (≤640px) ─────────────────────────────────────── */
+@media(max-width:640px){
+  :root{--nav:0px;--top:48px}
+
+  /* Voorkom horizontaal scrollen op alles */
+  *{box-sizing:border-box}
+  html,body{overflow-x:hidden;max-width:100vw}
+  #shell{overflow-x:hidden;max-width:100vw;height:100vh;height:100dvh}
+  #main{overflow-x:hidden;max-width:100vw;min-width:0;width:100%;display:flex;flex-direction:column;height:100%;flex:1;min-height:0}
+  #content{overflow-x:hidden;overflow-y:auto;max-width:100%;padding:10px;gap:10px;-webkit-overflow-scrolling:touch}
+
+  /* Nav: slide-in */
+  #nav{
+    position:fixed;left:-280px;top:0;bottom:0;width:280px;z-index:200;
+    transition:left .22s ease;box-shadow:6px 0 32px rgba(0,0,0,.5)
+  }
+  #nav.open{left:0}
+  #nav-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:199
+  }
+  body.nav-open #nav-overlay{display:block}
+
+  /* Hamburger */
+  #nav-toggle{
+    display:flex!important;align-items:center;justify-content:center;
+    width:40px;height:40px;border-radius:var(--r);
+    border:1px solid var(--border);background:var(--bg3);
+    cursor:pointer;font-size:20px;flex-shrink:0;color:var(--text);
+    -webkit-tap-highlight-color:transparent;touch-action:manipulation
+  }
+
+  /* Topbar */
+  #topbar{padding:0 10px;gap:6px;height:var(--top)}
+  .tb-title{font-size:13px;font-weight:600}
+  .tb-sep,.tb-sub,.tb-pill{display:none!important}
+
+  /* GRIDS — alles 1 kolom */
+  .g4,.g3,.g2,
+  [class*="grid"]{grid-template-columns:1fr!important}
+
+  /* ROWS — altijd stapelen */
+  .row,.flex:not(.panel-head):not(.panel-actions):not(.flex.gap-sm){
+    flex-direction:column!important;flex-wrap:wrap
+  }
+  .row .col,.col{max-width:100%!important;width:100%!important;min-width:0!important}
+
+  /* Kaarten */
+  .card{padding:12px}
+  .card-val{font-size:22px}
+  .card-label{font-size:10px}
+
+  /* Panels */
+  .panel{overflow:clip;width:100%;max-width:100%}
+  .panel-head{flex-wrap:wrap;gap:6px;padding:8px 10px}
+  .panel-title{font-size:12px}
+  .panel-actions{flex-wrap:wrap;gap:4px}
+  .panel-body{padding:10px}
+
+  /* Tabellen: scrollbaar */
+  .panel-scroll,
+  .panel > div[style*="overflow"],
+  .panel > table,
+  .panel table{
+    display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%
+  }
+  table{width:100%;min-width:0}
+  th,td{padding:7px 8px;font-size:11px}
+
+  /* Berichten split view — stapelen op mobiel */
+  #dm-split{flex-direction:column!important}
+  #dm-list-panel{width:100%!important;flex-shrink:unset!important}
+  #dm-list{max-height:300px!important}
+  #dm-chat-msgs{max-height:380px!important}
+
+  /* Bars */
+  .bars{width:100%;min-height:40px}
+  .bar-row{gap:5px}
+  .bar-lbl{width:clamp(50px,20%,70px)!important;font-size:10px!important}
+  .bar-val{width:28px;font-size:10px}
+
+  /* Online nu: gebruik gewone 1-kolom grid net als andere tabs */
+
+  /* Specifieke inline-style row panels naast elkaar: forceer stapelen */
+  #t-online .row,
+  #t-analytics .row,
+  #t-dsp .row,
+  #t-users .row{flex-direction:column!important}
+
+  /* User detail */
+  #u-detail .panel{overflow:clip}
+  #ud-pane-profiel,#ud-pane-device,#ud-pane-gedrag{
+    grid-template-columns:1fr!important;padding:10px!important
+  }
+  /* KPI strip: 3 kolommen */
+  #u-detail > .panel > div[style*="repeat(6,1fr)"]{
+    grid-template-columns:repeat(3,1fr)!important
+  }
+  /* User detail header */
+  #u-detail > .panel > div:first-child > div{flex-wrap:wrap;gap:10px}
+  #ud-live-status{align-items:flex-start!important}
+
+  /* UD tabs scrollbaar */
+  .ud-tab{padding:7px 10px;font-size:11px;white-space:nowrap}
+  #u-detail [style*="display:flex;border-bottom"]{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Live feed */
+  #live-feed{height:calc(100vh - 170px)!important}
+  .ev{padding:7px 10px}
+  .ev-type{font-size:11px}
+  .ev-meta{font-size:10px}
+
+  /* Auth */
+  #auth{padding:16px}
+  .auth-box{width:100%;max-width:400px;margin:0 auto;padding:24px 20px}
+
+  /* Selectboxes en inputs */
+  .inp{font-size:13px;padding:6px 8px}
+  .btn,.btn-sm{font-size:12px}
+
+  /* Stat-row */
+  .stat-row{flex-wrap:wrap}
+  .stat{min-width:calc(50% - 4px);flex:0 0 calc(50% - 4px)}
+
+  /* Nav footer */
+  .nav-foot{padding:8px}
+  .nav-user{font-size:10px}
+
+  /* ── COMPREHENSIVE MOBILE OVERFLOW FIXES ───────────────────── */
+
+  /* Alle tabs: nooit breder dan viewport */
+  .tab{max-width:100%;overflow-x:hidden}
+
+  /* Bar charts: schalen mee met container */
+  .bar-row{flex-wrap:nowrap;min-width:0}
+  .bar-lbl{width:clamp(50px,22%,90px)!important;font-size:10px!important}
+  .bar-val{width:24px!important;font-size:10px!important}
+  .bar-fill-wrap{flex:1;min-width:0}
+
+  /* Tabellen: alle kolommen wrappen/truncaten */
+  td.muted,td.mono{font-size:10px}
+
+  /* Kaartwaarden: niet te groot op kleine schermen */
+  .card-val{font-size:20px!important}
+
+  /* Flexbox containers: nooit forceer min-width */
+  .flex,.panel-head,.panel-actions{min-width:0;flex-wrap:wrap}
+
+  /* User detail panes: altijd 1 kolom */
+  [id^="ud-pane"]{grid-template-columns:1fr!important}
+
+  /* Live feed height fix: svh ipv vh */
+  #live-feed{height:calc(100svh - 215px)!important}
+
+  /* Analytics inzichten panel */
+  #an-insights>div{flex-wrap:wrap}
+
+  /* Inline style grid overrides voor analytcs/dsp panels */
+  #t-analytics [style*="max-width:280px"],
+  #t-analytics [style*="max-width:300px"]{max-width:100%!important;width:100%!important}
+
+  /* Berichten chat: beter leesbaar op smal scherm */
+  #dm-chat-msgs>div{flex-wrap:wrap}
+
+  /* Alle inputs/selects: nooit wider dan parent */
+  .inp,select,input,button{max-width:100%;box-sizing:border-box}
+
+  /* Flex containers: reset min-width zodat ze krimpen op mobile */
+  .flex>*,[style*="min-width:200px"],[style*="min-width:160px"]{min-width:0!important}
+  [style*="width:220px"]{width:100%!important;max-width:220px!important}
+  [style*="width:160px"]{width:100%!important;max-width:160px!important}
+
+  /* Panel: border-radius behouden via clip */
+  .panel{border-radius:var(--r)}
+
+  /* Tabel scroll containers: zorg dat de scroll wrapper ook max-width heeft */
+  .panel table,.panel>table{max-width:100%;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Verberg seconderaire info kolommen in smalle tabellen */
+  /* (alleen verbergen, niet weggooien — met class .hide-mobile) */
+  .hide-mobile{display:none!important}
+
+  /* Topbar: zorg dat breadcrumb niet overflows */
+  #topbar{overflow:hidden}
+  .tb-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:calc(100vw - 120px)}
+
+  /* Panelhoofden: niet wider dan panel */
+  .panel-head{max-width:100%;overflow:hidden}
+  .panel-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* Online nu tabel: compactere kolommen */
+  #on-tbody td:nth-child(3),
+  #on-tbody td:nth-child(4){display:none}
+
+  /* DSP tabel: verberg minder relevante kolommen */
+  #dsp-log td:nth-child(4),
+  #dsp-log td:nth-child(5){display:none}
+  #dsp-log th:nth-child(4),
+  #dsp-log th:nth-child(5){display:none}
+}
+
+/* ── Cards ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;min-width:0;overflow:clip}
+.card-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.card-val{font-size:24px;font-weight:700;line-height:1}
+.card-sub{font-size:11px;color:var(--text2);margin-top:4px}
+.gold .card-val{color:var(--gold)}
+.green .card-val{color:var(--green)}
+.red .card-val{color:var(--red)}
+
+/* ── Panels ── */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:clip;min-width:0;max-width:100%}
+.dm-row:hover{background:var(--bg3)!important}
+.panel-head{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
+.panel-title{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+.panel-actions{display:flex;gap:6px}
+.panel-body{padding:12px 14px}
+.panel-scroll{overflow-y:auto;max-height:340px}
+
+/* ── Tables ── */
+table{width:100%;border-collapse:collapse}
+th{padding:8px 12px;text-align:left;font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.015)}
+.mono{font-family:var(--mono);font-size:11px;color:var(--text2)}
+.muted{color:var(--text2)}
+.truncate{max-width:min(200px,100%);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Badges ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:100px;font-size:10px;font-weight:600}
+.b-gold{background:var(--gold2);color:var(--gold)}
+.b-green{background:var(--green2);color:var(--green)}
+.b-red{background:var(--red2);color:var(--red)}
+.b-blue{background:var(--blue2);color:var(--blue)}
+.b-gray{background:rgba(255,255,255,.06);color:var(--text2)}
+.b-amber{background:var(--amber2);color:var(--amber)}
+
+/* ── Live feed ── */
+.feed{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.feed-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.feed-live{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
+.feed-body{overflow-y:auto}
+.ev{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);animation:evIn .15s ease}
+@keyframes evIn{from{opacity:0;background:rgba(198,125,6,.05)}to{opacity:1;background:transparent}}
+.ev:last-child{border-bottom:none}
+.ev-ic{font-size:14px;flex-shrink:0;width:22px;text-align:center;padding-top:1px}
+.ev-body{flex:1;min-width:0}
+.ev-type{font-size:12px;font-weight:500}
+.ev-meta{font-size:10px;color:var(--text2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev-time{font-size:10px;color:var(--text3);flex-shrink:0;margin-top:2px}
+
+/* ── Bar charts ── */
+.bars{display:flex;flex-direction:column;gap:7px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-lbl{width:clamp(60px,25%,110px);font-size:11px;color:var(--text2);text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;height:7px;background:var(--bg4);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;background:var(--gold);transition:width .5s ease}
+.bar-fill.blue{background:var(--blue)}
+.bar-fill.green{background:var(--green)}
+.bar-val{width:32px;font-size:11px;color:var(--text2);text-align:right;flex-shrink:0}
+
+/* ── User row ── */
+.urow{display:flex;align-items:center;gap:8px}
+.uav{width:28px;height:28px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gold);flex-shrink:0}
+.uname{font-size:12px;font-weight:500;line-height:1.2}
+.uuid{font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* ── Status dot ── */
+.dot-on{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green)}
+.dot-off{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--text3)}
+
+/* ── Auth ── */
+#auth{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.auth-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:32px;width:320px}
+.auth-title{font-size:18px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.auth-sub{font-size:12px;color:var(--text2);margin-bottom:20px}
+.auth-inp{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:13px;outline:none;margin-bottom:10px;font-family:var(--font)}
+.auth-inp:focus{border-color:var(--gold)}
+.auth-err{font-size:11px;color:var(--red);margin-top:8px;min-height:16px}
+
+/* ── Input/Select ── */
+.inp{padding:5px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:12px;outline:none;font-family:var(--font)}
+.inp:focus{border-color:var(--gold)}
+
+/* ── Misc ── */
+.sec-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.sec-title small{font-size:11px;font-weight:400;color:var(--text2)}
+.empty{padding:24px;text-align:center;color:var(--text3);font-size:12px}
+.loading{padding:16px;text-align:center;color:var(--text3);font-size:12px}
+.row{display:flex;gap:12px;align-items:flex-start;min-width:0;max-width:100%}
+.col{flex:1;min-width:0}
+.flex{display:flex;align-items:center;gap:8px}
+.gap-sm{gap:6px}
+.stat-row{display:flex;gap:8px;flex-wrap:wrap}
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;flex:1;min-width:100px}
+.stat-l{font-size:10px;color:var(--text3);margin-bottom:3px}
+.stat-v{font-size:16px;font-weight:700}
+.ud-tab{padding:8px 14px;font-size:12px;font-weight:500;border:none;background:none;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;font-family:var(--font)}
+.ud-tab:hover{color:var(--text)}
+.ud-tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.ud-pane{display:none}.ud-pane.on{display:block}
+
+/* ── Meldingen Dashboard ─────────────────────────────────────── */
+.mel-loading { padding:24px; text-align:center; color:rgba(255,255,255,0.3); font-size:0.82rem; }
+.mel-empty   { padding:48px 20px; text-align:center; color:rgba(255,255,255,0.3); font-size:0.85rem; line-height:1.6; }
+.mel-error   { padding:20px; color:#fca5a5; font-size:0.82rem; line-height:1.6; background:rgba(239,68,68,0.06); }
+
+/* Meldingen kaarten */
+.mel-kaart{border-bottom:1px solid rgba(255,255,255,0.05);transition:background 0.15s}
+.mel-kaart:last-child{border-bottom:none}
+.mel-kaart:hover{background:rgba(255,255,255,0.015)}
+.mel-kaart-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px;flex-wrap:wrap;gap:8px}
+.mel-kaart-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mel-kaart-acties{display:flex;gap:6px;flex-wrap:wrap}
+.mel-kaart-body{padding:0 20px 16px;font-size:0.82rem}
+.mel-ernst-dot{font-size:0.75rem}
+.mel-ts{font-size:0.73rem;color:rgba(255,255,255,0.38);font-variant-numeric:tabular-nums}
+.mel-status{font-size:0.62rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border-radius:100px}
+.mel-status--open{background:rgba(239,68,68,0.1);color:#fca5a5}
+.mel-status--done{background:rgba(34,197,94,0.1);color:#86efac}
+.mel-ernst-label{font-size:0.68rem;font-weight:600;opacity:0.8}
+.mel-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.mel-veld{}
+.mel-label{display:block;font-size:0.63rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:2px}
+.mel-val{display:block;color:rgba(255,255,255,0.8);font-size:0.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mel-redenen{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.mel-reden{font-size:0.70rem;color:rgba(255,255,255,0.6);background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:4px}
+.mel-toelichting{padding:10px 14px;background:rgba(255,255,255,0.03);border-left:2px solid rgba(198,125,6,0.35);border-radius:0 6px 6px 0;font-size:0.8rem;color:rgba(255,255,255,0.55);font-style:italic;margin-bottom:10px;line-height:1.5}
+.mel-admin-note{display:flex;align-items:flex-start;gap:6px;padding:8px 12px;background:rgba(198,125,6,0.07);border-radius:6px;font-size:0.77rem;color:rgba(198,125,6,0.85);margin-bottom:8px}
+.mel-note-wrap{margin-top:8px;display:none}
+.mel-note-btns{display:flex;gap:6px;margin-top:6px}
+.btn-gold{background:rgba(198,125,6,0.15);color:#c67d06;border:1px solid rgba(198,125,6,0.25)}
+.btn-gold:hover{background:rgba(198,125,6,0.25)}
+.btn-red{background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.2)}
+.btn-red:hover{background:rgba(239,68,68,0.2)}
+
+/* ── Kai feed rows ── */
+.feed-row{display:flex;align-items:flex-start;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border);font-size:11px}
+.feed-row:hover{background:var(--bg3)}
+.feed-ico{flex-shrink:0;width:20px;text-align:center}
+.feed-main{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.feed-type{background:var(--bg4);color:var(--gold);padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;flex-shrink:0}
+.feed-uid{color:var(--text3);font-size:10px;flex-shrink:0}
+.feed-detail{color:var(--text2);font-size:11px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px}
+.feed-time{flex-shrink:0;color:var(--text3);font-size:10px;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div id="auth">
+  <div class="auth-box">
+    <div class="auth-title">DoubleYou Admin</div>
+    <div class="auth-sub">Beveiligd beheerportaal</div>
+    <input class="auth-inp" id="ae" type="email" placeholder="E-mailadres" autocomplete="email">
+    <input class="auth-inp" id="ap" type="password" placeholder="Wachtwoord">
+    <button class="btn btn-gold" style="width:100%" onclick="doLogin()">Inloggen</button>
+    <div class="auth-err" id="aerr"></div>
+  </div>
+</div>
+
+<div id="shell" style="display:none">
+  <div id="nav-overlay" onclick="toggleNav()"></div>
+  <!-- Nav -->
+  <nav id="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-name">DoubleYou</div>
+      <div class="nav-logo-sub">Admin v3.1 · Realtime</div>
+    </div>
+
+    <div class="nav-sect">Outfit AI</div>
+    <div class="nav-item" data-tab="kai" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Vergelijk &amp; Opgeslagen
+      <span class="nav-badge green" id="kai-n" style="display:none">0</span>
+    </div>
+
+    <div class="nav-sect">Overzicht</div>
+    <div class="nav-item on" data-tab="dash" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+    </div>
+    <div class="nav-item" data-tab="live" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 010 8.49M7.76 7.76a6 6 0 000 8.49"/></svg>Live feed
+      <span class="nav-badge" id="live-n">0</span>
+    </div>
+
+    <div class="nav-sect">Gebruikers</div>
+    <div class="nav-item" data-tab="users" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Gebruikers
+    </div>
+    <div class="nav-item" data-tab="online" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Online nu
+      <span class="nav-badge green" id="online-n">0</span>
+    </div>
+
+    <div class="nav-sect">Engagement</div>
+    <div class="nav-item" data-tab="analytics" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics
+    </div>
+    <div class="nav-item" data-tab="dsp" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>DSP & Streaks
+    </div>
+
+    <div class="nav-sect">Content</div>
+    <div class="nav-item" data-tab="vergelijkingen" onclick="go(this)">
+      <span class="nav-icon">👗</span>
+      <span class="nav-label">Vergelijkingen</span>
+    </div>
+    <div class="nav-item" data-tab="pvdw" onclick="go(this)">
+      <span class="nav-icon">👑</span>
+      <span class="nav-label">Post vd Week</span>
+    </div>
+    <div class="nav-item" data-tab="challenges" onclick="go(this)">
+      <span class="nav-icon">✶</span>
+      <span class="nav-label">Challenges</span>
+    </div>
+    <div class="nav-item" data-tab="polls" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Poll resultaten
+      <span class="nav-badge green" id="poll-n">0</span>
+    </div>
+    <div class="nav-item" data-tab="content" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Content
+    </div>
+    <div class="nav-item" data-tab="berichten" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Berichten
+    </div>
+
+    <div class="nav-sect">Beheer</div>
+    <div class="nav-item" data-tab="mailinglist" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Mailing List
+      <span class="nav-badge green" id="ml-n" style="display:none">0</span>
+    </div>
+    <div class="nav-item" data-tab="mod" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Moderatie
+    </div>
+    <div class="nav-item" data-tab="meldingen" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Meldingen
+      <span class="nav-badge" id="mel-n" style="display:none;background:#e53935">0</span>
+    </div>
+    <div class="nav-item" data-tab="errors" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Errors
+      <span class="nav-badge" id="err-n" style="display:none">!</span>
+    </div>
+    <div class="nav-item" data-tab="sys" onclick="go(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>Systeem
+    </div>
+
+    <div class="nav-foot">
+      <div class="nav-user" id="nav-email">—</div>
+      <button class="btn btn-sm btn-red" onclick="doLogout()" style="width:100%">Uitloggen</button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div id="main">
+    <div id="topbar">
+      <button id="nav-toggle" onclick="toggleNav()" aria-label="Menu">☰</button>
+      <span class="tb-title" id="tb-t">Dashboard</span>
+      <span class="tb-sep">·</span>
+      <span class="tb-sub" id="tb-s">Realtime overzicht</span>
+      <div class="tb-space"></div>
+      <div id="admin-err-bar" style="display:none;background:var(--red2);border:1px solid var(--red);color:var(--red);font-size:11px;padding:3px 10px;border-radius:var(--r);max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+      <div class="tb-pill"><span class="tb-dot"></span>Firebase verbonden</div>
+      <button class="btn btn-sm" onclick="reload()">↻ Vernieuwen</button>
+    </div>
+
+    <div id="content">
+
+<!-- ═══ KAI — OUTFIT AI MONITORING ═══════════════════════════════ -->
+<div class="tab" id="t-kai">
+
+  <!-- KPI rij -->
+  <div class="grid g4">
+    <div class="card gold">
+      <div class="card-label">Vergelijkingen vandaag</div>
+      <div class="card-val" id="kai-verg-vandaag">—</div>
+      <div class="card-sub">analyses vergeleken</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Vergelijkingen totaal</div>
+      <div class="card-val" id="kai-verg-totaal">—</div>
+      <div class="card-sub">alle tijd</div>
+    </div>
+    <div class="card green">
+      <div class="card-label">Opgeslagen vandaag</div>
+      <div class="card-val" id="kai-saved-vandaag">—</div>
+      <div class="card-sub">outfits opgeslagen</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Opgeslagen totaal</div>
+      <div class="card-val" id="kai-saved-totaal">—</div>
+      <div class="card-sub">alle tijd</div>
+    </div>
+  </div>
+
+  <!-- Poll KPI rij -->
+  <div class="grid g4">
+    <div class="card">
+      <div class="card-label">Poll stemmen totaal</div>
+      <div class="card-val" id="kai-poll-totaal">—</div>
+      <div class="card-sub">A of B gekozen</div>
+    </div>
+    <div class="card green">
+      <div class="card-label">Outfit A gekozen</div>
+      <div class="card-val" id="kai-poll-a">—</div>
+      <div class="card-sub" id="kai-poll-a-pct">—%</div>
+    </div>
+    <div class="card gold">
+      <div class="card-label">Outfit B gekozen</div>
+      <div class="card-val" id="kai-poll-b">—</div>
+      <div class="card-sub" id="kai-poll-b-pct">—%</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Vandaag gestemd</div>
+      <div class="card-val" id="kai-poll-vandaag">—</div>
+      <div class="card-sub">stemmen vandaag</div>
+    </div>
+  </div>
+
+  <!-- Extra KPI rij -->
+  <div class="grid g4" style="margin-top:8px">
+    <div class="card">
+      <div class="card-label">Analyses vandaag</div>
+      <div class="card-val" id="kai-analyse-vandaag">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Verbeteracties</div>
+      <div class="card-val" id="kai-verbeter-totaal">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Chat vragen</div>
+      <div class="card-val" id="kai-chat-totaal">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Uploads vandaag</div>
+      <div class="card-val" id="kai-upload-vandaag">—</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="flex" style="flex-wrap:wrap;gap:8px;align-items:center">
+    <select class="inp" id="kai-filter-type" onchange="kaiRenderFeed()">
+      <option value="">Alles</option>
+      <option value="verg_poll">Poll stemmen</option>
+      <option value="compare">Vergelijkingen</option>
+      <option value="saved">Opgeslagen</option>
+      <option value="analysis">Analyses</option>
+      <option value="upload_start">Uploads</option>
+      <option value="verbeter_actie">Verbeteracties</option>
+      <option value="chat_vraag">Chat vragen</option>
+      <option value="verg_upload">Verg. uploads</option>
+    </select>
+    <select class="inp" id="kai-filter-periode" onchange="kaiRenderFeed()">
+      <option value="all">Alle tijd</option>
+      <option value="today">Vandaag</option>
+      <option value="week">Deze week</option>
+      <option value="month">Deze maand</option>
+    </select>
+    <button class="btn btn-sm" onclick="kaiClearFeed()">Wissen</button>
+    <span style="margin-left:auto;font-size:11px;color:var(--text3)" id="kai-cnt">0 events</span>
+  </div>
+
+  <div class="row" style="gap:16px;align-items:flex-start">
+
+    <!-- Live feed -->
+    <div class="col" style="flex:1.2">
+      <div class="feed" style="max-height:calc(100vh - 300px)">
+        <div class="feed-head">
+          <span class="feed-live"></span>
+          <span style="font-size:12px;font-weight:600;margin-left:4px">Live feed</span>
+        </div>
+        <div class="feed-body panel-scroll" id="kai-feed" style="max-height:none;overflow-y:auto;height:calc(100svh - 360px)">
+          <div class="loading">Wacht op events…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vergelijking tabel -->
+    <div class="col" style="flex:1">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Laatste vergelijkingen</span>
+          <span id="kai-verg-sub" style="font-size:10px;color:var(--text3)"></span>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr><th>Gebruiker</th><th>Stijl A</th><th>Stijl B</th><th>Score A</th><th>Score B</th><th>Winnaar</th><th>Tijd</th></tr>
+            </thead>
+            <tbody id="kai-verg-tbody"><tr><td colspan="7" class="loading">Laden…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Opgeslagen outfits tabel -->
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-head">
+          <span class="panel-title">Laatste opgeslagen outfits</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr><th>Gebruiker</th><th>Stijl</th><th>Seizoen</th><th>Score</th><th>Tijd</th></tr>
+            </thead>
+            <tbody id="kai-saved-tbody"><tr><td colspan="5" class="loading">Laden…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Verbeteracties tabel -->
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-head">
+          <span class="panel-title">🔧 Verbeteracties</span>
+          <button class="btn btn-sm" onclick="kaiLaadVerbeteracties()">↻</button>
+        </div>
+        <table>
+          <thead><tr><th>Gebruiker</th><th>Onderdeel</th><th>Stijl</th><th>Tijd</th></tr></thead>
+          <tbody id="kai-verbeter-tbody"><tr><td colspan="4" class="loading">Laden…</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- Chat logs tabel -->
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-head">
+          <span class="panel-title">💬 Chat vragen</span>
+          <button class="btn btn-sm" onclick="kaiLaadChatLogs()">↻</button>
+        </div>
+        <table>
+          <thead><tr><th>Gebruiker</th><th>Vraag</th><th>Sessie</th><th>Tijd</th></tr></thead>
+          <tbody id="kai-chat-tbody"><tr><td colspan="4" class="loading">Laden…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══════════════════════════════════════════════ -->
+<div class="tab on" id="t-dash">
+  <div class="grid g4">
+    <div class="card gold"><div class="card-label">Totaal gebruikers</div><div class="card-val" id="d-users">—</div><div class="card-sub">geregistreerd</div></div>
+    <div class="card green"><div class="card-label">Online nu</div><div class="card-val" id="d-online">—</div><div class="card-sub">actieve sessies</div></div>
+    <div class="card"><div class="card-label">Stories totaal</div><div class="card-val" id="d-stories">—</div></div>
+    <div class="card"><div class="card-label">DSP uitgegeven</div><div class="card-val" id="d-dsp">—</div></div>
+  </div>
+  <div class="grid g4">
+    <div class="card"><div class="card-label">Looks</div><div class="card-val" id="d-looks">—</div></div>
+    <div class="card"><div class="card-label">Reviews</div><div class="card-val" id="d-reviews">—</div></div>
+    <div class="card"><div class="card-label">Berichten gesprekken</div><div class="card-val" id="d-msgs">—</div></div>
+    <div class="card"><div class="card-label">Kleur stemmen</div><div class="card-val" id="d-stems">—</div></div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="feed" style="max-height:380px">
+        <div class="feed-head"><span class="feed-live"></span><span style="font-size:12px;font-weight:600;margin-left:4px">Live activiteit</span></div>
+        <div class="feed-body panel-scroll" id="dash-feed"><div class="loading">Wacht op events…</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Top gebruikers (DSP)</span></div>
+        <table><thead><tr><th>#</th><th>Gebruiker</th><th>Niveau</th><th>DSP</th></tr></thead>
+        <tbody id="dash-topusers"><tr><td colspan="4" class="loading">Laden…</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">DSP verdeling per actie</span></div>
+    <div class="panel-body bars" id="dash-dspbars"><div class="loading">Laden…</div></div>
+  </div>
+</div>
+
+<!-- ═══ LIVE FEED ════════════════════════════════════════════════ -->
+<div class="tab" id="t-live">
+  <div class="flex" style="flex-wrap:wrap;gap:8px">
+    <select class="inp" id="ev-cat" onchange="renderFeed()">
+      <option value="">Alle categorieën</option>
+      <option>engagement</option><option>content</option><option>berichten</option>
+      <option>dsp</option><option>navigatie</option><option>sessie</option><option>systeem</option>
+    </select>
+    <select class="inp" id="ev-type" onchange="renderFeed()">
+      <option value="">Alle types</option>
+      <option>like</option><option>reactie</option><option>volgen</option>
+      <option>verhaal_plaatsen</option><option>dm_versturen</option><option>overlay_open</option>
+      <option>dsp_verdienen</option><option>js_error</option><option>login</option>
+    </select>
+    <button class="btn btn-sm" onclick="_evs=[];renderFeed()">Wissen</button>
+    <span style="margin-left:auto;font-size:11px;color:var(--text3)" id="ev-cnt">0 events</span>
+  </div>
+  <div class="feed" style="flex:1;max-height:calc(100vh - 160px)">
+    <div class="feed-head"><span class="feed-live"></span><span style="font-size:12px;font-weight:600;margin-left:4px">Live events</span></div>
+    <div class="feed-body" id="live-feed" style="max-height:none;overflow-y:auto;height:calc(100svh - 215px)"><div class="loading">Wacht op events…</div></div>
+  </div>
+</div>
+
+<!-- ═══ GEBRUIKERS ═══════════════════════════════════════════════ -->
+<div class="tab" id="t-users">
+  <div class="flex" style="flex-wrap:wrap">
+    <input class="inp" id="u-q" placeholder="Naam of UID zoeken…" oninput="filterUsers()" style="width:100%;max-width:220px">
+    <select class="inp" id="u-niv" onchange="filterUsers()">
+      <option value="">Alle niveaus</option>
+      <option>Binnenkomer</option><option>Insider</option><option>Front Row</option>
+      <option>Backstage Pass</option><option>VIP Founder</option>
+    </select>
+    <select class="inp" id="u-sort" onchange="filterUsers()">
+      <option value="dsp">Sorteer: DSP</option>
+      <option value="naam">Sorteer: Naam</option>
+      <option value="streak">Sorteer: Streak</option>
+    </select>
+    <span style="margin-left:auto;font-size:11px;color:var(--text3)" id="u-cnt"></span>
+  </div>
+  <div class="panel">
+    <table><thead><tr><th>Gebruiker</th><th>Niveau</th><th>DSP lifetime</th><th>Streak</th><th>Lengte · Maat</th><th>Status</th><th></th></tr></thead>
+    <tbody id="u-tbody"><tr><td colspan="7" class="loading">Laden…</td></tr></tbody></table>
+  </div>
+  <div id="u-detail" style="display:none">
+  <div class="panel" style="overflow:hidden">
+
+    <!-- HEADER -->
+    <div style="background:linear-gradient(135deg,var(--bg3) 0%,var(--bg4) 100%);padding:20px 20px 16px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:flex-start;gap:16px">
+        <div id="ud-avatar" style="width:52px;height:52px;border-radius:50%;background:var(--gold2);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--gold);flex-shrink:0">?</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span id="ud-name" style="font-size:18px;font-weight:700">—</span>
+            <span id="ud-niveau-badge" class="badge b-gold" style="font-size:10px;display:none"></span>
+            <span id="ud-online-badge" class="badge b-gray" style="font-size:10px">Offline</span>
+            <span id="ud-pwa-badge" class="badge b-amber" style="font-size:10px;display:none">PWA</span>
+          </div>
+          <div id="ud-sub" style="font-size:11px;color:var(--text3);margin-top:3px">—</div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+            <button class="btn btn-sm" onclick="closeUserDetail()">✕ Sluiten</button>
+            <button class="btn btn-sm" id="ud-mod-btn" onclick="quickMod()">⚠ Modereren</button>
+            <button class="btn btn-sm" id="ud-refresh-btn" onclick="refreshUserDetail()">↻ Vernieuwen</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+          <div style="font-size:10px;color:var(--text3)">Live route</div>
+          <div id="ud-live-route" class="badge b-blue">—</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">Sessieduur</div>
+          <div id="ud-live-sess" style="font-size:11px;font-weight:600;color:var(--gold)">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--border)">
+      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">DSP lifetime</div><div id="ud-dsp" style="font-size:18px;font-weight:700;color:var(--gold)">—</div></div>
+      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Streak</div><div id="ud-streak" style="font-size:18px;font-weight:700;color:var(--amber)">—</div></div>
+      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Events (24u)</div><div id="ud-events" style="font-size:18px;font-weight:700">—</div></div>
+      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Likes</div><div id="ud-likes" style="font-size:18px;font-weight:700;color:var(--red)">—</div></div>
+      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Posts</div><div id="ud-posts" style="font-size:18px;font-weight:700;color:var(--green)">—</div></div>
+      <div style="padding:12px;text-align:center"><div style="font-size:10px;color:var(--text3)">Sessies</div><div id="ud-sessions" style="font-size:18px;font-weight:700">—</div></div>
+    </div>
+
+    <!-- TAB NAV -->
+    <div style="display:flex;border-bottom:1px solid var(--border);background:var(--bg3)">
+      <button class="ud-tab on" data-t="profiel" onclick="udTab(this)">Profiel</button>
+      <button class="ud-tab" data-t="activiteit" onclick="udTab(this)">Activiteit</button>
+      <button class="ud-tab" data-t="device" onclick="udTab(this)">Device</button>
+      <button class="ud-tab" data-t="gedrag" onclick="udTab(this)">Gedrag</button>
+    </div>
+
+    <!-- PANE: Profiel -->
+    <div class="ud-pane on" id="ud-pane-profiel" style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="grid-column:1/-1">
+        <div id="ud-profile-stats"></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Engagement (24u)</div>
+        <div class="bars" id="ud-engagement-bars"></div>
+      </div>
+    </div>
+
+    <!-- PANE: Activiteit -->
+    <div class="ud-pane" id="ud-pane-activiteit">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--text3)">Activiteitslog</span>
+        <span id="ud-tl-count" style="font-size:10px;color:var(--text3)"></span>
+      </div>
+      <div style="max-height:380px;overflow-y:auto">
+        <table>
+          <thead><tr><th>Tijd</th><th>Event</th><th>Route</th><th>Device</th><th>Details</th></tr></thead>
+          <tbody id="ud-tl"><tr><td colspan="5" class="loading">Laden…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANE: Device -->
+    <div class="ud-pane" id="ud-pane-device" style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Huidig device</div>
+        <div id="ud-device-current"></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Device geschiedenis</div>
+        <div id="ud-device-hist" style="font-size:12px;color:var(--text2)">Laden…</div>
+      </div>
+    </div>
+
+    <!-- PANE: Gedrag -->
+    <div class="ud-pane" id="ud-pane-gedrag" style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Populaire routes</div>
+        <div class="bars" id="ud-routes-bars"></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Activiteit per uur</div>
+        <div style="display:flex;align-items:flex-end;gap:2px;height:60px" id="ud-hour-bars"></div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-top:3px">
+          <span>0u</span><span>6u</span><span>12u</span><span>18u</span><span>23u</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ═══ ONLINE ════════════════════════════════════════════════════ -->
+<div class="tab" id="t-online">
+  <!-- KPI rij -->
+  <div class="grid g4">
+    <div class="card gold"><div class="card-label">Totaal online</div><div class="card-val" id="pres-tot">0</div><div class="card-sub">actieve sessies</div></div>
+    <div class="card green"><div class="card-label">Ingelogd</div><div class="card-val" id="pres-auth">0</div></div>
+    <div class="card"><div class="card-label">Anoniem</div><div class="card-val" id="pres-anon">0</div></div>
+    <div class="card"><div class="card-label">PWA</div><div class="card-val" id="pres-pwa">0</div></div>
+    <div class="card red"><div class="card-label">Recent offline</div><div class="card-val" id="pres-offline-cnt">0</div><div class="card-sub">&lt; 15 min geleden</div></div>
+    <div class="card"><div class="card-label">Gem. sessie</div><div class="card-val" id="pres-avg-sess">—</div></div>
+    <div class="card"><div class="card-label">Mobiel</div><div class="card-val" id="pres-mobile">0</div></div>
+    <div class="card"><div class="card-label">Desktop</div><div class="card-val" id="pres-desktop">0</div></div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <!-- ONLINE -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">🟢 Nu online <span id="on-cnt" class="badge b-green">0</span> <span id="pres-last-update" style="font-size:10px;color:var(--text3);font-weight:400;margin-left:6px"></span></span>
+          <div class="panel-actions">
+            <select class="inp" id="pres-filter" onchange="filterPresence()">
+              <option value="">Allen</option>
+              <option value="auth">Ingelogd</option>
+              <option value="anon">Anoniem</option>
+              <option value="mobile">Mobiel</option>
+              <option value="desktop">Desktop</option>
+              <option value="pwa">PWA</option>
+            </select>
+            <button class="btn btn-sm" onclick="refreshOnlineNu()">↻ Vernieuwen</button>
+            <button class="btn btn-sm" onclick="cleanStale()">🧹 Stale opruimen</button>
+            <button class="btn btn-sm btn-gold" onclick="exportPresence()">⬇ Exporteren</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Gebruiker</th><th>Status</th><th>Route</th>
+            <th>Locatie</th><th>Device</th><th>Browser</th>
+            <th>Sessieduur</th><th>Acties</th><th>Laatste ping</th>
+          </tr></thead>
+          <tbody id="on-tbody"><tr><td colspan="9" class="empty">Laden…</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- RECENT OFFLINE -->
+      <div class="panel" style="margin-top:14px">
+        <div class="panel-head">
+          <span class="panel-title">🔴 Recent offline <span id="off-cnt" class="badge b-red">0</span> <span style="font-size:10px;color:var(--text3);font-weight:400;margin-left:6px">laatste 15 min</span></span>
+          <div class="panel-actions">
+            <button class="btn btn-sm" onclick="refreshOnlineNu()">↻ Vernieuwen</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Gebruiker</th><th>Laatste route</th><th>Locatie</th>
+            <th>Device</th><th>Sessieduur</th><th>Offline sinds</th>
+          </tr></thead>
+          <tbody id="off-tbody"><tr><td colspan="6" class="empty">Laden…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="col" style="max-width:220px">
+      <div class="panel"><div class="panel-head"><span class="panel-title">Device</span></div>
+      <div class="panel-body bars" id="pres-device-bars"><div class="loading">—</div></div></div>
+      <div class="panel" style="margin-top:12px"><div class="panel-head"><span class="panel-title">Routes</span></div>
+      <div class="panel-body bars" id="pres-route-bars"><div class="loading">—</div></div></div>
+      <div class="panel" style="margin-top:12px"><div class="panel-head"><span class="panel-title">Landen</span></div>
+      <div class="panel-body bars" id="pres-country-bars"><div class="loading">—</div></div></div>
+      <div class="panel" style="margin-top:12px"><div class="panel-head"><span class="panel-title">Browser</span></div>
+      <div class="panel-body bars" id="pres-browser-bars"><div class="loading">—</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ANALYTICS ════════════════════════════════════════════════ -->
+<div class="tab" id="t-analytics">
+
+  <!-- KPI rij 1 -->
+  <div class="grid g4">
+    <div class="card gold"><div class="card-label">Events (24u)</div><div class="card-val" id="an-ev">—</div><div class="card-sub" id="an-ev-sub"></div></div>
+    <div class="card green"><div class="card-label">Unieke sessies</div><div class="card-val" id="an-ses">—</div></div>
+    <div class="card"><div class="card-label">Overlays geopend</div><div class="card-val" id="an-ov">—</div></div>
+    <div class="card"><div class="card-label">DMs verstuurd</div><div class="card-val" id="an-dm">—</div></div>
+  </div>
+
+  <!-- KPI rij 2 -->
+  <div class="grid g4">
+    <div class="card"><div class="card-label">Likes (24u)</div><div class="card-val" id="an-lk">—</div></div>
+    <div class="card"><div class="card-label">Posts geplaatst</div><div class="card-val" id="an-po">—</div></div>
+    <div class="card"><div class="card-label">Gem. sessieduur</div><div class="card-val" id="an-dur">—</div></div>
+    <div class="card"><div class="card-label">Terugkerende users</div><div class="card-val" id="an-ret">—</div></div>
+  </div>
+
+  <!-- Filter balk -->
+  <div class="flex" style="gap:8px;flex-wrap:wrap">
+    <select class="inp" id="an-period" onchange="loadAnalytics()">
+      <option value="86400000">Laatste 24u</option>
+      <option value="604800000">Laatste 7 dagen</option>
+      <option value="2592000000">Laatste 30 dagen</option>
+    </select>
+    <select class="inp" id="an-segment" onchange="loadAnalytics()">
+      <option value="">Alle gebruikers</option>
+      <option value="auth">Ingelogd</option>
+      <option value="anon">Anoniem</option>
+      <option value="mobile">Mobiel</option>
+      <option value="desktop">Desktop</option>
+    </select>
+    <button class="btn btn-sm" onclick="loadAnalytics()">↻ Vernieuwen</button>
+    <span style="margin-left:auto;font-size:11px;color:var(--text3)" id="an-updated"></span>
+  </div>
+
+  <!-- Activiteit per uur + Events per type -->
+  <div class="row">
+    <div class="col" style="flex:1.5">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Activiteit per uur (vandaag)</span></div>
+        <div class="panel-body" id="an-hourly" style="padding:10px 14px">
+          <div style="display:flex;align-items:flex-end;gap:3px;height:80px" id="an-hour-bars"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:var(--text3)" id="an-hour-labels"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Events per type</span></div>
+        <div class="panel-body bars" id="an-bars"><div class="loading">Laden…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top gebruikers + Route verdeling -->
+  <div class="row">
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Meest actieve gebruikers</span></div>
+        <table>
+          <thead><tr><th>Gebruiker</th><th>Events</th><th>Likes</th><th>Posts</th><th>DSP</th><th>Device</th></tr></thead>
+          <tbody id="an-top"><tr><td colspan="6" class="loading">Laden…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col" style="max-width:280px">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Populaire routes</span></div>
+        <div class="panel-body bars" id="an-routes"><div class="loading">Laden…</div></div>
+      </div>
+      <div class="panel" style="margin-top:12px">
+        <div class="panel-head"><span class="panel-title">Landen</span></div>
+        <div class="panel-body bars" id="an-country-bars"><div class="loading">Laden…</div></div>
+      </div>
+      <div class="panel" style="margin-top:12px">
+        <div class="panel-head"><span class="panel-title">Kleur stemmen</span></div>
+        <div class="panel-body bars" id="kleur-bars"><div class="loading">Laden…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trending content + Inzichten -->
+  <div class="row">
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">🔥 Trending content (24u)</span></div>
+        <table>
+          <thead><tr><th>Type</th><th>Auteur</th><th>Likes</th><th>Reacties</th><th>Engagement</th></tr></thead>
+          <tbody id="an-trending"><tr><td colspan="5" class="loading">Laden…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col" style="max-width:300px">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">💡 Slimme inzichten</span></div>
+        <div id="an-insights" style="padding:10px 14px;display:flex;flex-direction:column;gap:8px">
+          <div class="loading">Analyseren…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wishlist + DSP verdeling -->
+  <div class="row">
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Wishlist activiteit</span></div>
+        <table>
+          <thead><tr><th>Gebruiker</th><th>Product</th><th>Tijdstip</th></tr></thead>
+          <tbody id="an-wl"><tr><td colspan="3" class="loading">Laden…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">DSP verdeling per actie</span></div>
+        <div class="panel-body bars" id="an-dsp-bars" style="min-height:120px"><div class="loading">Laden…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Geografische verdeling -->
+  <div class="row">
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">🌍 Landen</span></div>
+        <div class="panel-body bars" id="an-geo-country" style="min-height:80px"><div class="loading">Laden…</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">📍 Provincies / regio's</span></div>
+        <div class="panel-body bars" id="an-geo-region" style="min-height:80px"><div class="loading">Laden…</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">🏙️ Steden</span></div>
+        <div class="panel-body bars" id="an-geo-city" style="min-height:80px"><div class="loading">Laden…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body & maat analytics — KPI strip -->
+  <div class="grid g3" id="an-body-kpi">
+    <div class="card"><div class="card-label">Users met lengte</div><div class="card-val">—</div></div>
+    <div class="card"><div class="card-label">Users met bouw</div><div class="card-val">—</div></div>
+    <div class="card"><div class="card-label">Users met maat</div><div class="card-val">—</div></div>
+  </div>
+
+  <!-- Body & maat analytics — grafieken -->
+  <div class="row">
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">📏 Lengteverdeling community</span></div>
+        <div class="panel-body bars" id="an-body-lengte" style="min-height:80px"><div class="loading">Laden…</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">🧍 Lichaamsbouw</span></div>
+        <div class="panel-body bars" id="an-body-bouw" style="min-height:80px"><div class="loading">Laden…</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">👕 Populairste maten</span></div>
+        <div class="panel-body bars" id="an-body-maat" style="min-height:80px"><div class="loading">Laden…</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">✂️ Fit voorkeuren</span></div>
+        <div class="panel-body bars" id="an-body-fit" style="min-height:80px"><div class="loading">Laden…</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ═══ DSP ═══════════════════════════════════════════════════════ -->
+<div class="tab" id="t-dsp">
+  <div class="grid g3">
+    <div class="card gold"><div class="card-label">Totaal DSP ooit</div><div class="card-val" id="dsp-tot">—</div></div>
+    <div class="card"><div class="card-label">DSP logs vandaag</div><div class="card-val" id="dsp-today">—</div></div>
+    <div class="card"><div class="card-label">Actieve streaks ≥3</div><div class="card-val" id="dsp-str">—</div></div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Recente DSP toekenningen</span></div>
+        <div class="panel-scroll">
+          <table><thead><tr><th>Tijd</th><th>Ontvanger</th><th>Actie</th><th>Punten</th></tr></thead>
+          <tbody id="dsp-log"><tr><td colspan="4" class="loading">Laden…</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Top DSP houders</span></div>
+        <table><thead><tr><th>#</th><th>Gebruiker</th><th>Niveau</th><th>Lifetime</th><th>Streak</th></tr></thead>
+        <tbody id="dsp-top"><tr><td colspan="5" class="loading">Laden…</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Streak overzicht</span></div>
+    <table><thead><tr><th>Gebruiker</th><th>Huidige streak</th><th>Langste streak</th><th>Laatste actief</th><th>Milestone</th></tr></thead>
+    <tbody id="dsp-streaks"><tr><td colspan="5" class="loading">Laden…</td></tr></tbody></table>
+  </div>
+</div>
+
+<!-- ═══ POLLS ══════════════════════════════════════════════════ -->
+<div class="tab" id="t-vergelijkingen">
+  <div class="grid g4">
+    <div class="card gold"><div class="card-label">Totaal vergelijkingen</div><div class="card-val" id="verg-count">—</div></div>
+    <div class="card"><div class="card-label">Met context ingevuld</div><div class="card-val" id="verg-met-context">—</div></div>
+  </div>
+  <div class="panel" style="margin-top:14px">
+    <div class="panel-head">
+      <span class="panel-title">👗 Outfit vergelijkingen</span>
+      <button class="btn btn-sm" onclick="loadVergelijkingen()">↻ Vernieuwen</button>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Datum</th><th>Gebruiker</th><th>Gelegenheid</th><th>Uitstraling</th>
+        <th>Scores</th><th>Focus</th><th>Sessie ID</th>
+      </tr></thead>
+      <tbody id="verg-tbody"><tr><td colspan="7" class="loading">Laden…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="tab" id="t-pvdw">
+  <div class="grid g4">
+    <div class="card gold"><div class="card-label">Huidige winnaar</div><div class="card-val" id="pvdw-huidige-winnaar">—</div></div>
+    <div class="card"><div class="card-label">Weken met winnaar</div><div class="card-val" id="pvdw-weken-count">—</div></div>
+    <div class="card"><div class="card-label">Laatste run</div><div class="card-val" id="pvdw-laatste-run" style="font-size:12px">—</div></div>
+    <div class="card"><div class="card-label">Run status</div><div class="card-val" id="pvdw-run-status">—</div></div>
+  </div>
+
+  <div class="panel" style="margin-top:14px">
+    <div class="panel-head">
+      <span class="panel-title">👑 Weekwinnaars geschiedenis</span>
+      <div class="panel-actions">
+        <button class="btn btn-sm" onclick="loadPvdw()">↻ Vernieuwen</button>
+        <button class="btn btn-sm btn-gold" onclick="pvdwHandmatigRun()">▶ Handmatig uitvoeren</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Week</th><th>Post ID</th><th>Auteur</th><th>Likes</th>
+        <th>Status</th><th>Geselecteerd op</th><th>Eligible posts</th>
+      </tr></thead>
+      <tbody id="pvdw-winners-tbody"><tr><td colspan="7" class="loading">Laden…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="row" style="margin-top:14px">
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">📋 Eligible posts huidige week</span>
+          <button class="btn btn-sm" onclick="loadPvdwEligible()">↻</button>
+        </div>
+        <table>
+          <thead><tr><th>Post ID</th><th>Auteur</th><th>Likes</th><th>Aangemaakt</th></tr></thead>
+          <tbody id="pvdw-eligible-tbody"><tr><td colspan="4" class="loading">Laden…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">🔍 Worker audit log</span>
+        </div>
+        <table>
+          <thead><tr><th>Week</th><th>Uitgevoerd</th><th>Duur</th><th>Status</th><th>Bericht</th></tr></thead>
+          <tbody id="pvdw-audit-tbody"><tr><td colspan="5" class="loading">Laden…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab" id="t-polls">
+  <div class="grid g4">
+    <div class="card gold"><div class="card-label">Totaal stemmen</div><div class="card-val" id="poll-total">—</div></div>
+    <div class="card green"><div class="card-label">Ingelogd</div><div class="card-val" id="poll-auth">—</div></div>
+    <div class="card"><div class="card-label">Gasten</div><div class="card-val" id="poll-anon">—</div></div>
+    <div class="card"><div class="card-label">Winnende optie</div><div class="card-val" id="poll-winner" style="font-size:14px">—</div></div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">📊 Welk item zou jij willen zien? <span id="poll-updated" style="font-size:10px;color:var(--text3);font-weight:400;margin-left:8px"></span></span>
+          <div class="panel-actions">
+            <button class="btn btn-sm" onclick="loadPolls()">↻ Vernieuwen</button>
+            <button class="btn btn-sm btn-gold" onclick="exportPolls()">⬇ Exporteren</button>
+          </div>
+        </div>
+        <div id="poll-results" style="padding:16px;display:flex;flex-direction:column;gap:10px"><div class="loading">Laden…</div></div>
+      </div>
+      <div class="panel" style="margin-top:14px">
+        <div class="panel-head">
+          <span class="panel-title">Alle stemmen <span id="poll-cnt" class="badge b-blue">0</span></span>
+          <div class="panel-actions">
+            <select class="inp" id="poll-filter" onchange="filterPolls()">
+              <option value="">Alle opties</option>
+              <option value="Tracksuit">Tracksuit 🏃</option>
+              <option value="Jeans">Jeans 👖</option>
+              <option value="Jurk">Jurk 👗</option>
+              <option value="Polo">Polo 👕</option>
+              <option value="Blazer">Blazer 🧥</option>
+              <option value="Anders">Anders ✨</option>
+            </select>
+            <select class="inp" id="poll-type-filter" onchange="filterPolls()">
+              <option value="">Alle gebruikers</option>
+              <option value="auth">Ingelogd</option>
+              <option value="anon">Gast</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Gebruiker</th><th>Keuze</th><th>Bouw</th><th>Lengte</th>
+            <th>Leeftijd</th><th>Device</th><th>Land</th><th>Tijdstip</th>
+          </tr></thead>
+          <tbody id="poll-tbody"><tr><td colspan="8" class="empty">Laden…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col" style="max-width:220px">
+      <div class="panel"><div class="panel-head"><span class="panel-title">Per keuze</span></div>
+      <div class="panel-body bars" id="poll-keuze-bars"><div class="loading">—</div></div></div>
+      <div class="panel" style="margin-top:12px"><div class="panel-head"><span class="panel-title">Per bouw</span></div>
+      <div class="panel-body bars" id="poll-bouw-bars"><div class="loading">—</div></div></div>
+      <div class="panel" style="margin-top:12px"><div class="panel-head"><span class="panel-title">Device</span></div>
+      <div class="panel-body bars" id="poll-device-bars"><div class="loading">—</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONTENT ══════════════════════════════════════════════════ -->
+<div class="tab" id="t-content">
+  <div class="grid g3">
+    <div class="card"><div class="card-label">Stories</div><div class="card-val" id="ct-st">—</div></div>
+    <div class="card"><div class="card-label">Looks</div><div class="card-val" id="ct-lk">—</div></div>
+    <div class="card"><div class="card-label">Reviews</div><div class="card-val" id="ct-rv">—</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">Recente stories</span>
+      <div class="panel-actions">
+        <select class="inp" id="ct-filter" onchange="loadContent()">
+          <option value="stories">Stories</option><option value="looks">Looks</option><option value="reviews">Reviews</option>
+        </select>
+        <button class="btn btn-sm" onclick="loadContent()">↻</button>
+      </div>
+    </div>
+    <table><thead><tr><th>Auteur</th><th>Inhoud</th><th>Likes</th><th>Reacties</th><th>Geplaatst</th><th>Acties</th></tr></thead>
+    <tbody id="ct-tbody"><tr><td colspan="6" class="loading">Laden…</td></tr></tbody></table>
+  </div>
+</div>
+
+<!-- ═══ BERICHTEN ════════════════════════════════════════════════ -->
+<div class="tab" id="t-berichten">
+  <!-- KPI strip -->
+  <div class="grid g3">
+    <div class="card"><div class="card-label">Gesprekken</div><div class="card-val" id="dm-g">—</div></div>
+    <div class="card"><div class="card-label">Berichten totaal</div><div class="card-val" id="dm-m">—</div></div>
+    <div class="card"><div class="card-label">Actief vandaag</div><div class="card-val" id="dm-a">—</div></div>
+  </div>
+
+  <!-- Zoek + filters -->
+  <div class="flex" style="gap:8px;flex-wrap:wrap;align-items:center">
+    <input class="inp" id="dm-zoek" placeholder="Zoek op naam of bericht…" style="flex:1;min-width:160px" oninput="dmFilter()">
+    <select class="inp" id="dm-filter" onchange="dmFilter()" style="width:100%;max-width:160px">
+      <option value="">Alle gesprekken</option>
+      <option value="unread">Ongelezen</option>
+      <option value="today">Vandaag actief</option>
+    </select>
+    <button class="btn btn-sm" onclick="loadBerichten()">↻ Vernieuwen</button>
+  </div>
+
+  <!-- Split layout: lijst links, chat rechts -->
+  <div id="dm-split" style="display:flex;gap:12px;min-height:500px;align-items:flex-start">
+
+    <!-- Gesprekkenlijst -->
+    <div id="dm-list-panel" style="width:320px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+      <div class="panel" style="flex:1">
+        <div class="panel-head" style="justify-content:space-between">
+          <span class="panel-title">Gesprekken</span>
+          <span id="dm-list-cnt" style="font-size:11px;color:var(--text3)"></span>
+        </div>
+        <div id="dm-list" style="overflow-y:auto;max-height:600px"></div>
+      </div>
+    </div>
+
+    <!-- Chat detail panel -->
+    <div id="dm-chat-panel" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+      <div class="panel" style="flex:1">
+        <!-- Chat header -->
+        <div id="dm-chat-header" class="panel-head" style="flex-direction:column;align-items:flex-start;gap:6px;display:none">
+          <div style="display:flex;align-items:center;gap:10px;width:100%">
+            <div id="dm-ch-avatars" style="display:flex;gap:-4px"></div>
+            <div style="flex:1;min-width:0">
+              <div id="dm-ch-namen" style="font-weight:600;font-size:13px"></div>
+              <div id="dm-ch-meta" style="font-size:11px;color:var(--text3)"></div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0">
+              <button class="btn btn-sm" id="dm-ch-profiel-a" onclick="" style="display:none">👤 A</button>
+              <button class="btn btn-sm" id="dm-ch-profiel-b" onclick="" style="display:none">👤 B</button>
+              <button class="btn btn-sm btn-red" id="dm-ch-flag" onclick="dmFlagGesprek()" style="display:none">🚩 Markeer</button>
+            </div>
+          </div>
+        </div>
+        <!-- Chat messages -->
+        <div id="dm-chat-msgs" style="padding:12px 14px;overflow-y:auto;max-height:520px;display:flex;flex-direction:column;gap:10px">
+          <div class="empty" style="text-align:center;padding:40px;color:var(--text3)">
+            ← Selecteer een gesprek om te lezen
+          </div>
+        </div>
+        <!-- Realtime indicator -->
+        <div id="dm-live-bar" style="display:none;padding:6px 14px;font-size:11px;color:var(--gold);border-top:1px solid var(--border)">
+          🔴 Live — nieuwe berichten verschijnen automatisch
+        </div>
+      </div><!-- /panel -->
+    </div><!-- /dm-chat-panel -->
+
+  </div><!-- /dm-split -->
+</div><!-- /t-berichten -->
+
+<!-- ═══ MODERATIE ════════════════════════════════════════════════ -->
+<div class="tab" id="t-mod">
+  <div class="grid g3">
+    <div class="card red"><div class="card-label">Acties uitgevoerd</div><div class="card-val" id="mod-n">—</div></div>
+    <div class="card"><div class="card-label">Gewaarschuwde users</div><div class="card-val" id="mod-w">—</div></div>
+    <div class="card"><div class="card-label">Content verborgen</div><div class="card-val" id="mod-h">—</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Gebruiker acties</span></div>
+    <div class="panel-body">
+      <div class="flex" style="flex-wrap:wrap;gap:8px">
+        <input class="inp" id="mod-uid" placeholder="Gebruiker UID" style="flex:1;min-width:0">
+        <select class="inp" id="mod-act">
+          <option value="warn">Waarschuwing</option>
+          <option value="shadowban">Shadowban</option>
+          <option value="ban">Blokkeren</option>
+          <option value="unban">Deblokkeren</option>
+        </select>
+        <input class="inp" id="mod-reas" placeholder="Reden (verplicht)" style="flex:1;min-width:0">
+        <button class="btn btn-red" onclick="doMod()">Uitvoeren</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Content verbergen</span></div>
+    <div class="panel-body">
+      <div class="flex">
+        <select class="inp" id="hide-col"><option value="stories">Stories</option><option value="looks">Looks</option><option value="reacties">Reacties</option></select>
+        <input class="inp" id="hide-id" placeholder="Document ID" style="flex:1">
+        <button class="btn btn-red" onclick="doHide()">Verbergen</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Moderatie log</span></div>
+    <table><thead><tr><th>Tijd</th><th>Admin</th><th>Actie</th><th>Target</th><th>Reden</th></tr></thead>
+    <tbody id="mod-log"><tr><td colspan="5" class="loading">Laden…</td></tr></tbody></table>
+  </div>
+</div>
+
+<!-- ═══ ERRORS ═══════════════════════════════════════════════════ -->
+<div class="tab" id="t-errors">
+  <div class="grid g3">
+    <div class="card red"><div class="card-label">Errors (24u)</div><div class="card-val" id="er-n">—</div></div>
+    <div class="card"><div class="card-label">JS fouten</div><div class="card-val" id="er-js">—</div></div>
+    <div class="card"><div class="card-label">Promise errors</div><div class="card-val" id="er-pr">—</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">Recente errors</span>
+      <div class="panel-actions">
+        <button class="btn btn-sm" onclick="clearErrors()">🗑 Wis alle errors</button>
+        <button class="btn btn-sm" onclick="loadErrors()">↻ Vernieuwen</button>
+      </div>
+    </div>
+    <table><thead><tr><th>Tijd</th><th>Ernst</th><th>Type · Freq</th><th>Bericht</th><th>Route</th><th>User</th></tr></thead>
+    <tbody id="er-tbody"><tr><td colspan="6" class="loading">Laden…</td></tr></tbody></table>
+  </div>
+</div>
+
+<!-- ═══ SYSTEEM ══════════════════════════════════════════════════ -->
+<div class="tab" id="t-sys">
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Admin toegangsbeheer</span></div>
+    <div class="panel-body">
+      <div class="flex" style="flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <input class="inp" id="adm-uid" placeholder="Firebase UID nieuwe admin" style="flex:1;min-width:0">
+        <input class="inp" id="adm-lbl" placeholder="Naam / label">
+        <button class="btn" onclick="addAdmin()">➕ Toevoegen</button>
+      </div>
+      <div id="adm-list"><div class="loading">Laden…</div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">Admin tools</span>
+    </div>
+    <div class="panel-body flex" style="flex-wrap:wrap;gap:8px">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;font-size:12px;margin-bottom:8px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Ingelogd als (Firebase UID):</div>
+          <div class="mono" id="my-uid" style="font-size:11px;color:var(--gold)">—</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:6px">Kopieer dit UID om andere admins toe te voegen.</div>
+        </div>
+        <button class="btn" onclick="sysFlush()">🗑 Logs opruimen (30+ dagen)</button>
+      <button class="btn" onclick="sysExport()">⬇ Gebruikers exporteren</button>
+      <button class="btn btn-red" onclick="sysBroadcast()">📢 Broadcast bericht</button>
+      <button class="btn" onclick="sysPresenceDiag()">🔍 Presence diagnose</button>
+      <button class="btn" onclick="sysGeoDiag()">🌍 Geo diagnose</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Admin log</span></div>
+    <table><thead><tr><th>Tijd</th><th>Admin</th><th>Actie</th><th>Details</th></tr></thead>
+    <tbody id="sys-log"><tr><td colspan="4" class="loading">Laden…</td></tr></tbody></table>
+  </div>
+</div><!-- /t-sys -->
+
+
+    <div class="tab" id="t-meldingen">
+      <div class="grid g4">
+        <div class="card red"><div class="card-label">Open</div><div class="card-val" id="mel-stat-open">—</div><div class="card-sub">niet afgehandeld</div></div>
+        <div class="card gold"><div class="card-label">Hoog prioriteit</div><div class="card-val" id="mel-stat-hoog">—</div><div class="card-sub">direct aandacht</div></div>
+        <div class="card"><div class="card-label">Afgehandeld</div><div class="card-val" id="mel-stat-done">—</div><div class="card-sub">verwerkt</div></div>
+        <div class="card green"><div class="card-label">Melders</div><div class="card-val" id="mel-stat-users">—</div><div class="card-sub">unieke gebruikers</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Meldingen overzicht</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="inp" id="mel-filter-status" onchange="loadMeldingen()" style="padding:4px 10px;font-size:0.78rem">
+              <option value="alle">Alle</option>
+              <option value="open">Open</option>
+              <option value="afgehandeld">Afgehandeld</option>
+            </select>
+            <select class="inp" id="mel-filter-ernst" onchange="loadMeldingen()" style="padding:4px 10px;font-size:0.78rem">
+              <option value="">Alle ernst</option>
+              <option value="Hoog (direct risico)">Hoog</option>
+              <option value="Gemiddeld">Gemiddeld</option>
+              <option value="Laag (niet dringend)">Laag</option>
+            </select>
+            <button class="btn btn-sm" onclick="loadMeldingen()">Vernieuwen</button>
+          </div>
+        </div>
+        <div class="panel-body" id="mel-lijst" style="padding:0">
+          <div style="padding:20px;text-align:center;color:rgba(255,255,255,0.3);font-size:0.82rem">Selecteer tabblad om te laden.</div>
+        </div>
+
+      </div>
+    </div>
+
+
+
+<!-- ═══ MAILING LIST ══════════════════════════════════════════════ -->
+<div class="tab" id="t-mailinglist">
+
+  <!-- KPI rij -->
+  <div class="grid g4">
+    <div class="card gold">
+      <div class="card-label">Totaal ingeschreven</div>
+      <div class="card-val" id="ml-kpi-totaal">—</div>
+      <div class="card-sub">actieve e-mails</div>
+    </div>
+    <div class="card green">
+      <div class="card-label">Nieuw deze maand</div>
+      <div class="card-val" id="ml-kpi-maand">—</div>
+      <div class="card-sub">inschrijvingen</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Opt-outs</div>
+      <div class="card-val" id="ml-kpi-optout">—</div>
+      <div class="card-sub">uitgeschreven</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Campagnes verzonden</div>
+      <div class="card-val" id="ml-kpi-campagnes">—</div>
+      <div class="card-sub">alle tijd</div>
+    </div>
+  </div>
+
+  <!-- Zoek + filter balk -->
+  <div class="flex" style="flex-wrap:wrap;gap:6px;align-items:center">
+    <input class="inp" id="ml-q" placeholder="Zoek op e-mail of UID…" oninput="mlFilter()" style="width:100%;max-width:240px">
+    <select class="inp" id="ml-status-filter" onchange="mlFilter()" style="max-width:160px">
+      <option value="">Alle gebruikers</option>
+      <option value="actief">Actief</option>
+      <option value="optout">Opt-out</option>
+    </select>
+    <select class="inp" id="ml-period-filter" onchange="mlFilter()" style="max-width:160px">
+      <option value="">Alle periodes</option>
+      <option value="7">Laatste 7 dagen</option>
+      <option value="30">Laatste 30 dagen</option>
+      <option value="90">Laatste 90 dagen</option>
+    </select>
+    <button class="btn btn-sm" onclick="mlLaad(true)">↻ Vernieuwen</button>
+    <button class="btn btn-sm" style="background:var(--gold2);color:var(--gold)" onclick="mlSyncBestaand()">⟳ Sync bestaande users</button>
+    <span style="margin-left:auto;font-size:11px;color:var(--text3)" id="ml-cnt"></span>
+  </div>
+
+  <!-- Bulk selectie balk -->
+  <div class="panel" style="padding:0">
+    <div class="panel-head" style="gap:8px;flex-wrap:wrap">
+      <span class="panel-title">Abonnees</span>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-left:auto">
+        <label style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:5px;cursor:pointer">
+          <input type="checkbox" id="ml-sel-all" onchange="mlToggleAll(this.checked)"> Alles selecteren
+        </label>
+        <span id="ml-sel-cnt" style="font-size:11px;color:var(--gold);display:none">0 geselecteerd</span>
+        <button class="btn btn-sm" id="ml-bulk-btn" onclick="mlOpenBulkMail()" style="display:none;background:var(--gold);color:#000">✉ Bulk mail verzenden</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:32px"></th>
+            <th>E-mail</th>
+            <th>Gebruikersnaam</th>
+            <th>Aangemeld</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ml-tbody"><tr><td colspan="6" class="loading">Laden…</td></tr></tbody>
+      </table>
+    </div>
+    <div id="ml-pager" style="display:flex;justify-content:center;gap:8px;padding:10px;border-top:1px solid var(--border)">
+      <button class="btn btn-sm" id="ml-prev" onclick="mlPagina(-1)" disabled>← Vorige</button>
+      <span id="ml-pager-info" style="font-size:11px;color:var(--text3);line-height:26px">—</span>
+      <button class="btn btn-sm" id="ml-next" onclick="mlPagina(1)">Volgende →</button>
+    </div>
+  </div>
+
+  <!-- Log van verzonden campagnes -->
+  <div class="panel" style="margin-top:0">
+    <div class="panel-head">
+      <span class="panel-title">Verzendgeschiedenis</span>
+      <button class="btn btn-sm" onclick="mlLaadLog()">↻</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Datum</th><th>Onderwerp</th><th>Ontvangers</th><th>Status</th></tr></thead>
+        <tbody id="ml-log-tbody"><tr><td colspan="4" style="padding:12px;text-align:center;color:var(--text3);font-size:11px">Geen campagnes verzonden.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BULK MAIL MODAL ══════════════════════════════════════════ -->
+<div id="ml-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:24px;width:100%;max-width:520px;margin:16px;display:flex;flex-direction:column;gap:14px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-weight:700;font-size:14px">✉ Bulk mail verzenden</span>
+      <button class="btn btn-sm btn-red" onclick="mlSluitModal()">✕ Sluiten</button>
+    </div>
+    <div style="font-size:11px;color:var(--text3)" id="ml-modal-cnt-info">—</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <label style="font-size:11px;color:var(--text3)">Onderwerp</label>
+      <input class="inp" id="ml-mail-onderwerp" placeholder="Onderwerp van de e-mail…" style="width:100%">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <label style="font-size:11px;color:var(--text3)">Bericht (plain text)</label>
+      <textarea class="inp" id="ml-mail-bericht" placeholder="Schrijf je bericht hier…" style="width:100%;min-height:140px;resize:vertical;font-family:inherit;font-size:12px;line-height:1.5"></textarea>
+    </div>
+    <div style="font-size:10px;color:var(--text3);background:var(--bg3);border-radius:6px;padding:8px">
+      ⚠ Mails worden verstuurd in batches van 10 via de Cloudflare Worker. Zorg dat de worker e-mail verzending ondersteunt (bijv. via Mailgun, Resend, of SendGrid). Bekijk de status hieronder tijdens verzending.
+    </div>
+    <div id="ml-send-status" style="display:none;font-size:11px;color:var(--text3);background:var(--bg3);border-radius:6px;padding:8px;max-height:120px;overflow-y:auto"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-sm" onclick="mlSluitModal()">Annuleren</button>
+      <button class="btn btn-sm" id="ml-send-btn" onclick="mlVerzend()" style="background:var(--gold);color:#000;font-weight:700">✉ Verzenden</button>
+    </div>
+  </div>
+</div>
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/js/admin-logic-v177.js?t=20260602-v360"></script>
+<script defer src="/js/admin-errors-v1.js?v=60"></script>
+
+<div class="tab" id="t-challenges">
+  <style>
+    .ch-admin-form { display:grid; gap:12px; max-width:560px; }
+    .ch-admin-form input, .ch-admin-form textarea, .ch-admin-form select { width:100%; padding:10px 12px; background:#1a1a0f; border:1px solid rgba(198,125,6,0.25); border-radius:8px; color:#fdf8f0; font-family:inherit; font-size:13px; box-sizing:border-box; }
+    .ch-admin-form textarea { min-height:80px; resize:vertical; }
+    .ch-admin-form label { font-size:12px; color:rgba(252,248,239,0.5); margin-bottom:4px; display:block; }
+    .ch-admin-btn { background:#c67d06; color:#fff; border:none; border-radius:8px; padding:10px 20px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+    .ch-admin-btn:hover { background:#d4890a; }
+    .ch-admin-btn.rood { background:#c0392b; }
+    .ch-admin-btn.grijs { background:#444; }
+    .ch-lijst-item { background:rgba(255,255,255,0.04); border:1px solid rgba(198,125,6,0.12); border-radius:10px; padding:14px 16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+    .ch-lijst-meta { flex:1; min-width:0; }
+    .ch-lijst-titel { font-weight:700; font-size:14px; margin-bottom:4px; }
+    .ch-lijst-sub { font-size:12px; color:rgba(252,248,239,0.5); }
+    .ch-lijst-acties { display:flex; gap:8px; flex-shrink:0; }
+    .ch-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; background:rgba(28,158,100,0.2); color:#1d9e64; margin-left:8px; }
+    .ch-badge.inactief { background:rgba(255,255,255,0.08); color:rgba(252,248,239,0.4); }
+    .ch-log { background:#0a0806; border:1px solid rgba(198,125,6,0.1); border-radius:8px; padding:10px; max-height:200px; overflow-y:auto; font-size:11px; color:rgba(252,248,239,0.5); font-family:monospace; margin-top:12px; }
+  </style>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+    <!-- Linker kolom: lijst -->
+    <div>
+      <h2 style="font-size:15px;font-weight:700;margin-bottom:12px;">Actieve challenges</h2>
+      <div id="ch-admin-lijst"><div style="opacity:0.4;font-size:13px;">Laden…</div></div>
+    </div>
+
+    <!-- Rechter kolom: aanmaken / bewerken -->
+    <div>
+      <h2 style="font-size:15px;font-weight:700;margin-bottom:12px;" id="ch-form-titel">Nieuwe challenge</h2>
+      <div class="ch-admin-form">
+        <input type="hidden" id="ch-edit-id">
+        <div><label>Titel</label><input type="text" id="ch-titel" placeholder="bv. Zomerlook Challenge"></div>
+        <div><label>Beschrijving</label><textarea id="ch-omschrijving" placeholder="Wat moeten gebruikers doen?"></textarea></div>
+        <div><label>Icoon (emoji)</label><input type="text" id="ch-icon" placeholder="🎯" maxlength="4"></div>
+        <div><label>DSP Bonus</label><input type="number" id="ch-bonus" placeholder="25" min="0" max="500"></div>
+        <div><label>Startdatum (ISO)</label><input type="datetime-local" id="ch-startdatum"></div>
+        <div><label>Einddatum (ISO)</label><input type="datetime-local" id="ch-einddatum"></div>
+        <div><label>Type</label>
+          <select id="ch-type">
+            <option value="look">Outfit / Fitcheck</option>
+            <option value="verhaal">Verhaal</option>
+            <option value="reactie">Reacties geven</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="ch-admin-btn" onclick="chOpslaan()">Opslaan</button>
+          <button class="ch-admin-btn grijs" onclick="chNieuw()">Nieuw</button>
+        </div>
+        <div id="ch-form-status" style="font-size:12px;color:rgba(252,248,239,0.5);min-height:18px;"></div>
+      </div>
+      <div class="ch-log" id="ch-log">— actielog —</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

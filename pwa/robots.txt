@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+Allow: /feed
+Allow: /looks
+Allow: /reviews
+Allow: /winkel
+Allow: /challenges
+Allow: /post-van-de-week
+Allow: /outfit-vergelijker
+Allow: /voorwaarden
+Allow: /privacy
+Allow: /community-regels
+Allow: /beta
+Allow: /sitemap.xml
+Allow: /manifest.json
+Allow: /hero-model.png
+
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /debug.html
+Disallow: /login
+Disallow: /register
+
+# Sitemap
+Sitemap: https://paskamerpraat.nl/sitemap.xml

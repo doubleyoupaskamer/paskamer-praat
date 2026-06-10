@@ -1,0 +1,16 @@
+# SPA fallback: alle bekende paden → index.html
+/feed                  /index.html    200
+/looks                 /index.html    200
+/reviews               /index.html    200
+/winkel                /index.html    200
+/challenges            /index.html    200
+/post-van-de-week      /index.html    200
+/outfit-vergelijker    /index.html    200
+/voorwaarden           /index.html    200
+/privacy               /index.html    200
+/community-regels      /index.html    200
+/beta                  /index.html    200
+/profiel/*             /index.html    200
+/verhaal/*             /index.html    200
+/look/*                /index.html    200
+/share-target          /index.html?pagina=nieuw  200

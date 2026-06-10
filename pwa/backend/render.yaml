@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: paskamer-ai
+    env: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    region: frankfurt
+    healthCheckPath: /healthz
+    envVars:
+      - key: EMERGENT_LLM_KEY
+        sync: false   # Vul in via Render dashboard
+      - key: PYTHONUNBUFFERED
+        value: "1"

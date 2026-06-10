@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paskamer Praat · Debug Console</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="robots" content="noindex, nofollow">
+<style>
+:root {
+  --bg:     #0a0b0f;
+  --bg2:    #0f1018;
+  --bg3:    #161720;
+  --bg4:    #1c1d2a;
+  --border: rgba(255,255,255,0.07);
+  --text:   #d8dce8;
+  --text2:  #6b7590;
+  --text3:  #353a50;
+  --gold:   #c67d06;
+  --green:  #16a34a;
+  --red:    #dc2626;
+  --blue:   #2563eb;
+  --amber:  #d97706;
+  --purple: #7c3aed;
+  --cyan:   #0891b2;
+  --r: 6px;
+  --font: 'SF Pro Display',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono: 'SF Mono','Fira Code',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:12px;line-height:1.5}
+button{font-family:var(--font);cursor:pointer}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+
+/* Auth */
+#auth{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
+.auth-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:32px;width:320px}
+.auth-title{font-size:18px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.auth-sub{font-size:11px;color:var(--text2);margin-bottom:20px}
+.auth-inp{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:13px;outline:none;margin-bottom:10px}
+.auth-inp:focus{border-color:var(--gold)}
+.auth-btn{width:100%;padding:10px;background:var(--gold);border:none;border-radius:var(--r);color:#fff;font-weight:600;font-size:13px}
+.auth-err{font-size:11px;color:var(--red);margin-top:8px;min-height:16px}
+
+/* Shell */
+#shell{display:none;height:100vh;height:100dvh;flex-direction:column}
+#topbar{height:48px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0}
+.tb-title{font-weight:700;color:var(--gold);font-size:14px}
+.tb-badge{background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:0.05em}
+.tb-live{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.tb-spacer{flex:1}
+.tb-btn{padding:5px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-size:11px}
+.tb-btn:hover{color:var(--text);border-color:var(--gold)}
+
+/* Tabs */
+#tabs{display:flex;gap:1px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.tab{padding:10px 16px;font-size:11px;font-weight:600;color:var(--text2);border:none;background:transparent;white-space:nowrap;position:relative}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold)}
+.tab.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold)}
+.tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;margin-left:4px;padding:0 4px}
+
+/* Content */
+#content{flex:1;overflow:hidden;display:flex}
+.panel{display:none;flex:1;overflow-y:auto;padding:14px;flex-direction:column;gap:10px}
+.panel.active{display:flex}
+
+/* Cards */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.card-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text2)}
+.card-body{padding:12px 14px}
+
+/* Grid */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* Stats */
+.stat{text-align:center;padding:12px}
+.stat-val{font-size:24px;font-weight:700;line-height:1}
+.stat-lbl{font-size:10px;color:var(--text2);margin-top:4px;text-transform:uppercase;letter-spacing:0.05em}
+
+/* Log list */
+.log-list{display:flex;flex-direction:column;gap:1px;max-height:400px;overflow-y:auto}
+.log-item{padding:7px 10px;border-radius:4px;font-size:11px;font-family:var(--mono);display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.log-item:hover{background:var(--bg3)}
+.log-item.error{border-left:2px solid var(--red)}
+.log-item.warn{border-left:2px solid var(--amber)}
+.log-item.info{border-left:2px solid var(--blue)}
+.log-item.success{border-left:2px solid var(--green)}
+.log-time{color:var(--text3);flex-shrink:0;font-size:10px;padding-top:1px}
+.log-msg{flex:1;word-break:break-all;color:var(--text)}
+.log-badge{flex-shrink:0;font-size:9px;padding:1px 5px;border-radius:3px;font-weight:700}
+.log-badge.error{background:rgba(220,38,38,0.15);color:var(--red)}
+.log-badge.warn{background:rgba(217,119,6,0.15);color:var(--amber)}
+.log-badge.info{background:rgba(37,99,235,0.15);color:var(--blue)}
+.log-badge.success{background:rgba(22,163,74,0.15);color:var(--green)}
+
+/* Filters */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.filter-btn{padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:10px;font-weight:600}
+.filter-btn.active{background:var(--gold);border-color:var(--gold);color:#fff}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{text-align:left;padding:6px 10px;color:var(--text2);border-bottom:1px solid var(--border);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.05em}
+.tbl td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.tbl tr:hover td{background:var(--bg3)}
+
+/* Status dots */
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.dot.green{background:var(--green)}
+.dot.red{background:var(--red)}
+.dot.amber{background:var(--amber)}
+.dot.grey{background:var(--text3)}
+.dot.pulse{animation:pulse 2s infinite}
+
+/* Metric bar */
+.metric-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:4px}
+.metric-fill{height:100%;border-radius:3px;transition:width 0.3s}
+.metric-fill.green{background:var(--green)}
+.metric-fill.amber{background:var(--amber)}
+.metric-fill.red{background:var(--red)}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.badge.green{background:rgba(22,163,74,0.12);color:var(--green)}
+.badge.red{background:rgba(220,38,38,0.12);color:var(--red)}
+.badge.amber{background:rgba(217,119,6,0.12);color:var(--amber)}
+.badge.blue{background:rgba(37,99,235,0.12);color:var(--blue)}
+.badge.purple{background:rgba(124,58,237,0.12);color:var(--purple)}
+
+/* Empty */
+.empty{padding:24px;text-align:center;color:var(--text3);font-size:11px}
+
+/* Console output */
+.console-out{font-family:var(--mono);font-size:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:10px;max-height:300px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;color:var(--text2)}
+
+/* Toggle */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+.toggle-lbl{font-size:11px;color:var(--text2)}
+.toggle{width:36px;height:20px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;position:relative;cursor:pointer;transition:background 0.2s}
+.toggle.on{background:var(--green);border-color:var(--green)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform 0.2s}
+.toggle.on::after{transform:translateX(16px)}
+
+/* Clear btn */
+.clear-btn{padding:5px 12px;background:transparent;border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-size:10px}
+.clear-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* Export btn */
+.export-btn{padding:5px 12px;background:transparent;border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-size:10px}
+.export-btn:hover{border-color:var(--green);color:var(--green)}
+</style>
+</head>
+<body>
+
+<!-- Auth -->
+<div id="auth">
+  <div class="auth-box">
+    <div class="auth-title">🔒 Debug Console</div>
+    <div class="auth-sub">Alleen toegankelijk voor beheerders</div>
+    <input id="auth-email" class="auth-inp" type="email" placeholder="E-mailadres" autocomplete="email">
+    <input id="auth-pass" class="auth-inp" type="password" placeholder="Wachtwoord" autocomplete="current-password">
+    <button class="auth-btn" onclick="doLogin()">Inloggen</button>
+    <div class="auth-err" id="auth-err"></div>
+  </div>
+</div>
+
+<!-- Shell -->
+<div id="shell">
+  <div id="topbar">
+    <span class="tb-title">Debug Console</span>
+    <span class="tb-badge">INTERN</span>
+    <span class="dot green pulse tb-live" title="Live monitoring actief"></span>
+    <span class="tb-spacer"></span>
+    <span id="tb-error-count" style="color:var(--red);font-size:11px;font-weight:600;display:none"></span>
+    <button class="tb-btn" onclick="clearAllLogs()">Wis logs</button>
+    <button class="export-btn" onclick="exportLogs()">↓ Export</button>
+    <button class="tb-btn" onclick="doLogout()" style="margin-left:8px">Uitloggen</button>
+  </div>
+
+  <div id="tabs">
+    <button class="tab active" onclick="showPanel('overview')" id="tab-overview">📊 Overzicht</button>
+    <button class="tab" onclick="showPanel('errors')" id="tab-errors">🔴 Fouten <span class="tab-count" id="cnt-errors" style="display:none">0</span></button>
+    <button class="tab" onclick="showPanel('firestore')" id="tab-firestore">🔥 Firestore</button>
+    <button class="tab" onclick="showPanel('media')" id="tab-media">🎬 Media <span class="tab-count" id="cnt-media" style="display:none">0</span></button>
+    <button class="tab" onclick="showPanel('performance')" id="tab-performance">⚡ Performance</button>
+    <button class="tab" onclick="showPanel('pwa')" id="tab-pwa">📱 PWA</button>
+    <button class="tab" onclick="showPanel('network')" id="tab-network">🌐 Netwerk <span class="tab-count" id="cnt-network" style="display:none">0</span></button>
+    <button class="tab" onclick="showPanel('layout')" id="tab-layout">📐 Layout</button>
+    <button class="tab" onclick="showPanel('console')" id="tab-console">💬 Console</button>
+  </div>
+
+  <div id="content">
+
+    <!-- OVERVIEW -->
+    <div class="panel active" id="panel-overview">
+      <div class="grid-4">
+        <div class="card"><div class="stat"><div class="stat-val" id="ov-errors" style="color:var(--red)">0</div><div class="stat-lbl">Fouten</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="ov-warnings" style="color:var(--amber)">0</div><div class="stat-lbl">Warnings</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="ov-failed-fetch" style="color:var(--purple)">0</div><div class="stat-lbl">Fetch Fouten</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="ov-media-errors" style="color:var(--cyan)">0</div><div class="stat-lbl">Media Fouten</div></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-hdr">🖥️ Omgeving</div>
+          <div class="card-body">
+            <table class="tbl">
+              <tr><td style="color:var(--text2)">Browser</td><td id="env-browser">-</td></tr>
+              <tr><td style="color:var(--text2)">Platform</td><td id="env-platform">-</td></tr>
+              <tr><td style="color:var(--text2)">Viewport</td><td id="env-viewport">-</td></tr>
+              <tr><td style="color:var(--text2)">Device ratio</td><td id="env-dpr">-</td></tr>
+              <tr><td style="color:var(--text2)">Online</td><td id="env-online">-</td></tr>
+              <tr><td style="color:var(--text2)">Connection</td><td id="env-connection">-</td></tr>
+              <tr><td style="color:var(--text2)">PWA mode</td><td id="env-pwa">-</td></tr>
+              <tr><td style="color:var(--text2)">SW actief</td><td id="env-sw">-</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">⏱️ Recentste fouten</div>
+          <div class="card-body">
+            <div class="log-list" id="ov-recent-errors">
+              <div class="empty">Geen fouten gedetecteerd</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">📈 Activiteit tijdlijn</div>
+        <div class="card-body">
+          <div id="ov-timeline" style="font-family:var(--mono);font-size:10px;color:var(--text2);max-height:180px;overflow-y:auto">
+            <div class="empty">Geen activiteit</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ERRORS -->
+    <div class="panel" id="panel-errors">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div class="filters" id="error-filters">
+          <button class="filter-btn active" onclick="filterErrors('all',this)">Alles</button>
+          <button class="filter-btn" onclick="filterErrors('error',this)">Errors</button>
+          <button class="filter-btn" onclick="filterErrors('warn',this)">Warnings</button>
+          <button class="filter-btn" onclick="filterErrors('promise',this)">Promises</button>
+          <button class="filter-btn" onclick="filterErrors('fetch',this)">Fetch</button>
+        </div>
+        <span class="tb-spacer"></span>
+        <button class="clear-btn" onclick="clearErrors()">Wis</button>
+      </div>
+      <div class="card">
+        <div class="card-hdr">🔴 Runtime Fouten</div>
+        <div class="card-body" style="padding:0">
+          <div class="log-list" id="error-list">
+            <div class="empty">Geen fouten gedetecteerd ✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIRESTORE -->
+    <div class="panel" id="panel-firestore">
+      <div class="grid-4">
+        <div class="card"><div class="stat"><div class="stat-val" id="fs-reads" style="color:var(--blue)">0</div><div class="stat-lbl">Reads</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="fs-writes" style="color:var(--green)">0</div><div class="stat-lbl">Writes</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="fs-listeners" style="color:var(--amber)">0</div><div class="stat-lbl">Listeners</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="fs-errors" style="color:var(--red)">0</div><div class="stat-lbl">Fouten</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">🔥 Firestore Status</div>
+        <div class="card-body">
+          <table class="tbl">
+            <tr><td style="color:var(--text2)">Verbinding</td><td id="fs-status"><span class="badge amber">Controleren...</span></td></tr>
+            <tr><td style="color:var(--text2)">Project</td><td style="font-family:var(--mono);color:var(--text2)">doubleyou-journal</td></tr>
+            <tr><td style="color:var(--text2)">Auth state</td><td id="fs-auth">-</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">📋 Query log</div>
+        <div class="card-body" style="padding:0">
+          <div class="log-list" id="fs-log">
+            <div class="empty">Geen queries gelogd</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEDIA -->
+    <div class="panel" id="panel-media">
+      <div class="grid-4">
+        <div class="card"><div class="stat"><div class="stat-val" id="med-videos" style="color:var(--cyan)">0</div><div class="stat-lbl">Videos</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="med-playing" style="color:var(--green)">0</div><div class="stat-lbl">Speelt af</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="med-errors" style="color:var(--red)">0</div><div class="stat-lbl">Media Fouten</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="med-blocked" style="color:var(--amber)">0</div><div class="stat-lbl">Autoplay geblokkeerd</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">🎬 Media Decoder Status</div>
+        <div class="card-body">
+          <table class="tbl">
+            <tr><td style="color:var(--text2)">H.264 (MP4)</td><td id="codec-h264">-</td></tr>
+            <tr><td style="color:var(--text2)">H.265 (HEVC)</td><td id="codec-h265">-</td></tr>
+            <tr><td style="color:var(--text2)">VP9 (WebM)</td><td id="codec-vp9">-</td></tr>
+            <tr><td style="color:var(--text2)">AV1</td><td id="codec-av1">-</td></tr>
+            <tr><td style="color:var(--text2)">AAC Audio</td><td id="codec-aac">-</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">📋 Media Log</div>
+        <div class="card-body" style="padding:0">
+          <div class="log-list" id="media-log">
+            <div class="empty">Geen media events</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE -->
+    <div class="panel" id="panel-performance">
+      <div class="grid-4">
+        <div class="card"><div class="stat"><div class="stat-val" id="perf-fps" style="color:var(--green)">-</div><div class="stat-lbl">FPS</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="perf-memory" style="color:var(--blue)">-</div><div class="stat-lbl">Memory (MB)</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="perf-dom" style="color:var(--amber)">-</div><div class="stat-lbl">DOM Nodes</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="perf-lcp" style="color:var(--purple)">-</div><div class="stat-lbl">LCP (ms)</div></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-hdr">⚡ Web Vitals</div>
+          <div class="card-body">
+            <table class="tbl" id="vitals-tbl">
+              <tr><td style="color:var(--text2)">FCP</td><td id="vital-fcp">-</td></tr>
+              <tr><td style="color:var(--text2)">LCP</td><td id="vital-lcp">-</td></tr>
+              <tr><td style="color:var(--text2)">FID / INP</td><td id="vital-fid">-</td></tr>
+              <tr><td style="color:var(--text2)">CLS</td><td id="vital-cls">-</td></tr>
+              <tr><td style="color:var(--text2)">TTFB</td><td id="vital-ttfb">-</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">🧠 Resources</div>
+          <div class="card-body">
+            <div style="margin-bottom:10px">
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-bottom:3px">
+                <span>JS Heap</span><span id="heap-pct">-</span>
+              </div>
+              <div class="metric-bar"><div class="metric-fill green" id="heap-bar" style="width:0%"></div></div>
+            </div>
+            <table class="tbl">
+              <tr><td style="color:var(--text2)">Script duration</td><td id="perf-script">-</td></tr>
+              <tr><td style="color:var(--text2)">Render blocking</td><td id="perf-blocking">-</td></tr>
+              <tr><td style="color:var(--text2)">Network requests</td><td id="perf-requests">-</td></tr>
+              <tr><td style="color:var(--text2)">Transfer size</td><td id="perf-transfer">-</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PWA -->
+    <div class="panel" id="panel-pwa">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-hdr">📱 PWA Status</div>
+          <div class="card-body">
+            <table class="tbl">
+              <tr><td style="color:var(--text2)">Display mode</td><td id="pwa-display">-</td></tr>
+              <tr><td style="color:var(--text2)">Standalone</td><td id="pwa-standalone">-</td></tr>
+              <tr><td style="color:var(--text2)">Install prompt</td><td id="pwa-install">-</td></tr>
+              <tr><td style="color:var(--text2)">Push permission</td><td id="pwa-push">-</td></tr>
+              <tr><td style="color:var(--text2)">Manifest</td><td id="pwa-manifest">-</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">⚙️ Service Worker</div>
+          <div class="card-body">
+            <table class="tbl">
+              <tr><td style="color:var(--text2)">Status</td><td id="sw-status">-</td></tr>
+              <tr><td style="color:var(--text2)">Scope</td><td id="sw-scope" style="font-family:var(--mono);font-size:10px">-</td></tr>
+              <tr><td style="color:var(--text2)">Script URL</td><td id="sw-script" style="font-family:var(--mono);font-size:10px">-</td></tr>
+              <tr><td style="color:var(--text2)">Cache versies</td><td id="sw-caches">-</td></tr>
+              <tr><td style="color:var(--text2)">Cache entries</td><td id="sw-cache-count">-</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">🗂️ Cache Inhoud</div>
+        <div class="card-body" style="padding:0">
+          <div id="cache-list" style="max-height:300px;overflow-y:auto">
+            <div class="empty">Laden...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NETWORK -->
+    <div class="panel" id="panel-network">
+      <div class="grid-4">
+        <div class="card"><div class="stat"><div class="stat-val" id="net-total" style="color:var(--blue)">0</div><div class="stat-lbl">Verzoeken</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="net-failed" style="color:var(--red)">0</div><div class="stat-lbl">Mislukt</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="net-blocked" style="color:var(--amber)">0</div><div class="stat-lbl">Geblokkeerd</div></div></div>
+        <div class="card"><div class="stat"><div class="stat-val" id="net-slow" style="color:var(--purple)">0</div><div class="stat-lbl">&gt;2s</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">🌐 Fetch / XHR Log</div>
+        <div class="card-body" style="padding:0">
+          <div class="log-list" id="network-log" style="max-height:500px">
+            <div class="empty">Geen netwerk verzoeken gelogd</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LAYOUT -->
+    <div class="panel" id="panel-layout">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-hdr">📐 Viewport Info</div>
+          <div class="card-body">
+            <table class="tbl">
+              <tr><td style="color:var(--text2)">window.innerWidth</td><td id="lay-w">-</td></tr>
+              <tr><td style="color:var(--text2)">window.innerHeight</td><td id="lay-h">-</td></tr>
+              <tr><td style="color:var(--text2)">screen.width</td><td id="lay-sw">-</td></tr>
+              <tr><td style="color:var(--text2)">screen.height</td><td id="lay-sh">-</td></tr>
+              <tr><td style="color:var(--text2)">devicePixelRatio</td><td id="lay-dpr">-</td></tr>
+              <tr><td style="color:var(--text2)">scrollY</td><td id="lay-scroll">-</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">🚨 Layout Issues</div>
+          <div class="card-body" style="padding:0">
+            <div class="log-list" id="layout-issues">
+              <div class="empty">Geen layout issues gevonden</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr" style="display:flex;align-items:center;justify-content:space-between">
+          <span>🔍 Element Inspector</span>
+          <button class="tb-btn" onclick="runLayoutScan()">Scan uitvoeren</button>
+        </div>
+        <div class="card-body">
+          <div id="layout-scan-result" class="console-out">Klik "Scan uitvoeren" om layout te analyseren...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONSOLE -->
+    <div class="panel" id="panel-console">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div class="filters">
+          <button class="filter-btn active" onclick="filterConsole('all',this)">Alles</button>
+          <button class="filter-btn" onclick="filterConsole('error',this)">Errors</button>
+          <button class="filter-btn" onclick="filterConsole('warn',this)">Warnings</button>
+          <button class="filter-btn" onclick="filterConsole('log',this)">Logs</button>
+        </div>
+        <span class="tb-spacer"></span>
+        <button class="clear-btn" onclick="clearConsole()">Wis</button>
+      </div>
+      <div class="card" style="flex:1">
+        <div class="card-body" style="padding:0;height:100%">
+          <div class="log-list" id="console-log" style="max-height:calc(100vh - 220px)">
+            <div class="empty">Console output verschijnt hier...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// FIREBASE
+// ═══════════════════════════════════════════════════════════
+firebase.initializeApp({
+  apiKey:            "AIzaSyD28TOHwxX8gMWKbdaLZDtTVZh3V9BHcA8",
+  authDomain:        "doubleyou-journal.firebaseapp.com",
+  projectId:         "doubleyou-journal",
+  storageBucket:     "doubleyou-journal.firebasestorage.app",
+  messagingSenderId: "271740812679",
+  appId:             "1:271740812679:web:ae49188253c573892f6722"
+});
+const auth = firebase.auth();
+const db   = firebase.firestore();
+const OWNERS = ['ahtVa6qvFheIy3yDVpDXCz2INwq1','vpEOxNajQ1Mu3iPiGZnkPg1asGc2'];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+const state = {
+  errors: [], warnings: [], fetchLog: [], mediaLog: [],
+  consoleLog: [], networkLog: [],
+  counts: { errors: 0, warns: 0, fetch: 0, media: 0, net: 0 },
+  perf: { fps: 0, frames: 0, lastFrame: 0 },
+  fs: { reads: 0, writes: 0, listeners: 0, errors: 0 },
+  net: { total: 0, failed: 0, blocked: 0, slow: 0 },
+  errorFilter: 'all', consoleFilter: 'all'
+};
+
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
+function doLogin() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const err   = document.getElementById('auth-err');
+  err.textContent = 'Inloggen...';
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(uc => {
+      if (!OWNERS.includes(uc.user.uid)) {
+        auth.signOut();
+        err.textContent = 'Geen toegang — alleen beheerders';
+        return;
+      }
+      document.getElementById('auth').style.display = 'none';
+      document.getElementById('shell').style.display = 'flex';
+      initDebug(uc.user);
+    })
+    .catch(e => { err.textContent = e.message; });
+}
+document.getElementById('auth-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+function doLogout() {
+  auth.signOut().then(() => location.reload());
+}
+auth.onAuthStateChanged(user => {
+  if (user && OWNERS.includes(user.uid)) {
+    document.getElementById('auth').style.display = 'none';
+    document.getElementById('shell').style.display = 'flex';
+    initDebug(user);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// PANELS
+// ═══════════════════════════════════════════════════════════
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'layout') updateLayout();
+  if (name === 'pwa') updatePWA();
+  if (name === 'media') checkCodecs();
+  if (name === 'performance') updatePerformance();
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+function initDebug(user) {
+  hookErrors();
+  hookFetch();
+  hookConsole();
+  hookMedia();
+  updateEnv(user);
+  updateLayout();
+  updatePWA();
+  checkCodecs();
+  startFPS();
+  startPerformancePoll();
+  checkFirestore();
+  addLog('info', 'Debug console gestart voor ' + user.email, 'system');
+}
+
+// ═══════════════════════════════════════════════════════════
+// ERROR HOOKS
+// ═══════════════════════════════════════════════════════════
+function hookErrors() {
+  window.onerror = function(msg, src, line, col, err) {
+    addError('error', msg, src + ':' + line, err && err.stack);
+    return false;
+  };
+  window.addEventListener('unhandledrejection', e => {
+    const msg = e.reason && e.reason.message ? e.reason.message : String(e.reason);
+    addError('promise', 'Unhandled Promise: ' + msg, '', e.reason && e.reason.stack);
+  });
+}
+
+function addError(type, msg, src, stack) {
+  state.counts.errors++;
+  const entry = { ts: new Date(), type, msg, src: src || '', stack: stack || '' };
+  state.errors.unshift(entry);
+  if (state.errors.length > 200) state.errors.pop();
+  document.getElementById('ov-errors').textContent = state.counts.errors;
+  const cnt = document.getElementById('cnt-errors');
+  cnt.style.display = 'inline-flex';
+  cnt.textContent = state.counts.errors;
+  document.getElementById('tb-error-count').style.display = 'inline';
+  document.getElementById('tb-error-count').textContent = state.counts.errors + ' fouten';
+  renderErrors();
+  renderRecentErrors();
+  addTimeline('error', msg);
+}
+
+// ═══════════════════════════════════════════════════════════
+// FETCH HOOK
+// ═══════════════════════════════════════════════════════════
+function hookFetch() {
+  const orig = window.fetch;
+  window.fetch = function(url, opts) {
+    const start = Date.now();
+    const urlStr = typeof url === 'string' ? url : url.url || String(url);
+    state.net.total++;
+    document.getElementById('net-total').textContent = state.net.total;
+    return orig.apply(this, arguments).then(res => {
+      const dur = Date.now() - start;
+      const ok = res.ok;
+      if (!ok) { state.net.failed++; document.getElementById('net-failed').textContent = state.net.failed; }
+      if (dur > 2000) { state.net.slow++; document.getElementById('net-slow').textContent = state.net.slow; }
+      addNetworkLog(urlStr, res.status, dur, ok ? 'success' : 'error');
+      return res;
+    }).catch(err => {
+      state.net.failed++;
+      document.getElementById('net-failed').textContent = state.net.failed;
+      addNetworkLog(urlStr, 'FAIL', Date.now() - start, 'error');
+      throw err;
+    });
+  };
+}
+
+function addNetworkLog(url, status, dur, type) {
+  const short = url.replace(/https?:\/\/[^\/]+/, '').slice(0, 60);
+  state.networkLog.unshift({ ts: new Date(), url: short, status, dur, type });
+  if (state.networkLog.length > 100) state.networkLog.pop();
+  renderNetworkLog();
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONSOLE HOOK
+// ═══════════════════════════════════════════════════════════
+function hookConsole() {
+  ['log','warn','error','info'].forEach(fn => {
+    const orig = console[fn];
+    console[fn] = function() {
+      const args = Array.from(arguments).map(a => {
+        try { return typeof a === 'object' ? JSON.stringify(a).slice(0,200) : String(a); }
+        catch { return String(a); }
+      });
+      const msg = args.join(' ');
+      const type = fn === 'error' ? 'error' : fn === 'warn' ? 'warn' : fn === 'info' ? 'info' : 'log';
+      state.consoleLog.unshift({ ts: new Date(), type, msg });
+      if (state.consoleLog.length > 300) state.consoleLog.pop();
+      if (fn === 'error') { state.counts.errors++; document.getElementById('ov-errors').textContent = state.counts.errors; }
+      if (fn === 'warn') { state.counts.warns++; document.getElementById('ov-warnings').textContent = state.counts.warns; }
+      renderConsoleLog();
+      orig.apply(console, arguments);
+    };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// MEDIA HOOK
+// ═══════════════════════════════════════════════════════════
+function hookMedia() {
+  // Observeer nieuwe video elementen via MutationObserver
+  const mo = new MutationObserver(muts => {
+    muts.forEach(m => {
+      m.addedNodes.forEach(node => {
+        if (node.nodeName === 'VIDEO') attachVideoListeners(node);
+        if (node.querySelectorAll) node.querySelectorAll('video').forEach(attachVideoListeners);
+      });
+    });
+  });
+  mo.observe(document.body || document.documentElement, { childList: true, subtree: true });
+  document.querySelectorAll('video').forEach(attachVideoListeners);
+}
+
+function attachVideoListeners(vid) {
+  if (vid._debugHooked) return;
+  vid._debugHooked = true;
+  state.counts.media++;
+  document.getElementById('med-videos').textContent = state.counts.media;
+  vid.addEventListener('playing', () => { updatePlayingCount(); addMediaLog('success', 'Video afspelen gestart', vid.src); });
+  vid.addEventListener('pause',   () => updatePlayingCount());
+  vid.addEventListener('error',   () => {
+    state.net.failed++;
+    addMediaLog('error', 'Video laad fout: ' + (vid.error ? vid.error.message : 'onbekend'), vid.src);
+    document.getElementById('med-errors').textContent = parseInt(document.getElementById('med-errors').textContent||0)+1;
+  });
+  vid.addEventListener('stalled', () => addMediaLog('warn', 'Video gestagneerd', vid.src));
+  vid.addEventListener('waiting', () => addMediaLog('info', 'Video buffert', vid.src));
+}
+
+function updatePlayingCount() {
+  const playing = document.querySelectorAll('video:not([paused])').length;
+  document.getElementById('med-playing').textContent = playing;
+}
+
+function addMediaLog(type, msg, src) {
+  const short = src ? src.replace(/https?:\/\/[^\/]+/, '').slice(0,50) : '';
+  state.mediaLog.unshift({ ts: new Date(), type, msg, src: short });
+  if (state.mediaLog.length > 100) state.mediaLog.pop();
+  if (type === 'error') { state.counts.errors++; const cnt = document.getElementById('cnt-media'); cnt.style.display='inline-flex'; cnt.textContent=parseInt(cnt.textContent||0)+1; }
+  renderMediaLog();
+}
+
+// ═══════════════════════════════════════════════════════════
+// CODECS
+// ═══════════════════════════════════════════════════════════
+function checkCodecs() {
+  const v = document.createElement('video');
+  const codecs = {
+    'codec-h264': 'video/mp4; codecs="avc1.42E01E"',
+    'codec-h265': 'video/mp4; codecs="hvc1.1.6.L93.90"',
+    'codec-vp9':  'video/webm; codecs="vp9"',
+    'codec-av1':  'video/mp4; codecs="av01.0.05M.08"',
+    'codec-aac':  'audio/mp4; codecs="mp4a.40.2"'
+  };
+  Object.entries(codecs).forEach(([id, type]) => {
+    const result = v.canPlayType(type);
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (result === 'probably') el.innerHTML = '<span class="badge green">Ondersteund</span>';
+    else if (result === 'maybe') el.innerHTML = '<span class="badge amber">Mogelijk</span>';
+    else el.innerHTML = '<span class="badge red">Niet ondersteund</span>';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// ENVIRONMENT
+// ═══════════════════════════════════════════════════════════
+function updateEnv(user) {
+  const nav = navigator;
+  set('env-browser', nav.userAgent.slice(0,60));
+  set('env-platform', nav.platform);
+  set('env-viewport', window.innerWidth + ' × ' + window.innerHeight + 'px');
+  set('env-dpr', window.devicePixelRatio + 'x');
+  set('env-online', navigator.onLine ? '<span class="badge green">Online</span>' : '<span class="badge red">Offline</span>');
+  const conn = nav.connection;
+  set('env-connection', conn ? (conn.effectiveType + ' ' + (conn.downlink||'?') + ' Mbps') : 'onbekend');
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  set('env-pwa', standalone ? '<span class="badge green">Standalone</span>' : '<span class="badge blue">Browser</span>');
+  set('env-sw', 'serviceWorker' in navigator ? '<span class="badge green">Beschikbaar</span>' : '<span class="badge red">Niet beschikbaar</span>');
+  set('fs-auth', user ? '<span class="badge green">' + user.email + '</span>' : '<span class="badge red">Niet ingelogd</span>');
+}
+
+// ═══════════════════════════════════════════════════════════
+// LAYOUT
+// ═══════════════════════════════════════════════════════════
+function updateLayout() {
+  set('lay-w', window.innerWidth + 'px');
+  set('lay-h', window.innerHeight + 'px');
+  set('lay-sw', screen.width + 'px');
+  set('lay-sh', screen.height + 'px');
+  set('lay-dpr', window.devicePixelRatio + 'x');
+  set('lay-scroll', window.scrollY + 'px');
+}
+function runLayoutScan() {
+  const issues = [];
+  const all = document.querySelectorAll('*');
+  let overflow = 0, offscreen = 0;
+  all.forEach(el => {
+    const r = el.getBoundingClientRect();
+    const style = window.getComputedStyle(el);
+    if (r.right > window.innerWidth + 5) { overflow++; issues.push('OVERFLOW: ' + el.tagName + '.' + el.className.slice(0,30) + ' right=' + Math.round(r.right)); }
+    if (r.bottom < -100 && style.position === 'fixed') { offscreen++; issues.push('OFFSCREEN: ' + el.tagName + '#' + el.id + ' bottom=' + Math.round(r.bottom)); }
+  });
+  const out = issues.length ? issues.slice(0,20).join('\n') : '✓ Geen layout problemen gevonden\n\nGeanalyseerde elementen: ' + all.length + '\nOverflow issues: ' + overflow + '\nOffscreen fixed: ' + offscreen;
+  document.getElementById('layout-scan-result').textContent = out;
+  if (issues.length) {
+    const el = document.getElementById('layout-issues');
+    el.innerHTML = '';
+    issues.slice(0,10).forEach(issue => {
+      el.innerHTML += '<div class="log-item error"><span class="log-badge error">LAYOUT</span><span class="log-msg">' + issue + '</span></div>';
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PWA
+// ═══════════════════════════════════════════════════════════
+async function updatePWA() {
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  set('pwa-display', standalone ? '<span class="badge green">standalone</span>' : 'browser');
+  set('pwa-standalone', standalone ? '<span class="badge green">Ja</span>' : '<span class="badge amber">Nee</span>');
+  set('pwa-install', window._deferredPrompt ? '<span class="badge green">Beschikbaar</span>' : '<span class="badge amber">Niet beschikbaar</span>');
+  const perm = Notification.permission;
+  set('pwa-push', perm === 'granted' ? '<span class="badge green">Toegestaan</span>' : perm === 'denied' ? '<span class="badge red">Geweigerd</span>' : '<span class="badge amber">Niet gevraagd</span>');
+
+  // SW status
+  if ('serviceWorker' in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    if (regs.length) {
+      const reg = regs[0];
+      const sw = reg.active || reg.waiting || reg.installing;
+      set('sw-status', sw ? '<span class="badge green">Actief</span>' : '<span class="badge red">Inactief</span>');
+      set('sw-scope', reg.scope);
+      set('sw-script', reg.active ? reg.active.scriptURL.split('/').pop() : '-');
+    }
+    // Caches
+    const keys = await caches.keys();
+    set('sw-caches', keys.join(', ') || 'geen');
+    let total = 0;
+    const cacheList = document.getElementById('cache-list');
+    cacheList.innerHTML = '';
+    for (const key of keys) {
+      const cache = await caches.open(key);
+      const reqs = await cache.keys();
+      total += reqs.length;
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:8px 14px;border-bottom:1px solid rgba(255,255,255,0.03)';
+      div.innerHTML = '<div style="font-weight:600;color:var(--gold);font-size:10px;margin-bottom:4px">' + key + ' (' + reqs.length + ' entries)</div>' +
+        reqs.slice(0,5).map(r => '<div style="font-size:10px;font-family:var(--mono);color:var(--text2)">' + r.url.replace(/https?:\/\/[^\/]+/, '').slice(0,60) + '</div>').join('') +
+        (reqs.length > 5 ? '<div style="font-size:10px;color:var(--text3)">...en ' + (reqs.length-5) + ' meer</div>' : '');
+      cacheList.appendChild(div);
+    }
+    set('sw-cache-count', total + ' bestanden');
+    set('pwa-manifest', '<span class="badge green">Aanwezig</span>');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// FIRESTORE CHECK
+// ═══════════════════════════════════════════════════════════
+function checkFirestore() {
+  db.collection('_debug_ping').doc('ping').set({ ts: firebase.firestore.FieldValue.serverTimestamp() })
+    .then(() => {
+      set('fs-status', '<span class="badge green">Verbonden ✓</span>');
+      state.fs.writes++;
+      document.getElementById('fs-writes').textContent = state.fs.writes;
+      addFsLog('success', 'Firestore verbinding OK');
+    })
+    .catch(e => {
+      set('fs-status', '<span class="badge red">Fout: ' + e.message + '</span>');
+      state.fs.errors++;
+      document.getElementById('fs-errors').textContent = state.fs.errors;
+      addFsLog('error', 'Firestore fout: ' + e.message);
+    });
+}
+
+function addFsLog(type, msg) {
+  const el = document.getElementById('fs-log');
+  if (el.querySelector('.empty')) el.innerHTML = '';
+  el.insertAdjacentHTML('afterbegin', logItem(type, msg, 'FS'));
+}
+
+// ═══════════════════════════════════════════════════════════
+// FPS
+// ═══════════════════════════════════════════════════════════
+function startFPS() {
+  let frames = 0, last = performance.now();
+  function tick(ts) {
+    frames++;
+    if (ts - last >= 1000) {
+      const fps = Math.round(frames * 1000 / (ts - last));
+      document.getElementById('perf-fps').textContent = fps;
+      document.getElementById('perf-fps').style.color = fps >= 55 ? 'var(--green)' : fps >= 30 ? 'var(--amber)' : 'var(--red)';
+      frames = 0; last = ts;
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ═══════════════════════════════════════════════════════════
+// PERFORMANCE POLL
+// ═══════════════════════════════════════════════════════════
+function startPerformancePoll() { setInterval(updatePerformance, 2000); updatePerformance(); }
+function updatePerformance() {
+  // DOM nodes
+  document.getElementById('perf-dom').textContent = document.querySelectorAll('*').length;
+  // Memory
+  if (performance.memory) {
+    const used = Math.round(performance.memory.usedJSHeapSize / 1048576);
+    const total = Math.round(performance.memory.totalJSHeapSize / 1048576);
+    const pct = Math.round(used / total * 100);
+    document.getElementById('perf-memory').textContent = used;
+    document.getElementById('heap-pct').textContent = used + '/' + total + ' MB (' + pct + '%)';
+    const bar = document.getElementById('heap-bar');
+    bar.style.width = pct + '%';
+    bar.className = 'metric-fill ' + (pct < 60 ? 'green' : pct < 80 ? 'amber' : 'red');
+  }
+  // Navigation timing
+  const nav = performance.getEntriesByType('navigation')[0];
+  if (nav) {
+    set('vital-ttfb', Math.round(nav.responseStart - nav.requestStart) + ' ms');
+    set('vital-fcp', '-');
+  }
+  // Resources
+  const res = performance.getEntriesByType('resource');
+  set('perf-requests', res.length);
+  const transfer = res.reduce((a, r) => a + (r.transferSize || 0), 0);
+  set('perf-transfer', Math.round(transfer / 1024) + ' KB');
+  // Paint entries
+  const paints = performance.getEntriesByType('paint');
+  paints.forEach(p => {
+    if (p.name === 'first-contentful-paint') set('vital-fcp', Math.round(p.startTime) + ' ms');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER HELPERS
+// ═══════════════════════════════════════════════════════════
+function logItem(type, msg, label) {
+  const t = new Date().toLocaleTimeString('nl-NL', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  return `<div class="log-item ${type}">
+    <span class="log-time">${t}</span>
+    <span class="log-msg">${escHtml(msg)}</span>
+    ${label ? `<span class="log-badge ${type}">${label}</span>` : ''}
+  </div>`;
+}
+
+function renderErrors() {
+  const el = document.getElementById('error-list');
+  const filtered = state.errorFilter === 'all' ? state.errors : state.errors.filter(e => e.type === state.errorFilter);
+  if (!filtered.length) { el.innerHTML = '<div class="empty">Geen fouten ✓</div>'; return; }
+  el.innerHTML = filtered.slice(0,50).map(e =>
+    `<div class="log-item error" onclick="showStack(this,'${escHtml(e.stack || '')}')">
+      <span class="log-time">${e.ts.toLocaleTimeString('nl-NL')}</span>
+      <span class="log-msg">${escHtml(e.msg)} ${e.src ? '<span style="color:var(--text3);font-size:10px">' + escHtml(e.src) + '</span>' : ''}</span>
+      <span class="log-badge ${e.type === 'promise' ? 'warn' : 'error'}">${e.type.toUpperCase()}</span>
+    </div>`
+  ).join('');
+}
+
+function renderRecentErrors() {
+  const el = document.getElementById('ov-recent-errors');
+  if (!state.errors.length) { el.innerHTML = '<div class="empty">Geen fouten</div>'; return; }
+  el.innerHTML = state.errors.slice(0,5).map(e =>
+    `<div class="log-item error"><span class="log-time">${e.ts.toLocaleTimeString('nl-NL')}</span><span class="log-msg">${escHtml(e.msg.slice(0,60))}</span></div>`
+  ).join('');
+}
+
+function renderNetworkLog() {
+  const el = document.getElementById('network-log');
+  if (!state.networkLog.length) { el.innerHTML = '<div class="empty">Geen verzoeken</div>'; return; }
+  el.innerHTML = state.networkLog.slice(0,50).map(n =>
+    `<div class="log-item ${n.type}">
+      <span class="log-time">${n.ts.toLocaleTimeString('nl-NL')}</span>
+      <span class="log-msg" style="font-family:var(--mono)">${escHtml(n.url)}</span>
+      <span class="log-badge ${n.type}">${n.status} ${n.dur}ms</span>
+    </div>`
+  ).join('');
+}
+
+function renderMediaLog() {
+  const el = document.getElementById('media-log');
+  if (!state.mediaLog.length) { el.innerHTML = '<div class="empty">Geen media events</div>'; return; }
+  el.innerHTML = state.mediaLog.slice(0,30).map(m =>
+    logItem(m.type, m.msg + (m.src ? ' · ' + m.src : ''), 'MEDIA')
+  ).join('');
+}
+
+function renderConsoleLog() {
+  const el = document.getElementById('console-log');
+  const filtered = state.consoleFilter === 'all' ? state.consoleLog : state.consoleLog.filter(c => c.type === state.consoleFilter);
+  if (!filtered.length) { el.innerHTML = '<div class="empty">Geen console output</div>'; return; }
+  el.innerHTML = filtered.slice(0,100).map(c => logItem(c.type, c.msg, c.type.toUpperCase())).join('');
+}
+
+function addTimeline(type, msg) {
+  const el = document.getElementById('ov-timeline');
+  if (el.querySelector('.empty')) el.innerHTML = '';
+  const t = new Date().toLocaleTimeString('nl-NL');
+  el.insertAdjacentHTML('afterbegin',
+    `<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;gap:8px">
+      <span style="color:var(--text3);font-size:10px;flex-shrink:0">${t}</span>
+      <span style="color:${type==='error'?'var(--red)':type==='warn'?'var(--amber)':'var(--text2)'}">${escHtml(msg.slice(0,80))}</span>
+    </div>`
+  );
+}
+
+function addLog(type, msg, src) {
+  state.consoleLog.unshift({ ts: new Date(), type, msg });
+  renderConsoleLog();
+  addTimeline(type, msg);
+}
+
+// ═══════════════════════════════════════════════════════════
+// FILTERS
+// ═══════════════════════════════════════════════════════════
+function filterErrors(val, btn) {
+  state.errorFilter = val;
+  document.querySelectorAll('#error-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderErrors();
+}
+function filterConsole(val, btn) {
+  state.consoleFilter = val;
+  document.querySelectorAll('.filters .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderConsoleLog();
+}
+
+// ═══════════════════════════════════════════════════════════
+// CLEAR / EXPORT
+// ═══════════════════════════════════════════════════════════
+function clearErrors() { state.errors = []; renderErrors(); renderRecentErrors(); }
+function clearConsole() { state.consoleLog = []; renderConsoleLog(); }
+function clearAllLogs() {
+  state.errors = []; state.consoleLog = []; state.networkLog = []; state.mediaLog = [];
+  renderErrors(); renderConsoleLog(); renderNetworkLog(); renderMediaLog();
+  document.getElementById('ov-timeline').innerHTML = '<div class="empty">Geen activiteit</div>';
+}
+function exportLogs() {
+  const data = { ts: new Date().toISOString(), errors: state.errors, console: state.consoleLog, network: state.networkLog, media: state.mediaLog };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'debug-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+function set(id, val) { const el = document.getElementById(id); if (el) el.innerHTML = val; }
+function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showStack(el, stack) { alert(stack || 'Geen stacktrace beschikbaar'); }
+window.addEventListener('resize', updateLayout);
+window.addEventListener('online',  () => addLog('success', 'Netwerk verbonden'));
+window.addEventListener('offline', () => addLog('error',   'Netwerk verbroken'));
+</script>
+</body>
+</html>

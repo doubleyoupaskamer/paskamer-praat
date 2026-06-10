@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hub Button Test Harness</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <script>window.DY = { user: { uid: 'test' } };</script>
+  <script>
+    (function () {
+      window.DY._extraMenuActive = true;
+      function nuke() {
+        ['dy-ai-fab', 'dy-push-btn', 'dy-hub-fab', 'dy-hub-items', 'dy-hub-backdrop']
+          .forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+          });
+      }
+      if (document.readyState !== 'loading') nuke();
+      else document.addEventListener('DOMContentLoaded', nuke);
+      setInterval(nuke, 1500);
+    })();
+  </script>
+
+  <div id="dy-verhalen" class="dy-feed-reel" style="background:#1a160a;min-height:100vh">
+    <div class="dy-reel-item" style="position:relative;width:100%;height:90vh;background:linear-gradient(180deg,#6b5a3a,#1a160a)">
+      <div class="dy-reel-actions" style="position:absolute;right:10px;bottom:120px;z-index:5;color:#fff">
+        <div>❤️</div>
+        <div>💬</div>
+        <div>↗️</div>
+      </div>
+      <div class="dy-reel-content" style="position:absolute;bottom:0;left:0;right:72px;padding:0 16px 16px;display:flex;flex-direction:column;gap:4px;color:#fff;z-index:3">
+        <div class="dy-reel-auteur" style="display:flex;align-items:center;gap:10px;cursor:pointer;position:relative">
+          <div class="dy-reel-avatar" style="width:38px;height:38px;border-radius:50%;background:#c67d06;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">M</div>
+          <div class="dy-reel-auteur-meta">
+            <div style="font-weight:700">Marieke (1m92)</div>
+            <div style="font-size:12px;opacity:.7">2 dagen geleden</div>
+          </div>
+          <button class="dy-reel-volg-btn" style="margin-left:auto;padding:4px 10px;border-radius:14px;background:#c67d06;color:#fff;border:none;font-size:12px">+ Volgen</button>
+        </div>
+        <h2 class="dy-reel-titel" style="margin:6px 0 0;font-size:18px;font-weight:700">Spijkerbroek H&M voor lange dames</h2>
+        <p class="dy-reel-preview" style="margin:0;font-size:14px;line-height:1.5;opacity:.85">Eindelijk een broek die past op lengte 1m92, valt ruim maar zit super lekker...</p>
+        <span class="dy-reel-meer" style="font-size:13px;color:#fbbf24">Lees meer →</span>
+      </div>
+    </div>
+
+    <div class="dy-reel-item" style="position:relative;width:100%;height:90vh;background:linear-gradient(180deg,#3a5a3a,#1a160a)">
+      <div class="dy-reel-content" style="position:absolute;bottom:0;left:0;right:72px;padding:0 16px 16px;display:flex;flex-direction:column;gap:4px;color:#fff;z-index:3">
+        <div class="dy-reel-auteur" style="display:flex;align-items:center;gap:10px;cursor:pointer;position:relative">
+          <div class="dy-reel-avatar" style="width:38px;height:38px;border-radius:50%;background:#5a7a3a;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">J</div>
+          <div class="dy-reel-auteur-meta">
+            <div style="font-weight:700">Jeroen (2m05)</div>
+            <div style="font-size:12px;opacity:.7">vorige week</div>
+          </div>
+        </div>
+        <h2 class="dy-reel-titel" style="margin:6px 0 0;font-size:18px;font-weight:700">Bonprix XXL hoodie review</h2>
+        <p class="dy-reel-preview" style="margin:0;font-size:14px;line-height:1.5;opacity:.85">Voor brede schouders en lange armen valt deze ruim genoeg.</p>
+      </div>
+    </div>
+  </div>
+
+  <script defer src="js/extra-menu-v3.js"></script>
+  <script defer src="js/ai-fit-chat-v3.js"></script>
+  <script defer src="js/push-notifications-v3.js"></script>
+</body>
+</html>

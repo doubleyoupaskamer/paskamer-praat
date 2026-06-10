@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="nl-NL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1e1a0f">
+  <title>Geen verbinding — Paskamer Praat</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;height:100%;font-family:'DM Sans','Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+      background:
+        radial-gradient(60% 50% at  0%   0%, rgba(232,185,74,0.18) 0%, rgba(232,185,74,0) 60%),
+        radial-gradient(70% 60% at 100% 100%, rgba(198,125,6, 0.22) 0%, rgba(198,125,6, 0) 65%),
+        linear-gradient(160deg, #2a2218 0%, #1e1a0f 100%);
+      color:#f5edda;display:flex;align-items:center;justify-content:center;
+      padding:env(safe-area-inset-top,16px) 16px env(safe-area-inset-bottom,16px)}
+    .wrap{max-width:380px;text-align:center;animation:fadeIn .6s cubic-bezier(.23,1,.32,1)}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .icon{width:96px;height:96px;margin:0 auto 24px;
+      background:radial-gradient(circle at 30% 30%,rgba(232,185,74,.32),rgba(198,125,6,.18));
+      border-radius:50%;display:flex;align-items:center;justify-content:center;
+      border:1px solid rgba(232,185,74,.32);
+      animation:pulse 2.4s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.04);opacity:.85}}
+    .icon svg{width:48px;height:48px;color:#e8b94a}
+    h1{font-size:28px;margin:0 0 12px;font-weight:700;letter-spacing:-.01em;color:#fef5d6;line-height:1.2}
+    p{font-size:15px;line-height:1.55;color:#e8d8a8;margin:0 0 28px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:100px;
+      background:linear-gradient(135deg,#e8b94a,#c67d06);color:#fff5d6;text-decoration:none;
+      font-weight:700;font-size:15px;border:none;cursor:pointer;font-family:inherit;
+      box-shadow:0 4px 16px rgba(198,125,6,.32),inset 0 1px 0 rgba(254,237,182,.32);
+      transition:transform .15s ease,box-shadow .15s ease;-webkit-tap-highlight-color:transparent;
+      min-height:44px}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(198,125,6,.42),inset 0 1px 0 rgba(254,237,182,.40)}
+    .btn:active{transform:translateY(0) scale(.98)}
+    .btn:focus-visible{outline:2px solid #fef5d6;outline-offset:3px}
+    .status{margin-top:24px;font-size:13px;color:#d4c89a;display:flex;align-items:center;justify-content:center;gap:8px}
+    .status-dot{width:8px;height:8px;border-radius:50%;background:#c0392b;
+      box-shadow:0 0 0 4px rgba(192,57,43,.32);transition:background .3s,box-shadow .3s}
+    .status-dot.online{background:#1a6b3a;box-shadow:0 0 0 4px rgba(26,107,58,.32)}
+    @media (prefers-reduced-motion: reduce){
+      .icon{animation:none}.wrap{animation:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55"/>
+        <path d="M5 12.55a10.94 10.94 0 015.17-2.39"/><path d="M10.71 5.05A16 16 0 0122.58 9"/>
+        <path d="M1.42 9a15.91 15.91 0 014.7-2.88"/><path d="M8.53 16.11a6 6 0 016.95 0"/>
+        <line x1="12" y1="20" x2="12.01" y2="20"/>
+      </svg>
+    </div>
+    <h1>Geen verbinding</h1>
+    <p>Je internet lijkt offline te zijn. We proberen automatisch opnieuw te verbinden zodra je weer online bent.</p>
+    <button class="btn" id="retry-btn" type="button">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+      </svg>
+      Opnieuw proberen
+    </button>
+    <div class="status" role="status" aria-live="polite">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Offline</span>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var dot = document.getElementById('status-dot');
+      var txt = document.getElementById('status-text');
+      var btn = document.getElementById('retry-btn');
+      function update(){
+        var on = navigator.onLine;
+        dot.classList.toggle('online', on);
+        txt.textContent = on ? 'Online — klik op Opnieuw proberen' : 'Offline';
+        if (on) setTimeout(function(){ location.replace('/'); }, 1200);
+      }
+      window.addEventListener('online',  update);
+      window.addEventListener('offline', update);
+      btn.addEventListener('click', function(){
+        if (navigator.onLine) location.replace('/');
+        else { btn.disabled = true; btn.textContent = 'Nog offline…';
+               setTimeout(function(){ btn.disabled = false; btn.innerHTML =
+                 '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg> Opnieuw proberen';
+               }, 1500); }
+      });
+      update();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+
+/style-*.css
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: text/css; charset=utf-8
+/app.css
+  Cache-Control: no-cache, must-revalidate
+  Content-Type: text/css; charset=utf-8
+
+/app-*.css
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: text/css; charset=utf-8
+
+/pwa-*.css
+  Cache-Control: public, max-age=31536000
+  Content-Type: text/css; charset=utf-8
+
+/pwa-*.js
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: application/javascript; charset=utf-8
+  X-Content-Type-Options: nosniff
+
+/
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+
+# ── Admin: nooit cachen (Cloudflare + browser) ───────────────────
+/admin
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+  Surrogate-Control: no-store
+  CF-Cache-Status: BYPASS
+  X-Robots-Tag: noindex, nofollow
+
+/admin.html
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+  Surrogate-Control: no-store
+  CF-Cache-Status: BYPASS
+  X-Robots-Tag: noindex, nofollow
+
+/debug.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  X-Robots-Tag: noindex, nofollow
+
+
+# ── Service Worker: NOOIT cachen ─────────────────────────────────
+/sw.js
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+
+# ── Statische assets: lang cachen (versioned filenames) ──────────
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: application/javascript; charset=utf-8
+  X-Content-Type-Options: nosniff
+
+/css/*
+  Cache-Control: no-cache, must-revalidate
+
+/icons/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.webp
+  Cache-Control: public, max-age=2592000
+
+/*.png
+  Cache-Control: public, max-age=2592000
+
+# ── HTML: altijd vers ─────────────────────────────────────────────
+/*.html
+  Cache-Control: no-cache, must-revalidate
+
+# ── Manifest: kort cachen ─────────────────────────────────────────
+/manifest.json
+  Cache-Control: public, max-age=86400
+  Content-Type: application/manifest+json; charset=utf-8
+
+# ── Sitemap & robots ─────────────────────────────────────────────
+/sitemap.xml
+  Cache-Control: no-cache, must-revalidate
+  Content-Type: application/xml; charset=utf-8
+
+/robots.txt
+  Cache-Control: no-cache, must-revalidate
+  Content-Type: text/plain; charset=utf-8
+
+# ── Globale security & SEO headers ───────────────────────────────
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; connect-src 'self' data: blob: https://ipapi.co https://*.googleapis.com https://*.firebaseio.com https://*.firebase.googleapis.com wss://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://storage.googleapis.com https://firebasestorage.googleapis.com https://api.anthropic.com https://api.stripe.com https://paskamerpraat.nl https://*.workers.dev https://doubleyou-patroon-server.onrender.com https://black-grass-c05c.doubleuurbanluxury.workers.dev https://doubleyoufashion.nl https://fitting-chat-app.preview.emergentagent.com https://*.preview.emergentagent.com https://*.emergentagent.com https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self' blob:; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com https://lh3.googleusercontent.com https://paskamerpraat.nl https://image.pollinations.ai https://*.preview.emergentagent.com; media-src 'self' blob: data: https://firebasestorage.googleapis.com https://storage.googleapis.com; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com; object-src 'none'; base-uri 'self';
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-Robots-Tag: index, follow
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+/admin-v174.html
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  X-Robots-Tag: noindex, nofollow

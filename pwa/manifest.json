@@ -1,0 +1,111 @@
+{
+  "name": "Paskamer Praat — Tall & Plus Size Community",
+  "short_name": "Paskamer Praat",
+  "description": "De community voor tall (1.85m+) en plus size (XL-5XL) fashion. Deel je pasvorm ervaringen en ontdek kleding die écht past.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1a0f",
+  "theme_color": "#1e1a0f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": [
+    "lifestyle",
+    "shopping",
+    "social"
+  ],
+  "lang": "nl-NL",
+  "screenshots": [
+    {
+      "src": "screenshot-narrow.jpg",
+      "sizes": "720x1280",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Paskamer Praat community feed op mobiel"
+    },
+    {
+      "src": "screenshot-wide.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Paskamer Praat — Tall & Plus Size Fashion Community"
+    }
+  ],
+  "scope": "/",
+  "dir": "ltr",
+  "id": "/",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Feed bekijken",
+      "short_name": "Feed",
+      "url": "/?pagina=feed",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Lookbook bekijken",
+      "short_name": "Looks",
+      "url": "/?pagina=lookbook",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Nieuwe fitcheck plaatsen",
+      "short_name": "Plaatsen",
+      "url": "/?pagina=nieuw",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "foto",
+          "accept": ["image/*", "image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]
+        }
+      ]
+    }
+  },
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ]
+}

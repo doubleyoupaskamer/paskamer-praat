@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e1a0f">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Paskamer Praat — Vernieuwen</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; min-height: 100dvh;
+    background: #1e1a0f; color: #fefcf5;
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .kaart {
+    max-width: 440px; width: 100%; background: #2a2415;
+    border: 1px solid rgba(254,252,245,0.12); border-radius: 18px;
+    padding: 28px 24px; text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+  .ico { font-size: 42px; margin-bottom: 10px; line-height: 1; }
+  h1 { font-size: 22px; margin: 0 0 8px; font-weight: 700; }
+  p { margin: 0 0 14px; opacity: .85; font-size: 14px; }
+  .log {
+    background: rgba(0,0,0,0.35); border-radius: 10px; padding: 14px;
+    text-align: left; font: 12px/1.6 ui-monospace, "SF Mono", Menlo, monospace;
+    margin: 16px 0 18px; max-height: 240px; overflow-y: auto;
+  }
+  .log div { padding: 2px 0; }
+  .ok { color: #6ec77a; }
+  .err { color: #ef7a6a; }
+  .info { color: #d4910a; }
+  .btn {
+    display: inline-block; background: #fefcf5; color: #1e1a0f;
+    border: none; padding: 12px 28px; border-radius: 999px;
+    font: 600 14px inherit; cursor: pointer; text-decoration: none;
+    margin-top: 6px; transition: transform .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn[disabled] { opacity: .5; cursor: wait; }
+  .spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2px solid rgba(254,252,245,0.25); border-top-color: #d4910a;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+    vertical-align: middle; margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .versie { font-size: 11px; opacity: .5; margin-top: 18px; }
+</style>
+</head>
+<body>
+  <div class="kaart">
+    <div class="ico">🔄</div>
+    <h1>Vernieuwen van Paskamer Praat</h1>
+    <p>Verwijdert oude cache zodat je de nieuwste versie ziet.</p>
+    <div class="log" id="log"></div>
+    <button class="btn" id="terug" disabled><span class="spinner"></span>Bezig…</button>
+    <div class="versie">Paskamer Praat — refresh tool</div>
+  </div>
+
+<script>
+(function() {
+  var logEl = document.getElementById('log');
+  var btn   = document.getElementById('terug');
+  function log(msg, cls) {
+    var d = document.createElement('div');
+    d.className = cls || '';
+    d.textContent = msg;
+    logEl.appendChild(d);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  async function ruimOp() {
+    var aantal = 0, fouten = 0;
+
+    // 1. Service Workers uitschrijven
+    if ('serviceWorker' in navigator) {
+      try {
+        var regs = await navigator.serviceWorker.getRegistrations();
+        if (regs.length === 0) {
+          log('✓ Geen actieve service workers gevonden', 'info');
+        }
+        for (var i = 0; i < regs.length; i++) {
+          try {
+            await regs[i].unregister();
+            log('✓ Service worker uitgeschreven (scope: ' + regs[i].scope + ')', 'ok');
+            aantal++;
+          } catch (e) {
+            log('✗ Fout bij uitschrijven SW: ' + e.message, 'err');
+            fouten++;
+          }
+        }
+      } catch (e) {
+        log('✗ Kon SW lijst niet ophalen: ' + e.message, 'err');
+        fouten++;
+      }
+    } else {
+      log('⚠ Service workers niet ondersteund in deze browser', 'info');
+    }
+
+    // 2. Cache Storage opruimen
+    if ('caches' in window) {
+      try {
+        var keys = await caches.keys();
+        if (keys.length === 0) {
+          log('✓ Geen caches gevonden', 'info');
+        }
+        for (var j = 0; j < keys.length; j++) {
+          try {
+            await caches.delete(keys[j]);
+            log('✓ Cache verwijderd: ' + keys[j], 'ok');
+            aantal++;
+          } catch (e) {
+            log('✗ Cache delete fout: ' + keys[j] + ' — ' + e.message, 'err');
+            fouten++;
+          }
+        }
+      } catch (e) {
+        log('✗ Cache opruimen mislukt: ' + e.message, 'err');
+        fouten++;
+      }
+    }
+
+    // 3. IndexedDB legen (alleen onze share-target DB, niet Firebase data)
+    try {
+      if (indexedDB && indexedDB.deleteDatabase) {
+        var req = indexedDB.deleteDatabase('pp-share-target');
+        req.onsuccess = function() { log('✓ Share-target IDB opgeruimd', 'ok'); };
+        req.onerror   = function() { /* stille fail */ };
+      }
+    } catch (e) {}
+
+    log('', '');
+    if (fouten === 0) {
+      log('✅ Klaar! ' + aantal + ' onderdelen opgeruimd.', 'ok');
+    } else {
+      log('⚠ Klaar, maar met ' + fouten + ' fout(en). Probeer hieronder opnieuw.', 'info');
+    }
+    log('', '');
+    log('Klik hieronder om de app opnieuw te laden.', 'info');
+
+    btn.disabled = false;
+    btn.innerHTML = '→ Open Paskamer Praat opnieuw';
+    btn.onclick = function() {
+      // Hard reload naar root met cache-buster
+      window.location.replace('/?fresh=' + Date.now());
+    };
+  }
+
+  log('Start opruimen...', 'info');
+  setTimeout(ruimOp, 400);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Hoofdpagina -->
+  <url>
+    <loc>https://paskamerpraat.nl/</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://paskamerpraat.nl/hero-model.png</image:loc>
+      <image:title>Paskamer Praat — Tall en Plus Size Fashion Community</image:title>
+    </image:image>
+  </url>
+
+  <!-- Community Feed -->
+  <url>
+    <loc>https://paskamerpraat.nl/feed</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Lookbook — outfit inspiratie -->
+  <url>
+    <loc>https://paskamerpraat.nl/looks</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Pasvorm Reviews -->
+  <url>
+    <loc>https://paskamerpraat.nl/reviews</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Post van de Week -->
+  <url>
+    <loc>https://paskamerpraat.nl/post-van-de-week</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Challenges -->
+  <url>
+    <loc>https://paskamerpraat.nl/challenges</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <!-- Winkel -->
+  <url>
+    <loc>https://paskamerpraat.nl/winkel</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <!-- Outfit Vergelijker -->
+  <url>
+    <loc>https://paskamerpraat.nl/outfit-vergelijker</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+
+  <!-- Juridisch / Trust -->
+  <url>
+    <loc>https://paskamerpraat.nl/voorwaarden</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://paskamerpraat.nl/privacy</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://paskamerpraat.nl/community-regels</loc>
+    <lastmod>2026-06-02</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>
