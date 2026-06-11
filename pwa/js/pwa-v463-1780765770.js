@@ -2200,15 +2200,20 @@ DY.renderHome = function() {
             '<img src="hero-v3-canal.jpg" srcset="hero-v3-canal-480.jpg 480w, hero-v3-canal-800.jpg 800w, hero-v3-canal-1024.jpg 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 720px" class="dy-hm-hero-img" width="848" height="1264" alt="Inclusieve modecommunity bij Amsterdamse gracht, mensen met diverse lichaamstypen, leeftijden en stijlen" loading="eager" fetchpriority="high" decoding="async">' +
           '</picture>' +
           '<div class="dy-hm-hero-overlay"></div>' +
+          // v60.1.32: tekst-overlay op de foto
+          '<div class="dy-hm-hero-text-overlay">' +
+            '<span class="dy-hm-hero-eyebrow">Tall, Plus &amp; Inclusieve Mode</span>' +
+            '<h1 class="dy-hm-hero-titel">Mode die écht<br><em>past bij jou</em></h1>' +
+            '<p class="dy-hm-hero-sub">Een plek voor iedereen die buiten standaard confectiematen valt. Deel outfits, ontvang eerlijke feedback en ontdek stijladvies van de community en AI.</p>' +
+          '</div>' +
         '</div>' +
         '<div class="dy-hm-hero-content">' +
-          '<span class="dy-hm-hero-eyebrow">Tall, Plus &amp; Inclusieve Mode</span>' +
-          '<h1 class="dy-hm-hero-titel">Mode die écht<br><em>past bij jou</em></h1>' +
-          '<p class="dy-hm-hero-sub">Een plek voor iedereen die buiten standaard confectiematen valt. Deel outfits, ontvang eerlijke feedback en ontdek stijladvies van de community en AI.</p>' +
-          '<div class="dy-hm-hero-knoppen">' +
-            '<button class="dy-hm-hero-cta-sec" onclick="DY.navigeer(\x27feed\x27)" data-testid="home-cta-feed">Ontdek de community</button>' +
-            '<button class="dy-hm-hero-cta-bpos" onclick="DY.toonBposOverlay()" data-testid="home-cta-bpos">Body Positivity</button>' +
-          '</div>' +
+          // v60.1.32: tekst overlayed op de foto (in image), CTAs onder
+          '<div class="dy-hm-hero-actions">' +
+            '<div class="dy-hm-hero-knoppen">' +
+              '<button class="dy-hm-hero-cta-sec" onclick="DY.navigeer(\x27feed\x27)" data-testid="home-cta-feed">Ontdek de community</button>' +
+              '<button class="dy-hm-hero-cta-bpos" onclick="DY.toonBposOverlay()" data-testid="home-cta-bpos">Body Positivity</button>' +
+            '</div>' +
           // v60.1.13: Partner CTA volledig geïntegreerd in het bestaande hero-blok.
           // Geen extra sectie meer, alleen een subtiele scheidingslijn binnen het content-blok.
           '<div class="dy-hm-hero-partner" data-testid="home-brand-partner">' +
@@ -2226,6 +2231,7 @@ DY.renderHome = function() {
             '<span class="dy-hm-hero-legal-sep">·</span>' +
             '<a href="mailto:info@doubleyousmallandtall.nl" class="dy-hm-hero-legal-link">Contact</a>' +
           '</div>' +
+          '</div>' /* einde dy-hm-hero-actions */ +
         '</div>' +
       '</section>' +
     '</div>';
