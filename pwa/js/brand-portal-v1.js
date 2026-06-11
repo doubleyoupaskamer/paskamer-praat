@@ -186,22 +186,27 @@
 
     var _origToonPagina = DY.toonPagina;
     DY.toonPagina = function(pagina) {
-      // ── v60.1.3 sticky deep-link hijack ─────────────────────────────────
-      // Deep-link blijft actief totdat:
-      //   (a) we de bedoelde brand-portal pagina daadwerkelijk gerenderd hebben
-      //   (b) het deeplink-venster is verlopen (5 seconden)
-      // Dit voorkomt dat een latere onAuthReady-call het formulier overschrijft.
+      // ── v60.1.4 FINAL: sticky deeplink + render-lock ────────────────────
+      // Combinatie van 2 mechanismen die elkaar aanvullen:
+      //   1) Sticky deeplink (5s TTL) — hijack non-brand calls. NIET wissen
+      //      bij render-start, pas wissen wanneer URL verandert of TTL afloopt.
+      //   2) Render-lock (2s) — terwijl een brand-portal render bezig is,
+      //      worden concurrent non-brand toonPagina calls GENEGEERD (zodat
+      //      onAuthReady tijdens een async await niet over ons render heen
+      //      schrijft).
       try {
-        if (BP._deeplink && !Object.prototype.hasOwnProperty.call(BP_PAGES, pagina)) {
-          var nu = Date.now();
-          var ttl = (BP._deeplinkAt && (nu - BP._deeplinkAt) < 5000);
-          if (ttl) {
-            pagina = BP._deeplink; // hijack
-            // NIET wissen — pas wissen wanneer we daadwerkelijk renderen (zie hieronder)
-          } else {
-            BP._deeplink = null;
-            BP._deeplinkAt = 0;
-          }
+        var nu = Date.now();
+        // Sticky deeplink hijack
+        if (BP._deeplink
+            && (nu - (BP._deeplinkAt || 0)) < 5000
+            && !Object.prototype.hasOwnProperty.call(BP_PAGES, pagina)) {
+          pagina = BP._deeplink;
+        }
+        // Render-lock: tijdens onze render, slik concurrent non-brand navigatie
+        if (BP._renderLock
+            && (nu - (BP._renderLockAt || 0)) < 2000
+            && !Object.prototype.hasOwnProperty.call(BP_PAGES, pagina)) {
+          return; // negeer — we zijn bezig
         }
       } catch(e) {}
 
@@ -209,13 +214,9 @@
       if (pagina && Object.prototype.hasOwnProperty.call(BP_PAGES, pagina)) {
         try {
           DY.pagina = pagina;
-          DY._laatstGerenderd = null; // Forceer dat onze pagina rendert
-          // v60.1.3: zodra we een brand-portal pagina gaan renderen, wis de
-          // deeplink — we hebben de gebruiker daar gebracht waar URL bedoelde.
-          if (BP._deeplink === pagina) {
-            BP._deeplink = null;
-            BP._deeplinkAt = 0;
-          }
+          DY._laatstGerenderd = null;
+          BP._renderLock = true;
+          BP._renderLockAt = Date.now();
           var fn = BP_PAGES[pagina] || BP[pagina];
           if (typeof fn !== 'function') {
             // Functie nog niet aangemaakt (forward declaration) — lookup direct
@@ -230,7 +231,29 @@
             }[pagina];
             fn = BP[directKey];
           }
-          if (typeof fn === 'function') return fn.call(BP);
+          if (typeof fn === 'function') {
+            var _result = fn.call(BP);
+            // v60.1.4: release render-lock na async render. Wis deeplink ook
+            // pas hier zodat eventueel mislukte render een retry kan triggeren.
+            if (_result && typeof _result.then === 'function') {
+              _result.then(function() {
+                BP._renderLock = false;
+                if (BP._deeplink === pagina) {
+                  BP._deeplink = null;
+                  BP._deeplinkAt = 0;
+                }
+              }, function() {
+                BP._renderLock = false;
+              });
+            } else {
+              BP._renderLock = false;
+              if (BP._deeplink === pagina) {
+                BP._deeplink = null;
+                BP._deeplinkAt = 0;
+              }
+            }
+            return _result;
+          }
         } catch(e) { console.error('[BrandPortal]', e); }
       }
       return _origToonPagina.call(DY, pagina);
@@ -1429,7 +1452,7 @@
 
     // ── Markeer geladen ──────────────────────────────────────────────────
     BP._loaded = true;
-    BP._versie = 'v60.1-brand-portal-v1.3';
+    BP._versie = 'v60.1-brand-portal-v1.4-final';
 
   });
 })();
