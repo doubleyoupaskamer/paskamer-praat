@@ -10834,13 +10834,13 @@ img {
   overflow: hidden;
   background: #0f0d06;
 }
-/* Mobile: foto bovenaan vast formaat, content eronder in rustig donker paneel */
+/* Mobile: foto bovenaan met natuurlijke aspect-ratio (geen letterboxing),
+   content eronder in rustig donker paneel */
 .dy-hm-hero-bg {
   position: relative;
   width: 100%;
-  height: 56vh;
-  min-height: 320px;
-  max-height: 520px;
+  aspect-ratio: 848 / 1264;
+  max-height: 65vh;
   flex-shrink: 0;
   background: #0a0806;
   overflow: hidden;
@@ -10855,8 +10855,8 @@ img {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center bottom;
+  object-fit: contain;
+  object-position: center center;
   display: block;
   filter: brightness(0.95);
 }
@@ -10905,8 +10905,8 @@ img {
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center bottom;
+    object-fit: contain;
+    object-position: center center;
     filter: brightness(0.95);
   }
   .dy-hm-hero-content {
