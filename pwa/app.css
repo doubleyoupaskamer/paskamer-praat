@@ -10834,13 +10834,11 @@ img {
   overflow: hidden;
   background: #0f0d06;
 }
-/* Mobile: foto bovenaan met natuurlijke aspect-ratio (geen letterboxing),
-   content eronder in rustig donker paneel */
+/* Mobile: foto vol-breed in natuurlijke 2:3 aspect-ratio, volledig zichtbaar */
 .dy-hm-hero-bg {
   position: relative;
   width: 100%;
   aspect-ratio: 848 / 1264;
-  max-height: 46vh;
   flex-shrink: 0;
   background: #0a0806;
   overflow: hidden;
