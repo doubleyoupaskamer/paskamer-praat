@@ -40,6 +40,14 @@ PaskamerPraat.nl is een vanilla JS PWA op Firebase + Cloudflare Workers, met rec
 - ZIP artifact: `/app/pwa/paskamerpraat-pwa-v60.1.35-stability-audit.zip`
 - Backend tests: 100% pass (8/8) via testing_agent_v3_fork
 
+### v60.1.36 — Navigation Flow Audit (2026-02-14)
+- 6 orphan pagina's voorzien van `← Terug` knop via bestaande `DY.terug()` smart fallback chain
+- Pages gefixt: meldingen, ovdw, challenges, lookbook, deelhub, admin
+- Geen layout/UX wijzigingen — alleen knop toegevoegd in bestaande headers
+- 7 testids toegevoegd voor e2e testing
+- Full audit: `/app/memory/NAV_AUDIT_v60.1.36.md`
+- Download: `/app/frontend/public/paskamerpraat-pwa-v60.1.36-nav-audit.zip`
+
 ## Backlog / Toekomstige tasks
 
 ### P0 — Verificatie nog open

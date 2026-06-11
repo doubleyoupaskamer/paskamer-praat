@@ -9723,6 +9723,7 @@ DY.renderMeldingen = async function() {
     '<div class="dy-pg-header">' +
       '<div class="dy-pg-header-inner">' +
         '<div>' +
+          '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2)" data-testid="meldingen-terug-btn">← Terug</button>' +
           '<div class="dy-feed-merk-label">Paskamer Praat</div>' +
           '<h1 class="dy-pg-titel">Activiteiten</h1>' +
         '</div>' +
@@ -9930,6 +9931,7 @@ DY.renderChallenges = async function() {
     '<div class="dy-pg-header dy-pg-header-dark">' +
       '<div class="dy-pg-header-inner">' +
         '<div>' +
+          '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2);color:rgba(253,248,240,0.85)" data-testid="challenges-terug-btn">← Terug</button>' +
           '<div class="dy-feed-merk-label" style="color:rgba(198,125,6,0.7)">Paskamer Praat</div>' +
           '<h1 class="dy-pg-titel" style="color:rgba(253,248,240,0.95)">Community <em>Challenges</em></h1>' +
           '<p class="dy-pg-sub" style="color:rgba(253,248,240,0.38)">Doe mee en verdien extra <span class="dy-dsp-label">DSP punten</span>.</p>' +
@@ -10169,6 +10171,7 @@ DY.renderOvdwFeed = async function() {
     '<div class="dy-lb-header">' +
       '<div class="dy-lb-header-inner">' +
         '<div style="min-width:0;flex:1;overflow:hidden">' +
+          '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2)" data-testid="ovdw-terug-btn">← Terug</button>' +
           '<div class="dy-feed-merk-label">Paskamer Praat</div>' +
           '<h1 class="dy-lb-page-titel">Post <em>van de week</em></h1>' +
         '</div>' +
@@ -11706,6 +11709,7 @@ DY.renderLookbook = function() {
     '<div class="dy-lb-header">' +
       '<div class="dy-lb-header-inner">' +
         '<div>' +
+          '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2)" data-testid="lookbook-terug-btn">← Terug</button>' +
           '<div class="dy-feed-merk-label">Paskamer Praat</div>' +
           '<h1 class="dy-lb-page-titel">Look <em>Book</em></h1>' +
         '</div>' +
@@ -17129,6 +17133,7 @@ DY.renderDeelHub = function() {
       '<div class="dy-vr-header">' +
         '<div class="dy-vr-header-inner">' +
           '<div>' +
+            '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2);color:rgba(252,248,239,0.7)" data-testid="deelhub-terug-btn">← Terug</button>' +
             '<div class="dy-feed-merk-label">Paskamer Praat</div>' +
             '<h1 class="dy-vr-titel">Wat deel je, <em>' + naam + '</em>?</h1>' +
           '</div>' +
@@ -17809,8 +17814,11 @@ DY.renderAdmin = function() {
   main.innerHTML =
     '<div class="dy-admin-wrap">' +
       '<div class="dy-vr-header"><div class="dy-vr-header-inner">' +
-        '<div><div class="dy-feed-merk-label">DoubleYou</div>' +
-        '<h1 class="dy-vr-titel">Admin <em>Dashboard</em></h1></div>' +
+        '<div>' +
+          '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2);color:rgba(252,248,239,0.7)" data-testid="admin-terug-btn">← Terug</button>' +
+          '<div class="dy-feed-merk-label">DoubleYou</div>' +
+          '<h1 class="dy-vr-titel">Admin <em>Dashboard</em></h1>' +
+        '</div>' +
       '</div></div>' +
       // Tabs
       '<div class="dy-admin-tabs">' +
@@ -25099,6 +25107,7 @@ DY.renderChallenges = async function() {
     '<div class="dy-pg-header dy-pg-header-dark">' +
       '<div class="dy-pg-header-inner">' +
         '<div>' +
+          '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2);color:rgba(253,248,240,0.85)" data-testid="challenges-terug-btn">← Terug</button>' +
           '<div class="dy-feed-merk-label" style="color:rgba(198,125,6,0.7)">Paskamer Praat</div>' +
           '<h1 class="dy-pg-titel" style="color:rgba(253,248,240,0.95)">Community <em>Challenges</em></h1>' +
           '<p class="dy-pg-sub" style="color:rgba(253,248,240,0.38)">Doe mee en verdien extra <span class="dy-dsp-label">DSP punten</span>.</p>' +
