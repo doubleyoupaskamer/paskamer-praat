@@ -1,0 +1,132 @@
+rules_version = '2';
+// ══════════════════════════════════════════════════════════════════
+// DOUBLEYOU — PASKAMER PRAAT
+// Firebase Storage Rules
+// Bijgewerkt: februari 2026 (v11 — brand portal toegevoegd)
+//
+// Storage paden:
+//   verhalen/{uid}/{filename}        — verhaal + story media (50MB)
+//   lookbook/{uid}/{filename}        — fitcheck foto's/video's (50MB)
+//   avatars/{uid}/{filename}         — profielfoto's (5MB)
+//   reacties/{uid}/{filename}        — reactie foto's (20MB)
+//   berichten/{uid}/{filename}       — DM media (20MB, alleen ingelogd)
+//   reviews/{uid}/{filename}         — review foto's (20MB)
+//   brands/{uid}/{...}               — merklogo's (3MB, images only)         ← NIEUW v11
+//   brand_products/{uid}/{...}       — productafbeeldingen (3MB, images only) ← NIEUW v11
+// ══════════════════════════════════════════════════════════════════
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── VERHALEN MEDIA ───────────────────────────────────────────
+    match /verhalen/{userId}/{fileName} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 50 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*')
+         || request.resource.contentType.matches('video/.*'));
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── LOOKBOOK ────────────────────────────────────────────────
+    match /lookbook/{userId}/{fileName} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 50 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*')
+         || request.resource.contentType.matches('video/.*'));
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── PROFIELFOTO'S ────────────────────────────────────────────
+    match /avatars/{userId}/{fileName} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── REACTIE MEDIA ────────────────────────────────────────────
+    match /reacties/{userId}/{fileName} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 20 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow update: if false;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── BERICHTEN MEDIA ──────────────────────────────────────────
+    match /berichten/{userId}/{fileName} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 20 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*')
+         || request.resource.contentType.matches('video/.*'));
+      allow update: if false;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── REVIEW FOTO'S ────────────────────────────────────────────
+    match /reviews/{userId}/{fileName} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 20 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+
+    // ══════════════════════════════════════════════════════════════
+    // BRAND PORTAL v1 (nieuw v11) — merklogo's + productafbeeldingen
+    // ══════════════════════════════════════════════════════════════
+
+    // ── BRAND LOGO'S ─────────────────────────────────────────────
+    // Pad: brands/{uid}/logo_*.png
+    // Owner = brand-eigenaar (uid). Iedereen mag lezen (logo's zijn publiek).
+    // Recursieve match ({allPaths=**}) zodat eventuele subfolders ook werken
+    // (bv. brands/{uid}/banners/), zonder dat we hier extra paden moeten
+    // definiëren in de toekomst.
+    match /brands/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 3 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 3 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── BRAND PRODUCT AFBEELDINGEN ───────────────────────────────
+    // Pad: brand_products/{uid}/{productId}/img_*.jpg
+    // Owner = brand-eigenaar (uid). Iedereen mag lezen (productfoto's zijn
+    // publiek voor /merken pagina). 3MB cap, alleen images.
+    match /brand_products/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 3 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 3 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+  }
+}
