@@ -10891,30 +10891,9 @@ img {
   /* W-spinner watermark als ::before pseudo. Geen HTML wijziging.
      mix-blend-mode: overlay legt 'm zacht over de foto.
      Slow rotate 45s + gentle pulse 9s, allebei GPU only. */
-  /* v60.1.28: zachte gouden halo, kleiner watermark-formaat */
+  /* v60.1.29: halo verwijderd op verzoek user, pure W watermark */
   .dy-hm-hero-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    width: 28vw;
-    height: 28vw;
-    max-width: 160px;
-    max-height: 160px;
-    background: radial-gradient(circle at center,
-      rgba(251,231,184,0.22) 0%,
-      rgba(212,145,10,0.10) 50%,
-      transparent 78%);
-    border-radius: 50%;
-    z-index: 2;
-    pointer-events: none;
-    transform-origin: center center;
-    will-change: transform, opacity;
-    animation: dy-hm-halo-emerge 6.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  }
-  @keyframes dy-hm-halo-emerge {
-    0%, 100% { opacity: 0.30; transform: scale(0.94); }
-    50%      { opacity: 0.65; transform: scale(1.06); }
+    display: none;
   }
 
   .dy-hm-hero-bg::before {
@@ -10926,24 +10905,23 @@ img {
     justify-content: center;
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-style: italic;
-    font-size: 6.5rem;
+    font-size: 3.4rem;
     font-weight: 600;
     line-height: 1;
     color: #fbe7b8;
-    opacity: 0.42;
+    opacity: 0.35;
     pointer-events: none;
     z-index: 3;
     transform-origin: center center;
-    will-change: transform, opacity;
+    will-change: opacity;
     text-shadow:
-      0 0 14px rgba(251,231,184,0.50),
-      0 0 28px rgba(212,145,10,0.30),
-      0 2px 8px rgba(10,8,6,0.40);
+      0 0 10px rgba(251,231,184,0.40),
+      0 2px 6px rgba(10,8,6,0.35);
     animation: dy-hm-w-emerge 6.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
   @keyframes dy-hm-w-emerge {
-    0%, 100% { opacity: 0.32; transform: scale(0.97); }
-    50%      { opacity: 0.72; transform: scale(1.03); }
+    0%, 100% { opacity: 0.22; }
+    50%      { opacity: 0.55; }
   }
 
   /* Reduced motion: alle animaties uit, statische subtiele W blijft */
