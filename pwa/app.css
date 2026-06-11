@@ -11115,9 +11115,8 @@ img {
 }
 .dy-hm-hero-cta-bpos:active { transform: scale(0.96); }
 
-/* Desktop hero: blijft binnen de bestaande .dy-main app-frame (max 680-1000px).
-   Foto in 16:10 verhouding, tekst-overlay onderaan met donkere gradient.
-   CTA-blok daaronder in dezelfde kolom (consistent met mobiel). */
+/* Desktop hero: foto vult volledige viewport-hoogte (full-immersive) in proportie.
+   Tekst-overlay onderaan met donkere gradient. CTA-blok daaronder zichtbaar bij scroll. */
 @media (min-width: 768px) {
   .dy-hm-hero {
     min-height: auto;
@@ -11129,8 +11128,11 @@ img {
   .dy-hm-hero-bg {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 10;
-    max-height: 64vh;
+    aspect-ratio: auto;
+    /* v60.1.38: foto vult volledige beschikbare viewport-hoogte */
+    height: calc(100dvh - var(--topbar-h, 56px));
+    min-height: 560px;
+    max-height: none;
     background: #0a0806;
     overflow: hidden;
     flex-shrink: 0;
@@ -11147,9 +11149,10 @@ img {
     inset: 0;
     width: 100%;
     height: 100%;
+    /* Proporties behouden, vult container, centreert gezichten */
     object-fit: cover;
-    object-position: center 30%;
-    filter: brightness(0.92);
+    object-position: center center;
+    filter: brightness(0.94);
   }
   /* Desktop text-overlay: onderaan met donkere gradient */
   .dy-hm-hero-text-overlay {
@@ -11158,33 +11161,74 @@ img {
     right: 0;
     bottom: 0;
     top: auto;
-    padding: 80px 40px 36px;
+    padding: 120px 40px 48px;
     background: linear-gradient(180deg,
       transparent 0%,
-      rgba(10,8,6,0.32) 28%,
-      rgba(10,8,6,0.86) 70%,
-      rgba(10,8,6,0.96) 100%);
+      rgba(10,8,6,0.18) 35%,
+      rgba(10,8,6,0.72) 72%,
+      rgba(10,8,6,0.95) 100%);
   }
-  .dy-hm-hero-text-overlay .dy-hm-hero-eyebrow { font-size: 0.7rem; }
+  .dy-hm-hero-text-overlay .dy-hm-hero-eyebrow { font-size: 0.72rem; }
   .dy-hm-hero-text-overlay .dy-hm-hero-titel {
-    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-size: clamp(2.6rem, 5.2vw, 3.8rem);
   }
   .dy-hm-hero-text-overlay .dy-hm-hero-sub {
     font-size: 0.95rem;
     color: rgba(252,248,239,0.92);
     max-width: 100%;
   }
-  /* Geen blurred bg, geen extra ::after gradient; overlay doet het werk */
-  .dy-hm-hero-bg::after { display: none; }
-  .dy-hm-hero-bg::before { display: none; }
+  /* Verberg blurred-bg ::before (uit oudere desktop variant) en oude ::after overlay */
   .dy-hm-hero-overlay { display: none; }
   /* Verberg duplicate desktop-tekst-block (overlay toont al de tekst) */
   .dy-hm-hero-text-desktop { display: none; }
+  /* Subtiele scroll-hint onderaan foto: muis-icoon met bewegend bolletje */
+  .dy-hm-hero-bg::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 36px;
+    border: 1.5px solid rgba(252,248,239,0.4);
+    border-radius: 12px;
+    display: block;
+    z-index: 5;
+    opacity: 0.65;
+    animation: dy-hero-scroll-hint 2.2s ease-in-out infinite;
+    pointer-events: none;
+    background: none;
+    filter: none;
+  }
+  .dy-hm-hero-bg::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 26px;
+    width: 3px;
+    height: 7px;
+    background: rgba(252,248,239,0.75);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    display: block;
+    z-index: 6;
+    animation: dy-hero-scroll-dot 2.2s ease-in-out infinite;
+    pointer-events: none;
+    inset: auto auto 26px 50%;
+  }
+  @keyframes dy-hero-scroll-hint {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.75; }
+  }
+  @keyframes dy-hero-scroll-dot {
+    0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.75; }
+    50% { transform: translateX(-50%) translateY(6px); opacity: 0.3; }
+  }
   /* Content panel met CTA's, blijft binnen frame, normale flow */
   .dy-hm-hero-content {
     position: relative;
     z-index: 3;
-    padding: 32px 40px 48px;
+    padding: 36px 40px 56px;
     max-width: 100%;
     width: 100%;
     margin: 0;
@@ -11198,8 +11242,8 @@ img {
   }
 }
 @media (min-width: 1024px) {
-  .dy-hm-hero-text-overlay { padding: 88px 48px 40px; }
-  .dy-hm-hero-content { padding: 36px 48px 56px; }
+  .dy-hm-hero-text-overlay { padding: 140px 48px 56px; }
+  .dy-hm-hero-content { padding: 44px 48px 64px; }
 }
 
 .dy-reactie {
