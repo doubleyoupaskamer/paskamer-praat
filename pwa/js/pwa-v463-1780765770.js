@@ -2196,8 +2196,8 @@ DY.renderHome = function() {
       '<section class="dy-hm-hero">' +
         '<div class="dy-hm-hero-bg">' +
           '<picture>' +
-            '<source type="image/webp" srcset="hero-model-480.webp 480w, hero-model-800.webp 800w, hero-model-1024.webp 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 80vw, 1024px">' +
-            '<img src="hero-model.jpg" srcset="hero-model-480.jpg 480w, hero-model-800.jpg 800w, hero-model-1024.jpg 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 80vw, 1024px" class="dy-hm-hero-img" width="848" height="1264" alt="Paskamer Praat, een community voor iedereen die buiten standaard confectiematen valt" loading="eager" fetchpriority="high" decoding="async">' +
+            '<source type="image/webp" srcset="hero-v2-mixed-480.webp 480w, hero-v2-mixed-800.webp 800w, hero-v2-mixed-1024.webp 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 720px">' +
+            '<img src="hero-v2-mixed.jpg" srcset="hero-v2-mixed-480.jpg 480w, hero-v2-mixed-800.jpg 800w, hero-v2-mixed-1024.jpg 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 720px" class="dy-hm-hero-img" width="848" height="1264" alt="Inclusieve modecommunity, mensen met diverse lichaamstypen, stijlen en achtergronden" loading="eager" fetchpriority="high" decoding="async">' +
           '</picture>' +
           '<div class="dy-hm-hero-overlay"></div>' +
         '</div>' +
