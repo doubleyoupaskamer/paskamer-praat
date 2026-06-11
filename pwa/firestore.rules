@@ -1,0 +1,635 @@
+rules_version = '2';
+// ══════════════════════════════════════════════════════════════════
+// DOUBLEYOU — PASKAMER PRAAT
+// Firestore Security Rules — februari 2026 v11
+// Wijzigingen t.o.v. v10:
+//   + brand-portal helpers (isApprovedBrand, isBrandOwner)
+//   + brands/{brandId}                — merken (status flow)
+//   + brand_products/{productId}      — producten van merken
+//   + campaigns/{campaignId}          — campagnes
+//   + campaign_events/{eventId}       — append-only impressie/click log
+//   + brand_admin_log/{logId}         — audit log voor admin-acties
+//
+// Bestaande v10 regels ongewijzigd. Pure additie.
+// ══════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── HELPERS ──────────────────────────────────────────────────
+    function isIngelogd() {
+      return request.auth != null;
+    }
+    function isEchtIngelogd() {
+      return isIngelogd() &&
+        request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+    function isEigenDoc(uid) {
+      return isIngelogd() && request.auth.uid == uid;
+    }
+    function isAdmin() {
+      return isIngelogd() && (
+        request.auth.uid == 'ahtVa6qvFheIy3yDVpDXCz2INwq1' ||
+        exists(/databases/$(database)/documents/admin_access/$(request.auth.uid))
+      );
+    }
+    function alleenPubliekeSocialVelden() {
+      let gewijzigd = request.resource.data.diff(resource.data).affectedKeys();
+      return gewijzigd.hasOnly([
+        'volgers', 'volgend', 'dsp_inbox',
+        'dsp_lifetime', 'dsp_seizoen',
+        'niveau', 'seizoentier',
+        'streak_huidig', 'streak_langste', 'streak_laatste_dag',
+        'modStatus', 'modReason', 'modBy', 'modAt',
+        'pushSubscribed',
+        'verhalen_count',
+        'leaderboard_opt_in',
+        'laatste_actief',
+        'huidige_pagina'
+      ]);
+    }
+
+    // ── BRAND-PORTAL HELPERS (nieuw v11) ─────────────────────────
+    function isBrandOwner(brandId) {
+      return isIngelogd() && request.auth.uid == brandId;
+    }
+    function isApprovedBrand(brandId) {
+      return isIngelogd()
+        && request.auth.uid == brandId
+        && exists(/databases/$(database)/documents/brands/$(brandId))
+        && get(/databases/$(database)/documents/brands/$(brandId)).data.status == 'approved';
+    }
+
+
+    // ── REALTIME STATUS (presence) ────────────────────────────────
+    match /realtime_status/{uid} {
+      allow read:   if isAdmin();
+      allow create: if isIngelogd() && request.auth.uid == uid;
+      allow update: if isIngelogd() && request.auth.uid == uid;
+      allow delete: if isAdmin();
+    }
+
+
+    // ── ACTIVITY LOGS ─────────────────────────────────────────────
+    match /activity_logs/{logId} {
+      allow read:   if isAdmin();
+      allow create: if isIngelogd();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+
+    // ── ADMIN ACCESS ──────────────────────────────────────────────
+    match /admin_access/{uid} {
+      allow read:   if isAdmin();
+      allow write:  if request.auth.uid == 'ahtVa6qvFheIy3yDVpDXCz2INwq1';
+    }
+
+
+    // ── ADMIN LOG ─────────────────────────────────────────────────
+    match /admin_log/{logId} {
+      allow read:   if isAdmin();
+      allow create: if isAdmin() || isIngelogd();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+
+    // ── USERS ────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read:   if true;
+      allow create: if isEigenDoc(userId);
+      allow update: if isEigenDoc(userId) ||
+        (isIngelogd() && alleenPubliekeSocialVelden()) ||
+        isAdmin();
+      allow delete: if false;
+
+      // AI style profiel: subcollectie per user — alleen eigen toegang
+      match /ai_style_profile/{doc} {
+        allow read:  if isEigenDoc(userId) || isAdmin();
+        allow write: if isEigenDoc(userId);
+      }
+
+      // Push notification subscriptions: subcollectie per user
+      // (push-notifications-v3.js: één doc per endpoint-hash, merge-write)
+      match /push_subscriptions/{endpointId} {
+        allow read:   if isEigenDoc(userId) || isAdmin();
+        allow create: if isEigenDoc(userId);
+        allow update: if isEigenDoc(userId);
+        allow delete: if isEigenDoc(userId) || isAdmin();
+      }
+    }
+
+
+    // ── STORIES ──────────────────────────────────────────────────
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create: if isEchtIngelogd() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if (isIngelogd() && (
+        resource.data.userId == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'likes', 'reacties', 'reactieCount',
+            'verborgen', 'views', 'viewCount'
+          ])
+      )) || isAdmin();
+      allow delete: if (isEchtIngelogd() &&
+        resource.data.userId == request.auth.uid) || isAdmin();
+
+      match /comments/{commentId} {
+        allow read:   if true;
+        allow create: if isEchtIngelogd() &&
+          request.resource.data.userId == request.auth.uid;
+        allow delete: if (isEchtIngelogd() && (
+          resource.data.userId == request.auth.uid ||
+          get(/databases/$(database)/documents/stories/$(storyId)).data.userId == request.auth.uid
+        )) || isAdmin();
+        allow update: if false;
+      }
+
+      match /reacties/{reactieId} {
+        allow read:   if true;
+        allow create: if isEchtIngelogd();
+        allow delete: if isEchtIngelogd() &&
+          resource.data.userId == request.auth.uid;
+        allow update: if false;
+      }
+    }
+
+
+    // ── DY_STORIES (24-uurs story ring) ──────────────────────────
+    match /dy_stories/{storyId} {
+      allow read: if true;
+      allow create: if isEchtIngelogd() &&
+        request.resource.data.userId == request.auth.uid;
+      allow delete: if isEchtIngelogd() &&
+        resource.data.userId == request.auth.uid;
+      allow update: if isIngelogd() && (
+        resource.data.userId == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['likes', 'reactieCount', 'expiresAt'])
+      );
+    }
+
+
+    // ── DY_STORY_VIEWS ───────────────────────────────────────────
+    match /dy_story_views/{userId} {
+      allow read:  if isEigenDoc(userId);
+      allow write: if isEigenDoc(userId);
+
+      // Viewers subcollectie: ingelogde users mogen eigen entry schrijven.
+      // Lezen: alleen de story owner (userId) mag de lijst zien.
+      match /viewers/{viewerUid} {
+        allow read:   if isEigenDoc(userId);
+        allow create: if isEchtIngelogd() && request.auth.uid == viewerUid;
+        allow update: if isEchtIngelogd() && request.auth.uid == viewerUid;
+        allow delete: if isEigenDoc(userId);
+      }
+    }
+
+
+    // ── LOOKBOOK ─────────────────────────────────────────────────
+    match /lookbook/{lookId} {
+      allow read: if true;
+      allow create: if isEchtIngelogd() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if (isIngelogd() && (
+        resource.data.userId == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['likes', 'reacties', 'reactieCount', 'verborgen'])
+      )) || isAdmin();
+      allow delete: if (isEchtIngelogd() &&
+        resource.data.userId == request.auth.uid) || isAdmin();
+
+      match /comments/{commentId} {
+        allow read:   if true;
+        allow create: if isEchtIngelogd() &&
+          request.resource.data.userId == request.auth.uid;
+        allow delete: if (isEchtIngelogd() && (
+          resource.data.userId == request.auth.uid ||
+          get(/databases/$(database)/documents/lookbook/$(lookId)).data.userId == request.auth.uid
+        )) || isAdmin();
+        allow update: if false;
+      }
+    }
+
+
+    // ── LOOKS ────────────────────────────────────────────────────
+    match /looks/{lookId} {
+      allow read: if true;
+      allow create: if isEchtIngelogd() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if (isIngelogd() && (
+        resource.data.userId == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['likes', 'verborgen', 'stems'])
+      )) || isAdmin();
+      allow delete: if (isEchtIngelogd() &&
+        resource.data.userId == request.auth.uid) || isAdmin();
+    }
+
+
+    // ── DSP_LOG ──────────────────────────────────────────────────
+    match /dsp_log/{logId} {
+      allow read: if (isIngelogd() &&
+        resource.data.uid == request.auth.uid) || isAdmin();
+      allow create: if isIngelogd();
+      allow delete: if isIngelogd() &&
+        resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+
+    // ── REVIEWS ──────────────────────────────────────────────────
+    match /reviews/{reviewId} {
+      allow read:   if true;
+      allow create: if isEchtIngelogd() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if (isEchtIngelogd() &&
+        resource.data.userId == request.auth.uid) || isAdmin();
+      allow delete: if (isEchtIngelogd() &&
+        resource.data.userId == request.auth.uid) || isAdmin();
+    }
+
+
+    // ── REACTIES ─────────────────────────────────────────────────
+    match /reacties/{reactieId} {
+      allow read:   if true;
+      allow create: if isEchtIngelogd() &&
+        request.resource.data.userId == request.auth.uid;
+      allow delete: if (isEchtIngelogd() &&
+        resource.data.userId == request.auth.uid) || isAdmin();
+      allow update: if false;
+    }
+
+
+    // ── COMMENTS ─────────────────────────────────────────────────
+    match /comments/{commentId} {
+      allow read:   if true;
+      allow create: if isEchtIngelogd() &&
+        request.resource.data.userId == request.auth.uid;
+      allow delete: if (isEchtIngelogd() &&
+        resource.data.userId == request.auth.uid) || isAdmin();
+      allow update: if false;
+    }
+
+
+    // ── MELDINGEN ────────────────────────────────────────────────
+    match /meldingen/{meldingId} {
+      allow read:   if isAdmin() ||
+        (isIngelogd() && (
+          resource.data.reporterUid == request.auth.uid ||
+          resource.data.userId == request.auth.uid
+        ));
+      allow create: if isIngelogd();
+      allow update: if isAdmin() ||
+        (isIngelogd() && (
+          resource.data.reporterUid == request.auth.uid ||
+          resource.data.userId == request.auth.uid
+        ));
+      allow delete: if isAdmin();
+    }
+
+
+    // ── BERICHTEN (DM gesprekken) ────────────────────────────────
+    match /berichten/{gesprekId} {
+      allow read: if (isEchtIngelogd() &&
+        request.auth.uid in resource.data.deelnemers) || isAdmin();
+      allow create: if isEchtIngelogd() &&
+        request.auth.uid in request.resource.data.deelnemers;
+      allow update: if isEchtIngelogd() &&
+        request.auth.uid in resource.data.deelnemers;
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isEchtIngelogd() &&
+          request.auth.uid in get(/databases/$(database)/documents/berichten/$(gesprekId)).data.deelnemers;
+        allow create: if isEchtIngelogd() &&
+          request.resource.data.userId == request.auth.uid &&
+          request.auth.uid in get(/databases/$(database)/documents/berichten/$(gesprekId)).data.deelnemers;
+        allow update: if isEchtIngelogd() &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['gelezen', 'fotoLikes']);
+        allow delete: if false;
+      }
+    }
+
+
+    // ── WISHLIST ─────────────────────────────────────────────────
+    match /wishlist/{wishId} {
+      allow read: if (isEchtIngelogd() &&
+        resource.data.uid == request.auth.uid) || isAdmin();
+      allow create: if isEchtIngelogd() &&
+        request.resource.data.uid == request.auth.uid;
+      allow delete: if isEchtIngelogd() &&
+        resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+
+    // ── KLEUR_STEMMEN ─────────────────────────────────────────────
+    match /kleur_stemmen/{stemId} {
+      allow read:   if isAdmin();
+      allow create: if isIngelogd();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+
+    // ── CHALLENGES ───────────────────────────────────────────────
+    match /challenges/{challengeId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+
+    // ── CHALLENGE_STEMMEN ─────────────────────────────────────────
+    match /challenge_stemmen/{stemId} {
+      allow read:   if isAdmin() ||
+        (isIngelogd() && resource.data.uid == request.auth.uid);
+      allow create: if isEchtIngelogd();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+
+    // ── PUSH_SUBSCRIPTIONS (legacy top-level — behouden voor backwards compat)
+    // De v3 push-notificatie code schrijft naar users/{uid}/push_subscriptions/{endpointId}
+    // (zie users subcollectie hierboven). Deze top-level collectie wordt
+    // verder niet meer gevuld door de nieuwe code, maar laten we open staan
+    // zodat oude clients geen errors krijgen tijdens migratie.
+    match /push_subscriptions/{userId} {
+      allow read:  if isEigenDoc(userId) || isAdmin();
+      allow write: if isEigenDoc(userId);
+    }
+
+
+    // ── SHOPIFY_SYNC_LOG ─────────────────────────────────────────
+    match /shopify_sync_log/{logId} {
+      allow read: if (isIngelogd() &&
+        resource.data.uid == request.auth.uid) || isAdmin();
+      allow create: if isIngelogd() &&
+        request.resource.data.uid == request.auth.uid;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+
+    // ── ORDERS ───────────────────────────────────────────────────
+    match /orders/{orderId} {
+      allow read:  if isIngelogd() &&
+        resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+
+    // ── ONTWERPEN ────────────────────────────────────────────────
+    match /ontwerpen/{ontwerp} {
+      allow read:   if isIngelogd() &&
+        resource.data.userId == request.auth.uid;
+      allow create: if isIngelogd() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if isIngelogd() &&
+        resource.data.userId == request.auth.uid;
+      allow delete: if isIngelogd() &&
+        resource.data.userId == request.auth.uid;
+    }
+
+
+    // ── MAATADVIEZEN ─────────────────────────────────────────────
+    match /maatadviezen/{adviesId} {
+      allow read:   if false;
+      allow create: if isIngelogd();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+
+    // ── KLANT_MATEN ──────────────────────────────────────────────
+    match /klant_maten/{userId} {
+      allow read:   if isEigenDoc(userId);
+      allow create: if isEigenDoc(userId);
+      allow update: if isEigenDoc(userId);
+      allow delete: if isEigenDoc(userId);
+    }
+
+
+    // ── POLLS ────────────────────────────────────────────────────
+    match /polls/{pollId} {
+      allow read:   if true;
+      allow create: if false;
+      allow update: if isIngelogd() &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['stemmen', 'totaal']);
+      allow delete: if false;
+    }
+
+
+    // ── PWA_EVENTS ───────────────────────────────────────────────
+    match /pwa_events/{eventId} {
+      allow read:   if isAdmin();
+      allow create: if isIngelogd();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+
+    // ── APP_CONFIG ───────────────────────────────────────────────
+    match /app_config/{doc} {
+      allow read:  if isIngelogd();
+      allow write: if isAdmin();
+    }
+
+
+    // ── VERGELIJKINGEN ───────────────────────────────────────────
+    match /vergelijkingen/{docId} {
+      allow read:   if isAdmin() ||
+        (isIngelogd() && resource.data.userId == request.auth.uid);
+      allow create: if isEchtIngelogd() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+
+    // ── GEDEELDE ANALYSES ─────────────────────────────────────────
+    // Kleuranalyses gedeeld via URL — publiek leesbaar, ingelogd aanmaken.
+    match /gedeelde_analyses/{docId} {
+      allow read:   if true;
+      allow create: if isEchtIngelogd();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+
+    // ── OUTFIT FEEDBACK ───────────────────────────────────────────
+    // Thumbs up/down op AI stijladvies — ingelogd schrijven, admin leest.
+    match /outfit_feedback/{docId} {
+      allow read:   if isAdmin();
+      allow create: if isEchtIngelogd();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+
+    // ── MAILING LIST ──────────────────────────────────────────────
+    // Gevuld bij registratie en via admin sync.
+    // Eigen entry schrijven (registratie), admin beheert alles.
+    match /mailing_list/{uid} {
+      allow read:   if isAdmin() ||
+        (isIngelogd() && request.auth.uid == uid);
+      allow create: if isEigenDoc(uid) || isAdmin();
+      allow update: if isEigenDoc(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+
+    // ── MAIL CAMPAGNES ────────────────────────────────────────────
+    // Log van verstuurde bulk mail campagnes — uitsluitend admin.
+    match /mail_campagnes/{docId} {
+      allow read:   if isAdmin();
+      allow create: if isAdmin();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+
+    // ── WEEKLY RANKINGS ──────────────────────────────────────────
+    // Publiek leesbaar voor de winnaar banner.
+    // Write = false: Cloudflare Worker schrijft via service account (bypass).
+    match /weekly_rankings/{weekId} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
+
+    // ── WORKER AUDIT LOG ─────────────────────────────────────────
+    // Write = false: uitsluitend via Worker service account (bypass).
+    match /worker_audit_log/{logId} {
+      allow read:  if isAdmin();
+      allow write: if false;
+    }
+
+
+    // ── KAI EVENTS ───────────────────────────────────────────────
+    match /kai_events/{docId} {
+      allow read:   if isAdmin();
+      allow create: if isEchtIngelogd();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+
+    // ══════════════════════════════════════════════════════════════
+    // BRAND PORTAL v1 (nieuw v11) — self-service merkenportaal
+    // ══════════════════════════════════════════════════════════════
+
+    // ── BRANDS ───────────────────────────────────────────────────
+    // Document-id == owning user uid (1 brand-account per user).
+    // Goedgekeurde merken zijn publiek leesbaar (voor /merken pagina).
+    // Pending/rejected merken alleen door eigenaar of admin leesbaar.
+    match /brands/{brandId} {
+      allow read: if (resource.data.status == 'approved')
+                  || isBrandOwner(brandId)
+                  || isAdmin();
+
+      // Eigenaar mag eigen brand-doc aanmaken; status moet 'pending' zijn.
+      allow create: if isBrandOwner(brandId)
+                    && request.resource.data.status == 'pending';
+
+      // Eigenaar mag eigen profielvelden updaten — NIET status of moderator-
+      // velden (alleen admin mag deze wijzigen).
+      allow update: if (
+                      isBrandOwner(brandId)
+                      && !(request.resource.data.diff(resource.data).affectedKeys()
+                            .hasAny(['status','moderatedBy','moderatedAt',
+                                     'goedgekeurdAt','afgekeurdReden','suspendReden']))
+                    ) || isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+
+    // ── BRAND_PRODUCTS ───────────────────────────────────────────
+    // Producten van merken — gekoppeld via brandId.
+    // Actieve producten publiek leesbaar; concept/verwijderd alleen owner+admin.
+    match /brand_products/{productId} {
+      allow read: if (resource.data.status == 'actief')
+                  || (isIngelogd() && resource.data.brandId == request.auth.uid)
+                  || isAdmin();
+
+      // Alleen approved brands mogen producten aanmaken voor hun eigen merk.
+      allow create: if isApprovedBrand(request.resource.data.brandId)
+                    && request.resource.data.brandId == request.auth.uid;
+
+      // Brand-owner mag eigen producten updaten (brandId mag niet veranderen).
+      allow update: if (
+                      isIngelogd()
+                      && resource.data.brandId == request.auth.uid
+                      && request.resource.data.brandId == request.auth.uid
+                    ) || isAdmin();
+
+      // Soft-delete via status='verwijderd' (geen hard delete door brand).
+      allow delete: if isAdmin();
+    }
+
+
+    // ── CAMPAIGNS ────────────────────────────────────────────────
+    // Live campagnes publiek leesbaar (voor rendering in app);
+    // overige statussen alleen owner + admin.
+    match /campaigns/{campaignId} {
+      allow read: if (resource.data.status == 'live')
+                  || (isIngelogd() && resource.data.brandId == request.auth.uid)
+                  || isAdmin();
+
+      // Approved brand mag campagnes aanmaken in 'draft' of 'review' status.
+      allow create: if isApprovedBrand(request.resource.data.brandId)
+                    && request.resource.data.brandId == request.auth.uid
+                    && (request.resource.data.status == 'draft'
+                        || request.resource.data.status == 'review');
+
+      // Brand mag eigen campagne updaten naar draft/review/paused — NIET
+      // direct naar 'live' (admin only) en NIET moderator-velden of
+      // aggregate-metrics (impressies/clicks/spend/omzet).
+      allow update: if (
+                      isIngelogd()
+                      && resource.data.brandId == request.auth.uid
+                      && request.resource.data.brandId == request.auth.uid
+                      && !(request.resource.data.diff(resource.data).affectedKeys()
+                            .hasAny(['moderatedBy','moderatedAt',
+                                     'impressies','clicks','spend','omzet']))
+                      && (request.resource.data.status == 'draft'
+                          || request.resource.data.status == 'review'
+                          || request.resource.data.status == 'paused')
+                    ) || isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+
+    // ── CAMPAIGN_EVENTS (append-only impressie/click log) ────────
+    // Iedereen mag een event loggen (impressie/click); lezen alleen admin.
+    // Type whitelisted om misbruik te voorkomen.
+    match /campaign_events/{eventId} {
+      allow read:   if isAdmin();
+      allow create: if request.resource.data.keys().hasAny(['type'])
+                    && request.resource.data.type in ['impression','product_click','campaign_click'];
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+
+    // ── BRAND_ADMIN_LOG (audit log) ──────────────────────────────
+    // Audit-log voor brand-portal acties (registratie, approve/reject,
+    // campagne wijzigingen). Alleen admin leesbaar; ingelogde users mogen
+    // eigen events loggen (server-side cloud function valideert later).
+    match /brand_admin_log/{logId} {
+      allow read:   if isAdmin();
+      allow create: if isIngelogd();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+  }
+}
