@@ -10900,27 +10900,28 @@ img {
     justify-content: center;
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-style: italic;
-    font-size: 20rem;
+    font-size: 22rem;
     font-weight: 500;
     line-height: 1;
-    color: #fcf8ef;
-    opacity: 0.10;
-    mix-blend-mode: overlay;
+    color: #d4910a;
+    opacity: 0.28;
+    mix-blend-mode: soft-light;
     pointer-events: none;
     z-index: 3;
     transform-origin: center center;
     will-change: transform, opacity;
+    text-shadow: 0 4px 24px rgba(212,145,10,0.4);
     animation:
-      dy-hm-w-rotate 45s linear infinite,
-      dy-hm-w-pulse 9s ease-in-out infinite;
+      dy-hm-w-rotate 28s linear infinite,
+      dy-hm-w-pulse 5s ease-in-out infinite;
   }
   @keyframes dy-hm-w-rotate {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
   }
   @keyframes dy-hm-w-pulse {
-    0%, 100% { opacity: 0.08; }
-    50%      { opacity: 0.16; }
+    0%, 100% { opacity: 0.22; }
+    50%      { opacity: 0.38; }
   }
 
   /* Reduced motion: alle animaties uit, statische subtiele W blijft */
