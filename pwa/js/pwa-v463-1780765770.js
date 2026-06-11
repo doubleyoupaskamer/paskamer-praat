@@ -650,11 +650,36 @@ DY._tabScrollY = {};
 DY._APP_VERSION = 'v20260606-v463a';
 
 // Veiligheidsvangnet: bij onverwachte crash naar feed navigeren
+// v60.1.35 STABILITY: max-attempts guard om redirect-loop te voorkomen
+// als de fallback-pagina (feed) zelf crasht.
+window._dyCrashRecoveryCount = 0;
 window.addEventListener('error', function(e) {
   // Alleen bij blank screen (main leeg)
   var main = document.getElementById('dy-main');
   if (main && (!main.innerHTML || main.innerHTML.trim().length < 50)) {
-    try { DY.navigeer('feed'); } catch(err) {}
+    window._dyCrashRecoveryCount = (window._dyCrashRecoveryCount || 0) + 1;
+    // Stop na 3 attempts — toon statische fallback i.p.v. herhaalde navigatie
+    if (window._dyCrashRecoveryCount > 3) {
+      try {
+        main.innerHTML =
+          '<div style="padding:48px 20px;text-align:center;color:var(--ink-muted)">' +
+            '<p style="font-size:0.95rem;margin:0 0 12px">Er ging iets mis bij het laden.</p>' +
+            '<button onclick="window._dyCrashRecoveryCount=0;location.reload()" ' +
+            'style="background:var(--clay);color:#0a0806;border:0;padding:10px 18px;border-radius:10px;font-weight:600;cursor:pointer">' +
+            'Herlaad app' +
+            '</button>' +
+          '</div>';
+      } catch(err) {}
+      return;
+    }
+    // Reset teller na 10s zodat losse crashes niet doorlopen
+    setTimeout(function() { window._dyCrashRecoveryCount = 0; }, 10000);
+    try {
+      // Kies veilige doelpagina o.b.v. auth-state, NIET de gecrashte pagina
+      var safe = (DY && DY.user) ? 'feed' : 'home';
+      if (DY.pagina === safe) safe = (safe === 'feed') ? 'home' : 'feed';
+      DY.navigeer(safe);
+    } catch(err) {}
   }
 });
 (function() {
@@ -1099,18 +1124,26 @@ DY.toonPagina = function(pagina) {
   }
 
   if (renders[pagina]) {
-    // Guard: toon fallback na 8s als render hangt (hoger voor async renders)
-    var _renderTimer = setTimeout(function() {
+    // v60.1.35 STABILITY: safety-fallback fires na 8s ALS main nog (vrijwel)
+    // leeg is. Eerder werd de timer direct na renders[pagina]() gecleared,
+    // wat 'm voor async renders nutteloos maakte. We laten 'm nu doorlopen
+    // en gebruiken renderGeneratie om concurrent navigatie te respecteren.
+    var _renderGen = renderGen;
+    setTimeout(function() {
+      // Andere render heeft inmiddels overgenomen — niets doen
+      if (DY._renderGeneratie !== _renderGen) return;
+      // Andere pagina actief — niets doen
+      if (DY.pagina !== pagina) return;
       var m = document.getElementById('dy-main');
-      if (m && m.innerHTML && m.innerHTML.trim().length < 100) {
-        m.innerHTML = '<div style="padding:40px 16px;text-align:center">' +
-          '<p style="color:var(--ink-muted);font-size:0.85rem;margin-bottom:12px">Laden mislukt.</p>' +
-          '<button onclick="DY.navigeer(&quot;feed&quot;)" style="color:var(--clay);background:none;border:none;cursor:pointer;font-size:0.88rem;font-weight:600">← Terug naar feed</button>' +
-          '</div>';
-      }
-    }, 3000);
+      if (!m) return;
+      // Render is succesvol als er noemenswaardige content is
+      if (m.innerHTML && m.innerHTML.trim().length >= 200) return;
+      m.innerHTML = '<div style="padding:40px 16px;text-align:center">' +
+        '<p style="color:var(--ink-muted);font-size:0.85rem;margin-bottom:12px">Laden duurt langer dan verwacht.</p>' +
+        '<button onclick="DY.navigeer(&quot;feed&quot;)" style="color:var(--clay);background:none;border:none;cursor:pointer;font-size:0.88rem;font-weight:600">Terug naar feed</button>' +
+        '</div>';
+    }, 8000);
     renders[pagina]();
-    clearTimeout(_renderTimer);
     if (isTabPagina) {
       DY._slaTabDOMOp(pagina);
     }
@@ -6564,7 +6597,11 @@ DY.plaatsReactie = async function(verhaalId) {
     } catch(e) {}
     // Push notificatie naar auteur
     try {
-      const auteurId = (await DY.db.collection('stories').doc(verhaalId).get()).data() && (yield).data().userId;
+      // v60.1.35 STABILITY FIX: vorige regel had `(yield).data()` (typo) waardoor
+      // de push notificatie naar de auteur nooit verstuurd werd — silent fail in try/catch.
+      const _snap = await DY.db.collection('stories').doc(verhaalId).get();
+      const _data = _snap.exists ? _snap.data() : null;
+      const auteurId = _data && _data.userId;
       if (auteurId) await DY.stuurPushNaarAuteur(auteurId, 'Nieuwe reactie', 'Iemand reageerde op jouw verhaal.', '/');
     } catch(e) {}
 

@@ -10,7 +10,7 @@
 // Strategie is bewust simpel + bestand-naam-gebaseerd zodat een nieuwe deploy
 // (nieuwe versioned filename) automatisch niet uit cache komt.
 
-const VERSION       = 'v60.1-20260214-brand-portal-v1.34-hero-overlay-fix';
+const VERSION       = 'v60.1-20260214-brand-portal-v1.35-stability-audit';
 const STATIC_CACHE  = 'pp-static-' + VERSION;
 const RUNTIME_CACHE = 'pp-runtime-' + VERSION;
 const IMG_CACHE     = 'pp-images-' + VERSION;
@@ -59,12 +59,15 @@ function networkFirst(request, cacheName, timeoutMs = 3000, isNavigation = false
 
     fetch(request).then(resp => {
       clearTimeout(timer);
-      if (settled) return;
-      settled = true;
+      // v60.1.35 STABILITY: update cache ALTIJD bij geslaagde fetch,
+      // ook als de timer al een cached response heeft gereturned. Anders
+      // blijven gebruikers met traag netwerk eeuwig op stale cache hangen.
       if (resp && resp.ok && resp.type === 'basic') {
         const copy = resp.clone();
         caches.open(cacheName).then(c => c.put(request, copy)).catch(() => {});
       }
+      if (settled) return;
+      settled = true;
       resolve(resp);
     }).catch(() => {
       clearTimeout(timer);

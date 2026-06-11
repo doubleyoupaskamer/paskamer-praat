@@ -151,10 +151,17 @@ async def generate_image(req: ImageGenRequest, x_admin_secret: Optional[str] = H
 # Include the router in the main app
 app.include_router(api_router)
 
+# v60.1.35 STABILITY: CORS spec verbiedt allow_credentials=True met origin '*'.
+# Browsers weigeren dergelijke responses. Als CORS_ORIGINS '*' bevat, dwingen we
+# allow_credentials=False af. In productie hoort CORS_ORIGINS specifieke origins
+# te bevatten (bv. 'https://paskamerpraat.nl').
+_raw_origins = os.environ.get('CORS_ORIGINS', '*').split(',')
+_cors_origins = [o.strip() for o in _raw_origins if o.strip()]
+_wildcard = (len(_cors_origins) == 1 and _cors_origins[0] == '*')
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_credentials=not _wildcard,
+    allow_origins=_cors_origins or ['*'],
     allow_methods=["*"],
     allow_headers=["*"],
 )
