@@ -56,6 +56,10 @@ var _currentRoute = 'home';
 var _actCount     = 0;
 var _initialized  = false;
 var _firstWrite   = true;
+// v60.1.11 AUTH FIX: timer-handle voor pending anon sign-in. Wordt gecanceld
+// zodra een echte user inlogt, zodat de scheduled signInAnonymously NIET
+// alsnog firet en de echte sessie wegtrapt (kritieke race).
+var _anonSignInTimer = null;
 
 function _auth() { return window.firebase && firebase.auth ? firebase.auth() : null; }
 function _db()   { return (window.DY && DY.db) || (window.firebase && firebase.apps && firebase.apps.length ? firebase.firestore() : null); }
@@ -242,8 +246,20 @@ window.addEventListener('offline', function() { if (_firebaseUid) _write(false);
 
 // ── Anoniem inloggen voor guest presence ────────────────────────
 function _anonSignIn() {
+  // v60.1.11 AUTH FIX: dubbele check vlak voordat we signInAnonymously
+  // aanroepen. Als er ondertussen een echte (non-anon) user is verschenen,
+  // mogen we NIET anon inloggen — dat zou de echte user wegtrappen.
+  try {
+    var aCheck = _auth();
+    var cu = aCheck && aCheck.currentUser;
+    if (cu && !cu.isAnonymous) {
+      // Echte user al ingelogd — abort.
+      return;
+    }
+  } catch (e) {}
+
   var a = _auth();
-  if (!a) { setTimeout(_anonSignIn, 500); return; }
+  if (!a) { _anonSignInTimer = setTimeout(_anonSignIn, 500); return; }
 
   a.signInAnonymously()
     .then(function(cred) {
@@ -277,6 +293,14 @@ function _initWithAuth() {
     _presRef    = null;
     _firstWrite = true;
 
+    // v60.1.11 AUTH FIX (CRITICAL): cancel pending anon sign-in als er
+    // een echte user verschijnt binnen het 500ms window. Anders trapt de
+    // scheduled signInAnonymously de echte sessie weg.
+    if (_anonSignInTimer) {
+      clearTimeout(_anonSignInTimer);
+      _anonSignInTimer = null;
+    }
+
     if (user) {
       _firebaseUid = user.uid;
       _isAnonymous = user.isAnonymous;
@@ -292,7 +316,7 @@ function _initWithAuth() {
     } else {
       // Geen user — start anonieme sessie voor guest tracking
       _firebaseUid = null;
-      setTimeout(_anonSignIn, 500);
+      _anonSignInTimer = setTimeout(_anonSignIn, 500);
     }
   });
 }

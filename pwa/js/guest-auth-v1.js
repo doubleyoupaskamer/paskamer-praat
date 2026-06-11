@@ -42,6 +42,16 @@
 
   async function signInAnon(fbAuth, attempt) {
     attempt = attempt || 0;
+    // v60.1.11 AUTH FIX (CRITICAL): allerlaatste check vlak voor signIn.
+    // Als er ondertussen een echte (non-anon) user is, breek af. Dit voorkomt
+    // dat een opgestapelde anon-signin de zojuist ingelogde user wegtrapt.
+    try {
+      var _cu = fbAuth && fbAuth.currentUser;
+      if (_cu && !_cu.isAnonymous) {
+        window[STATE_FLAG] = { ok: true, uid: _cu.uid, anonymous: false, restored: true, skipped: 'real-user-present' };
+        return _cu.uid;
+      }
+    } catch (e) {}
     try {
       await ensurePersistence(fbAuth);
       var res = await fbAuth.signInAnonymously();
@@ -114,6 +124,19 @@
     if (restored) {
       window[STATE_FLAG] = { ok: true, uid: restored.uid, anonymous: !!restored.isAnonymous, restored: true };
       try { window.dispatchEvent(new CustomEvent('dy-guest-auth-ready', { detail: { uid: restored.uid, anonymous: !!restored.isAnonymous, restored: true } })); } catch (e) {}
+      // v60.1.11 AUTH FIX: als de restored user al ECHT (non-anon) is,
+      // dan klaar — geen anon sign-in nodig.
+      if (!restored.isAnonymous) return;
+      return;
+    }
+
+    // v60.1.11 AUTH FIX (CRITICAL): laatste check vlak voor signInAnon.
+    // Door scheduling kan er ondertussen toch een real user zijn (bv. login
+    // halverwege de 1200ms wait). signInAnon() heeft een eigen guard maar
+    // we slaan 'm voor de zekerheid hier ook over.
+    if (fbAuth.currentUser && !fbAuth.currentUser.isAnonymous) {
+      var cu2 = fbAuth.currentUser;
+      window[STATE_FLAG] = { ok: true, uid: cu2.uid, anonymous: false, restored: true, skipped: 'real-user-late' };
       return;
     }
 
