@@ -134,6 +134,14 @@
 .bp-veld textarea { resize: vertical; min-height: 80px; }
 .bp-veld input[type=file] { padding: 8px; cursor: pointer; }
 
+/* v60.1.7 fix: native <option> dropdown gebruikt OS-thema → witte achtergrond.
+   Forceer donkere tekst zodat opties leesbaar zijn op alle browsers/OS'en. */
+.bp-veld select option,
+.bp-veld select optgroup {
+  background: #1a1410;
+  color: #fcf8ef;
+}
+
 .bp-grid-2 {
   display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
 }
