@@ -10830,21 +10830,26 @@ img {
   position: relative;
   min-height: calc(100dvh - var(--topbar-h, 56px) - var(--nav-h, 64px));
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
   overflow: hidden;
+  background: #0f0d06;
 }
-
+/* Mobile: foto bovenaan vast formaat, content eronder in rustig donker paneel */
 .dy-hm-hero-bg {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  width: 100%;
+  height: 56vh;
+  min-height: 320px;
+  max-height: 520px;
+  flex-shrink: 0;
   background: #0a0806;
+  overflow: hidden;
 }
 .dy-hm-hero-bg picture {
   display: block;
   width: 100%;
   height: 100%;
 }
-
 .dy-hm-hero-img {
   position: absolute;
   inset: 0;
@@ -10853,10 +10858,19 @@ img {
   object-fit: cover;
   object-position: center 30%;
   display: block;
-  filter: brightness(0.72);
+  filter: brightness(0.95);
+}
+/* Subtiele gradient onderaan foto naar content panel voor zachte overgang */
+.dy-hm-hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 90px;
+  background: linear-gradient(to bottom, transparent 0%, #0f0d06 100%);
+  pointer-events: none;
 }
 
-/* Desktop: schone two-column layout (v60.1.16). Tekst links op donker
+/* Desktop: schone two-column layout (v60.1.17). Tekst links op donker
    paneel, foto rechts volledig zichtbaar. Geen overlap, geen rommel. */
 @media (min-width: 768px) {
   .dy-hm-hero {
@@ -10864,15 +10878,27 @@ img {
     display: grid;
     grid-template-columns: minmax(360px, 1fr) minmax(380px, 1fr);
     align-items: stretch;
+    flex-direction: row;
     background: linear-gradient(160deg, #1e1a0f 0%, #2a2010 50%, #0f0d06 100%);
   }
-  /* Image kolom rechts: foto volledig zichtbaar, geen blur sides nodig */
   .dy-hm-hero-bg {
     position: relative;
     inset: auto;
     order: 2;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
     background: #0a0806;
     overflow: hidden;
+  }
+  .dy-hm-hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(15,13,6,0.35) 0%, transparent 30%);
+    pointer-events: none;
+    height: auto;
   }
   .dy-hm-hero-img {
     position: absolute;
@@ -10883,17 +10909,6 @@ img {
     object-position: center 25%;
     filter: brightness(0.95);
   }
-  /* Subtiele gradient links over de foto voor leesbaarheid op groene oever */
-  .dy-hm-hero-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, rgba(15,13,6,0.35) 0%, transparent 30%);
-    pointer-events: none;
-  }
-  /* Geen overlay meer op desktop */
-  .dy-hm-hero-overlay { display: none; }
-  /* Content kolom links: donker paneel, ruime padding */
   .dy-hm-hero-content {
     order: 1;
     padding: 64px 56px;
@@ -10901,6 +10916,7 @@ img {
     margin: 0;
     align-self: center;
     width: 100%;
+    background: transparent;
   }
 }
 @media (min-width: 1280px) {
@@ -10912,17 +10928,9 @@ img {
   }
 }
 
+/* Mobile: overlay niet meer nodig, foto en content zijn nu gescheiden */
 .dy-hm-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(10,8,6,0.94) 0%,
-    rgba(10,8,6,0.55) 30%,
-    rgba(10,8,6,0.15) 65%,
-    transparent 100%
-  );
-  z-index: 1;
+  display: none;
 }
 
 .dy-hm-hero-grad-bg {
@@ -10931,12 +10939,17 @@ img {
   background: linear-gradient(160deg, #1e1a0f 0%, #2a2010 50%, #0f0d06 100%);
 }
 
+/* Mobile content panel: rustig donker paneel met ruime padding */
 .dy-hm-hero-content {
   position: relative;
   z-index: 2;
-  padding: 0 22px 28px;
+  padding: 32px 22px 28px;
   max-width: 480px;
   width: 100%;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: #0f0d06;
 }
 
 .dy-hm-hero-eyebrow {
