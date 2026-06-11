@@ -17004,10 +17004,12 @@ geen layout shift */
   background: #0a0806 !important;
 }
 
-/* Zorg dat .dy-hm-wrap de volle hoogte van .dy-main vult */
+/* v60.1.12 LEGE-RUIMTE FIX: niet meer 100dvh forceren op de wrap.
+   De hero vult zelf de viewport (calc(100dvh - topbar - nav)) en
+   de nieuwe BrandPartnerCTA sectie vult de natuurlijke flow eronder.
+   Eerder: min-height:100dvh creëerde lege ruimte onder de hero. */
 .dy-hm-wrap {
-  min-height: 100%;
-  min-height: 100dvh;
+  background: #0a0806;
 }
 
 /* Desktop: hero hoogte zonder topbar/nav aftrek */
@@ -17016,9 +17018,188 @@ geen layout shift */
     height: calc(100dvh);
     min-height: 500px;
   }
-  .dy-hm-wrap {
-    min-height: 100dvh;
-  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BrandPartnerCTA — homepage merken-blok (v60.1.12)
+   Zelfde huisstijl/layouttaal als bestaande dy-hm-* en dy-bpos-*.
+   ════════════════════════════════════════════════════════════════ */
+.dy-hm-partner {
+  position: relative;
+  background: linear-gradient(180deg, #0a0806 0%, #14110a 50%, #0a0806 100%);
+  border-top: 1px solid rgba(198,125,6,0.18);
+  padding: 56px 22px 72px;
+}
+.dy-hm-partner-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  text-align: left;
+}
+.dy-hm-partner-eyebrow {
+  display: inline-block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(212,145,10,0.85);
+  margin-bottom: 12px;
+}
+.dy-hm-partner-titel {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(1.6rem, 4.5vw, 2.1rem);
+  font-weight: 600;
+  color: #fcf8ef;
+  letter-spacing: -0.005em;
+  margin: 0 0 14px;
+  line-height: 1.15;
+}
+.dy-hm-partner-titel em {
+  color: var(--clay, #d4910a);
+  font-style: italic;
+}
+.dy-hm-partner-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.93rem;
+  line-height: 1.55;
+  color: rgba(252,248,239,0.68);
+  margin: 0 0 22px;
+  max-width: 540px;
+}
+.dy-hm-partner-knoppen {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.dy-hm-partner-cta-primair,
+.dy-hm-partner-cta-secundair {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 100px;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, transform 0.12s, background 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px;
+}
+.dy-hm-partner-cta-primair {
+  background: linear-gradient(145deg, #d4910a 0%, #c67d06 60%, #b06d05 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(198,125,6,0.30);
+}
+.dy-hm-partner-cta-primair:hover { opacity: 0.92; }
+.dy-hm-partner-cta-primair:active { transform: scale(0.97); }
+.dy-hm-partner-cta-secundair {
+  background: rgba(255,255,255,0.06);
+  color: #fcf8ef;
+  border: 1px solid rgba(252,248,239,0.16);
+}
+.dy-hm-partner-cta-secundair:hover { background: rgba(255,255,255,0.12); }
+.dy-hm-partner-cta-secundair:active { transform: scale(0.97); }
+
+@media (min-width: 768px) {
+  .dy-hm-partner { padding: 80px 48px 96px; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Samenwerkingen overlay (v60.1.12)
+   Hergebruikt dy-bpos-* layouttaal — pure additieve stijl.
+   ════════════════════════════════════════════════════════════════ */
+.dy-sw-sheet {
+  max-width: 720px;
+  width: 100%;
+}
+.dy-sw-sluit {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(252,248,239,0.14);
+  border-radius: 50%;
+  color: #fcf8ef;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2;
+  touch-action: manipulation;
+}
+.dy-sw-sluit:hover { background: rgba(255,255,255,0.12); }
+.dy-sw-content { padding-bottom: 20px; }
+.dy-sw-sectie { margin: 22px 0 0; }
+.dy-sw-sectie:first-child { margin-top: 8px; }
+.dy-sw-sectie-titel {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--clay, #d4910a);
+  margin: 0 0 10px;
+}
+.dy-sw-content p {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: rgba(252,248,239,0.74);
+  margin: 0 0 8px;
+}
+.dy-sw-lijst, .dy-sw-stappen {
+  margin: 0;
+  padding-left: 20px;
+  color: rgba(252,248,239,0.74);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+.dy-sw-lijst li, .dy-sw-stappen li { margin-bottom: 6px; }
+.dy-sw-lijst li strong, .dy-sw-stappen li strong { color: #fcf8ef; }
+.dy-sw-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+@media (max-width: 540px) { .dy-sw-grid { grid-template-columns: 1fr; } }
+.dy-sw-kaart {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(252,248,239,0.10);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dy-sw-kaart strong {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  color: #fcf8ef;
+  font-weight: 600;
+}
+.dy-sw-kaart span {
+  font-size: 0.82rem;
+  color: rgba(252,248,239,0.6);
+  line-height: 1.45;
+}
+.dy-sw-fijndruk {
+  font-size: 0.82rem;
+  color: rgba(252,248,239,0.5);
+  margin-top: 10px;
+}
+.dy-sw-link {
+  background: none;
+  border: none;
+  color: var(--clay, #d4910a);
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.dy-sw-cta {
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
 /* ════════════════════════════════════════════════════════════════

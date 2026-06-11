@@ -2207,8 +2207,8 @@ DY.renderHome = function() {
           '<h1 class="dy-hm-hero-titel">Mode die écht<br><em>past bij jou</em></h1>' +
           '<p class="dy-hm-hero-sub">Deel je outfits, vind kleding die past bij jouw lichaam en word onderdeel van een community die begrijpt wat jij ervaart.</p>' +
           '<div class="dy-hm-hero-knoppen">' +
-            '<button class="dy-hm-hero-cta-sec" onclick="DY.navigeer(\x27feed\x27)">Ontdek de community</button>' +
-            '<button class="dy-hm-hero-cta-bpos" onclick="DY.toonBposOverlay()">Body Positivity</button>' +
+            '<button class="dy-hm-hero-cta-sec" onclick="DY.navigeer(\x27feed\x27)" data-testid="home-cta-feed">Ontdek de community</button>' +
+            '<button class="dy-hm-hero-cta-bpos" onclick="DY.toonBposOverlay()" data-testid="home-cta-bpos">Body Positivity</button>' +
           '</div>' +
           '<div class="dy-hm-hero-legal">' +
             '<button onclick="DY.navigeer(\x27voorwaarden\x27)" class="dy-hm-hero-legal-link">Algemene voorwaarden</button>' +
@@ -2219,8 +2219,158 @@ DY.renderHome = function() {
           '</div>' +
         '</div>' +
       '</section>' +
+      // v60.1.12 — BrandPartnerCTA blok direct onder de hero/community sectie
+      '<section class="dy-hm-partner" data-testid="home-brand-partner">' +
+        '<div class="dy-hm-partner-inner">' +
+          '<span class="dy-hm-partner-eyebrow">Voor merken</span>' +
+          '<h2 class="dy-hm-partner-titel">Word partner van <em>Paskamerpraat</em></h2>' +
+          '<p class="dy-hm-partner-sub">Laat jouw merk ontdekken door een betrokken modecommunity van vrouwen die zoeken naar kleding die écht past.</p>' +
+          '<div class="dy-hm-partner-knoppen">' +
+            '<button class="dy-hm-partner-cta-primair" onclick="DY.toonSamenwerkingenOverlay()" data-testid="home-partner-info-btn">Bekijk samenwerkingen</button>' +
+            '<button class="dy-hm-partner-cta-secundair" onclick="DY.brandPortal && DY.brandPortal.openPortaal ? DY.brandPortal.openPortaal() : DY.navigeer(\x27brand_register\x27)" data-testid="home-partner-register-btn">Aanmelden als merk</button>' +
+          '</div>' +
+        '</div>' +
+      '</section>' +
     '</div>';
-};;
+};
+
+// ── SAMENWERKINGEN OVERLAY (v60.1.12) ────────────────────────────
+// Bestaande layouttaal hergebruikt (dy-bpos-* patroon). Sluit met escape +
+// backdrop-klik. Body scroll-lock toegevoegd zodat achtergrond niet
+// meeschuift op mobiel.
+DY.toonSamenwerkingenOverlay = function() {
+  if (document.getElementById('dy-sw-overlay')) return;
+  var overlay = document.createElement('div');
+  overlay.id = 'dy-sw-overlay';
+  overlay.className = 'dy-bpos-backdrop dy-sw-backdrop';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'dy-sw-titel');
+
+  overlay.innerHTML =
+    '<div class="dy-bpos-sheet dy-sw-sheet" id="dy-sw-sheet">' +
+      '<div class="dy-bpos-drag-bar"></div>' +
+      '<button class="dy-sw-sluit" aria-label="Sluiten" data-testid="sw-overlay-sluit-btn">&times;</button>' +
+      '<div class="dy-bpos-header">' +
+        '<span class="dy-bpos-w">W</span>' +
+        '<div>' +
+          '<span class="dy-bpos-titel" id="dy-sw-titel">Samenwerken met Paskamerpraat</span>' +
+          '<span class="dy-bpos-sub">Voor merken &amp; ontwerpers in tall &amp; plus size mode</span>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="dy-bpos-content dy-sw-content">' +
+
+        // 1. Intro
+        '<section class="dy-sw-sectie">' +
+          '<h3 class="dy-sw-sectie-titel">Introductie</h3>' +
+          '<p>Paskamerpraat is dé community voor vrouwen die buiten de standaard maten vallen. Onze leden delen dagelijks pasvorm-ervaringen, outfits en aanbevelingen. Voor jouw merk is dit een unieke kans om gericht zichtbaar te worden bij een groep die actief op zoek is naar passende mode.</p>' +
+        '</section>' +
+
+        // 2. Voor wie
+        '<section class="dy-sw-sectie">' +
+          '<h3 class="dy-sw-sectie-titel">Voor wie</h3>' +
+          '<ul class="dy-sw-lijst">' +
+            '<li><strong>Tall fashion merken</strong> — kleding vanaf maat 38, lengte 36+</li>' +
+            '<li><strong>Plus size merken</strong> — collecties vanaf maat 44/46 en groter</li>' +
+            '<li><strong>Schoenen, lingerie, accessoires</strong> die rekening houden met afwijkende maten</li>' +
+            '<li><strong>Ontwerpers</strong> die inclusieve mode maken</li>' +
+          '</ul>' +
+        '</section>' +
+
+        // 3. Hoe werkt het
+        '<section class="dy-sw-sectie">' +
+          '<h3 class="dy-sw-sectie-titel">Hoe werkt het</h3>' +
+          '<ol class="dy-sw-stappen">' +
+            '<li><strong>Aanmelden</strong> — vul het merkprofiel in via het merkenportaal (BTW, website, categorie)</li>' +
+            '<li><strong>Goedkeuring</strong> — wij beoordelen binnen 2 werkdagen en activeren je merkaccount</li>' +
+            '<li><strong>Producten uploaden</strong> — voeg je collectie toe via een eigen merkdashboard</li>' +
+            '<li><strong>Campagne starten</strong> — kies plaatsingen, budget en doelgroep zelf</li>' +
+            '<li><strong>Live resultaten</strong> — bekijk impressies, clicks en conversies in jouw analytics</li>' +
+          '</ol>' +
+        '</section>' +
+
+        // 4. Campagnes
+        '<section class="dy-sw-sectie">' +
+          '<h3 class="dy-sw-sectie-titel">Campagne-mogelijkheden</h3>' +
+          '<div class="dy-sw-grid">' +
+            '<div class="dy-sw-kaart"><strong>Merken-tab feed</strong><span>Producten verschijnen in een aparte feed voor leden die actief zoeken</span></div>' +
+            '<div class="dy-sw-kaart"><strong>Story-ring</strong><span>Premium plaatsing bovenaan de community-feed</span></div>' +
+            '<div class="dy-sw-kaart"><strong>Outfit Review</strong><span>Jouw kleding wordt voorgesteld in pasvorm-vergelijkingen</span></div>' +
+            '<div class="dy-sw-kaart"><strong>AI Stylist</strong><span>Worden aanbevolen wanneer leden naar advies vragen</span></div>' +
+          '</div>' +
+        '</section>' +
+
+        // 5. Voorwaarden
+        '<section class="dy-sw-sectie">' +
+          '<h3 class="dy-sw-sectie-titel">Voorwaarden</h3>' +
+          '<ul class="dy-sw-lijst">' +
+            '<li>Geldig KvK + BTW-nummer</li>' +
+            '<li>Eigen webshop of verkooppunt</li>' +
+            '<li>Body-positive communicatie — geen schadelijke afslank- of dieetclaims</li>' +
+            '<li>Realistische product- en pasvorm-foto&apos;s</li>' +
+            '<li>Budget en facturatie via maandelijkse handmatige verwerking (geen automatische betalingen vooraf)</li>' +
+          '</ul>' +
+          '<p class="dy-sw-fijndruk">Lees de volledige <button class="dy-sw-link" onclick="DY.sluitSamenwerkingenOverlay();DY.navigeer(\x27voorwaarden\x27)">algemene voorwaarden</button> voor het complete reglement.</p>' +
+        '</section>' +
+
+      '</div>' +
+
+      // 6. CTA
+      '<button class="dy-bpos-cta dy-sw-cta" id="dy-sw-naar-portaal" data-testid="sw-overlay-cta">Naar merkenportaal</button>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+
+  // Scroll-lock om achtergrondverschuiving op mobiel te voorkomen
+  try {
+    DY._swPrevBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+  } catch(e) {}
+
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { overlay.classList.add('dy-bpos-in'); });
+  });
+
+  // CTA → naar merkenportaal (gebruikt bestaande openPortaal routing)
+  document.getElementById('dy-sw-naar-portaal').onclick = function() {
+    DY.sluitSamenwerkingenOverlay();
+    setTimeout(function() {
+      if (DY.brandPortal && typeof DY.brandPortal.openPortaal === 'function') {
+        DY.brandPortal.openPortaal();
+      } else {
+        DY.navigeer('brand_register');
+      }
+    }, 220);
+  };
+
+  // Sluit-knop
+  overlay.querySelector('.dy-sw-sluit').onclick = function() { DY.sluitSamenwerkingenOverlay(); };
+
+  // Backdrop klik = sluiten
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) DY.sluitSamenwerkingenOverlay();
+  });
+
+  // Escape = sluiten
+  DY._swEscHandler = function(e) {
+    if (e.key === 'Escape') DY.sluitSamenwerkingenOverlay();
+  };
+  document.addEventListener('keydown', DY._swEscHandler);
+};
+
+DY.sluitSamenwerkingenOverlay = function() {
+  var el = document.getElementById('dy-sw-overlay');
+  if (!el) return;
+  el.classList.remove('dy-bpos-in');
+  el.classList.add('dy-bpos-out');
+  // Cleanup: scroll-lock + escape handler
+  try { document.body.style.overflow = DY._swPrevBodyOverflow || ''; } catch(e) {}
+  if (DY._swEscHandler) { document.removeEventListener('keydown', DY._swEscHandler); DY._swEscHandler = null; }
+  setTimeout(function() {
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+  }, 320);
+};
 
 
 
