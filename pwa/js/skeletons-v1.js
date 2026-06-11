@@ -61,11 +61,34 @@
   }
 
   function findFeedRoot() {
+    // v60.1 fix: NOOIT meer fallback naar <main> — dat zorgde ervoor dat op
+    // niet-feed pagina's (home, profiel, brand-portal, voorwaarden, etc.)
+    // skeleton-cards in #dy-main werden geïnjecteerd. Alleen echte
+    // feed-containers triggeren skeletons.
     return document.querySelector('[data-feed-root]') ||
            document.querySelector('.dy-reel-container') ||
            document.querySelector('#dy-feed') ||
-           document.querySelector('main') ||
+           document.querySelector('#dy-verhalen') ||
            null;
+  }
+
+  function isOpFeedPagina() {
+    // Extra defensieve check: alleen op feed-pagina mogen skeletons getoond
+    // worden. Voorkomt edge-cases waarin DOM toch matcht maar context anders is.
+    try {
+      if (window.DY && typeof window.DY.pagina === 'string') {
+        return window.DY.pagina === 'feed';
+      }
+    } catch (e) { /* noop */ }
+    // Fallback: check URL/hash
+    try {
+      var hash = (location.hash || '').replace(/^#\/?/, '');
+      var qs = new URLSearchParams(location.search || '');
+      var p = qs.get('pagina') || hash || '';
+      // Geen pagina-parameter → eerste bezoek → guest gaat naar 'home' (NIET feed)
+      // Dus we tonen géén skeletons tenzij expliciet feed.
+      return p === 'feed';
+    } catch (e) { return false; }
   }
 
   function feedHasContent(root) {
@@ -90,7 +113,18 @@
     for (var i = 0; i < skels.length; i++) skels[i].remove();
   }
 
+  // v60.1 fix: ruim eventuele orphan-skeletons uit eerdere sessies/bugs op
+  function nukeOrphanSkeletons() {
+    try {
+      var orphans = document.querySelectorAll('[data-pp-skeleton]');
+      for (var i = 0; i < orphans.length; i++) orphans[i].remove();
+    } catch (e) { /* noop */ }
+  }
+
   function maybeShowSkeletons() {
+    // v60.1 fix: alleen op feed-pagina skeletons tonen, anders forceren we
+    // lege blokken op homepage/profile/brand-portal/etc.
+    if (!isOpFeedPagina()) return;
     var root = findFeedRoot();
     if (!root) return;
     if (feedHasContent(root)) return; // er is al echte content
@@ -100,9 +134,16 @@
   // Wacht tot DOM klaar is + 1500ms buffer, dan tonen als feed leeg
   function initSkeletons() {
     setTimeout(maybeShowSkeletons, 1500);
-    // Watch voor content-arrival: zodra echte cards verschijnen → opruimen
+    // Watch voor content-arrival: zodra echte cards verschijnen → opruimen.
+    // OOK opruimen als gebruiker wegnavigeert van feed.
     try {
       var mo = new MutationObserver(function() {
+        // Niet meer op feed → skeletons direct weg
+        if (!isOpFeedPagina()) {
+          removeSkeletons(document.querySelector('main'));
+          removeSkeletons(document.body);
+          return;
+        }
         var root = findFeedRoot();
         if (root && feedHasContent(root)) {
           removeSkeletons(root);
@@ -111,7 +152,11 @@
       });
       mo.observe(document.body || document.documentElement, { childList: true, subtree: true });
       // Safety: na 30s sowieso opruimen
-      setTimeout(function() { try { mo.disconnect(); } catch (e) { /* noop */ } removeSkeletons(findFeedRoot()); }, 30000);
+      setTimeout(function() {
+        try { mo.disconnect(); } catch (e) { /* noop */ }
+        removeSkeletons(findFeedRoot());
+        removeSkeletons(document.querySelector('main'));
+      }, 30000);
     } catch (e) { /* noop */ }
   }
 
@@ -201,8 +246,12 @@
 
   // Init skeletons na load
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSkeletons);
+    document.addEventListener('DOMContentLoaded', function() {
+      nukeOrphanSkeletons();
+      initSkeletons();
+    });
   } else {
+    nukeOrphanSkeletons();
     initSkeletons();
   }
 })();
