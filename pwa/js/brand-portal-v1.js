@@ -322,9 +322,17 @@
         t3.textContent = '€ Inkomsten';
         t3.onclick = function() { DY.navigeer('admin_inkomsten'); };
 
+        var t4 = document.createElement('button');
+        t4.id = 'bp-admin-tab-imggen';
+        t4.className = 'dy-admin-tab';
+        t4.setAttribute('data-testid','admin-tab-imggen-link');
+        t4.textContent = '🎨 Images';
+        t4.onclick = function() { DY.navigeer('admin_imggen'); };
+
         tabs.appendChild(t1);
         tabs.appendChild(t2);
         tabs.appendChild(t3);
+        tabs.appendChild(t4);
       } catch(e) { /* noop */ }
     }
 
@@ -1634,6 +1642,13 @@
     BP_PAGES.admin_brands         = BP.renderAdminBrands;
     BP_PAGES.admin_campagnes      = BP.renderAdminCampagnes;
     BP_PAGES.admin_inkomsten      = BP.renderAdminInkomsten;
+
+    // v60.1.14: expose registratie-hook zodat externe admin-modules
+    // (bv. admin-imggen-v1.js) hun pagina's kunnen registreren in
+    // BP_PAGES zonder de brand-portal core aan te raken.
+    BP._registreerPage = function(naam, fn) {
+      if (typeof fn === 'function' && naam) BP_PAGES[naam] = fn;
+    };
 
     // ── Init: probeer direct knop te injecteren als profile al rendert ──
     setTimeout(injecteerProfielKnop, 600);

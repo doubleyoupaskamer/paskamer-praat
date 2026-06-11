@@ -1,14 +1,17 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException, Header
+from fastapi.responses import Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import base64
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 
 ROOT_DIR = Path(__file__).parent
@@ -65,6 +68,85 @@ async def get_status_checks():
             check['timestamp'] = datetime.fromisoformat(check['timestamp'])
     
     return status_checks
+
+
+# ════════════════════════════════════════════════════════════════
+# PASKAMERPRAAT — Admin Image Generator (Gemini Nano Banana)
+# v60.1.14 — admin-only hero/banner generator via EMERGENT_LLM_KEY
+# ════════════════════════════════════════════════════════════════
+
+class ImageGenRequest(BaseModel):
+    prompt: str
+    aspect: Optional[str] = "portrait"  # portrait (1024x1536) | landscape (1200x630) | square
+    style_hint: Optional[str] = "paskamerpraat"  # auto-prepend brand style if set
+
+
+PASKAMERPRAAT_STYLE_PROMPT = (
+    "Editorial fashion photography in the style of high-end magazines. "
+    "Warm cinematic lighting, golden hour glow, cream and clay color palette "
+    "(#fcf8ef cream, #d4910a clay-gold accents, #0a0806 deep brown background). "
+    "Inclusive body diversity, tall and plus-size models, petite and unisex bodies, "
+    "natural skin textures, no airbrushing, confident and grounded poses. "
+    "Body-positive composition, no diet or weight-loss imagery. "
+    "Soft film grain, shallow depth of field, muted earth tones. "
+)
+
+
+@api_router.post("/admin/generate-image")
+async def generate_image(req: ImageGenRequest, x_admin_secret: Optional[str] = Header(None)):
+    """Admin-only endpoint to generate hero/banner images via Gemini Nano Banana.
+    
+    Auth: shared secret via X-Admin-Secret header.
+    Returns: { ok, mime_type, base64, prompt_used }
+    """
+    expected_secret = os.environ.get('ADMIN_GEN_SECRET')
+    if not expected_secret or x_admin_secret != expected_secret:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    
+    api_key = os.environ.get('EMERGENT_LLM_KEY')
+    if not api_key:
+        raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY niet geconfigureerd")
+    
+    aspect_hint = {
+        "portrait":  "Portrait aspect ratio 2:3 (1024x1536), vertical composition, full-body or 3/4 body shot.",
+        "landscape": "Landscape aspect ratio 16:9 (1200x630), wide horizontal composition suitable for social media banner.",
+        "square":    "Square aspect ratio 1:1, balanced central composition.",
+    }.get(req.aspect, "Portrait aspect ratio 2:3.")
+    
+    full_prompt = (
+        f"{PASKAMERPRAAT_STYLE_PROMPT}{aspect_hint}\n\n"
+        f"SUBJECT: {req.prompt}"
+    )
+    
+    try:
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"paskamerpraat-imggen-{uuid.uuid4()}",
+            system_message="You are a professional fashion editorial image generator."
+        )
+        chat.with_model("gemini", "gemini-3.1-flash-image-preview").with_params(modalities=["image", "text"])
+        
+        msg = UserMessage(text=full_prompt)
+        text, images = await chat.send_message_multimodal_response(msg)
+        
+        if not images:
+            raise HTTPException(status_code=502, detail=f"Geen afbeelding gegenereerd. Model response: {text[:200] if text else 'leeg'}")
+        
+        img = images[0]
+        return {
+            "ok": True,
+            "mime_type": img.get('mime_type', 'image/png'),
+            "base64": img['data'],
+            "prompt_used": full_prompt,
+            "aspect": req.aspect,
+            "text_response": text[:500] if text else None,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Image generation failed")
+        raise HTTPException(status_code=500, detail=f"Generatie mislukt: {str(e)}")
+
 
 # Include the router in the main app
 app.include_router(api_router)
