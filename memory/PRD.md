@@ -1,108 +1,100 @@
-# PaskamerPraat.nl — Brand Portal v1 + Stability v60.1
+# PaskamerPraat — Product Requirements (PRD)
 
-## Problem statement (huidige sessie)
-Bouw een volledig werkend self-service merkportaal als pure uitbreiding, zonder inbreuk op bestaande code, functionaliteiten, UX, routing, styling of dataflows. Met RBAC (USER/BRAND/ADMIN), feature flags, productiegeschikte implementatie en hamburgermenu-entry.
+## Origineel probleem
+PaskamerPraat.nl is een vanilla JS PWA op Firebase + Cloudflare Workers, met recente uitbreidingen:
+- Onboarding, routing, PWA & stability recovery audit
+- Phase 2: Self-service Brand Portal (`/brands` / `/merken`) voor externe merken
+- Python FastAPI backend voor Admin Image Generator (Nano Banana via Emergent LLM Key)
 
-## User choices (vastgelegd)
-- **1A** Fase 1 MVP: registratie + approval + product-CMS + campagne CRUD + basis analytics
-- **2A** Geen echte betalingen — budget als getal, admin verwerkt facturen handmatig
-- **3B** Alleen apart "Merken"-tabblad, geen menging met organische feed
-- **4A** Brand-producten volledig gescheiden van Shopify-flow (`brand_products` collectie)
-- **5A** Firebase Storage voor image uploads
-- **Plus:** menu-entry in profielmenu (= hamburger-equivalent in deze app)
+## Implementatiestatus (chronologisch)
 
-## Tech stack
-- **Static PWA** (HTML/CSS/JS) op Cloudflare Pages
-- **Firebase** (Firestore + Auth + Storage)
-- **Service Worker** (caching + offline)
-- Geen build step, geen SSR
+### v60.1.x — Brand Portal MVP
+- Merken-discovery (publiek), registratie, brand login, pending state, dashboard
+- Product CMS, campagne builder, audience selectie, analytics
+- Admin: brand moderation, campagne controle, inkomsten dashboard
+- RBAC: USER / BRAND (users.role='brand' + brands.status='approved') / ADMIN (email-based)
+- Self-approval security fix (v60.1.10): brands kunnen niet hun eigen status wijzigen via UI/JS/Firestore rules
+- Multi-user auth race condition fix (v60.1.11): guest-auth-v1.js + dy-presence.js geen conflicten meer
 
-## Codebase locatie
-- Werk-folder: `/app/pwa/`
-- Originele back-up: `/app/paskamerpraat-v60-original.zip`
-- Fixed + brand portal output: `/app/paskamerpraat-pwa-v60.1-brand-portal.zip`
+### v60.1.14 — Admin Image Generator
+- Python FastAPI `/api/admin/generate-image` met `X-Admin-Secret` header
+- Gemini Nano Banana via Emergent LLM Key (`gemini-3.1-flash-image-preview`)
+- PaskamerPraat brand style prompt-prefix
+- Admin UI: `admin-imggen-v1.js`
 
-## Architectuur — Brand Portal
-- **Geïsoleerde module**: `js/brand-portal-v1.js` + `brand-portal.css` met `bp-` prefix → géén overrides
-- **Router wrapper**: hookt op `DY.toonPagina` zonder bestaande tabel te muteren
-- **Profielmenu injectie**: `MutationObserver` injecteert "Merkenportaal"-knop in bestaande `.dy-profiel-acties`
-- **RBAC**: `users.role='brand'` + `brands.status` + bestaande `DY._isAdmin()`
-- **Feature flag**: `localStorage.dy_brand_portal='0'` schakelt module uit + script-tag verwijderbaar
+### v60.1.34 — Homepage Hero Overlay Fix (2026-02-14)
+- Desktop hero layout hersteld (was: gebroken magazine-layout door CSS-cascade volgorde)
+- Mobile tekst-contrast verbeterd (sterkere gradient + text-shadow)
+- Duplicate `.dy-hm-hero-text-desktop` verborgen (text-overlay is enige bron)
+- 16:10 aspect ratio binnen `.dy-main` app-frame (680-1000px max-width)
 
-## Nieuwe routes
-| Route | Toegang |
-|---|---|
-| `/merken` | publiek |
-| `/brand_register` | publiek |
-| `/brand_pending` | brand (pending/rejected/suspended) |
-| `/brand_dashboard` | brand approved |
-| `/brand_producten` + `/brand_product_nieuw` | brand approved |
-| `/brand_campagnes` + `/brand_campagne_nieuw` | brand approved |
-| `/brand_analytics` | brand approved |
-| `/admin_brands` + `/admin_campagnes` + `/admin_inkomsten` | admin only |
+### v60.1.35 — Full Stability & Performance Audit (2026-02-14)
+- Crash recovery loop-guard (max 3 attempts → statische fallback UI)
+- Safety timer voor render hangs werkt nu correct (8s na render-start)
+- Push notificatie auteur-lookup bug gefixt (was silent fail via invalid `yield` syntax)
+- Service Worker networkFirst: cache.put nu altijd na fresh fetch
+- Backend CORS spec-compliant (geen credentials+wildcard conflict)
+- Alle 26 helper-JS scripts geüniformeerd naar `?v=60.1.35-stability-audit`
+- Logger init verplaatst naar top of file (forward-reference fix)
+- Full audit report: `/app/memory/AUDIT_v60.1.35.md`
+- ZIP artifact: `/app/pwa/paskamerpraat-pwa-v60.1.35-stability-audit.zip`
+- Backend tests: 100% pass (8/8) via testing_agent_v3_fork
 
-## Nieuwe Firestore collections
-- `brands/{uid}` — brand profile + status
-- `brand_products/{id}` — products (soft-delete)
-- `campaigns/{id}` — campaigns met live aggregaten
-- `campaign_events/{id}` — append-only impressie/click log
-- `brand_admin_log/{id}` — audit log
+## Backlog / Toekomstige tasks
 
-## Wat is geleverd
-✅ Brand registratie met validaties (e-mail uniqueness, URL/BTW/wachtwoord checks, rate limiting)
-✅ Logo-upload naar Firebase Storage
-✅ Admin approval flow (approve/reject met reden/suspend)
-✅ Brand dashboard met live stats (producten/campagnes/impressies/clicks/CTR)
-✅ Product CMS (CRUD met max 4 afbeeldingen, soft-delete)
-✅ Campagne CRUD met plaatsing-checklist + budget caps + biedstrategie + doel
-✅ Analytics dashboard met CSV-export
-✅ Publieke /merken discovery + merk-detail + product-click tracking
-✅ Admin: brand management, campaign control (pause/resume/end/budget), revenue dashboard
-✅ Audit log (`brand_admin_log`) voor alle admin acties
-✅ Hamburger-/profielmenu entry via DOM-injection (geen wijziging in pwa-v463-js)
-✅ Firestore Rules document `BRAND_PORTAL_FIRESTORE_RULES.md` (additief, geen bestaande regels gewijzigd)
+### P0 — Verificatie nog open
+- Brand Product Upload: drag/drop, compressie, limieten verifiëren
+- Campaign Builder: live budget berekening, objective settings verifiëren
+- Brand registratie e2e flow op productie testen
 
-## Stability fixes (v60.1, vorige sessie — blijven actief)
-✅ Bug 1 — Dubbele onboarding/route renders opgelost (SW dedup + auth/render guards)
-✅ Bug 2 — iOS "Voeg toe" knop opgelost (touch-action + z-index + sync binding)
-✅ Bug 3 — Samsung PWA install banner detection opgelost (comprehensive `isAppInstalled()`)
+### P1 — Verificatie nog open
+- Results Dashboard / Analytics: impressies, reach, CTR, CSV export
+- Admin Campaign Control: pause/resume, budget overrides, revenue dashboard
+- Browser back-button gedrag (popstate hook ontbreekt; werkt nu via URL-reset)
 
-## Test status
-- ✅ Statische JS-syntax: alle bestanden OK
-- ✅ CSS balans: 126/126 braces
-- ✅ Inline scripts: 9/9 OK
-- ✅ ESLint: alleen pre-existing patterns (consistent met codebase)
-- ⚠️ **MOCKED testing**: E2E browser tests in sandbox kunnen niet bij productie-Firebase. Functionele acceptance test door eindgebruiker op productie-deployment.
+### P2 — Refactoring (niet kritiek)
+- `app.css` opschonen rond `.dy-hm-hero` block (~15 iteraties gerelateerde regels)
+- `pwa-v463-*.js` is 1.2MB monolith → opsplitsen in modules
+- Duplicate object-key `'plus-size'` in DY._normBouw map (line 232) cleanup
+- Deprecated `@app.on_event('shutdown')` → lifespan context manager
+- CORS middleware order in `server.py` (na router toegevoegd; werkt maar fragiel)
 
-## Nieuwe bestanden in ZIP
-- `js/brand-portal-v1.js` (~80 KB)
-- `brand-portal.css` (~19 KB)
-- `BRAND_PORTAL_FIRESTORE_RULES.md` (deployment instructies)
-- `CHANGELOG-v60.1-brand-portal-v1.md` (volledige documentatie)
+### P3 — Optimalisaties
+- Image preload hints voor hero variants
+- Bundle splitting voor lazy-load helper modules
+- Web Vitals dashboard koppelen aan admin panel
 
-## Gewijzigde bestanden
-- `index.html` — 2 regels toegevoegd (`<link>` + `<script>`)
-- `sw.js` — VERSION bump naar `v60.1-20260214-brand-portal-v1`
+## Architectuur (huidige stack)
 
-## Volgende stappen (eindgebruiker)
-1. **Download** ZIP: `https://paskamer-stability.preview.emergentagent.com/paskamerpraat-pwa-v60.1-brand-portal.zip`
-2. **Deploy codebase** naar Cloudflare Pages
-3. **CRITICAL**: Deploy Firestore + Storage rules volgens `BRAND_PORTAL_FIRESTORE_RULES.md`
-4. **Test** op productie: registreer test-merk, keur goed via admin, upload product, maak campagne
-5. **Optioneel**: maak composite indexes (Firebase Console toont auto-prompts)
+```
+/app/pwa/                          # Vanilla JS PWA (deploy via Cloudflare Workers extern)
+├── index.html                     # SPA shell + inline routing/recovery scripts
+├── app.css                        # Monolitische stylesheet
+├── sw.js                          # Service worker (networkFirst HTML, cacheFirst JS)
+├── firestore.rules                # Firebase security rules
+├── js/
+│   ├── pwa-v463-*.js              # 25K-line legacy core (renderHome, renderFeed, etc.)
+│   ├── brand-portal-v1.js         # Brand Portal SPA module (1.7K lines)
+│   ├── guest-auth-v1.js           # Anonymous auth voor gasten
+│   ├── dy-presence.js             # Realtime presence engine
+│   ├── admin-imggen-v1.js         # Admin UI voor Nano Banana
+│   ├── error-boundary-v1.js       # Global error capture
+│   └── ...                        # 30+ helper modules
 
-## Future / Backlog (niet in scope MVP)
-- Stripe Connect billing (keuze 2B)
-- ~~E-mail notificaties (SendGrid/Resend)~~ → **GEÏMPLEMENTEERD v60.1.8** via bestaande mail-worker
-- Real-time analytics aggregatie (Cloud Functions)
-- Audience segment builder
-- reCAPTCHA
-- Sponsored placements in feed (keuze 3A/3C)
-- Drag-and-drop bulk import
-- Push notificaties bij status-changes
+/app/backend/                      # Python FastAPI (lokale dev / Emergent platform)
+├── server.py                      # POST /api/admin/generate-image + /api/status
+└── .env                           # MONGO_URL, DB_NAME, EMERGENT_LLM_KEY, ADMIN_GEN_SECRET, CORS_ORIGINS
 
-## v60.1.8 — Submit fix + e-mailnotificaties + admin-tabs (2026-02-14)
-- 🐛 Fix: registratie-submit-handler met diagnostiek + click-fallback (iOS)
-- ✉️ E-mailnotificaties bij brand-registratie naar zowel aanvrager als admin (`info@doubleyousmallandtall.nl`) via bestaande Cloudflare mail-worker (`black-grass-c05c.doubleyou-journal.workers.dev/mail`)
-- 🛠️ Admin-tabs (🏷️ Merken / 📢 Campagnes / € Inkomsten) ge-injecteerd in bestaand admin-dashboard via MutationObserver — geen wijziging in `pwa-v463-*.js`
-- ZIP: `paskamerpraat-pwa-v60.1.8-brand-portal.zip`
+/app/memory/
+├── PRD.md                         # Dit bestand
+├── AUDIT_v60.1.35.md              # Volledige audit + fix log
+└── test_credentials.md            # Test accounts (leeg of niet aanwezig)
+```
+
+## Belangrijke conventies (NIET BREKEN)
+1. **GEEN em-dashes (—)**: gebruik komma, punt of haakjes
+2. **Inclusief taalgebruik**: geen "afslank-mode", geen gewicht-georiënteerde copy
+3. **Cache busting**: bij elke JS/CSS edit `?v=` in `index.html` EN `VERSION` in `sw.js` bumpen
+4. **Antwoord altijd in NL** (user voorkeur)
+5. **Brand Portal route hijack**: BP_PAGES whitelist controleert welke routes door brand-portal overgenomen worden
+6. **Auth identity dedup**: `_laatsteAuthUid` voorkomt onnodige re-renders bij token refresh
