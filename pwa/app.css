@@ -10859,6 +10859,85 @@ img {
   object-position: center center;
   display: block;
   filter: brightness(0.95);
+  /* v60.1.24: subtiele fade+scale-in bij eerste paint */
+  animation: dy-hm-img-in 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@keyframes dy-hm-img-in {
+  from { opacity: 0; transform: scale(1.02); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* v60.1.24 — Mobile-only motion enhancement.
+   Subtiele W-watermark animatie + shimmer placeholder + fade-in image.
+   GPU-accelerated (transform + opacity), respect prefers-reduced-motion. */
+@media (max-width: 767px) {
+  /* Shimmer placeholder achter de image (zichtbaar tijdens load) */
+  .dy-hm-hero-bg {
+    background:
+      linear-gradient(110deg,
+        #0a0806 0%,
+        rgba(212,145,10,0.06) 35%,
+        rgba(212,145,10,0.12) 50%,
+        rgba(212,145,10,0.06) 65%,
+        #0a0806 100%) #0a0806;
+    background-size: 220% 100%;
+    animation: dy-hm-shimmer 2.6s linear infinite;
+  }
+  @keyframes dy-hm-shimmer {
+    0%   { background-position: 220% 0; }
+    100% { background-position: -220% 0; }
+  }
+
+  /* W-spinner watermark als ::before pseudo. Geen HTML wijziging.
+     mix-blend-mode: overlay legt 'm zacht over de foto.
+     Slow rotate 45s + gentle pulse 9s, allebei GPU only. */
+  .dy-hm-hero-bg::before {
+    content: 'W';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: 20rem;
+    font-weight: 500;
+    line-height: 1;
+    color: #fcf8ef;
+    opacity: 0.10;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 3;
+    transform-origin: center center;
+    will-change: transform, opacity;
+    animation:
+      dy-hm-w-rotate 45s linear infinite,
+      dy-hm-w-pulse 9s ease-in-out infinite;
+  }
+  @keyframes dy-hm-w-rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes dy-hm-w-pulse {
+    0%, 100% { opacity: 0.08; }
+    50%      { opacity: 0.16; }
+  }
+
+  /* Reduced motion: alle animaties uit, statische subtiele W blijft */
+  @media (prefers-reduced-motion: reduce) {
+    .dy-hm-hero-bg {
+      background: #0a0806;
+      animation: none;
+    }
+    .dy-hm-hero-bg::before {
+      animation: none;
+      opacity: 0.10;
+      transform: none;
+    }
+    .dy-hm-hero-img {
+      animation: none;
+    }
+  }
 }
 /* Subtiele gradient onderaan foto naar content panel voor zachte overgang */
 .dy-hm-hero-bg::after {
