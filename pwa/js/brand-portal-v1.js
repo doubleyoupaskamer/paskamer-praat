@@ -186,6 +186,20 @@
 
     var _origToonPagina = DY.toonPagina;
     DY.toonPagina = function(pagina) {
+      // ── v60.1.2 deep-link hijack ────────────────────────────────────────
+      // Als de URL een brand-portal route bedoelde maar de oorspronkelijke
+      // router naar feed/home heeft geredirect (omdat onze wrapper toen nog
+      // niet bestond), hijack de eerstvolgende non-brand toonPagina-call en
+      // navigeer alsnog naar de bedoelde brand-portal route. Daarna wordt de
+      // deeplink gewist zodat normale navigatie blijft werken.
+      try {
+        if (BP._deeplink && !Object.prototype.hasOwnProperty.call(BP_PAGES, pagina)) {
+          var _dl = BP._deeplink;
+          BP._deeplink = null;
+          pagina = _dl; // re-route naar bedoelde brand-portal route
+        }
+      } catch(e) {}
+
       // Brand-portal pagina's? Pak ze hier af; anders origineel
       if (pagina && Object.prototype.hasOwnProperty.call(BP_PAGES, pagina)) {
         try {
@@ -1385,25 +1399,25 @@
     // ── Init: probeer direct knop te injecteren als profile al rendert ──
     setTimeout(injecteerProfielKnop, 600);
 
-    // ── v60.1 fix: lees URL opnieuw — als ?pagina=brand_* of merken is, navigeer.
-    // pwa-v463 parsed de URL VÓÓR onze wrapper geregistreerd was, waardoor
-    // onbekende routes naar feed werden teruggebracht. Nu we wel geregistreerd
-    // zijn, kunnen we de bedoelde route alsnog aanroepen.
+    // ── v60.1.2 deep-link: lees URL en zet intent op BP._deeplink.
+    // De wrapper hierboven hijackt automatisch de eerstvolgende router-call
+    // (van pwa-v463 init OF van onAuthReady) en re-route naar onze pagina.
+    // Werkt ongeacht timing van Firebase auth, SW reload of andere delays.
     try {
       var _qs = new URLSearchParams(location.search || '');
       var _hash = (location.hash || '').replace(/^#\/?/, '');
       var _gewenst = _qs.get('pagina') || _hash || '';
       if (_gewenst && Object.prototype.hasOwnProperty.call(BP_PAGES, _gewenst)) {
-        // Stel uit tot na huidige paint zodat de feed-fallback niet flickert
-        setTimeout(function() {
-          try { DY.toonPagina(_gewenst); } catch(e) {}
-        }, 100);
+        BP._deeplink = _gewenst;
+        // Direct ook proberen te navigeren — als toonPagina al eerder
+        // gerendered heeft, hijackt de wrapper deze call zelf.
+        try { DY.toonPagina(_gewenst); } catch(e) {}
       }
     } catch(e) { /* noop */ }
 
     // ── Markeer geladen ──────────────────────────────────────────────────
     BP._loaded = true;
-    BP._versie = 'v60.1-brand-portal-v1.1';
+    BP._versie = 'v60.1-brand-portal-v1.2';
 
   });
 })();
