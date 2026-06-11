@@ -10891,6 +10891,33 @@ img {
   /* W-spinner watermark als ::before pseudo. Geen HTML wijziging.
      mix-blend-mode: overlay legt 'm zacht over de foto.
      Slow rotate 45s + gentle pulse 9s, allebei GPU only. */
+  /* v60.1.26: glow halo achter de W (extra dieptelaag) */
+  .dy-hm-hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 70vw;
+    height: 70vw;
+    max-width: 480px;
+    max-height: 480px;
+    background: radial-gradient(circle at center,
+      rgba(212,145,10,0.42) 0%,
+      rgba(212,145,10,0.18) 30%,
+      rgba(212,145,10,0.06) 55%,
+      transparent 75%);
+    border-radius: 50%;
+    z-index: 2;
+    pointer-events: none;
+    transform-origin: center center;
+    will-change: transform, opacity;
+    animation: dy-hm-halo-pulse 5s ease-in-out infinite;
+  }
+  @keyframes dy-hm-halo-pulse {
+    0%, 100% { transform: scale(0.92); opacity: 0.55; }
+    50%      { transform: scale(1.08); opacity: 0.95; }
+  }
+
   .dy-hm-hero-bg::before {
     content: 'W';
     position: absolute;
@@ -10900,28 +10927,30 @@ img {
     justify-content: center;
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-style: italic;
-    font-size: 22rem;
-    font-weight: 500;
+    font-size: 28rem;
+    font-weight: 600;
     line-height: 1;
-    color: #d4910a;
-    opacity: 0.28;
-    mix-blend-mode: soft-light;
+    color: #f4c456;
+    opacity: 0.72;
     pointer-events: none;
     z-index: 3;
     transform-origin: center center;
     will-change: transform, opacity;
-    text-shadow: 0 4px 24px rgba(212,145,10,0.4);
+    text-shadow:
+      0 0 32px rgba(212,145,10,0.65),
+      0 0 72px rgba(212,145,10,0.45),
+      0 4px 18px rgba(10,8,6,0.55);
     animation:
-      dy-hm-w-rotate 28s linear infinite,
-      dy-hm-w-pulse 5s ease-in-out infinite;
+      dy-hm-w-rotate 22s linear infinite,
+      dy-hm-w-pulse 4s ease-in-out infinite;
   }
   @keyframes dy-hm-w-rotate {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
   }
   @keyframes dy-hm-w-pulse {
-    0%, 100% { opacity: 0.22; }
-    50%      { opacity: 0.38; }
+    0%, 100% { opacity: 0.62; }
+    50%      { opacity: 0.92; }
   }
 
   /* Reduced motion: alle animaties uit, statische subtiele W blijft */
@@ -10932,8 +10961,13 @@ img {
     }
     .dy-hm-hero-bg::before {
       animation: none;
-      opacity: 0.10;
+      opacity: 0.55;
       transform: none;
+    }
+    .dy-hm-hero-bg::after {
+      animation: none;
+      opacity: 0.55;
+      transform: scale(1);
     }
     .dy-hm-hero-img {
       animation: none;
