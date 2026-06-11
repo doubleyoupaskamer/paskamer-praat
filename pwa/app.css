@@ -10870,9 +10870,10 @@ img {
   pointer-events: none;
 }
 
-/* Desktop: editorial magazine cover layout (v60.1.22).
-   Foto bleed vol-breed, tekst-overlay links met zachte gradient.
-   Eén harmonieus geheel ipv twee kolommen. */
+/* Desktop: editorial magazine cover layout (v60.1.23).
+   Foto wordt ZICHTBAAR getoond met contain (geen crop).
+   Geblurde versie van dezelfde foto vult de zijkanten als cinematic fill.
+   Donkere gradient links voor tekstleesbaarheid. */
 @media (min-width: 768px) {
   .dy-hm-hero {
     min-height: calc(100dvh - var(--topbar-h, 56px) - var(--nav-h, 64px));
@@ -10890,30 +10891,50 @@ img {
     background: #0a0806;
     overflow: hidden;
   }
-  .dy-hm-hero-img {
+  /* Blurred background fill: zelfde foto, heavy blur, donker */
+  .dy-hm-hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: -60px;
+    background-image: url('hero-v3-canal.jpg');
+    background-size: cover;
+    background-position: center;
+    filter: blur(40px) brightness(0.32) saturate(0.6);
+    z-index: 0;
+  }
+  /* Foreground: volledige foto zichtbaar met contain, rechts uitgelijnd */
+  .dy-hm-hero-bg picture {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: right center;
-    filter: brightness(0.85) saturate(1.05);
+    z-index: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
   }
-  /* Donkere gradient: ondoorzichtig links waar tekst staat, transparent rechts waar mensen staan */
+  .dy-hm-hero-img {
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: 100%;
+    max-width: 65%;
+    object-fit: contain;
+    object-position: right center;
+    filter: brightness(0.95);
+  }
+  /* Donkere gradient links over de blurred bg voor tekst-leesbaarheid */
   .dy-hm-hero-bg::after {
     content: '';
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(90deg, rgba(10,8,6,0.92) 0%, rgba(10,8,6,0.78) 28%, rgba(10,8,6,0.35) 52%, rgba(10,8,6,0.0) 75%),
-      linear-gradient(180deg, rgba(10,8,6,0.20) 0%, transparent 30%, transparent 70%, rgba(10,8,6,0.30) 100%);
+      linear-gradient(90deg, rgba(10,8,6,0.94) 0%, rgba(10,8,6,0.86) 28%, rgba(10,8,6,0.20) 55%, rgba(10,8,6,0.0) 75%);
     pointer-events: none;
+    z-index: 2;
   }
-  /* Geen vorige overlay, hero-overlay blijft uit */
   .dy-hm-hero-overlay { display: none; }
   .dy-hm-hero-content {
     position: relative;
-    z-index: 2;
+    z-index: 3;
     padding: 72px 56px;
     max-width: 560px;
     width: 50%;
@@ -10933,12 +10954,18 @@ img {
     max-width: 620px;
     width: 48%;
   }
+  .dy-hm-hero-img {
+    max-width: 60%;
+  }
 }
 @media (min-width: 1600px) {
   .dy-hm-hero-content {
     padding: 112px 96px;
     max-width: 680px;
     width: 44%;
+  }
+  .dy-hm-hero-img {
+    max-width: 55%;
   }
 }
 
