@@ -17889,6 +17889,9 @@ DY._adminTabOverzicht = function(el) {
       if (el) el.querySelector('.dy-admin-kpi-val').textContent = snap.size;
     }, function() {});
 
+  // v60.1.37: cache voor users-collection lookups (vermijdt UID-codes in UI)
+  if (!DY._adminUserCache) DY._adminUserCache = {};
+
   // Realtime: online users (realtime_status)
   DY._adminListeners.online = DY.db.collection('realtime_status')
     .where('online', '==', true)
@@ -17902,16 +17905,39 @@ DY._adminTabOverzicht = function(el) {
       var html = '';
       (snap && snap.docs ? snap.docs : []).forEach(function(doc) {
         var d = doc.data();
-        var naam = d.displayName || doc.id.slice(0,8);
+        // v60.1.37: nooit UID-codes tonen, altijd leesbare naam.
+        // - displayName uit realtime_status (logged-in users)
+        // - "Gast" voor anonieme users
+        // - "Onbekend" als laatste fallback (cache lookup vult later in)
+        var naam;
+        if (d.displayName) {
+          naam = d.displayName;
+        } else if (d.isAnonymous) {
+          naam = 'Gast';
+        } else if (DY._adminUserCache[doc.id]) {
+          naam = DY._adminUserCache[doc.id];
+        } else {
+          naam = 'Onbekend';
+          // Async lookup + DOM update
+          (function(uid) {
+            DY.db.collection('users').doc(uid).get().then(function(u) {
+              if (!u.exists) return;
+              var nm = u.data().displayName || (u.data().email && u.data().email.split('@')[0]) || 'Onbekend';
+              DY._adminUserCache[uid] = nm;
+              var span = document.querySelector('[data-admin-naam-uid="' + uid + '"]');
+              if (span) span.textContent = nm;
+            }).catch(function(){});
+          })(doc.id);
+        }
         var route = d.route || '–';
         var device = d.device || '–';
         var ts = d.lastSeenMs ? new Date(d.lastSeenMs).toLocaleTimeString('nl-NL', {hour:'2-digit',minute:'2-digit'}) : '–';
         html += '<div class="dy-admin-online-rij">' +
           '<span class="dy-admin-online-dot"></span>' +
-          '<span class="dy-admin-online-naam">' + DY.escapeHtml(naam) + '</span>' +
+          '<span class="dy-admin-online-naam" data-admin-naam-uid="' + DY.escapeHtml(doc.id) + '">' + DY.escapeHtml(naam) + '</span>' +
+          '<span class="dy-admin-online-tijd">' + ts + '</span>' +
           '<span class="dy-admin-online-route">/' + DY.escapeHtml(route) + '</span>' +
           '<span class="dy-admin-online-device">' + DY.escapeHtml(device) + '</span>' +
-          '<span class="dy-admin-online-tijd">' + ts + '</span>' +
         '</div>';
       });
       listEl.innerHTML = html;
@@ -17932,12 +17958,18 @@ DY._adminTabGebruikers = function(el) {
     .onSnapshot(function(snap) {
       var content = document.getElementById('dy-admin-content');
       if (!content) return;
-      var html = '<table class="dy-admin-tabel"><thead><tr>' +
+      // v60.1.37: wrap tabel in horizontal-scroll container voor mobile
+      var html = '<div class="dy-admin-tabel-wrap"><table class="dy-admin-tabel"><thead><tr>' +
         '<th>Naam</th><th>Email</th><th>Maat</th><th>Lengte</th><th>DSP</th><th>Aangemeld</th>' +
       '</tr></thead><tbody>';
       (snap && snap.docs ? snap.docs : []).forEach(function(doc) {
         var d = doc.data();
-        var naam = DY.escapeHtml(d.displayName || '–');
+        // v60.1.37: fallback chain voor naam — nooit UID-code tonen
+        var naamRaw = d.displayName
+          || (d.email ? d.email.split('@')[0] : null)
+          || (d.naam || null)
+          || 'Onbekend';
+        var naam = DY.escapeHtml(naamRaw);
         var email = DY.escapeHtml(d.email || '–');
         var maat = DY.escapeHtml(DY._normBouw ? DY._normBouw(d.bouw || '–') : (d.bouw || '–'));
         var lengte = d.lengte ? d.lengte + 'cm' : '–';
@@ -17946,7 +17978,7 @@ DY._adminTabGebruikers = function(el) {
         html += '<tr><td>' + naam + '</td><td>' + email + '</td><td>' + maat + '</td>' +
           '<td>' + lengte + '</td><td>' + dsp + '</td><td>' + ts + '</td></tr>';
       });
-      html += '</tbody></table>';
+      html += '</tbody></table></div>';
       content.innerHTML = html;
     }, function() {
       var content = document.getElementById('dy-admin-content');
@@ -17968,6 +18000,9 @@ DY._adminTabPWA = function(el) {
 
   if (!DY.db) return;
 
+  // v60.1.37: gedeelde user-cache (zelfde als overzicht tab)
+  if (!DY._adminUserCache) DY._adminUserCache = {};
+
   // Realtime listener op pwa_events collectie
   DY._adminListeners.pwaEvents = DY.db.collection('pwa_events')
     .orderBy('ts', 'desc')
@@ -17984,11 +18019,31 @@ DY._adminTabPWA = function(el) {
         if (d.platform === 'ios') totals.ios++;
         var ts = d.ts ? new Date(d.ts).toLocaleString('nl-NL', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '–';
         var icon = d.type === 'installed' ? '✅' : '🗑';
+        // v60.1.37: toon username i.p.v. UID-code. Async lookup + DOM patch.
+        var uidLabel;
+        if (!d.uid) {
+          uidLabel = 'Gast';
+        } else if (DY._adminUserCache[d.uid]) {
+          uidLabel = DY._adminUserCache[d.uid];
+        } else {
+          uidLabel = 'Laden…';
+          (function(uid) {
+            DY.db.collection('users').doc(uid).get().then(function(u) {
+              if (!u.exists) {
+                DY._adminUserCache[uid] = 'Gast';
+              } else {
+                var nm = u.data().displayName || (u.data().email && u.data().email.split('@')[0]) || 'Onbekend';
+                DY._adminUserCache[uid] = nm;
+              }
+              document.querySelectorAll('[data-admin-pwa-uid="' + uid + '"]').forEach(function(s){ s.textContent = DY._adminUserCache[uid]; });
+            }).catch(function(){});
+          })(d.uid);
+        }
         rows += '<div class="dy-admin-pwa-rij">' +
           '<span>' + icon + '</span>' +
           '<span>' + DY.escapeHtml(d.type || '–') + '</span>' +
           '<span>' + DY.escapeHtml(d.platform || '–') + '</span>' +
-          '<span>' + DY.escapeHtml(d.uid ? d.uid.slice(0,8)+'…' : 'gast') + '</span>' +
+          '<span data-admin-pwa-uid="' + DY.escapeHtml(d.uid || '') + '">' + DY.escapeHtml(uidLabel) + '</span>' +
           '<span class="dy-admin-pwa-ts">' + ts + '</span>' +
         '</div>';
       });

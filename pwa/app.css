@@ -13467,35 +13467,67 @@ strong.dy-dsp-label {
   border-radius: 12px; overflow: hidden;
 }
 .dy-admin-online-rij {
-  display: grid; grid-template-columns: 10px 1fr 80px 60px 50px;
+  display: grid; grid-template-columns: 10px 1fr auto auto auto;
   gap: 10px; align-items: center;
   padding: 10px 14px; border-bottom: 1px solid rgba(30,26,15,0.05);
-  font-size: 0.78rem; color: var(--ink);
+  font-size: 0.78rem; color: var(--ink); min-width: 0;
 }
 .dy-admin-online-rij:last-child { border-bottom: none; }
 .dy-admin-online-dot {
   width: 8px; height: 8px; border-radius: 50%;
   background: #1D9E75; flex-shrink: 0;
 }
-.dy-admin-online-naam { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dy-admin-online-route { color: var(--clay); font-size: 0.72rem; }
-.dy-admin-online-device { color: var(--ink-muted); font-size: 0.70rem; }
-.dy-admin-online-tijd { color: var(--ink-muted); font-size: 0.70rem; text-align: right; }
+.dy-admin-online-naam { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.dy-admin-online-route { color: var(--clay); font-size: 0.72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px; }
+.dy-admin-online-device { color: var(--ink-muted); font-size: 0.70rem; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dy-admin-online-tijd { color: var(--ink-muted); font-size: 0.70rem; text-align: right; white-space: nowrap; }
+
+/* v60.1.37: mobile (< 600px) — herstructureer rij naar 2 lagen zodat niets afgesneden wordt */
+@media (max-width: 599px) {
+  .dy-admin-online-rij {
+    grid-template-columns: 8px 1fr auto;
+    grid-template-areas:
+      "dot naam tijd"
+      ". meta meta";
+    gap: 4px 8px;
+    padding: 10px 12px;
+  }
+  .dy-admin-online-dot { grid-area: dot; }
+  .dy-admin-online-naam { grid-area: naam; font-size: 0.82rem; }
+  .dy-admin-online-tijd { grid-area: tijd; }
+  /* Route en device naast elkaar onder de naam */
+  .dy-admin-online-route {
+    grid-area: meta;
+    max-width: 100%;
+    display: inline-block;
+  }
+  .dy-admin-online-device {
+    grid-row: 2; grid-column: 3;
+    text-align: right;
+    max-width: 100%;
+  }
+  /* Verplaats device naar dezelfde rij als route via flex-trick: gebruik order */
+  .dy-admin-online-rij::after {
+    content: " ";
+    grid-row: 2; grid-column: 2;
+  }
+}
 
 /* Gebruikers tabel */
+.dy-admin-tabel-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
 .dy-admin-tabel {
-  width: 100%; border-collapse: collapse; font-size: 0.78rem;
+  width: 100%; min-width: 540px; border-collapse: collapse; font-size: 0.78rem;
   background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
 }
 .dy-admin-tabel th {
   padding: 10px 12px; text-align: left; font-size: 0.68rem;
   font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
   color: var(--ink-muted); border-bottom: 1px solid var(--border);
-  background: var(--cream);
+  background: var(--cream); white-space: nowrap;
 }
 .dy-admin-tabel td {
   padding: 9px 12px; border-bottom: 1px solid rgba(30,26,15,0.05);
-  color: var(--ink); white-space: nowrap; overflow: hidden; max-width: 140px; text-overflow: ellipsis;
+  color: var(--ink); white-space: nowrap; overflow: hidden; max-width: 160px; text-overflow: ellipsis;
 }
 .dy-admin-tabel tr:last-child td { border-bottom: none; }
 .dy-admin-tabel tr:hover td { background: rgba(198,125,6,0.04); }
@@ -13506,13 +13538,39 @@ strong.dy-dsp-label {
   border-radius: 12px; overflow: hidden;
 }
 .dy-admin-pwa-rij {
-  display: grid; grid-template-columns: 20px 80px 70px 1fr 80px;
+  display: grid; grid-template-columns: 20px auto auto 1fr auto;
   gap: 8px; align-items: center;
   padding: 9px 14px; border-bottom: 1px solid rgba(30,26,15,0.05);
-  font-size: 0.78rem; color: var(--ink);
+  font-size: 0.78rem; color: var(--ink); min-width: 0;
 }
 .dy-admin-pwa-rij:last-child { border-bottom: none; }
+.dy-admin-pwa-rij > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .dy-admin-pwa-ts { color: var(--ink-muted); font-size: 0.70rem; text-align: right; }
+
+/* v60.1.37: mobile (< 600px) — herstructureer PWA rij naar 2 lagen */
+@media (max-width: 599px) {
+  .dy-admin-pwa-rij {
+    grid-template-columns: 20px 1fr auto;
+    grid-template-areas:
+      "icon type tijd"
+      "icon platform user";
+    gap: 2px 8px;
+    padding: 10px 12px;
+  }
+  .dy-admin-pwa-rij > span:nth-child(1) { grid-area: icon; align-self: center; }
+  .dy-admin-pwa-rij > span:nth-child(2) { grid-area: type; font-weight: 600; }
+  .dy-admin-pwa-rij > span:nth-child(3) { grid-area: platform; color: var(--ink-muted); font-size: 0.72rem; }
+  .dy-admin-pwa-rij > span:nth-child(4) { grid-area: user; text-align: right; color: var(--ink-muted); font-size: 0.72rem; }
+  .dy-admin-pwa-ts { grid-area: tijd; }
+}
+
+/* v60.1.37: mobile padding admin-content */
+@media (max-width: 599px) {
+  .dy-admin-content { padding: 12px; }
+  .dy-admin-tabs { padding: 10px 12px; }
+  .dy-admin-kpi { padding: 14px 8px; }
+  .dy-admin-kpi-val { font-size: 1.5rem; }
+}
 
 /* ── Privacy Center — Mijn Gegevens blok ────────────────────── */
 .dy-pc-export-blok {
