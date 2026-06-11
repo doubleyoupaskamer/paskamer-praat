@@ -10828,8 +10828,7 @@ img {
 
 .dy-hm-hero {
   position: relative;
-  height: calc(100dvh - var(--topbar-h, 56px) - var(--nav-h, 64px));
-  min-height: 420px;
+  min-height: calc(100dvh - var(--topbar-h, 56px) - var(--nav-h, 64px));
   display: flex;
   align-items: flex-end;
   overflow: hidden;
@@ -10855,8 +10854,7 @@ img {
 /* Desktop: volledige portretfoto, gecentreerd, geblurde zijkanten */
 @media (min-width: 768px) {
   .dy-hm-hero {
-    height: calc(100dvh - var(--topbar-h, 56px) - var(--nav-h, 64px));
-    min-height: 560px;
+    min-height: calc(100dvh - var(--topbar-h, 56px) - var(--nav-h, 64px));
   }
   /* Geblurde achtergrond voor zijkanten naast de portretfoto */
   .dy-hm-hero::before {
@@ -17004,105 +17002,77 @@ geen layout shift */
   background: #0a0806 !important;
 }
 
-/* v60.1.12 LEGE-RUIMTE FIX: niet meer 100dvh forceren op de wrap.
-   De hero vult zelf de viewport (calc(100dvh - topbar - nav)) en
-   de nieuwe BrandPartnerCTA sectie vult de natuurlijke flow eronder.
-   Eerder: min-height:100dvh creëerde lege ruimte onder de hero. */
+/* v60.1.13 LEGE-RUIMTE FIX: niet meer 100dvh forceren op de wrap.
+   De hero heeft zelf min-height: 100dvh-minus-chrome en groeit met
+   integrated partner CTA mee. Eerder forceerde de wrap extra ruimte
+   onder de hero. */
 .dy-hm-wrap {
   background: #0a0806;
 }
 
-/* Desktop: hero hoogte zonder topbar/nav aftrek */
-@media (min-width: 1024px) {
-  .dy-hm-hero {
-    height: calc(100dvh);
-    min-height: 500px;
-  }
-}
-
 /* ════════════════════════════════════════════════════════════════
-   BrandPartnerCTA — homepage merken-blok (v60.1.12)
-   Zelfde huisstijl/layouttaal als bestaande dy-hm-* en dy-bpos-*.
+   Partner CTA, geïntegreerd in hero (v60.1.13)
+   Geen aparte sectie meer. Subtiele scheidingslijn binnen het hero-content
+   blok. Zelfde tokens als bestaande dy-hm-hero-*.
    ════════════════════════════════════════════════════════════════ */
-.dy-hm-partner {
-  position: relative;
-  background: linear-gradient(180deg, #0a0806 0%, #14110a 50%, #0a0806 100%);
-  border-top: 1px solid rgba(198,125,6,0.18);
-  padding: 56px 22px 72px;
+.dy-hm-hero-partner {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(252,248,239,0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-.dy-hm-partner-inner {
-  max-width: 680px;
-  margin: 0 auto;
-  text-align: left;
-}
-.dy-hm-partner-eyebrow {
-  display: inline-block;
+.dy-hm-hero-partner-eyebrow {
   font-family: 'DM Sans', sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(212,145,10,0.85);
-  margin-bottom: 12px;
 }
-.dy-hm-partner-titel {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(1.6rem, 4.5vw, 2.1rem);
-  font-weight: 600;
-  color: #fcf8ef;
-  letter-spacing: -0.005em;
-  margin: 0 0 14px;
-  line-height: 1.15;
-}
-.dy-hm-partner-titel em {
-  color: var(--clay, #d4910a);
-  font-style: italic;
-}
-.dy-hm-partner-sub {
+.dy-hm-hero-partner-sub {
   font-family: 'DM Sans', sans-serif;
-  font-size: 0.93rem;
-  line-height: 1.55;
+  font-size: 0.84rem;
+  line-height: 1.5;
   color: rgba(252,248,239,0.68);
-  margin: 0 0 22px;
-  max-width: 540px;
+  margin: 0;
+  max-width: 460px;
 }
-.dy-hm-partner-knoppen {
+.dy-hm-hero-partner-knoppen {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+  margin-top: 4px;
 }
-.dy-hm-partner-cta-primair,
-.dy-hm-partner-cta-secundair {
+.dy-hm-hero-partner-cta,
+.dy-hm-hero-partner-cta-secundair {
   font-family: 'DM Sans', sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  padding: 12px 24px;
+  padding: 9px 18px;
   border-radius: 100px;
   cursor: pointer;
   border: none;
   transition: opacity 0.15s, transform 0.12s, background 0.15s;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  min-height: 44px;
+  min-height: 38px;
 }
-.dy-hm-partner-cta-primair {
+.dy-hm-hero-partner-cta {
   background: linear-gradient(145deg, #d4910a 0%, #c67d06 60%, #b06d05 100%);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(198,125,6,0.30);
+  box-shadow: 0 4px 14px rgba(198,125,6,0.28);
 }
-.dy-hm-partner-cta-primair:hover { opacity: 0.92; }
-.dy-hm-partner-cta-primair:active { transform: scale(0.97); }
-.dy-hm-partner-cta-secundair {
+.dy-hm-hero-partner-cta:hover { opacity: 0.92; }
+.dy-hm-hero-partner-cta:active { transform: scale(0.97); }
+.dy-hm-hero-partner-cta-secundair {
   background: rgba(255,255,255,0.06);
   color: #fcf8ef;
-  border: 1px solid rgba(252,248,239,0.16);
+  border: 1px solid rgba(252,248,239,0.18);
 }
-.dy-hm-partner-cta-secundair:hover { background: rgba(255,255,255,0.12); }
-.dy-hm-partner-cta-secundair:active { transform: scale(0.97); }
-
-@media (min-width: 768px) {
-  .dy-hm-partner { padding: 80px 48px 96px; }
-}
+.dy-hm-hero-partner-cta-secundair:hover { background: rgba(255,255,255,0.12); }
+.dy-hm-hero-partner-cta-secundair:active { transform: scale(0.97); }
 
 /* ════════════════════════════════════════════════════════════════
    Samenwerkingen overlay (v60.1.12)

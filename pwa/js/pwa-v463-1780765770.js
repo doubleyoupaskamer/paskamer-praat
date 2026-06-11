@@ -2198,17 +2198,27 @@ DY.renderHome = function() {
           '<picture>' +
             '<source type="image/avif" srcset="hero-model-480.avif 480w, hero-model-800.avif 800w, hero-model-1024.avif 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 80vw, 1024px">' +
             '<source type="image/webp" srcset="hero-model-480.webp 480w, hero-model-800.webp 800w, hero-model-1024.webp 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 80vw, 1024px">' +
-            '<img src="hero-model.png" class="dy-hm-hero-img" width="1024" height="1536" alt="Vrouw in bloemenjurk — Paskamer Praat tall en plus size fashion community" loading="eager" fetchpriority="high" decoding="async">' +
+            '<img src="hero-model.png" class="dy-hm-hero-img" width="1024" height="1536" alt="Paskamer Praat, een community voor iedereen die buiten standaard confectiematen valt" loading="eager" fetchpriority="high" decoding="async">' +
           '</picture>' +
           '<div class="dy-hm-hero-overlay"></div>' +
         '</div>' +
         '<div class="dy-hm-hero-content">' +
-          '<span class="dy-hm-hero-eyebrow">Tall &amp; Plus Size Community</span>' +
+          '<span class="dy-hm-hero-eyebrow">Tall, Plus &amp; Inclusieve Mode</span>' +
           '<h1 class="dy-hm-hero-titel">Mode die écht<br><em>past bij jou</em></h1>' +
-          '<p class="dy-hm-hero-sub">Deel je outfits, vind kleding die past bij jouw lichaam en word onderdeel van een community die begrijpt wat jij ervaart.</p>' +
+          '<p class="dy-hm-hero-sub">Een plek voor iedereen die buiten standaard confectiematen valt. Deel outfits, ontvang eerlijke feedback en ontdek stijladvies van de community en AI.</p>' +
           '<div class="dy-hm-hero-knoppen">' +
             '<button class="dy-hm-hero-cta-sec" onclick="DY.navigeer(\x27feed\x27)" data-testid="home-cta-feed">Ontdek de community</button>' +
             '<button class="dy-hm-hero-cta-bpos" onclick="DY.toonBposOverlay()" data-testid="home-cta-bpos">Body Positivity</button>' +
+          '</div>' +
+          // v60.1.13: Partner CTA volledig geïntegreerd in het bestaande hero-blok.
+          // Geen extra sectie meer, alleen een subtiele scheidingslijn binnen het content-blok.
+          '<div class="dy-hm-hero-partner" data-testid="home-brand-partner">' +
+            '<span class="dy-hm-hero-partner-eyebrow">Voor merken</span>' +
+            '<p class="dy-hm-hero-partner-sub">Laat jouw merk ontdekken door een betrokken modecommunity die zoekt naar kleding die écht past.</p>' +
+            '<div class="dy-hm-hero-partner-knoppen">' +
+              '<button class="dy-hm-hero-partner-cta" onclick="DY.toonSamenwerkingenOverlay()" data-testid="home-partner-info-btn">Bekijk samenwerkingen</button>' +
+              '<button class="dy-hm-hero-partner-cta-secundair" onclick="DY.brandPortal && DY.brandPortal.openPortaal ? DY.brandPortal.openPortaal() : DY.navigeer(\x27brand_register\x27)" data-testid="home-partner-register-btn">Aanmelden als merk</button>' +
+            '</div>' +
           '</div>' +
           '<div class="dy-hm-hero-legal">' +
             '<button onclick="DY.navigeer(\x27voorwaarden\x27)" class="dy-hm-hero-legal-link">Algemene voorwaarden</button>' +
@@ -2216,18 +2226,6 @@ DY.renderHome = function() {
             '<button onclick="DY.navigeer(\x27privacy\x27)" class="dy-hm-hero-legal-link">Privacybeleid</button>' +
             '<span class="dy-hm-hero-legal-sep">·</span>' +
             '<a href="mailto:info@doubleyousmallandtall.nl" class="dy-hm-hero-legal-link">Contact</a>' +
-          '</div>' +
-        '</div>' +
-      '</section>' +
-      // v60.1.12 — BrandPartnerCTA blok direct onder de hero/community sectie
-      '<section class="dy-hm-partner" data-testid="home-brand-partner">' +
-        '<div class="dy-hm-partner-inner">' +
-          '<span class="dy-hm-partner-eyebrow">Voor merken</span>' +
-          '<h2 class="dy-hm-partner-titel">Word partner van <em>Paskamerpraat</em></h2>' +
-          '<p class="dy-hm-partner-sub">Laat jouw merk ontdekken door een betrokken modecommunity van vrouwen die zoeken naar kleding die écht past.</p>' +
-          '<div class="dy-hm-partner-knoppen">' +
-            '<button class="dy-hm-partner-cta-primair" onclick="DY.toonSamenwerkingenOverlay()" data-testid="home-partner-info-btn">Bekijk samenwerkingen</button>' +
-            '<button class="dy-hm-partner-cta-secundair" onclick="DY.brandPortal && DY.brandPortal.openPortaal ? DY.brandPortal.openPortaal() : DY.navigeer(\x27brand_register\x27)" data-testid="home-partner-register-btn">Aanmelden als merk</button>' +
           '</div>' +
         '</div>' +
       '</section>' +
@@ -2255,7 +2253,7 @@ DY.toonSamenwerkingenOverlay = function() {
         '<span class="dy-bpos-w">W</span>' +
         '<div>' +
           '<span class="dy-bpos-titel" id="dy-sw-titel">Samenwerken met Paskamerpraat</span>' +
-          '<span class="dy-bpos-sub">Voor merken &amp; ontwerpers in tall &amp; plus size mode</span>' +
+          '<span class="dy-bpos-sub">Voor merken en ontwerpers in inclusieve mode</span>' +
         '</div>' +
       '</div>' +
 
@@ -2264,17 +2262,18 @@ DY.toonSamenwerkingenOverlay = function() {
         // 1. Intro
         '<section class="dy-sw-sectie">' +
           '<h3 class="dy-sw-sectie-titel">Introductie</h3>' +
-          '<p>Paskamerpraat is dé community voor vrouwen die buiten de standaard maten vallen. Onze leden delen dagelijks pasvorm-ervaringen, outfits en aanbevelingen. Voor jouw merk is dit een unieke kans om gericht zichtbaar te worden bij een groep die actief op zoek is naar passende mode.</p>' +
+          '<p>Paskamerpraat is een community voor iedereen die buiten standaard confectiematen valt. Leden delen dagelijks pasvorm, outfits en eerlijke aanbevelingen. Voor jouw merk is dit een unieke kans om zichtbaar te worden bij een groep die actief op zoek is naar passende mode.</p>' +
         '</section>' +
 
         // 2. Voor wie
         '<section class="dy-sw-sectie">' +
           '<h3 class="dy-sw-sectie-titel">Voor wie</h3>' +
           '<ul class="dy-sw-lijst">' +
-            '<li><strong>Tall fashion merken</strong> — kleding vanaf maat 38, lengte 36+</li>' +
-            '<li><strong>Plus size merken</strong> — collecties vanaf maat 44/46 en groter</li>' +
-            '<li><strong>Schoenen, lingerie, accessoires</strong> die rekening houden met afwijkende maten</li>' +
+            '<li><strong>Tall fashion merken</strong>, kleding met lengtematen 36 en groter</li>' +
+            '<li><strong>Plus size merken</strong>, collecties vanaf maat 44 of 46 en groter</li>' +
+            '<li><strong>Petite, schoenen, lingerie en accessoires</strong> met afwijkende maatvoering</li>' +
             '<li><strong>Ontwerpers</strong> die inclusieve mode maken</li>' +
+            '<li><strong>Unisex en genderneutrale labels</strong> die ruimte bieden aan alle lichamen</li>' +
           '</ul>' +
         '</section>' +
 
@@ -2282,22 +2281,22 @@ DY.toonSamenwerkingenOverlay = function() {
         '<section class="dy-sw-sectie">' +
           '<h3 class="dy-sw-sectie-titel">Hoe werkt het</h3>' +
           '<ol class="dy-sw-stappen">' +
-            '<li><strong>Aanmelden</strong> — vul het merkprofiel in via het merkenportaal (BTW, website, categorie)</li>' +
-            '<li><strong>Goedkeuring</strong> — wij beoordelen binnen 2 werkdagen en activeren je merkaccount</li>' +
-            '<li><strong>Producten uploaden</strong> — voeg je collectie toe via een eigen merkdashboard</li>' +
-            '<li><strong>Campagne starten</strong> — kies plaatsingen, budget en doelgroep zelf</li>' +
-            '<li><strong>Live resultaten</strong> — bekijk impressies, clicks en conversies in jouw analytics</li>' +
+            '<li><strong>Aanmelden:</strong> vul het merkprofiel in via het merkenportaal (BTW, website, categorie).</li>' +
+            '<li><strong>Goedkeuring:</strong> wij beoordelen binnen 2 werkdagen en activeren je merkaccount.</li>' +
+            '<li><strong>Producten uploaden:</strong> voeg je collectie toe via een eigen merkdashboard.</li>' +
+            '<li><strong>Campagne starten:</strong> kies plaatsingen, budget en doelgroep zelf.</li>' +
+            '<li><strong>Live resultaten:</strong> bekijk impressies, clicks en conversies in je analytics.</li>' +
           '</ol>' +
         '</section>' +
 
         // 4. Campagnes
         '<section class="dy-sw-sectie">' +
-          '<h3 class="dy-sw-sectie-titel">Campagne-mogelijkheden</h3>' +
+          '<h3 class="dy-sw-sectie-titel">Campagne mogelijkheden</h3>' +
           '<div class="dy-sw-grid">' +
-            '<div class="dy-sw-kaart"><strong>Merken-tab feed</strong><span>Producten verschijnen in een aparte feed voor leden die actief zoeken</span></div>' +
-            '<div class="dy-sw-kaart"><strong>Story-ring</strong><span>Premium plaatsing bovenaan de community-feed</span></div>' +
-            '<div class="dy-sw-kaart"><strong>Outfit Review</strong><span>Jouw kleding wordt voorgesteld in pasvorm-vergelijkingen</span></div>' +
-            '<div class="dy-sw-kaart"><strong>AI Stylist</strong><span>Worden aanbevolen wanneer leden naar advies vragen</span></div>' +
+            '<div class="dy-sw-kaart"><strong>Merken tab feed</strong><span>Producten verschijnen in een aparte feed voor leden die actief zoeken.</span></div>' +
+            '<div class="dy-sw-kaart"><strong>Story ring</strong><span>Premium plaatsing bovenaan de community feed.</span></div>' +
+            '<div class="dy-sw-kaart"><strong>Outfit review</strong><span>Jouw kleding wordt voorgesteld in pasvorm vergelijkingen.</span></div>' +
+            '<div class="dy-sw-kaart"><strong>AI Stylist</strong><span>Worden aanbevolen wanneer leden om advies vragen.</span></div>' +
           '</div>' +
         '</section>' +
 
@@ -2305,11 +2304,11 @@ DY.toonSamenwerkingenOverlay = function() {
         '<section class="dy-sw-sectie">' +
           '<h3 class="dy-sw-sectie-titel">Voorwaarden</h3>' +
           '<ul class="dy-sw-lijst">' +
-            '<li>Geldig KvK + BTW-nummer</li>' +
-            '<li>Eigen webshop of verkooppunt</li>' +
-            '<li>Body-positive communicatie — geen schadelijke afslank- of dieetclaims</li>' +
-            '<li>Realistische product- en pasvorm-foto&apos;s</li>' +
-            '<li>Budget en facturatie via maandelijkse handmatige verwerking (geen automatische betalingen vooraf)</li>' +
+            '<li>Geldig KvK en BTW nummer.</li>' +
+            '<li>Eigen webshop of verkooppunt.</li>' +
+            '<li>Body positive communicatie, geen schadelijke afslank of dieetclaims.</li>' +
+            '<li>Realistische product en pasvorm foto&apos;s.</li>' +
+            '<li>Budget en facturatie via maandelijkse handmatige verwerking (geen automatische betalingen vooraf).</li>' +
           '</ul>' +
           '<p class="dy-sw-fijndruk">Lees de volledige <button class="dy-sw-link" onclick="DY.sluitSamenwerkingenOverlay();DY.navigeer(\x27voorwaarden\x27)">algemene voorwaarden</button> voor het complete reglement.</p>' +
         '</section>' +
