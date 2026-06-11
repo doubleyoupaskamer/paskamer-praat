@@ -38,6 +38,11 @@
 (function() {
   'use strict';
 
+  // v60.1.5 — vroege marker zodat we in DevTools console kunnen zien dat
+  // het script daadwerkelijk geladen is. Als deze niet verschijnt is het
+  // een cache/loading probleem en niet een logica-fout.
+  try { console.log('[brand-portal] script geladen v60.1.5-poll'); } catch(e) {}
+
   // ── Feature flag ────────────────────────────────────────────────────────
   try {
     if (localStorage.getItem('dy_brand_portal') === '0') {
@@ -1433,26 +1438,76 @@
     // ── Init: probeer direct knop te injecteren als profile al rendert ──
     setTimeout(injecteerProfielKnop, 600);
 
-    // ── v60.1.3 deep-link: lees URL en zet intent op BP._deeplink (sticky 5s).
-    // De wrapper hierboven hijackt automatisch elke router-call binnen 5 seconden
-    // tot we daadwerkelijk de brand-portal pagina gerenderd hebben. Werkt
-    // ongeacht timing van Firebase auth, SW reload of andere async events.
-    try {
-      var _qs = new URLSearchParams(location.search || '');
-      var _hash = (location.hash || '').replace(/^#\/?/, '');
-      var _gewenst = _qs.get('pagina') || _hash || '';
-      if (_gewenst && Object.prototype.hasOwnProperty.call(BP_PAGES, _gewenst)) {
-        BP._deeplink = _gewenst;
+    // ── v60.1.5 FINAL FIX — polling-based force-render ──────────────────
+    // Eerdere oplossingen leden aan async race conditions met onAuthReady.
+    // Deze aanpak is brute-force maar bulletproof: elke 200ms voor 8 seconden
+    // checken we of de URL nog een brand-portal pagina vraagt EN of #dy-main
+    // onze content toont. Zo nee → forceer re-render. Stopt automatisch zodra
+    // onze content zichtbaar is OF de URL niet meer een brand-portal route is.
+    function startForceRenderPoller() {
+      try {
+        var qs0 = new URLSearchParams(location.search || '');
+        var hash0 = (location.hash || '').replace(/^#\/?/, '');
+        var wanted = qs0.get('pagina') || hash0 || '';
+        if (!wanted || !Object.prototype.hasOwnProperty.call(BP_PAGES, wanted)) return;
+
+        console.log('[brand-portal] deep-link gedetecteerd:', wanted, '— start force-render poller');
+        BP._deeplink = wanted;
         BP._deeplinkAt = Date.now();
-        // Direct ook proberen te navigeren — als toonPagina al eerder
-        // gerendered heeft, hijackt de wrapper deze call zelf.
-        try { DY.toonPagina(_gewenst); } catch(e) {}
+
+        var attempts = 0;
+        var maxAttempts = 40; // 40 * 200ms = 8 seconden
+        var iv = setInterval(function() {
+          attempts++;
+
+          // Stop als URL niet meer brand-portal is (user navigeerde weg)
+          var qsNow = new URLSearchParams(location.search || '');
+          var hashNow = (location.hash || '').replace(/^#\/?/, '');
+          var w = qsNow.get('pagina') || hashNow || '';
+          if (!w || !Object.prototype.hasOwnProperty.call(BP_PAGES, w)) {
+            console.log('[brand-portal] URL veranderd, poller stopt');
+            clearInterval(iv);
+            return;
+          }
+
+          // Stop als onze content al aanwezig is (succes)
+          var main = document.getElementById('dy-main');
+          if (main && main.querySelector('.bp-page')) {
+            console.log('[brand-portal] brand-portal content gerenderd na', attempts, 'pogingen');
+            clearInterval(iv);
+            return;
+          }
+
+          // Forceer re-render
+          console.log('[brand-portal] poging', attempts, '— force render:', w);
+          try {
+            BP._deeplink = w;
+            BP._deeplinkAt = Date.now();
+            DY.pagina = null; // bypass de v60.1 stability guard
+            DY._laatstGerenderd = null;
+            DY.toonPagina(w);
+          } catch(e) {
+            console.warn('[brand-portal] force render fout:', e.message);
+          }
+
+          // Stop na max attempts
+          if (attempts >= maxAttempts) {
+            console.warn('[brand-portal] poller gestopt na', attempts, 'pogingen — content niet zichtbaar');
+            clearInterval(iv);
+          }
+        }, 200);
+
+        // Eerste poging meteen
+        try { DY.toonPagina(wanted); } catch(e) {}
+      } catch(e) {
+        console.warn('[brand-portal] poller setup fout:', e.message);
       }
-    } catch(e) { /* noop */ }
+    }
+    startForceRenderPoller();
 
     // ── Markeer geladen ──────────────────────────────────────────────────
     BP._loaded = true;
-    BP._versie = 'v60.1-brand-portal-v1.4-final';
+    BP._versie = 'v60.1-brand-portal-v1.5-poll';
 
   });
 })();
