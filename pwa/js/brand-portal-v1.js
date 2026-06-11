@@ -41,7 +41,7 @@
   // v60.1.5 — vroege marker zodat we in DevTools console kunnen zien dat
   // het script daadwerkelijk geladen is. Als deze niet verschijnt is het
   // een cache/loading probleem en niet een logica-fout.
-  try { console.log('[brand-portal] script geladen v60.1.5-poll'); } catch(e) {}
+  try { console.log('[brand-portal] script geladen v60.1.6-bootstrap'); } catch(e) {}
 
   // ── Feature flag ────────────────────────────────────────────────────────
   try {
@@ -1446,9 +1446,15 @@
     // onze content zichtbaar is OF de URL niet meer een brand-portal route is.
     function startForceRenderPoller() {
       try {
-        var qs0 = new URLSearchParams(location.search || '');
-        var hash0 = (location.hash || '').replace(/^#\/?/, '');
-        var wanted = qs0.get('pagina') || hash0 || '';
+        // v60.1.6: lees PRIMARILY uit window.__bpDeeplink (gevangen door
+        // inline script in HEAD vóór pwa-v463 de URL rewrite). Fallback naar
+        // location.search voor terug-compat.
+        var wanted = window.__bpDeeplink || '';
+        if (!wanted) {
+          var qs0 = new URLSearchParams(location.search || '');
+          var hash0 = (location.hash || '').replace(/^#\/?/, '');
+          wanted = qs0.get('pagina') || hash0 || '';
+        }
         if (!wanted || !Object.prototype.hasOwnProperty.call(BP_PAGES, wanted)) return;
 
         console.log('[brand-portal] deep-link gedetecteerd:', wanted, '— start force-render poller');
@@ -1460,12 +1466,10 @@
         var iv = setInterval(function() {
           attempts++;
 
-          // Stop als URL niet meer brand-portal is (user navigeerde weg)
-          var qsNow = new URLSearchParams(location.search || '');
-          var hashNow = (location.hash || '').replace(/^#\/?/, '');
-          var w = qsNow.get('pagina') || hashNow || '';
-          if (!w || !Object.prototype.hasOwnProperty.call(BP_PAGES, w)) {
-            console.log('[brand-portal] URL veranderd, poller stopt');
+          // Stop als gebruiker daadwerkelijk naar andere route is genavigeerd
+          // (we tracken dit via DY.pagina; URL kan al herschreven zijn door pwa-v463)
+          if (window.__bpUserNavigated) {
+            console.log('[brand-portal] user navigated weg — poller stopt');
             clearInterval(iv);
             return;
           }
@@ -1479,18 +1483,17 @@
           }
 
           // Forceer re-render
-          console.log('[brand-portal] poging', attempts, '— force render:', w);
+          console.log('[brand-portal] poging', attempts, '— force render:', wanted);
           try {
-            BP._deeplink = w;
+            BP._deeplink = wanted;
             BP._deeplinkAt = Date.now();
-            DY.pagina = null; // bypass de v60.1 stability guard
+            DY.pagina = null;
             DY._laatstGerenderd = null;
-            DY.toonPagina(w);
+            DY.toonPagina(wanted);
           } catch(e) {
             console.warn('[brand-portal] force render fout:', e.message);
           }
 
-          // Stop na max attempts
           if (attempts >= maxAttempts) {
             console.warn('[brand-portal] poller gestopt na', attempts, 'pogingen — content niet zichtbaar');
             clearInterval(iv);
@@ -1507,7 +1510,7 @@
 
     // ── Markeer geladen ──────────────────────────────────────────────────
     BP._loaded = true;
-    BP._versie = 'v60.1-brand-portal-v1.5-poll';
+    BP._versie = 'v60.1-brand-portal-v1.6-bootstrap';
 
   });
 })();

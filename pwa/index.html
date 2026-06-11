@@ -313,6 +313,30 @@
   <link rel="stylesheet" href="/app.css?v=60.1-stability">
   <link rel="stylesheet" href="/brand-portal.css?v=60.1-brand-portal-v1">
 
+  <!-- v60.1.6 INLINE URL CAPTURE — vangt deep-link af VOORDAT pwa-v463 de URL
+       herschrijft via history.replaceState naar /feed. Brand-portal-v1.js
+       leest later uit window.__bpDeeplink. -->
+  <script>
+    (function() {
+      try {
+        var qs = new URLSearchParams(window.location.search || '');
+        var hash = (window.location.hash || '').replace(/^#\/?/, '');
+        var p = qs.get('pagina') || hash || '';
+        var BRAND_ROUTES = {
+          merken:1, brand_register:1, brand_login:1, brand_pending:1,
+          brand_dashboard:1, brand_producten:1, brand_product_nieuw:1,
+          brand_campagnes:1, brand_campagne_nieuw:1, brand_analytics:1,
+          admin_brands:1, admin_campagnes:1, admin_inkomsten:1
+        };
+        if (p && BRAND_ROUTES[p]) {
+          window.__bpDeeplink = p;
+          window.__bpDeeplinkAt = Date.now();
+          console.log('[brand-portal-bootstrap] URL deeplink vastgelegd:', p);
+        }
+      } catch(e) {}
+    })();
+  </script>
+
   <!-- Service Worker registratie -->
   <script>
     if ('serviceWorker' in navigator) {
@@ -818,7 +842,7 @@ window._dyEmergencyTimer = setTimeout(function() {
   <script defer src="js/zoek-mijnmaat-v1.js?v=60"></script>
   <script defer src="js/sw-auto-update-v1.js?v=60.1"></script>
   <script defer src="js/extra-menu-v3.js?v=60"></script>
-  <script defer src="js/brand-portal-v1.js?v=60.1-brand-portal-v1.5-poll"></script>
+  <script defer src="js/brand-portal-v1.js?v=60.1-brand-portal-v1.6-bootstrap"></script>
   <script defer src="js/ai-fit-chat-v3.js?v=60"></script>
   <script defer src="js/push-notifications-v3.js?v=60"></script>
   <script defer src="js/app-badge-v1.js?v=60"></script>
