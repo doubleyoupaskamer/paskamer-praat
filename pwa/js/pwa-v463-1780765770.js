@@ -2196,9 +2196,8 @@ DY.renderHome = function() {
       '<section class="dy-hm-hero">' +
         '<div class="dy-hm-hero-bg">' +
           '<picture>' +
-            '<source type="image/avif" srcset="hero-model-480.avif 480w, hero-model-800.avif 800w, hero-model-1024.avif 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 80vw, 1024px">' +
             '<source type="image/webp" srcset="hero-model-480.webp 480w, hero-model-800.webp 800w, hero-model-1024.webp 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 80vw, 1024px">' +
-            '<img src="hero-model.png" class="dy-hm-hero-img" width="1024" height="1536" alt="Paskamer Praat, een community voor iedereen die buiten standaard confectiematen valt" loading="eager" fetchpriority="high" decoding="async">' +
+            '<img src="hero-model.jpg" srcset="hero-model-480.jpg 480w, hero-model-800.jpg 800w, hero-model-1024.jpg 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 80vw, 1024px" class="dy-hm-hero-img" width="848" height="1264" alt="Paskamer Praat, een community voor iedereen die buiten standaard confectiematen valt" loading="eager" fetchpriority="high" decoding="async">' +
           '</picture>' +
           '<div class="dy-hm-hero-overlay"></div>' +
         '</div>' +
