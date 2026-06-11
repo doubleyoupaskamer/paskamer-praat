@@ -1882,6 +1882,12 @@ DY.renderVindMensen = async function() {
 DY.renderLogin = function() {
   const main = document.getElementById('dy-main');
   if (!main) return;
+  // v60.1.11 FULL-FLOW: als gebruiker al ingelogd is, niet de login-form
+  // tonen — direct doorsturen naar de feed (voorkomt verwarring + double-login).
+  if (DY.user && DY.user.uid) {
+    try { DY.navigeer('feed'); } catch(e) {}
+    return;
+  }
   main.innerHTML = `
     <div class="dy-auth-wrap">
       <button class="dy-back-btn" onclick="try{DY.pagina=null;DY.navigeer('home');}catch(e){window.location.replace('/');}" style="margin:var(--sp-4) var(--sp-4) 0">← Terug</button>
@@ -1911,11 +1917,35 @@ DY.renderLogin = function() {
     const email = document.getElementById('login-email').value.trim();
     const pw = document.getElementById('login-pw').value;
     const err = document.getElementById('dy-auth-err');
+    const btn = document.getElementById('btn-login');
     try {
       err.style.display = 'none';
+      btn.disabled = true;
+      const _origLabel = btn.textContent;
+      btn.textContent = 'Bezig met inloggen…';
+
+      // v60.1.11 FULL-FLOW LOGIN: markeer dat we expliciet ingelogd hebben.
+      // onAuthReady leest deze flag en toont éénmalig de welkomst-toast
+      // (alleen bij echte login-clicks, niet bij sessie-restore op refresh).
+      try { window.__dyJustLoggedIn = true; } catch(e) {}
+
       await DY.login(email, pw);
+
+      // Wacht max 3 seconden tot onAuthStateChanged DY.user heeft gevuld
+      // zodat we niet eerst de gast-feed renderen vóór de echte sessie er is.
+      await new Promise(function(resolve) {
+        var pollTimeout = setTimeout(resolve, 3000);
+        (function poll() {
+          if (DY.user && DY.user.uid) { clearTimeout(pollTimeout); resolve(); return; }
+          setTimeout(poll, 80);
+        })();
+      });
+
+      btn.disabled = false; btn.textContent = _origLabel;
       DY.navigeer('feed');
     } catch(e) {
+      try { window.__dyJustLoggedIn = false; } catch(_) {}
+      btn.disabled = false; btn.textContent = 'Inloggen';
       err.textContent = 'Inloggen mislukt. Controleer je e-mailadres en wachtwoord.';
       err.style.display = 'block';
     }
@@ -23320,6 +23350,26 @@ DY.toonVerhaalPopup = async function(id) {
     var result = _origOnAuthReady.apply(DY, arguments);
     if (user && !user.isAnonymous) {
       setTimeout(function() { DY._bookmarkQueueDrain(); }, 1500);
+
+      // v60.1.11 WELKOMST-TOAST: éénmalig tonen wanneer de gebruiker
+      // expliciet inlogt via de loginform (niet bij elke sessie-restore).
+      // De flag wordt gezet door de login button-handler en hier gewist.
+      try {
+        if (window.__dyJustLoggedIn) {
+          window.__dyJustLoggedIn = false;
+          // Wacht tot DY.profile geladen is voor correcte displayName
+          setTimeout(function() {
+            try {
+              var naam = (DY.profile && (DY.profile.displayName || DY.profile.naam))
+                || (user.displayName)
+                || (user.email ? user.email.split('@')[0] : 'jij');
+              if (typeof DY.toast === 'function') {
+                DY.toast('Welkom terug, ' + naam + '!');
+              }
+            } catch(e) {}
+          }, 600);
+        }
+      } catch(e) {}
     }
     return result;
   };
