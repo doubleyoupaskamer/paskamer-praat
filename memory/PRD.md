@@ -1,74 +1,102 @@
-# PaskamerPraat.nl — PWA Stability Recovery (v60.1)
+# PaskamerPraat.nl — Brand Portal v1 + Stability v60.1
 
-## Problem statement (origineel, Nederlands)
-Onboarding, Routing, PWA & Stability Recovery Audit voor PaskamerPraat.nl. Geen redesign, geen nieuwe features, geen verwijdering van bestaande code. Pure optimalisatie, bugfixing en stabiliteitsverbetering.
+## Problem statement (huidige sessie)
+Bouw een volledig werkend self-service merkportaal als pure uitbreiding, zonder inbreuk op bestaande code, functionaliteiten, UX, routing, styling of dataflows. Met RBAC (USER/BRAND/ADMIN), feature flags, productiegeschikte implementatie en hamburgermenu-entry.
+
+## User choices (vastgelegd)
+- **1A** Fase 1 MVP: registratie + approval + product-CMS + campagne CRUD + basis analytics
+- **2A** Geen echte betalingen — budget als getal, admin verwerkt facturen handmatig
+- **3B** Alleen apart "Merken"-tabblad, geen menging met organische feed
+- **4A** Brand-producten volledig gescheiden van Shopify-flow (`brand_products` collectie)
+- **5A** Firebase Storage voor image uploads
+- **Plus:** menu-entry in profielmenu (= hamburger-equivalent in deze app)
 
 ## Tech stack
-- **Static PWA** (HTML/CSS/JS) — geen build step
-- **Firebase** (Firestore + Auth) — back-end
-- **Service Worker** — caching + offline
-- **Hosting:** Cloudflare Pages (gebaseerd op `_headers` + `_redirects` bestanden)
+- **Static PWA** (HTML/CSS/JS) op Cloudflare Pages
+- **Firebase** (Firestore + Auth + Storage)
+- **Service Worker** (caching + offline)
+- Geen build step, geen SSR
 
-## Codebase context
-- Uitgepakte basis: `/app/pwa/` (uit `paskamerpraat-pwa-v60-COMPLETE.zip`)
+## Codebase locatie
+- Werk-folder: `/app/pwa/`
 - Originele back-up: `/app/paskamerpraat-v60-original.zip`
-- Fixed output: `/app/paskamerpraat-pwa-v60.1-FIXED.zip`
+- Fixed + brand portal output: `/app/paskamerpraat-pwa-v60.1-brand-portal.zip`
 
-## Wat is geleverd (v60.1)
-✅ **Bug 1 — Dubbele onboarding/route renders** opgelost
-   - Service Worker registratie idempotent gemaakt (sw-auto-update-v1.js)
-   - Duplicate `reg.update()` block in pwa-v463 verwijderd
-   - `onAuthReady` skipt identieke auth state changes (token refresh)
-   - `toonPagina` heeft re-render guard voor identieke pagina-keys
+## Architectuur — Brand Portal
+- **Geïsoleerde module**: `js/brand-portal-v1.js` + `brand-portal.css` met `bp-` prefix → géén overrides
+- **Router wrapper**: hookt op `DY.toonPagina` zonder bestaande tabel te muteren
+- **Profielmenu injectie**: `MutationObserver` injecteert "Merkenportaal"-knop in bestaande `.dy-profiel-acties`
+- **RBAC**: `users.role='brand'` + `brands.status` + bestaande `DY._isAdmin()`
+- **Feature flag**: `localStorage.dy_brand_portal='0'` schakelt module uit + script-tag verwijderbaar
 
-✅ **Bug 2 — iOS "Voeg toe" knop werkt niet** opgelost
-   - Conflict tussen inline #dy-install-banner en #dy-a2hs-prompt opgelost
-   - Event-handler binding direct i.p.v. DOMContentLoaded race
-   - `touchend` listener naast click voor directe iOS-respons
-   - `touch-action: manipulation` + `-webkit-tap-highlight-color` + z-index op alle install/nav-knoppen
+## Nieuwe routes
+| Route | Toegang |
+|---|---|
+| `/merken` | publiek |
+| `/brand_register` | publiek |
+| `/brand_pending` | brand (pending/rejected/suspended) |
+| `/brand_dashboard` | brand approved |
+| `/brand_producten` + `/brand_product_nieuw` | brand approved |
+| `/brand_campagnes` + `/brand_campagne_nieuw` | brand approved |
+| `/brand_analytics` | brand approved |
+| `/admin_brands` + `/admin_campagnes` + `/admin_inkomsten` | admin only |
 
-✅ **Bug 3 — Samsung PWA install banner toont terwijl al geïnstalleerd** opgelost
-   - Nieuwe `window.DY.isAppInstalled()` met comprehensive detection:
-     - `display-mode`: standalone, minimal-ui, fullscreen, window-controls-overlay
-     - `navigator.standalone` (iOS)
-     - `document.referrer === 'android-app://...'` (TWA)
-     - Persistent flag `localStorage.dy_pwa_geinstalleerd`
-   - Live `matchMedia('change')` listener
-   - Persistent flag voorkomt opnieuw tonen na false-negative detection
+## Nieuwe Firestore collections
+- `brands/{uid}` — brand profile + status
+- `brand_products/{id}` — products (soft-delete)
+- `campaigns/{id}` — campaigns met live aggregaten
+- `campaign_events/{id}` — append-only impressie/click log
+- `brand_admin_log/{id}` — audit log
 
-✅ **Service Worker cache invalidatie**
-   - `sw.js` VERSION → `v60.1-20260214-stability-onboarding-ios-pwa`
-   - Cache-bust query strings op modified JS/CSS
+## Wat is geleverd
+✅ Brand registratie met validaties (e-mail uniqueness, URL/BTW/wachtwoord checks, rate limiting)
+✅ Logo-upload naar Firebase Storage
+✅ Admin approval flow (approve/reject met reden/suspend)
+✅ Brand dashboard met live stats (producten/campagnes/impressies/clicks/CTR)
+✅ Product CMS (CRUD met max 4 afbeeldingen, soft-delete)
+✅ Campagne CRUD met plaatsing-checklist + budget caps + biedstrategie + doel
+✅ Analytics dashboard met CSV-export
+✅ Publieke /merken discovery + merk-detail + product-click tracking
+✅ Admin: brand management, campaign control (pause/resume/end/budget), revenue dashboard
+✅ Audit log (`brand_admin_log`) voor alle admin acties
+✅ Hamburger-/profielmenu entry via DOM-injection (geen wijziging in pwa-v463-js)
+✅ Firestore Rules document `BRAND_PORTAL_FIRESTORE_RULES.md` (additief, geen bestaande regels gewijzigd)
 
-## Niet-functionele wijzigingen (uitsluitend stabiliteit)
-- Geen UI redesign
-- Geen verwijderde features
-- Geen wijziging in user flows
-- Firestore rules ongewijzigd (v10 rules dekken alle paden correct)
-
-## Gewijzigde bestanden
-- `index.html` (PWA install script + cache-bust versies)
-- `app.css` (iOS touch-action fixes)
-- `js/pwa-v463-1780765770.js` (SW dedup + auth/render guards)
-- `js/a2hs-prompt-v1.js` (gedeelde isStandalone + conflict prevention)
-- `js/sw-auto-update-v1.js` (idempotente registratie)
-- `sw.js` (VERSION bump)
-- `CHANGELOG-v60.1.md` (nieuw bestand met volledige documentatie)
+## Stability fixes (v60.1, vorige sessie — blijven actief)
+✅ Bug 1 — Dubbele onboarding/route renders opgelost (SW dedup + auth/render guards)
+✅ Bug 2 — iOS "Voeg toe" knop opgelost (touch-action + z-index + sync binding)
+✅ Bug 3 — Samsung PWA install banner detection opgelost (comprehensive `isAppInstalled()`)
 
 ## Test status
-- ✅ Statische JS-syntax validatie geslaagd (alle 4 JS-bestanden + inline scripts)
-- ✅ Lokale HTTP serve test geslaagd (alle bestanden 200 OK)
-- ⚠️ End-to-end testen op echt Samsung Android-toestel uit te voeren door eindgebruiker (zoals afgesproken — gebruiker heeft alleen Samsung Android beschikbaar)
+- ✅ Statische JS-syntax: alle bestanden OK
+- ✅ CSS balans: 126/126 braces
+- ✅ Inline scripts: 9/9 OK
+- ✅ ESLint: alleen pre-existing patterns (consistent met codebase)
+- ⚠️ **MOCKED testing**: E2E browser tests in sandbox kunnen niet bij productie-Firebase. Functionele acceptance test door eindgebruiker op productie-deployment.
 
-## Test instructies (Samsung Android)
-Zie `CHANGELOG-v60.1.md` paragraaf "Test instructies voor Samsung Android".
+## Nieuwe bestanden in ZIP
+- `js/brand-portal-v1.js` (~80 KB)
+- `brand-portal.css` (~19 KB)
+- `BRAND_PORTAL_FIRESTORE_RULES.md` (deployment instructies)
+- `CHANGELOG-v60.1-brand-portal-v1.md` (volledige documentatie)
 
-## Next action items
-- Eindgebruiker deployt v60.1 naar productie (Cloudflare Pages)
-- Eindgebruiker test op Samsung Internet + Chrome Android (install flow + reeds-geïnstalleerd detectie)
-- Indien Bug 2 (iOS) toch nog optreedt: opname/screenshots delen voor verdere diagnose
+## Gewijzigde bestanden
+- `index.html` — 2 regels toegevoegd (`<link>` + `<script>`)
+- `sw.js` — VERSION bump naar `v60.1-20260214-brand-portal-v1`
 
-## Future / Backlog (niet in scope v60.1)
-- iOS volledige cross-device test (iPhone SE / 13 / 14 / 15 / 16) — niet getest vanwege gebrek aan Apple-hardware
-- Performance audit van dubbele Firestore listeners (vermeld in problem statement maar geen actieve bug)
-- Mogelijke optimalisatie: SW VERSION constant koppelen aan deployment hash
+## Volgende stappen (eindgebruiker)
+1. **Download** ZIP: `https://paskamer-stability.preview.emergentagent.com/paskamerpraat-pwa-v60.1-brand-portal.zip`
+2. **Deploy codebase** naar Cloudflare Pages
+3. **CRITICAL**: Deploy Firestore + Storage rules volgens `BRAND_PORTAL_FIRESTORE_RULES.md`
+4. **Test** op productie: registreer test-merk, keur goed via admin, upload product, maak campagne
+5. **Optioneel**: maak composite indexes (Firebase Console toont auto-prompts)
+
+## Future / Backlog (niet in scope MVP)
+- Stripe Connect billing (keuze 2B)
+- E-mail notificaties (SendGrid/Resend)
+- Real-time analytics aggregatie (Cloud Functions)
+- Audience segment builder
+- reCAPTCHA
+- Sponsored placements in feed (keuze 3A/3C)
+- Drag-and-drop bulk import
+- Push notificaties bij status-changes
