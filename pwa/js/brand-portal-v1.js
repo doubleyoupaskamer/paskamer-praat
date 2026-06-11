@@ -1385,9 +1385,25 @@
     // ── Init: probeer direct knop te injecteren als profile al rendert ──
     setTimeout(injecteerProfielKnop, 600);
 
+    // ── v60.1 fix: lees URL opnieuw — als ?pagina=brand_* of merken is, navigeer.
+    // pwa-v463 parsed de URL VÓÓR onze wrapper geregistreerd was, waardoor
+    // onbekende routes naar feed werden teruggebracht. Nu we wel geregistreerd
+    // zijn, kunnen we de bedoelde route alsnog aanroepen.
+    try {
+      var _qs = new URLSearchParams(location.search || '');
+      var _hash = (location.hash || '').replace(/^#\/?/, '');
+      var _gewenst = _qs.get('pagina') || _hash || '';
+      if (_gewenst && Object.prototype.hasOwnProperty.call(BP_PAGES, _gewenst)) {
+        // Stel uit tot na huidige paint zodat de feed-fallback niet flickert
+        setTimeout(function() {
+          try { DY.toonPagina(_gewenst); } catch(e) {}
+        }, 100);
+      }
+    } catch(e) { /* noop */ }
+
     // ── Markeer geladen ──────────────────────────────────────────────────
     BP._loaded = true;
-    BP._versie = 'v60.1-brand-portal-v1';
+    BP._versie = 'v60.1-brand-portal-v1.1';
 
   });
 })();
