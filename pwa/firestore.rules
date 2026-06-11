@@ -542,6 +542,10 @@ service cloud.firestore {
     // Document-id == owning user uid (1 brand-account per user).
     // Goedgekeurde merken zijn publiek leesbaar (voor /merken pagina).
     // Pending/rejected merken alleen door eigenaar of admin leesbaar.
+    //
+    // v60.1.10 SEPARATION OF DUTIES:
+    //   Admin mag NIET z'n eigen merkstatus wijzigen (zelfs niet als admin).
+    //   Reden: voorkomt self-approval; vereist twee-admin systeem.
     match /brands/{brandId} {
       allow read: if (resource.data.status == 'approved')
                   || isBrandOwner(brandId)
@@ -552,15 +556,19 @@ service cloud.firestore {
                     && request.resource.data.status == 'pending';
 
       // Eigenaar mag eigen profielvelden updaten — NIET status of moderator-
-      // velden (alleen admin mag deze wijzigen).
+      // velden (alleen admin mag deze wijzigen). Admin mag alles wijzigen
+      // BEHALVE z'n eigen brand-status (separation of duties).
       allow update: if (
                       isBrandOwner(brandId)
                       && !(request.resource.data.diff(resource.data).affectedKeys()
                             .hasAny(['status','moderatedBy','moderatedAt',
                                      'goedgekeurdAt','afgekeurdReden','suspendReden']))
-                    ) || isAdmin();
+                    ) || (
+                      isAdmin()
+                      && request.auth.uid != brandId
+                    );
 
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() && request.auth.uid != brandId;
     }
 
 
@@ -591,6 +599,9 @@ service cloud.firestore {
     // ── CAMPAIGNS ────────────────────────────────────────────────
     // Live campagnes publiek leesbaar (voor rendering in app);
     // overige statussen alleen owner + admin.
+    //
+    // v60.1.10 SEPARATION OF DUTIES:
+    //   Admin mag NIET eigen campagne approven/pauzeren/budget wijzigen.
     match /campaigns/{campaignId} {
       allow read: if (resource.data.status == 'live')
                   || (isIngelogd() && resource.data.brandId == request.auth.uid)
@@ -605,6 +616,7 @@ service cloud.firestore {
       // Brand mag eigen campagne updaten naar draft/review/paused — NIET
       // direct naar 'live' (admin only) en NIET moderator-velden of
       // aggregate-metrics (impressies/clicks/spend/omzet).
+      // Admin mag alles wijzigen BEHALVE op eigen campagne.
       allow update: if (
                       isIngelogd()
                       && resource.data.brandId == request.auth.uid
@@ -615,9 +627,12 @@ service cloud.firestore {
                       && (request.resource.data.status == 'draft'
                           || request.resource.data.status == 'review'
                           || request.resource.data.status == 'paused')
-                    ) || isAdmin();
+                    ) || (
+                      isAdmin()
+                      && resource.data.brandId != request.auth.uid
+                    );
 
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() && resource.data.brandId != request.auth.uid;
     }
 
 

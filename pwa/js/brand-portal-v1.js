@@ -41,7 +41,7 @@
   // v60.1.5 — vroege marker zodat we in DevTools console kunnen zien dat
   // het script daadwerkelijk geladen is. Als deze niet verschijnt is het
   // een cache/loading probleem en niet een logica-fout.
-  try { console.log('[brand-portal] script geladen v60.1.9-mail-firestore'); } catch(e) {}
+  try { console.log('[brand-portal] script geladen v60.1.10-separation-of-duties'); } catch(e) {}
 
   // ── Feature flag ────────────────────────────────────────────────────────
   try {
@@ -1382,20 +1382,25 @@
           (byStatus[b.status]||(byStatus.pending)).push(b);
         });
         function rij(b) {
+          var isEigenAanvraag = (b.id === uid());
+          var eigenBadge = isEigenAanvraag
+            ? '<span class="bp-badge" style="background:#444;color:#fcf8ef;margin-left:6px" title="Een admin mag z\'n eigen aanvraag niet beoordelen — vraag een tweede admin om dit te modereren.">⚠ Eigen aanvraag — vereist tweede admin</span>'
+            : '';
+          var goedkeurKnop = (!isEigenAanvraag && (b.status === 'pending' || b.status === 'rejected' || b.status === 'suspended'))
+            ? '<button class="bp-btn-mini bp-btn-mini-groen" onclick="DY.brandPortal.adminBrand(\'approve\',\'' + esc(b.id) + '\')" data-testid="admin-brand-approve-' + esc(b.id) + '">Goedkeuren</button>' : '';
+          var afwijsKnop = (!isEigenAanvraag && (b.status === 'pending' || b.status === 'approved'))
+            ? '<button class="bp-btn-mini bp-btn-mini-rood" onclick="DY.brandPortal.adminBrand(\'reject\',\'' + esc(b.id) + '\')" data-testid="admin-brand-reject-' + esc(b.id) + '">Afwijzen</button>' : '';
+          var blokkeerKnop = (!isEigenAanvraag && b.status === 'approved')
+            ? '<button class="bp-btn-mini bp-btn-mini-rood" onclick="DY.brandPortal.adminBrand(\'suspend\',\'' + esc(b.id) + '\')" data-testid="admin-brand-suspend-' + esc(b.id) + '">Blokkeer</button>' : '';
           return '<div class="bp-list-rij" data-testid="admin-brand-rij-' + esc(b.id) + '">' +
             '<div class="bp-list-img">' + (b.logo ? '<img src="' + esc(b.logo) + '" alt="">' : '🏷️') + '</div>' +
             '<div class="bp-list-info">' +
-              '<div class="bp-list-titel">' + esc(b.naam) + ' ' + badge(b.status) + '</div>' +
+              '<div class="bp-list-titel">' + esc(b.naam) + ' ' + badge(b.status) + eigenBadge + '</div>' +
               '<div class="bp-list-meta">' + esc(b.categorie||'') + ' · ' + esc(b.contactEmail||'') + ' · ' + fmtDatum(b.aangemaakt) + '</div>' +
               (b.website ? '<a class="bp-mini-link" href="' + esc(b.website) + '" target="_blank" rel="noopener">' + esc(b.website) + '</a>' : '') +
             '</div>' +
             '<div class="bp-list-acties">' +
-              (b.status === 'pending' || b.status === 'rejected' || b.status === 'suspended'
-                ? '<button class="bp-btn-mini bp-btn-mini-groen" onclick="DY.brandPortal.adminBrand(\'approve\',\'' + esc(b.id) + '\')" data-testid="admin-brand-approve-' + esc(b.id) + '">Goedkeuren</button>' : '') +
-              (b.status === 'pending' || b.status === 'approved'
-                ? '<button class="bp-btn-mini bp-btn-mini-rood" onclick="DY.brandPortal.adminBrand(\'reject\',\'' + esc(b.id) + '\')" data-testid="admin-brand-reject-' + esc(b.id) + '">Afwijzen</button>' : '') +
-              (b.status === 'approved'
-                ? '<button class="bp-btn-mini bp-btn-mini-rood" onclick="DY.brandPortal.adminBrand(\'suspend\',\'' + esc(b.id) + '\')" data-testid="admin-brand-suspend-' + esc(b.id) + '">Blokkeer</button>' : '') +
+              goedkeurKnop + afwijsKnop + blokkeerKnop +
             '</div>' +
           '</div>';
         }
@@ -1428,6 +1433,14 @@
 
     BP.adminBrand = async function(actie, brandId) {
       if (!isAdmin()) return;
+      // v60.1.10 SEPARATION OF DUTIES: een admin mag NOOIT z'n eigen aanvraag
+      // modereren. Dit voorkomt self-approval. Voor self-modificatie is een
+      // tweede admin nodig.
+      if (brandId === uid()) {
+        toast('Je mag je eigen merkaanvraag niet modereren. Vraag een tweede admin om dit te beoordelen.', true);
+        try { console.warn('[brand-portal] self-approval geblokkeerd (UI guard) — admin=', uid(), 'brand=', brandId); } catch(e){}
+        return;
+      }
       var reden = '';
       if (actie === 'reject' || actie === 'suspend') {
         reden = prompt(actie === 'reject' ? 'Reden voor afwijzing:' : 'Reden voor blokkade:');
@@ -1446,7 +1459,13 @@
         }).catch(function(){});
         toast('Actie voltooid.');
         BP.renderAdminBrands();
-      } catch(e) { toast('Actie mislukt: ' + e.message, true); }
+      } catch(e) {
+        if (e && e.code === 'permission-denied') {
+          toast('Toegang geweigerd door Firestore-regels. Heb je de v60.1.10-rules gedeployed?', true);
+        } else {
+          toast('Actie mislukt: ' + e.message, true);
+        }
+      }
     };
 
     // ════════════════════════════════════════════════════════════════════
@@ -1464,19 +1483,23 @@
         var rows = [];
         snap.forEach(function(d) {
           var c = d.data();
+          var isEigen = (c.brandId === uid());
+          var eigenBadge = isEigen
+            ? '<span class="bp-badge" style="background:#444;color:#fcf8ef;margin-left:6px">⚠ Eigen campagne — vereist tweede admin</span>'
+            : '';
           rows.push(
             '<div class="bp-list-rij" data-testid="admin-camp-rij-' + esc(d.id) + '">' +
               '<div class="bp-list-info">' +
-                '<div class="bp-list-titel">' + esc(c.naam||'—') + ' ' + badge(c.status||'draft') + '</div>' +
+                '<div class="bp-list-titel">' + esc(c.naam||'—') + ' ' + badge(c.status||'draft') + eigenBadge + '</div>' +
                 '<div class="bp-list-meta">' + esc(c.brandNaam||'') + ' · ' + fmtDatum(c.startDatum) + ' — ' + fmtDatum(c.eindDatum) + ' · ' + fmtEuro(c.totaalBudget||0) + '</div>' +
                 '<div class="bp-list-meta">' + fmtNum(c.impressies||0) + ' impr · ' + fmtNum(c.clicks||0) + ' clk · spend ' + fmtEuro(c.spend||0) + '</div>' +
               '</div>' +
               '<div class="bp-list-acties">' +
-                (c.status === 'review' ? '<button class="bp-btn-mini bp-btn-mini-groen" onclick="DY.brandPortal.adminCamp(\'approve\',\'' + esc(d.id) + '\')" data-testid="admin-camp-approve-' + esc(d.id) + '">Goedkeur &amp; live</button>' : '') +
-                (c.status === 'live' ? '<button class="bp-btn-mini" onclick="DY.brandPortal.adminCamp(\'pause\',\'' + esc(d.id) + '\')" data-testid="admin-camp-pause-' + esc(d.id) + '">Pauzeer</button>' : '') +
-                (c.status === 'paused' ? '<button class="bp-btn-mini" onclick="DY.brandPortal.adminCamp(\'resume\',\'' + esc(d.id) + '\')" data-testid="admin-camp-resume-' + esc(d.id) + '">Hervat</button>' : '') +
-                (c.status !== 'completed' ? '<button class="bp-btn-mini bp-btn-mini-rood" onclick="DY.brandPortal.adminCamp(\'end\',\'' + esc(d.id) + '\')" data-testid="admin-camp-end-' + esc(d.id) + '">Beëindig</button>' : '') +
-                '<button class="bp-btn-mini" onclick="DY.brandPortal.adminCampBudget(\'' + esc(d.id) + '\')" data-testid="admin-camp-budget-' + esc(d.id) + '">Budget</button>' +
+                (!isEigen && c.status === 'review' ? '<button class="bp-btn-mini bp-btn-mini-groen" onclick="DY.brandPortal.adminCamp(\'approve\',\'' + esc(d.id) + '\')" data-testid="admin-camp-approve-' + esc(d.id) + '">Goedkeur &amp; live</button>' : '') +
+                (!isEigen && c.status === 'live' ? '<button class="bp-btn-mini" onclick="DY.brandPortal.adminCamp(\'pause\',\'' + esc(d.id) + '\')" data-testid="admin-camp-pause-' + esc(d.id) + '">Pauzeer</button>' : '') +
+                (!isEigen && c.status === 'paused' ? '<button class="bp-btn-mini" onclick="DY.brandPortal.adminCamp(\'resume\',\'' + esc(d.id) + '\')" data-testid="admin-camp-resume-' + esc(d.id) + '">Hervat</button>' : '') +
+                (!isEigen && c.status !== 'completed' ? '<button class="bp-btn-mini bp-btn-mini-rood" onclick="DY.brandPortal.adminCamp(\'end\',\'' + esc(d.id) + '\')" data-testid="admin-camp-end-' + esc(d.id) + '">Beëindig</button>' : '') +
+                (!isEigen ? '<button class="bp-btn-mini" onclick="DY.brandPortal.adminCampBudget(\'' + esc(d.id) + '\')" data-testid="admin-camp-budget-' + esc(d.id) + '">Budget</button>' : '') +
               '</div>' +
             '</div>'
           );
@@ -1504,6 +1527,13 @@
       var map = { approve:'live', pause:'paused', resume:'live', end:'completed' };
       var status = map[actie]; if (!status) return;
       try {
+        // v60.1.10: self-moderation guard — admin mag eigen campagne niet
+        // wijzigen (separation of duties).
+        var docSnap = await DY.db.collection('campaigns').doc(id).get();
+        if (docSnap.exists && docSnap.data().brandId === uid()) {
+          toast('Je mag je eigen campagne niet modereren. Vraag een tweede admin.', true);
+          return;
+        }
         await DY.db.collection('campaigns').doc(id).set({ status: status, laatsteUpdate: nu(), moderatedBy: uid(), moderatedAt: nu() }, { merge: true });
         await DY.db.collection('brand_admin_log').add({ type:'campaign_'+actie, campaignId:id, door: uid(), ts: nu() }).catch(function(){});
         toast('Status gewijzigd.');
@@ -1518,6 +1548,12 @@
       var n = +nieuw;
       if (!(n >= 0)) { toast('Ongeldig bedrag.', true); return; }
       try {
+        // v60.1.10: self-moderation guard
+        var docSnap = await DY.db.collection('campaigns').doc(id).get();
+        if (docSnap.exists && docSnap.data().brandId === uid()) {
+          toast('Je mag je eigen campagne-budget niet wijzigen. Vraag een tweede admin.', true);
+          return;
+        }
         await DY.db.collection('campaigns').doc(id).set({ totaalBudget: n, laatsteUpdate: nu() }, { merge: true });
         await DY.db.collection('brand_admin_log').add({ type:'campaign_budget_changed', campaignId:id, nieuwBudget:n, door: uid(), ts: nu() }).catch(function(){});
         BP.renderAdminCampagnes();
