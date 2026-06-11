@@ -41,7 +41,7 @@
   // v60.1.5 — vroege marker zodat we in DevTools console kunnen zien dat
   // het script daadwerkelijk geladen is. Als deze niet verschijnt is het
   // een cache/loading probleem en niet een logica-fout.
-  try { console.log('[brand-portal] script geladen v60.1.8-submit-mail-admintabs'); } catch(e) {}
+  try { console.log('[brand-portal] script geladen v60.1.9-mail-firestore'); } catch(e) {}
 
   // ── Feature flag ────────────────────────────────────────────────────────
   try {
@@ -687,19 +687,19 @@
     };
 
     // ── Helper: stuur registratiemails naar gebruiker + admin ───────────────
+    // v60.1.9: schrijft naar Firestore `mail` collection — compatibel met de
+    // officiële Firebase "Trigger Email" Extension (firebase ext:install
+    // firebase/firestore-send-email). Geen externe fetch meer → geen CORS.
     BP.stuurRegistratieMails = async function(v, brandId) {
       var ADMIN_EMAIL = 'info@doubleyousmallandtall.nl';
-      var MAIL_ENDPOINT = 'https://black-grass-c05c.doubleyou-journal.workers.dev/mail';
-
       var userEmail = v.email || (DY.user && DY.user.email) || '';
+
       // 1. Bevestiging naar de aanvrager
       if (userEmail) {
         try {
-          await fetch(MAIL_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              to: userEmail,
+          await DY.db.collection('mail').add({
+            to: [userEmail],
+            message: {
               subject: 'Je merkaanvraag bij Paskamer Praat is ontvangen',
               text:
                 'Hoi ' + (v.contact || '') + ',\n\n' +
@@ -710,19 +710,32 @@
                 'Website: ' + (v.website || '—') + '\n\n' +
                 'Met vriendelijke groet,\n' +
                 'Het Paskamer Praat team\n' +
-                'https://paskamerpraat.nl'
-            })
+                'https://paskamerpraat.nl',
+              html:
+                '<p>Hoi ' + esc(v.contact || '') + ',</p>' +
+                '<p>Bedankt voor je aanvraag om <strong>' + esc(v.naam || 'je merk') + '</strong> toe te voegen aan Paskamer Praat.</p>' +
+                '<p>We beoordelen je aanvraag binnen <strong>2 werkdagen</strong>. Je ontvangt een mail zodra je merk is goedgekeurd of als we extra informatie nodig hebben.</p>' +
+                '<ul>' +
+                  '<li>Aanvraag-ID: <code>' + esc(brandId) + '</code></li>' +
+                  '<li>Categorie: ' + esc(v.categorie || '—') + '</li>' +
+                  '<li>Website: ' + esc(v.website || '—') + '</li>' +
+                '</ul>' +
+                '<p>Met vriendelijke groet,<br>Het Paskamer Praat team<br>' +
+                '<a href="https://paskamerpraat.nl">paskamerpraat.nl</a></p>'
+            },
+            // Metadata voor onze eigen worker of audit
+            _type: 'brand_registered_user',
+            _brandId: brandId,
+            _aangemaakt: nu()
           });
-        } catch(e) { try { console.warn('[brand-portal] mail naar user mislukt', e); } catch(_){} }
+        } catch(e) { try { console.warn('[brand-portal] mail-queue user mislukt', e); } catch(_){} }
       }
 
       // 2. Notificatie naar de admin
       try {
-        await fetch(MAIL_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: ADMIN_EMAIL,
+        await DY.db.collection('mail').add({
+          to: [ADMIN_EMAIL],
+          message: {
             subject: 'Nieuwe merkaanvraag: ' + (v.naam || 'onbekend'),
             text:
               'Er is een nieuwe merkaanvraag binnengekomen op Paskamer Praat.\n\n' +
@@ -736,10 +749,30 @@
               'TikTok:         ' + (v.tiktok || '—') + '\n\n' +
               'Omschrijving:\n' + (v.omschrijving || '—') + '\n\n' +
               'Aanvraag-ID: ' + brandId + '\n\n' +
-              'Modereer in het admin paneel: https://paskamerpraat.nl/?pagina=admin_brands'
-          })
+              'Modereer in het admin paneel: https://paskamerpraat.nl/?pagina=admin_brands',
+            html:
+              '<h2>Nieuwe merkaanvraag</h2>' +
+              '<table style="border-collapse:collapse">' +
+                '<tr><td><strong>Bedrijfsnaam:</strong></td><td>' + esc(v.naam || '—') + '</td></tr>' +
+                '<tr><td><strong>Contactpersoon:</strong></td><td>' + esc(v.contact || '—') + '</td></tr>' +
+                '<tr><td><strong>E-mail:</strong></td><td>' + esc(userEmail || '—') + '</td></tr>' +
+                '<tr><td><strong>Categorie:</strong></td><td>' + esc(v.categorie || '—') + '</td></tr>' +
+                '<tr><td><strong>Website:</strong></td><td><a href="' + esc(v.website || '') + '">' + esc(v.website || '—') + '</a></td></tr>' +
+                '<tr><td><strong>BTW:</strong></td><td>' + esc(v.btw || '—') + '</td></tr>' +
+                '<tr><td><strong>Instagram:</strong></td><td>' + esc(v.instagram || '—') + '</td></tr>' +
+                '<tr><td><strong>TikTok:</strong></td><td>' + esc(v.tiktok || '—') + '</td></tr>' +
+              '</table>' +
+              '<h3>Omschrijving</h3><p>' + esc(v.omschrijving || '—') + '</p>' +
+              '<p><strong>Aanvraag-ID:</strong> <code>' + esc(brandId) + '</code></p>' +
+              '<p style="margin-top:24px;"><a href="https://paskamerpraat.nl/?pagina=admin_brands" ' +
+                'style="background:#c67d06;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;">' +
+                'Modereer in admin paneel</a></p>'
+          },
+          _type: 'brand_registered_admin',
+          _brandId: brandId,
+          _aangemaakt: nu()
         });
-      } catch(e) { try { console.warn('[brand-portal] mail naar admin mislukt', e); } catch(_){} }
+      } catch(e) { try { console.warn('[brand-portal] mail-queue admin mislukt', e); } catch(_){} }
     };
 
     BP.renderBrandLogin = function() {

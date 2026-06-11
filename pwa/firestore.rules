@@ -495,6 +495,19 @@ service cloud.firestore {
     }
 
 
+    // ── MAIL QUEUE (Firebase Trigger Email extension) ─────────────
+    // Compat met de "Trigger Email" extension van Firebase. Writes
+    // door ingelogde gebruikers (bv. brand-registratie) zijn toegestaan
+    // zodat we transactionele mails kunnen versturen. Read/update/delete
+    // alleen admin (en de extension via service-account, die rules bypasst).
+    match /mail/{mailId} {
+      allow read:   if isAdmin();
+      allow create: if isIngelogd();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+
     // ── WEEKLY RANKINGS ──────────────────────────────────────────
     // Publiek leesbaar voor de winnaar banner.
     // Write = false: Cloudflare Worker schrijft via service account (bypass).
