@@ -10953,104 +10953,8 @@ img {
   pointer-events: none;
 }
 
-/* Desktop: editorial magazine cover layout (v60.1.23).
-   Foto wordt ZICHTBAAR getoond met contain (geen crop).
-   Geblurde versie van dezelfde foto vult de zijkanten als cinematic fill.
-   Donkere gradient links voor tekstleesbaarheid. */
-@media (min-width: 768px) {
-  .dy-hm-hero {
-    min-height: calc(100dvh - var(--topbar-h, 56px) - var(--nav-h, 64px));
-    display: block;
-    background: #0a0806;
-    position: relative;
-  }
-  .dy-hm-hero-bg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    aspect-ratio: auto;
-    max-height: none;
-    background: #0a0806;
-    overflow: hidden;
-  }
-  /* Blurred background fill: zelfde foto, heavy blur, donker */
-  .dy-hm-hero-bg::before {
-    content: '';
-    position: absolute;
-    inset: -60px;
-    background-image: url('hero-v3-canal.jpg');
-    background-size: cover;
-    background-position: center;
-    filter: blur(40px) brightness(0.32) saturate(0.6);
-    z-index: 0;
-  }
-  /* Foreground: volledige foto zichtbaar met contain, rechts uitgelijnd */
-  .dy-hm-hero-bg picture {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
-  .dy-hm-hero-img {
-    position: relative;
-    inset: auto;
-    width: auto;
-    height: 100%;
-    max-width: 65%;
-    object-fit: contain;
-    object-position: right center;
-    filter: brightness(0.95);
-  }
-  /* Donkere gradient links over de blurred bg voor tekst-leesbaarheid */
-  .dy-hm-hero-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(90deg, rgba(10,8,6,0.94) 0%, rgba(10,8,6,0.86) 28%, rgba(10,8,6,0.20) 55%, rgba(10,8,6,0.0) 75%);
-    pointer-events: none;
-    z-index: 2;
-  }
-  .dy-hm-hero-overlay { display: none; }
-  .dy-hm-hero-content {
-    position: relative;
-    z-index: 3;
-    padding: 72px 56px;
-    max-width: 560px;
-    width: 50%;
-    min-width: 420px;
-    margin: 0;
-    align-self: stretch;
-    background: transparent;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: calc(100dvh - var(--topbar-h, 56px) - var(--nav-h, 64px));
-  }
-}
-@media (min-width: 1280px) {
-  .dy-hm-hero-content {
-    padding: 96px 80px;
-    max-width: 620px;
-    width: 48%;
-  }
-  .dy-hm-hero-img {
-    max-width: 60%;
-  }
-}
-@media (min-width: 1600px) {
-  .dy-hm-hero-content {
-    padding: 112px 96px;
-    max-width: 680px;
-    width: 44%;
-  }
-  .dy-hm-hero-img {
-    max-width: 55%;
-  }
-}
+/* Desktop hero layout is gedefinieerd NA de mobile-first base styles
+   (zie verderop in dit bestand bij regel ~11210) voor correcte CSS-cascade. */
 
 /* Mobile: overlay niet meer nodig, foto en content zijn nu gescheiden */
 .dy-hm-hero-overlay {
@@ -11076,24 +10980,36 @@ img {
   background: #0f0d06;
 }
 
-/* v60.1.32: tekst-overlay binnen de foto (eyebrow + h1 + sub).
-   Plaatst de hoofdtekst onderin de foto met gradient voor leesbaarheid. */
+/* v60.1.34: tekst-overlay binnen de foto (eyebrow + h1 + sub).
+   Plaatst de hoofdtekst onderin de foto met sterke gradient voor leesbaarheid. */
 .dy-hm-hero-text-overlay {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 4;
-  padding: 28px 22px 22px;
+  padding: 56px 22px 22px;
   background: linear-gradient(180deg,
     transparent 0%,
-    rgba(10,8,6,0.35) 30%,
-    rgba(10,8,6,0.82) 75%,
-    rgba(10,8,6,0.95) 100%);
+    rgba(10,8,6,0.45) 25%,
+    rgba(10,8,6,0.88) 65%,
+    rgba(10,8,6,0.97) 100%);
   pointer-events: none;
 }
 .dy-hm-hero-text-overlay > * {
   pointer-events: auto;
+}
+.dy-hm-hero-text-overlay .dy-hm-hero-eyebrow {
+  color: var(--clay);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.85), 0 0 14px rgba(0,0,0,0.55);
+}
+.dy-hm-hero-text-overlay .dy-hm-hero-titel {
+  color: rgba(252,248,239,0.99);
+  text-shadow: 0 2px 12px rgba(0,0,0,0.85), 0 1px 4px rgba(0,0,0,0.75);
+}
+.dy-hm-hero-text-overlay .dy-hm-hero-sub {
+  color: rgba(252,248,239,0.92);
+  text-shadow: 0 1px 8px rgba(0,0,0,0.80);
 }
 
 /* CTA-blok onder de foto */
@@ -11195,12 +11111,98 @@ img {
 }
 .dy-hm-hero-cta-bpos:active { transform: scale(0.96); }
 
-@media (min-width: 600px) {
-  .dy-hm-hero-content { padding: 0 32px 36px; }
-  .dy-hm-hero-img { object-position: center 15%; }
+/* Desktop: text-overlay-on-image layout (v60.1.34).
+   Geplaatst NA mobile-first base styles voor correcte cascade.
+   Foto wordt full-width getoond in 21:9 cinematic banner.
+   Tekst-overlay onderaan foto met donkere gradient voor leesbaarheid.
+   CTA-blok daaronder in een gecentreerde kolom. */
+@media (min-width: 768px) {
+  .dy-hm-hero {
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    background: #0f0d06;
+    position: relative;
+  }
+  .dy-hm-hero-bg {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    max-height: 72vh;
+    background: #0a0806;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .dy-hm-hero-bg picture {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .dy-hm-hero-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    filter: brightness(0.92);
+  }
+  /* Desktop text-overlay: onderaan met donkere gradient */
+  .dy-hm-hero-text-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    padding: 96px 56px 52px;
+    background: linear-gradient(180deg,
+      transparent 0%,
+      rgba(10,8,6,0.30) 30%,
+      rgba(10,8,6,0.85) 70%,
+      rgba(10,8,6,0.96) 100%);
+  }
+  .dy-hm-hero-text-overlay .dy-hm-hero-eyebrow { font-size: 0.74rem; }
+  .dy-hm-hero-text-overlay .dy-hm-hero-titel {
+    font-size: clamp(2.8rem, 5vw, 4.6rem);
+    max-width: 720px;
+  }
+  .dy-hm-hero-text-overlay .dy-hm-hero-sub {
+    font-size: 1rem;
+    max-width: 560px;
+    color: rgba(252,248,239,0.92);
+  }
+  .dy-hm-hero-bg::after { display: none; }
+  .dy-hm-hero-bg::before { display: none; }
+  .dy-hm-hero-overlay { display: none; }
+  /* Verberg duplicate desktop-tekst-block (overlay neemt het over) */
+  .dy-hm-hero-text-desktop { display: none; }
+  /* Content panel onder de foto, centraal uitgelijnd */
+  .dy-hm-hero-content {
+    position: relative;
+    z-index: 3;
+    padding: 40px 56px 64px;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+    background: #0f0d06;
+    display: flex;
+    flex-direction: column;
+  }
+  .dy-hm-hero-actions {
+    padding: 0;
+    background: transparent;
+  }
 }
-
-
+@media (min-width: 1280px) {
+  .dy-hm-hero-text-overlay { padding: 112px 80px 60px; }
+  .dy-hm-hero-content { padding: 48px 80px 72px; max-width: 1120px; }
+}
+@media (min-width: 1600px) {
+  .dy-hm-hero-text-overlay { padding: 128px 96px 68px; }
+  .dy-hm-hero-content { padding: 56px 96px 80px; max-width: 1240px; }
+}
 
 .dy-reactie {
   display: flex;

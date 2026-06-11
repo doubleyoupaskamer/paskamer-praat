@@ -2208,7 +2208,12 @@ DY.renderHome = function() {
           '</div>' +
         '</div>' +
         '<div class="dy-hm-hero-content">' +
-          // v60.1.32: tekst overlayed op de foto (in image), CTAs onder
+          // v60.1.33: tekst óók in content panel voor DESKTOP (CSS hide op mobile)
+          '<div class="dy-hm-hero-text-desktop">' +
+            '<span class="dy-hm-hero-eyebrow">Tall, Plus &amp; Inclusieve Mode</span>' +
+            '<h1 class="dy-hm-hero-titel">Mode die écht<br><em>past bij jou</em></h1>' +
+            '<p class="dy-hm-hero-sub">Een plek voor iedereen die buiten standaard confectiematen valt. Deel outfits, ontvang eerlijke feedback en ontdek stijladvies van de community en AI.</p>' +
+          '</div>' +
           '<div class="dy-hm-hero-actions">' +
             '<div class="dy-hm-hero-knoppen">' +
               '<button class="dy-hm-hero-cta-sec" onclick="DY.navigeer(\x27feed\x27)" data-testid="home-cta-feed">Ontdek de community</button>' +
