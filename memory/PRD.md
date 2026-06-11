@@ -93,10 +93,16 @@ Bouw een volledig werkend self-service merkportaal als pure uitbreiding, zonder 
 
 ## Future / Backlog (niet in scope MVP)
 - Stripe Connect billing (keuze 2B)
-- E-mail notificaties (SendGrid/Resend)
+- ~~E-mail notificaties (SendGrid/Resend)~~ → **GEÏMPLEMENTEERD v60.1.8** via bestaande mail-worker
 - Real-time analytics aggregatie (Cloud Functions)
 - Audience segment builder
 - reCAPTCHA
 - Sponsored placements in feed (keuze 3A/3C)
 - Drag-and-drop bulk import
 - Push notificaties bij status-changes
+
+## v60.1.8 — Submit fix + e-mailnotificaties + admin-tabs (2026-02-14)
+- 🐛 Fix: registratie-submit-handler met diagnostiek + click-fallback (iOS)
+- ✉️ E-mailnotificaties bij brand-registratie naar zowel aanvrager als admin (`info@doubleyousmallandtall.nl`) via bestaande Cloudflare mail-worker (`black-grass-c05c.doubleyou-journal.workers.dev/mail`)
+- 🛠️ Admin-tabs (🏷️ Merken / 📢 Campagnes / € Inkomsten) ge-injecteerd in bestaand admin-dashboard via MutationObserver — geen wijziging in `pwa-v463-*.js`
+- ZIP: `paskamerpraat-pwa-v60.1.8-brand-portal.zip`

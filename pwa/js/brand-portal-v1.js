@@ -41,7 +41,7 @@
   // v60.1.5 — vroege marker zodat we in DevTools console kunnen zien dat
   // het script daadwerkelijk geladen is. Als deze niet verschijnt is het
   // een cache/loading probleem en niet een logica-fout.
-  try { console.log('[brand-portal] script geladen v60.1.6-bootstrap'); } catch(e) {}
+  try { console.log('[brand-portal] script geladen v60.1.8-submit-mail-admintabs'); } catch(e) {}
 
   // ── Feature flag ────────────────────────────────────────────────────────
   try {
@@ -290,6 +290,44 @@
       } catch(e) { /* noop */ }
     }
 
+    // v60.1.8: injecteer "Merken" en "Campagnes" knoppen in bestaande
+    // admin-tabs (Overzicht/Gebruikers/PWA/Monetization/Activiteit) zodat
+    // de beheerder direct naar het brand-portal moderation kan navigeren.
+    function injecteerAdminTabs() {
+      try {
+        if (DY.pagina !== 'admin') return;
+        if (!isAdmin()) return;
+        var tabs = document.querySelector('.dy-admin-tabs');
+        if (!tabs) return;
+        if (tabs.querySelector('#bp-admin-tab-merken')) return;
+
+        var t1 = document.createElement('button');
+        t1.id = 'bp-admin-tab-merken';
+        t1.className = 'dy-admin-tab';
+        t1.setAttribute('data-testid','admin-tab-merken-link');
+        t1.textContent = '🏷️ Merken';
+        t1.onclick = function() { DY.navigeer('admin_brands'); };
+
+        var t2 = document.createElement('button');
+        t2.id = 'bp-admin-tab-campagnes';
+        t2.className = 'dy-admin-tab';
+        t2.setAttribute('data-testid','admin-tab-campagnes-link');
+        t2.textContent = '📢 Campagnes';
+        t2.onclick = function() { DY.navigeer('admin_campagnes'); };
+
+        var t3 = document.createElement('button');
+        t3.id = 'bp-admin-tab-inkomsten';
+        t3.className = 'dy-admin-tab';
+        t3.setAttribute('data-testid','admin-tab-inkomsten-link');
+        t3.textContent = '€ Inkomsten';
+        t3.onclick = function() { DY.navigeer('admin_inkomsten'); };
+
+        tabs.appendChild(t1);
+        tabs.appendChild(t2);
+        tabs.appendChild(t3);
+      } catch(e) { /* noop */ }
+    }
+
     // Mutation observer — minimaal, alleen op profile/voorwaarden render
     var _obsTimer = null;
     var _obs = new MutationObserver(function() {
@@ -297,6 +335,7 @@
       _obsTimer = setTimeout(function() {
         _obsTimer = null;
         injecteerProfielKnop();
+        injecteerAdminTabs();
       }, 60);
     });
     try {
@@ -308,7 +347,8 @@
     var _origNavigeer = DY.navigeer;
     DY.navigeer = function(pagina) {
       var r = _origNavigeer ? _origNavigeer.call(DY, pagina) : null;
-      setTimeout(injecteerProfielKnop, 120);
+      setTimeout(function(){ injecteerProfielKnop(); injecteerAdminTabs(); }, 120);
+      setTimeout(function(){ injecteerProfielKnop(); injecteerAdminTabs(); }, 400);
       return r;
     };
 
@@ -494,8 +534,13 @@
 
       var form = document.getElementById('bp-register-form');
       var foutBox = document.getElementById('bp-reg-fouten');
-      form.addEventListener('submit', async function(ev) {
-        ev.preventDefault();
+      var submitBtn = form.querySelector('button[type=submit]');
+
+      // v60.1.8: directe submitter — naast form.submit ook click op de knop.
+      // Dit voorkomt dat eventueel overlay-z-index op iOS de submit slikt.
+      async function doeSubmit(ev) {
+        if (ev) { try { ev.preventDefault(); ev.stopPropagation(); } catch(e){} }
+        try { console.log('[brand-portal] submit gestart'); } catch(e){}
         foutBox.textContent = '';
         if (!rateLimitOK('brand_register', 8000)) {
           foutBox.textContent = 'Even rustig — wacht een paar seconden voor je opnieuw verstuurt.';
@@ -528,9 +573,13 @@
         if (!v.categorie) errs.push('Kies een categorie.');
         if (!v.voorwaarden) errs.push('Voorwaarden moeten geaccepteerd zijn.');
         if (v.logoFile && v.logoFile.size > 2 * 1024 * 1024) errs.push('Logo is groter dan 2 MB.');
-        if (errs.length) { foutBox.innerHTML = errs.map(function(x){ return '• ' + esc(x); }).join('<br>'); return; }
+        if (errs.length) {
+          foutBox.innerHTML = errs.map(function(x){ return '• ' + esc(x); }).join('<br>');
+          try { foutBox.scrollIntoView({ behavior:'smooth', block:'center' }); } catch(e){}
+          return;
+        }
 
-        var btn = form.querySelector('button[type=submit]');
+        var btn = submitBtn;
         btn.disabled = true; btn.textContent = 'Bezig...';
 
         try {
@@ -538,10 +587,15 @@
           var fbUid = uid();
           if (!isLogged()) {
             // Check dubbel account
-            var emailLookup = await DY.db.collection('brands').where('contactEmail','==', v.email).limit(1).get();
-            if (!emailLookup.empty) {
-              foutBox.textContent = 'Er bestaat al een aanvraag voor dit e-mailadres.';
-              btn.disabled = false; btn.textContent = 'Aanvraag versturen'; return;
+            try {
+              var emailLookup = await DY.db.collection('brands').where('contactEmail','==', v.email).limit(1).get();
+              if (!emailLookup.empty) {
+                foutBox.textContent = 'Er bestaat al een aanvraag voor dit e-mailadres.';
+                btn.disabled = false; btn.textContent = 'Aanvraag versturen'; return;
+              }
+            } catch(e) {
+              // Permission-denied bij ongeauthenticeerde query is OK — we gaan door.
+              try { console.warn('[brand-portal] dubbel-check niet beschikbaar (verwacht)', e && e.code); } catch(_){}
             }
             var cred = await firebase.auth().createUserWithEmailAndPassword(v.email, v.ww);
             fbUid = cred.user.uid;
@@ -599,16 +653,93 @@
           } catch(e) {}
 
           BP.clearCache();
+          // 5. E-mailnotificaties (best effort, geen blocker)
+          try {
+            BP.stuurRegistratieMails(v, fbUid);
+          } catch(e) { try { console.warn('[brand-portal] mail fout', e); } catch(_){} }
+
           toast('Aanvraag verstuurd! Je hoort binnen 2 werkdagen of je merk goedgekeurd is.');
           DY.navigeer('brand_pending');
         } catch(err) {
+          try { console.error('[brand-portal] registratie fout', err); } catch(e){}
           var msg = (err && err.message) || 'Onbekende fout.';
           if (err && err.code === 'auth/email-already-in-use') msg = 'Dit e-mailadres is al in gebruik. Log eerst in.';
           if (err && err.code === 'auth/weak-password') msg = 'Wachtwoord is te zwak.';
-          foutBox.textContent = msg;
-          btn.disabled = false; btn.textContent = 'Aanvraag versturen';
+          if (err && err.code === 'auth/operation-not-allowed') msg = 'E-mail/wachtwoord login is uitgeschakeld. Neem contact op met de beheerder.';
+          if (err && err.code === 'permission-denied') msg = 'Toegang geweigerd. Firestore regels moeten geüpdated worden.';
+          foutBox.textContent = 'Fout: ' + msg;
+          try { foutBox.scrollIntoView({ behavior:'smooth', block:'center' }); } catch(e){}
+          submitBtn.disabled = false; submitBtn.textContent = 'Aanvraag versturen';
         }
+      }
+
+      form.addEventListener('submit', doeSubmit);
+      // Extra fallback: ook reageren op directe click op de knop
+      submitBtn.addEventListener('click', function(ev) {
+        // Als de knop binnen het form zit gaat 'submit' al via form. Maar als
+        // dat om een of andere reden niet vuurt (overlays, iOS), doen we 't hier.
+        if (ev.defaultPrevented) return;
+        // Geef de native submit event een kans om eerst te vuren.
+        setTimeout(function() {
+          if (!submitBtn.disabled) { /* native submit didn't fire? */ }
+        }, 0);
       });
+    };
+
+    // ── Helper: stuur registratiemails naar gebruiker + admin ───────────────
+    BP.stuurRegistratieMails = async function(v, brandId) {
+      var ADMIN_EMAIL = 'info@doubleyousmallandtall.nl';
+      var MAIL_ENDPOINT = 'https://black-grass-c05c.doubleyou-journal.workers.dev/mail';
+
+      var userEmail = v.email || (DY.user && DY.user.email) || '';
+      // 1. Bevestiging naar de aanvrager
+      if (userEmail) {
+        try {
+          await fetch(MAIL_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: userEmail,
+              subject: 'Je merkaanvraag bij Paskamer Praat is ontvangen',
+              text:
+                'Hoi ' + (v.contact || '') + ',\n\n' +
+                'Bedankt voor je aanvraag om ' + (v.naam || 'je merk') + ' toe te voegen aan Paskamer Praat.\n\n' +
+                'We beoordelen je aanvraag binnen 2 werkdagen. Je ontvangt een mail zodra je merk is goedgekeurd of als we extra informatie nodig hebben.\n\n' +
+                'Aanvraag-ID: ' + brandId + '\n' +
+                'Categorie: ' + (v.categorie || '—') + '\n' +
+                'Website: ' + (v.website || '—') + '\n\n' +
+                'Met vriendelijke groet,\n' +
+                'Het Paskamer Praat team\n' +
+                'https://paskamerpraat.nl'
+            })
+          });
+        } catch(e) { try { console.warn('[brand-portal] mail naar user mislukt', e); } catch(_){} }
+      }
+
+      // 2. Notificatie naar de admin
+      try {
+        await fetch(MAIL_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: ADMIN_EMAIL,
+            subject: 'Nieuwe merkaanvraag: ' + (v.naam || 'onbekend'),
+            text:
+              'Er is een nieuwe merkaanvraag binnengekomen op Paskamer Praat.\n\n' +
+              'Bedrijfsnaam:   ' + (v.naam || '—') + '\n' +
+              'Contactpersoon: ' + (v.contact || '—') + '\n' +
+              'E-mail:         ' + (userEmail || '—') + '\n' +
+              'Categorie:      ' + (v.categorie || '—') + '\n' +
+              'Website:        ' + (v.website || '—') + '\n' +
+              'BTW:            ' + (v.btw || '—') + '\n' +
+              'Instagram:      ' + (v.instagram || '—') + '\n' +
+              'TikTok:         ' + (v.tiktok || '—') + '\n\n' +
+              'Omschrijving:\n' + (v.omschrijving || '—') + '\n\n' +
+              'Aanvraag-ID: ' + brandId + '\n\n' +
+              'Modereer in het admin paneel: https://paskamerpraat.nl/?pagina=admin_brands'
+          })
+        });
+      } catch(e) { try { console.warn('[brand-portal] mail naar admin mislukt', e); } catch(_){} }
     };
 
     BP.renderBrandLogin = function() {
