@@ -11115,27 +11115,33 @@ img {
 }
 .dy-hm-hero-cta-bpos:active { transform: scale(0.96); }
 
-/* Desktop hero: foto vult volledige viewport-hoogte (full-immersive) in proportie.
-   Tekst-overlay onderaan met donkere gradient. CTA-blok daaronder zichtbaar bij scroll. */
+/* Desktop hero: 2-koloms split layout (v60.1.40).
+   Foto links/midden (full-height, in proportie). CTA-blok rechts als sticky panel.
+   Geen los blok onderaan → pagina blijft 1 schermhoogte. */
 @media (min-width: 768px) {
   .dy-hm-hero {
     min-height: auto;
+    /* Twee kolommen naast elkaar: foto + rechter panel */
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: stretch;
+    height: calc(100dvh - var(--topbar-h, 56px));
     background: #0f0d06;
     position: relative;
+    overflow: hidden;
   }
   .dy-hm-hero-bg {
     position: relative;
-    width: 100%;
-    aspect-ratio: auto;
-    /* v60.1.38: foto vult volledige beschikbare viewport-hoogte */
-    height: calc(100dvh - var(--topbar-h, 56px));
-    min-height: 560px;
+    /* Foto neemt linker/midden ruimte, gaat NIET meer over de hele breedte */
+    flex: 1 1 auto;
+    width: auto;
+    height: 100%;
+    min-height: 0;
     max-height: none;
+    aspect-ratio: auto;
     background: #0f0d06;
     overflow: hidden;
-    flex-shrink: 0;
+    flex-shrink: 1;
   }
   .dy-hm-hero-bg picture {
     position: absolute;
@@ -11155,8 +11161,7 @@ img {
     object-position: center center;
     filter: brightness(1);
   }
-  /* v60.1.39: hergebruik bestaande .dy-hm-hero-overlay als blurred fill
-     voor de zij-/onderkanten zodat contain-image zonder harde dark bars staat. */
+  /* Hergebruik bestaande .dy-hm-hero-overlay als blurred fill (cinematic) */
   .dy-hm-hero-overlay {
     display: block;
     position: absolute;
@@ -11170,51 +11175,47 @@ img {
     z-index: 0;
     pointer-events: none;
   }
-  /* Desktop text-overlay: onderaan met donkere gradient */
+  /* Tekst-overlay onderaan de foto (niet meer fullwidth — alleen over foto) */
   .dy-hm-hero-text-overlay {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
     top: auto;
-    padding: 120px 40px 48px;
+    padding: 100px 36px 40px;
     background: linear-gradient(180deg,
       transparent 0%,
       rgba(10,8,6,0.18) 35%,
       rgba(10,8,6,0.72) 72%,
       rgba(10,8,6,0.95) 100%);
+    z-index: 4;
   }
   .dy-hm-hero-text-overlay .dy-hm-hero-eyebrow { font-size: 0.72rem; }
   .dy-hm-hero-text-overlay .dy-hm-hero-titel {
-    font-size: clamp(2.6rem, 5.2vw, 3.8rem);
+    font-size: clamp(2.2rem, 3.4vw, 3.2rem);
   }
   .dy-hm-hero-text-overlay .dy-hm-hero-sub {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     color: rgba(252,248,239,0.92);
     max-width: 100%;
   }
-  /* Verberg blurred-bg ::before (uit oudere desktop variant) en oude ::after overlay */
-  /* .dy-hm-hero-overlay is hergebruikt als blur-fill (zie boven) — niet verbergen */
-  /* Verberg duplicate desktop-tekst-block (overlay toont al de tekst) */
+  /* Verberg duplicate desktop-tekst-block */
   .dy-hm-hero-text-desktop { display: none; }
-  /* Subtiele scroll-hint onderaan foto: muis-icoon met bewegend bolletje */
+  /* Scroll-hint subtiel onderaan foto */
   .dy-hm-hero-bg::after {
     content: "";
     position: absolute;
     left: 50%;
     bottom: 18px;
     transform: translateX(-50%);
-    width: 24px;
-    height: 36px;
+    width: 22px;
+    height: 34px;
     border: 1.5px solid rgba(252,248,239,0.4);
-    border-radius: 12px;
+    border-radius: 11px;
     display: block;
     z-index: 5;
-    opacity: 0.65;
-    animation: dy-hero-scroll-hint 2.2s ease-in-out infinite;
+    opacity: 0.5;
     pointer-events: none;
-    background: none;
-    filter: none;
   }
   .dy-hm-hero-bg::before {
     content: "";
@@ -11223,43 +11224,45 @@ img {
     bottom: 26px;
     width: 3px;
     height: 7px;
-    background: rgba(252,248,239,0.75);
+    background: rgba(252,248,239,0.6);
     border-radius: 2px;
     transform: translateX(-50%);
     display: block;
     z-index: 6;
     animation: dy-hero-scroll-dot 2.2s ease-in-out infinite;
     pointer-events: none;
-    inset: auto auto 26px 50%;
-  }
-  @keyframes dy-hero-scroll-hint {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.75; }
   }
   @keyframes dy-hero-scroll-dot {
-    0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.75; }
-    50% { transform: translateX(-50%) translateY(6px); opacity: 0.3; }
+    0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.7; }
+    50% { transform: translateX(-50%) translateY(6px); opacity: 0.25; }
   }
-  /* Content panel met CTA's, blijft binnen frame, normale flow */
+  /* CTA-panel rechts (zoals het menu links) — geen los blok onderaan */
   .dy-hm-hero-content {
     position: relative;
     z-index: 3;
-    padding: 36px 40px 56px;
-    max-width: 100%;
-    width: 100%;
+    flex: 0 0 340px;
+    width: 340px;
+    height: 100%;
+    padding: 36px 28px 32px;
     margin: 0;
     background: #0f0d06;
+    border-left: 1px solid rgba(252,248,239,0.06);
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   .dy-hm-hero-actions {
     padding: 0;
     background: transparent;
   }
 }
-@media (min-width: 1024px) {
-  .dy-hm-hero-text-overlay { padding: 140px 48px 56px; }
-  .dy-hm-hero-content { padding: 44px 48px 64px; }
+@media (min-width: 1280px) {
+  .dy-hm-hero-content { flex: 0 0 380px; width: 380px; padding: 44px 32px 36px; }
+  .dy-hm-hero-text-overlay { padding: 120px 44px 48px; }
+}
+@media (min-width: 1600px) {
+  .dy-hm-hero-content { flex: 0 0 420px; width: 420px; padding: 52px 36px 40px; }
 }
 
 .dy-reactie {
