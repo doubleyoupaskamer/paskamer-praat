@@ -622,8 +622,10 @@ async def stripe_webhook(request: Request):
 
 
 # ════════════════════════════════════════════════════════════════════════
-# Outfit Score stub — voorkomt 404 spam, geeft deterministic placeholder.
-# Volledige Gemini-Vision implementatie wordt later toegevoegd.
+# Outfit Score - Echte Gemini Vision implementatie (v60.1.76)
+# Analyseert kledingoutfit foto via Gemini 3.1 Pro Preview vision model.
+# Fallback naar deterministic placeholder bij key/parse fout zodat de
+# frontend nooit een lege state krijgt.
 # ════════════════════════════════════════════════════════════════════════
 class OutfitScoreRequest(BaseModel):
     photo_b64: Optional[str] = None
@@ -633,9 +635,8 @@ class OutfitScoreRequest(BaseModel):
     image_hash: Optional[str] = None
 
 
-@api_router.post("/outfit-score")
-async def outfit_score(req: OutfitScoreRequest):
-    # Deterministic placeholder op basis van image_hash (geen LLM-call)
+def _outfit_score_fallback(req: OutfitScoreRequest) -> dict:
+    """Deterministic placeholder zodat de frontend nooit blanco staat."""
     h = req.image_hash or req.request_id or ""
     score = 70 + (sum(ord(c) for c in h) % 26)  # 70-95
     if score >= 90:
@@ -650,9 +651,105 @@ async def outfit_score(req: OutfitScoreRequest):
         "score": score,
         "label": label,
         "tips": tips,
+        "summary": "AI-analyse niet beschikbaar; heuristische score op basis van afbeelding-hash.",
+        "color_palette": [],
+        "breakdown": {"kleur": score, "fit": score, "styling": score, "occasion": score},
+        "source": "fallback",
         "request_id": req.request_id,
         "image_hash": req.image_hash,
     }
+
+
+@api_router.post("/outfit-score")
+async def outfit_score(req: OutfitScoreRequest):
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key or not req.photo_b64:
+        return _outfit_score_fallback(req)
+
+    system_prompt = (
+        "Je bent een professionele Tall & Plus Size fashion stylist voor Doubleyou. "
+        "Analyseer de outfit op de foto en geef een gestructureerde score. "
+        "Antwoord UITSLUITEND in valide JSON. Geen markdown, geen toelichting buiten JSON. "
+        "Schema:\n"
+        "{\n"
+        '  "score": <int 0-100>,\n'
+        '  "label": "<korte titel, max 3 woorden NL>",\n'
+        '  "summary": "<1 zin NL, max 140 tekens>",\n'
+        '  "tips": ["<tip 1 NL>", "<tip 2 NL>", "<tip 3 NL>"],\n'
+        '  "color_palette": ["#hex1", "#hex2", "#hex3"],\n'
+        '  "breakdown": {"kleur": <int>, "fit": <int>, "styling": <int>, "occasion": <int>}\n'
+        "}\n"
+        "Wees concreet, vriendelijk en focus op pasvorm voor tall (1.85m+) of plus size lichamen. "
+        "Score-richtlijn: 90+ iconisch, 80-89 top fit, 70-79 goede look, 60-69 solide basis, <60 verbetering nodig."
+    )
+
+    try:
+        from emergentintegrations.llm.chat import ImageContent  # type: ignore
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"outfit-score-{req.request_id or req.image_hash or uuid.uuid4()}",
+            system_message=system_prompt,
+        ).with_model("gemini", "gemini-3.1-pro-preview")
+
+        # Strip eventuele data:URL prefix
+        b64 = req.photo_b64
+        if b64.startswith("data:"):
+            try:
+                b64 = b64.split(",", 1)[1]
+            except Exception:
+                pass
+
+        image = ImageContent(image_base64=b64)
+        msg = UserMessage(
+            text="Analyseer deze outfit en geef een score volgens het JSON-schema in je instructies.",
+            file_contents=[image],
+        )
+
+        reply = await chat.send_message(msg)
+        text = reply if isinstance(reply, str) else getattr(reply, "content", str(reply))
+
+        # Parse JSON - strip eventuele markdown code fences
+        import json
+        import re
+        cleaned = text.strip()
+        cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
+        cleaned = re.sub(r"\s*```$", "", cleaned)
+        # Pak eerste JSON-blok als er extra tekst omheen staat
+        m = re.search(r"\{.*\}", cleaned, re.DOTALL)
+        if m:
+            cleaned = m.group(0)
+        data = json.loads(cleaned)
+
+        # Sanitize & normaliseer
+        score = int(max(0, min(100, int(data.get("score", 75)))))
+        label = str(data.get("label", "Goede look"))[:40]
+        summary = str(data.get("summary", ""))[:200]
+        tips = [str(t)[:140] for t in (data.get("tips") or [])][:5]
+        palette = [str(c)[:9] for c in (data.get("color_palette") or [])][:6]
+        bd_in = data.get("breakdown") or {}
+        breakdown = {
+            "kleur":    int(max(0, min(100, int(bd_in.get("kleur",    score))))),
+            "fit":      int(max(0, min(100, int(bd_in.get("fit",      score))))),
+            "styling":  int(max(0, min(100, int(bd_in.get("styling",  score))))),
+            "occasion": int(max(0, min(100, int(bd_in.get("occasion", score))))),
+        }
+
+        return {
+            "score": score,
+            "label": label,
+            "summary": summary,
+            "tips": tips,
+            "color_palette": palette,
+            "breakdown": breakdown,
+            "source": "gemini-3.1-pro-preview",
+            "request_id": req.request_id,
+            "image_hash": req.image_hash,
+        }
+    except Exception as e:
+        logger.warning("Outfit score Gemini Vision mislukt, fallback gebruikt: %s", e)
+        out = _outfit_score_fallback(req)
+        out["error_hint"] = str(e)[:120]
+        return out
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -1013,14 +1110,8 @@ async def weekly_stylist_stub(body: WeeklyStylistBody):
 
 
 # ── AI health (compatibility shim) ─────────────────────────────────────
-@api_router.get("/ai/health")
-async def ai_health():
-    return {
-        "ok": True,
-        "backend": "paskamer-stability",
-        "emergent_llm_configured": bool(os.environ.get("EMERGENT_LLM_KEY")),
-        "stripe_configured": bool(os.environ.get("STRIPE_API_KEY")),
-    }
+# Pre-existing /api/ai/health is reeds gedefinieerd boven (regel 111).
+# Geen duplicaat nodig - oude shim verwijderd.
 
 
 # Include the router in the main app

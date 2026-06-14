@@ -232,6 +232,31 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 ## Admin credentials
 - `williamdevriesis@gmail.com` - secret header `wivri` voor backend API
 
+## v60.1.76 (2026-02-14) - Theme config + Echte Gemini Vision Outfit Score
+- **PP_THEME config** (`extensions/config/pp-theme-config-v1.js`):
+  `window.PP_THEME = { current, presets, apply, switch, get }`.
+  4 presets: `default` (donker goud), `light`, `kerst` (rood), `lente`
+  (groen). Bij init: injecteert CSS custom properties op `:root`
+  (`--pp-primary`, `--pp-accent`, `--pp-ink`, `--pp-bg`, etc.).
+  Voorkeur in localStorage `dy_theme`. Reset bij `pp:logout`.
+  CustomEvent `pp:theme-change` voor luisteraars. Bestaande CSS blijft
+  werken; nieuwe code kan `var(--pp-primary)` gebruiken.
+- **Echte Gemini Vision Outfit Score** (`backend/server.py POST /api/outfit-score`):
+  Vervangt deterministic stub. Gebruikt Emergent LLM Key + emergentintegrations
+  library met model `gemini-3.1-pro-preview` (vision-capable).
+  Request: `photo_b64`, `photo_mime`, `request_id`, `image_hash`.
+  Response: `score (0-100)`, `label`, `summary`, `tips[]`, `color_palette[]`,
+  `breakdown {kleur, fit, styling, occasion}`, `source`.
+  Markdown-fence stripping + sanitisatie + clamp 0-100.
+  Fallback bij key/parse fout → deterministic placeholder (geen 500).
+  Tests: `/app/backend/tests/test_outfit_score.py` (2 pass).
+  Live test op localhost: score 68, Gemini analyseerde kleuren correct
+  (rood/blauw/zand palette), response ~10s.
+- **Lint cleanup**: 2 ruff blockers opgelost (E401 import on one line +
+  F811 duplicate ai_health route).
+- **Cache discipline**: SW VERSION naar `v60.1.76-20260214-theme-vision`,
+  brand config + theme config script tags geregistreerd met `?v=60.1.76`.
+
 ## v60.1.75 (2026-02-14) - Full Doubleyou rebrand + centralized config
 - **Branding**: alle 195 occurrences van "Paskamer Praat" in productie
   bestanden vervangen door "Doubleyou". CHANGELOG-*.md en workers/*
