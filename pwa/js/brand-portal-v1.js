@@ -451,13 +451,19 @@
           return;
         }
         var b = bSnap.data();
+        // v60.1.42: client-side status filter om composite index (brandId+status) te vermijden
         var pSnap = await DY.db.collection('brand_products')
           .where('brandId','==', brandId)
-          .where('status','==','actief')
-          .limit(24).get();
+          .limit(100).get();
         var prods = [];
+        var prodDocs = [];
         pSnap.forEach(function(d) {
-          var p = d.data();
+          var pd = d.data();
+          if ((pd.status || '') === 'actief') prodDocs.push({ id: d.id, data: pd });
+        });
+        prodDocs = prodDocs.slice(0, 24);
+        prodDocs.forEach(function(d) {
+          var p = d.data;
           var img = (p.afbeeldingen && p.afbeeldingen[0]) || '';
           prods.push(
             '<a class="bp-prod-kaart" href="' + esc(p.url || '#') + '" target="_blank" rel="noopener nofollow" onclick="DY.brandPortal._trackClick(\'' + esc(d.id) + '\')" data-testid="brand-product-' + esc(d.id) + '">' +
@@ -914,12 +920,21 @@
       if (!brand || brand.status !== 'approved') { DY.navigeer('brand_pending'); return; }
 
       try {
+        // v60.1.42: client-side sort om composite index (brandId+aangemaakt) te vermijden
         var snap = await DY.db.collection('brand_products')
           .where('brandId','==', uid())
-          .orderBy('aangemaakt','desc').limit(100).get();
+          .limit(200).get();
+        var docs = [];
+        snap.forEach(function(d) { docs.push({ id: d.id, data: d.data() }); });
+        docs.sort(function(a,b) {
+          var ta = (a.data.aangemaakt && a.data.aangemaakt.toMillis) ? a.data.aangemaakt.toMillis() : (a.data.aangemaakt || 0);
+          var tb = (b.data.aangemaakt && b.data.aangemaakt.toMillis) ? b.data.aangemaakt.toMillis() : (b.data.aangemaakt || 0);
+          return tb - ta;
+        });
+        docs = docs.slice(0, 100);
         var rows = [];
-        snap.forEach(function(d) {
-          var p = d.data();
+        docs.forEach(function(d) {
+          var p = d.data;
           var img = (p.afbeeldingen && p.afbeeldingen[0]) || '';
           rows.push(
             '<div class="bp-list-rij" data-testid="brand-product-rij-' + esc(d.id) + '">' +
@@ -1101,10 +1116,19 @@
       if (!brand || brand.status !== 'approved') { DY.navigeer('brand_pending'); return; }
 
       try {
-        var snap = await DY.db.collection('campaigns').where('brandId','==', uid()).orderBy('aangemaakt','desc').limit(50).get();
+        // v60.1.42: client-side sort om composite index (brandId+aangemaakt) te vermijden
+        var snap = await DY.db.collection('campaigns').where('brandId','==', uid()).limit(200).get();
+        var docs = [];
+        snap.forEach(function(d) { docs.push({ id: d.id, data: d.data() }); });
+        docs.sort(function(a,b) {
+          var ta = (a.data.aangemaakt && a.data.aangemaakt.toMillis) ? a.data.aangemaakt.toMillis() : (a.data.aangemaakt || 0);
+          var tb = (b.data.aangemaakt && b.data.aangemaakt.toMillis) ? b.data.aangemaakt.toMillis() : (b.data.aangemaakt || 0);
+          return tb - ta;
+        });
+        docs = docs.slice(0, 50);
         var rows = [];
-        snap.forEach(function(d) {
-          var c = d.data();
+        docs.forEach(function(d) {
+          var c = d.data;
           rows.push(
             '<div class="bp-list-rij" data-testid="brand-campagne-rij-' + esc(d.id) + '">' +
               '<div class="bp-list-info">' +
