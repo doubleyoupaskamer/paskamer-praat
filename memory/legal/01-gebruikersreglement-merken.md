@@ -2,7 +2,7 @@
 
 **Versie 1.0 - 14 februari 2026**
 **Beheerder**: Doubleyou Tailored for Tall & Plus Size h.o.d.n. *Paskamer Praat*
-**Contact**: support@paskamerpraat.nl
+**Contact**: info@doubleyousmallandtall.nl
 
 > ⚠️ **Disclaimer**: Dit is een concept opgesteld op basis van functionele
 > analyse van het platform. Het dient nog door een juridisch specialist
@@ -111,7 +111,7 @@
    uitbetaalbaar, behoudens wettelijke verplichting.
 3. Premium-abonnementen worden maandelijks automatisch verlengd via
    Stripe tegen het op dat moment geldende tarief.
-4. Opzegging is mogelijk via support@paskamerpraat.nl en wordt verwerkt
+4. Opzegging is mogelijk via info@doubleyousmallandtall.nl en wordt verwerkt
    per eerstvolgende verlengdatum. Reeds betaalde periodes worden niet
    gerestitueerd.
 5. Bij gegrond technisch falen aan zijde van het Platform kan in overleg
@@ -144,14 +144,14 @@
 2. Bij minder ernstige overtredingen wordt het Merk eerst aangesproken
    met een herstelmogelijkheid van veertien (14) dagen.
 3. Tegen een sanctiebeslissing kan binnen 14 dagen schriftelijk beroep
-   worden aangetekend via support@paskamerpraat.nl.
+   worden aangetekend via info@doubleyousmallandtall.nl.
 
 ---
 
 ## Artikel 9 - Beëindiging
 
 1. Het Merk kan het account op ieder moment beëindigen via
-   support@paskamerpraat.nl.
+   info@doubleyousmallandtall.nl.
 2. Paskamer Praat kan het account beëindigen bij:
    (a) ernstige of herhaalde overtreding;
    (b) faillissement of surséance van het Merk;

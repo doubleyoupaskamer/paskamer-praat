@@ -104,7 +104,7 @@ Het is uitdrukkelijk verboden om het Platform te gebruiken voor:
 2. **Beoordeling**: door moderatieteam binnen 72 uur
 3. **Maatregel**: waarschuwing, content-verwijdering, opschorting of
    beëindiging - afhankelijk van ernst
-4. **Beroep**: binnen 14 dagen via support@paskamerpraat.nl
+4. **Beroep**: binnen 14 dagen via info@doubleyousmallandtall.nl
 
 ### Escalatieladder
 | Niveau | Voorbeeld | Maatregel |
@@ -120,7 +120,7 @@ Het is uitdrukkelijk verboden om het Platform te gebruiken voor:
 ## 6. Meldingsprocedure
 
 Vermoedt u een overtreding door een ander Merk of gebruiker?
-- E-mail: support@paskamerpraat.nl
+- E-mail: info@doubleyousmallandtall.nl
 - Onderwerp: "AUP-melding - [URL of accountnaam]"
 - Vermeld: aard van de overtreding, bewijslast (screenshots, URL's),
   uw eigen contactgegevens

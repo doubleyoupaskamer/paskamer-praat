@@ -924,13 +924,13 @@
             '<h2>Aanvraag afgekeurd</h2>' +
             '<p>Helaas voldoet je aanvraag niet aan onze criteria.</p>' +
             (brand.afgekeurdReden ? '<p><strong>Reden:</strong> ' + esc(brand.afgekeurdReden) + '</p>' : '') +
-            '<p>Vragen? Neem contact op via <a href="mailto:partners@paskamerpraat.nl">partners@paskamerpraat.nl</a>.</p>' +
+            '<p>Vragen? Neem contact op via <a href="mailto:info@doubleyousmallandtall.nl">info@doubleyousmallandtall.nl</a>.</p>' +
           '</div>';
       } else if (brand.status === 'suspended') {
         statusBlok =
           '<div class="bp-status-card bp-status-rejected">' +
             '<h2>Account tijdelijk geblokkeerd</h2>' +
-            '<p>Je merkaccount is gepauzeerd. Neem contact op met partners@paskamerpraat.nl voor uitleg.</p>' +
+            '<p>Je merkaccount is gepauzeerd. Neem contact op met info@doubleyousmallandtall.nl voor uitleg.</p>' +
           '</div>';
       } else {
         statusBlok =

@@ -120,7 +120,7 @@
 >
 > Premium-abonnementen worden maandelijks automatisch verlengd via Stripe.
 > Opzegging is op ieder moment mogelijk via mail naar
-> support@paskamerpraat.nl en wordt verwerkt per eerstvolgende
+> info@doubleyousmallandtall.nl en wordt verwerkt per eerstvolgende
 > verlengdatum. Reeds betaalde periodes worden niet gerestitueerd.
 
 ---
@@ -329,7 +329,7 @@ opgeleverd (apart, in juridische taal door advocaat/jurist te reviewen):
 ### Procedureel
 - Juridische review door gespecialiseerde IT-/advertentie-jurist
 - Wijzigingen-procedure met 30 dagen aankondigingstermijn
-- Helpdesk e-mail support@paskamerpraat.nl voor klachten/opzegging
+- Helpdesk e-mail info@doubleyousmallandtall.nl voor klachten/opzegging
 - Klachten-loket conform WBR (B2B) en geschillencommissie aansluiting
 
 ### Audit & compliance

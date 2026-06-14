@@ -2,7 +2,7 @@
 
 **Versie 1.0 - 14 februari 2026**
 **Verwerkingsverantwoordelijke**: Doubleyou Tailored for Tall & Plus Size h.o.d.n. *Paskamer Praat*
-**Contact AVG**: privacy@paskamerpraat.nl
+**Contact AVG**: info@doubleyousmallandtall.nl
 
 > ⚠️ Concept - juridische review door privacy-jurist aanbevolen voor
 > definitieve publicatie. Aansluiting bij Autoriteit Persoonsgegevens
@@ -142,7 +142,7 @@ U heeft het recht om:
 
 | Recht | Hoe uit te oefenen |
 |---|---|
-| **Inzage** in uw gegevens | privacy@paskamerpraat.nl |
+| **Inzage** in uw gegevens | info@doubleyousmallandtall.nl |
 | **Rectificatie** (correctie) | Via account-instellingen of mail |
 | **Verwijdering** ("recht op vergetelheid") | Mail met identificatie |
 | **Beperking** van verwerking | Mail |
@@ -207,10 +207,10 @@ aangeleverd.
 Doubleyou Tailored for Tall & Plus Size
 [adres invullen]
 KvK: [invullen]
-privacy@paskamerpraat.nl
+info@doubleyousmallandtall.nl
 
 **Functionaris voor Gegevensbescherming (FG)**:
-Aanstelling onder evaluatie. Tot die tijd: privacy@paskamerpraat.nl.
+Aanstelling onder evaluatie. Tot die tijd: info@doubleyousmallandtall.nl.
 
 **Toezichthouder:**
 Autoriteit Persoonsgegevens

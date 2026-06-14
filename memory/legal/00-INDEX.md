@@ -118,10 +118,10 @@ Bij doorgaan accepteert u deze voorwaarden voor deze campagne.
 
 | Onderwerp | E-mail |
 |---|---|
-| Algemene support | support@paskamerpraat.nl |
-| Privacy-vragen | privacy@paskamerpraat.nl |
-| Juridisch | legal@paskamerpraat.nl |
-| Beveiligingsmeldingen | security@paskamerpraat.nl |
+| Algemene support | info@doubleyousmallandtall.nl |
+| Privacy-vragen | info@doubleyousmallandtall.nl |
+| Juridisch | info@doubleyousmallandtall.nl |
+| Beveiligingsmeldingen | info@doubleyousmallandtall.nl |
 
 ---
 

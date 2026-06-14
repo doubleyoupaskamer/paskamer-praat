@@ -68,7 +68,7 @@ Tijdens deze pauze wordt budget niet aangesproken.
 
 ## 10. Conflicten
 Bij geschillen over levering of meting: eerst overleg met
-support@paskamerpraat.nl. Bij geen oplossing binnen 30 dagen:
+info@doubleyousmallandtall.nl. Bij geen oplossing binnen 30 dagen:
 toepassing van Art. 12 AV Merken.
 
 ---

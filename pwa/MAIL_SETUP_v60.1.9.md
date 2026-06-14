@@ -38,7 +38,7 @@ Of via de Firebase Console:
      - Resend SMTP: `smtps://resend:JE_RESEND_KEY@smtp.resend.com:465`
      - Gmail SMTP: `smtps://JE_EMAIL:APP_PASSWORD@smtp.gmail.com:465`
    - **Email documents collection**: `mail` (DEFAULT — laat zo)
-   - **Default FROM address**: `Paskamer Praat <no-reply@paskamerpraat.nl>`
+   - **Default FROM address**: `Paskamer Praat <info@doubleyousmallandtall.nl>`
    - **Users collection** (optioneel): laat leeg
    - **Templates collection** (optioneel): laat leeg
 

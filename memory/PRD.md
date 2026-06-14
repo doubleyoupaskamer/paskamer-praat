@@ -83,7 +83,7 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - **🐛 Root cause "Beheer abonnement" alert**: `openCustomerPortal()` deed `POST /api/billing/portal` → backend retourneert 501 → JS deed `alert(d.detail)` → lelijke browser dialog.
 - **✅ Fix**: vervangen door volwaardige in-app **`#dy-prem-manage-overlay`** modal in `js/premium-v1.js`:
   - Premium users zien: status pill, plan, sinds-datum, vervaldatum, account-email, feature-lijst
-  - "Opzeggen via e-mail" knop (mailto: support@paskamerpraat.nl, auto-fill email + onderwerp)
+  - "Opzeggen via e-mail" knop (mailto: info@doubleyousmallandtall.nl, auto-fill email + onderwerp)
   - Bron-aware: `premium_monthly` (Stripe) / `premium_admin` (env) / `premium_grant` (handmatig) → toont juiste opties
   - Non-premium fallback: "Word Premium" CTA + Sluiten knop
   - WCAG: aria-modal, focus trap via overlay click, ESC-vriendelijk
@@ -231,6 +231,29 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 ## Admin credentials
 - `williamdevriesis@gmail.com` - secret header `wivri` voor backend API
+
+## v60.1.74 (2026-02-14) - Emails uniform + 3 P2 features
+- **Emails**: Alle `@paskamerpraat.nl` adressen (support/privacy/partners/no-reply/legal/security)
+  vervangen door `info@doubleyousmallandtall.nl`. Scope: HTML, JS, MD, JSON
+  in `/app/pwa/`, `/app/backend/` en `/app/memory/legal/`. Login-emails
+  (test users williamdevriesis@gmail.com en mozenlow2023@gmail.com) bleven
+  ongewijzigd; SMTP-template placeholders ook.
+- **P2 Brand A-Z sticky index bar** (`/extensions/placements/pp-brand-az-index-v1.js`):
+  additieve extensie, plakt sticky letterbalk boven `#bp-merken-lijst`,
+  letters zonder merk worden gedimd, scroll-naar-eerste-merk per letter,
+  diakrieten genormaliseerd. data-testids: `brand-az-index-bar`,
+  `brand-az-letter-{LETTER}`.
+- **P2 Recente activiteit in profiel** (`/extensions/profile/pp-recente-activiteit-v1.js`):
+  laadt laatste 5 stories van de ingelogde gebruiker via Firestore,
+  toont icon (categorie-based) + titel + relatieve tijd. Geinjecteerd
+  na `#dy-profiel-badges`. Fallback bij ontbrekende index. data-testids:
+  `pp-recente-activiteit`, `pp-act-list`, `pp-act-row-{id}`, `pp-act-leeg`.
+- **P2 Volgende factuur in premium modal** (`js/premium-v1.js`):
+  voor `plan === 'premium_monthly'` toont nu "Volgende factuur: [datum]
+  (€4,99 via Stripe)" gebaseerd op `expires_at` (= einde huidige periode
+  = eerstvolgende incasso). data-testid: `prem-volgende-factuur`.
+- Service Worker VERSION naar `v60.1.74-20260214-az-recente-factuur`,
+  index.html script tags geregistreerd met v60.1.74-az-recente-factuur.
 
 ## v60.1.73 (2026-02-14) - Em-dash cleanup definitief + cache bump
 - Volledige sweep: alle em-dashes (-) verwijderd uit ALLE productie bestanden

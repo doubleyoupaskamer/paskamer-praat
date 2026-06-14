@@ -425,7 +425,7 @@
     var manageBtns = '';
     if (plan === 'premium_monthly') {
       // Stripe-paid user: support email-based cancel until Customer Portal live
-      var mailto = 'mailto:support@paskamerpraat.nl?subject=' +
+      var mailto = 'mailto:info@doubleyousmallandtall.nl?subject=' +
         encodeURIComponent('Opzeggen Premium - ' + (emailNow || '')) +
         '&body=' + encodeURIComponent('Hoi, ik wil mijn Premium abonnement opzeggen.\nE-mail: ' + (emailNow || ''));
       manageBtns =
@@ -437,8 +437,13 @@
       // Grant / unknown source
       manageBtns =
         '<p class="dy-prem-sub" style="margin:0 0 4px">Toegang handmatig toegekend. Neem contact op met support voor wijzigingen.</p>' +
-        '<a class="dy-prem-btn ghost" href="mailto:support@paskamerpraat.nl?subject=Premium%20account%20vraag">Contact support</a>';
+        '<a class="dy-prem-btn ghost" href="mailto:info@doubleyousmallandtall.nl?subject=Premium%20account%20vraag">Contact support</a>';
     }
+
+    // Volgende factuur datum: alleen tonen voor Stripe-betalende users.
+    // De expires_at vertegenwoordigt het einde van de huidige periode,
+    // wat tegelijk de eerstvolgende incasso-datum is.
+    var volgendeFactuur = (plan === 'premium_monthly') ? _formatDate(status && status.expires_at) : null;
 
     body.innerHTML =
       '<p class="dy-prem-sub">Bedankt dat je Premium gebruikt. Hier zie je je status, vervaldatum en beheeropties.</p>' +
@@ -446,7 +451,8 @@
         '<dt>Status</dt><dd><span class="dy-prem-pill ' + pillClass + '">' + pillLabel + '</span></dd>' +
         '<dt>Plan</dt><dd>' + _esc(src || ' - ') + '</dd>' +
         (activated ? '<dt>Sinds</dt><dd>' + _esc(activated) + '</dd>' : '') +
-        (expires   ? '<dt>Vervalt op</dt><dd>' + _esc(expires) + '</dd>' : '') +
+        (expires   ? '<dt>' + (plan === 'premium_monthly' ? 'Periode tot' : 'Vervalt op') + '</dt><dd>' + _esc(expires) + '</dd>' : '') +
+        (volgendeFactuur ? '<dt>Volgende factuur</dt><dd data-testid="prem-volgende-factuur">' + _esc(volgendeFactuur) + ' (€4,99 via Stripe)</dd>' : '') +
         '<dt>Account</dt><dd>' + _esc(emailNow || ' - ') + '</dd>' +
       '</div>' +
       '<ul class="dy-prem-feat" data-testid="prem-feat-list">' +

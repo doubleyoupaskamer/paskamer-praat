@@ -28,7 +28,7 @@ inkoopvoorwaarden van het Merk wordt uitdrukkelijk uitgesloten.
 
 ## Art. 4 Duur en opzegging
 1. Abonnement geldt voor onbepaalde tijd, maandelijks opzegbaar via
-   support@paskamerpraat.nl met opzegtermijn van één maand.
+   info@doubleyousmallandtall.nl met opzegtermijn van één maand.
 2. Geen restitutie van reeds betaalde periodes.
 3. Bij faillissement of surséance van het Merk kan Paskamer Praat
    onmiddellijk beëindigen.
