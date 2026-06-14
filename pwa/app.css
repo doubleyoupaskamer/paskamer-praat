@@ -8075,7 +8075,10 @@ video.dy-detail-foto {
 .dy-reel-actions {
   position: absolute;
   right: 12px;
-  bottom: 20px;
+  /* v60.1.42: omhoog geplaatst zodat Like+Bericht starten op dezelfde
+     verticale hoogte als het kroontje van het hamburgermenu
+     (.dy-card-hub-btn zit op `bottom: calc(100% + 6px)` van .dy-reel-auteur). */
+  bottom: 92px;
   /* Top-beperking: nooit hoger dan 12px van de kaartrand */
   top: 12px;
   z-index: 3;
@@ -8435,7 +8438,9 @@ video
   align-items: center;
   /* Wrap zodat knoppen op smal scherm naar volgende regel gaan */
   flex-wrap: wrap;
-  margin: 18px 0 0;
+  /* v60.1.42: top-margin verkleind (was 18px) zodat Like+Reageer hoger in
+     overlay-flow staan, consistent met feed-kaart hoogtecorrectie. */
+  margin: 6px 0 0;
   padding: 6px 0;
   border-top: 1px solid rgba(198,125,6,0.12);
   border-bottom: 1px solid rgba(198,125,6,0.12);
@@ -11770,7 +11775,8 @@ img {
     padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   }
   .dy-reel-actions {
-    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    /* v60.1.42: zelfde upward-shift als desktop, plus safe-area inset */
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   }
 }
 
