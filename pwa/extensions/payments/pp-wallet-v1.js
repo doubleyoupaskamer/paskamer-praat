@@ -102,9 +102,9 @@
 
       main.innerHTML =
         '<div class="bp-page">' +
-          '<button class="bp-back" onclick="window.history.length > 1 ? window.history.back() : window.DY.navigeer(\'feed\')" data-testid="wallet-back">&larr; Terug</button>' +
+          '<button class="bp-back" onclick="window.DY.navigeer(\'brand_dashboard\')" data-testid="wallet-back">&larr; Dashboard</button>' +
           '<div class="bp-wallet-hero" data-testid="wallet-hero">' +
-            '<span class="bp-header-eyebrow">Jouw wallet</span>' +
+            '<span class="bp-header-eyebrow">Merken wallet</span>' +
             '<h1>Saldo</h1>' +
             '<div class="bp-wallet-saldo" data-testid="wallet-saldo">' +
               '<span class="bp-wallet-saldo-valuta">' + esc(currency === 'EUR' ? '€' : currency) + '</span>' +
@@ -122,11 +122,45 @@
               : '') +
           '</div>' +
 
-          '<h2 class="bp-section-titel" style="margin-top:28px">Transacties</h2>' +
-          (txRows.length
-            ? '<div class="bp-tabel-scroll"><table class="bp-tabel" data-testid="wallet-tx-tabel"><thead><tr><th>Datum</th><th>Type</th><th>Bedrag</th><th>Status</th></tr></thead><tbody>' + txRows.join('') + '</tbody></table></div>'
-            : '<div class="bp-empty"><div class="bp-empty-titel">Nog geen transacties</div><div>Je transactiehistorie verschijnt hier na je eerste opwaardering.</div></div>'
-          ) +
+          // ── Tabs ─────────────────────────────────────────────
+          '<div class="bp-wallet-tabs" data-testid="wallet-tabs">' +
+            '<button class="bp-wallet-tab on" data-tab="overzicht" onclick="PP_Wallet.switchTab(this,\'overzicht\')" data-testid="wallet-tab-overzicht">Overzicht</button>' +
+            '<button class="bp-wallet-tab" data-tab="opwaarderen" onclick="PP_Wallet.switchTab(this,\'opwaarderen\')" data-testid="wallet-tab-opwaarderen">Opwaarderen</button>' +
+            '<button class="bp-wallet-tab" data-tab="transacties" onclick="PP_Wallet.switchTab(this,\'transacties\')" data-testid="wallet-tab-transacties">Transacties</button>' +
+          '</div>' +
+
+          // Tab content: Overzicht (default open)
+          '<div class="bp-wallet-tabpanel" data-panel="overzicht" data-testid="wallet-panel-overzicht">' +
+            '<div class="bp-stat-grid" style="margin-top:14px">' +
+              '<div class="bp-stat-kaart"><div class="bp-stat-label">Saldo</div><div class="bp-stat-num">€' + balance.toFixed(2) + '</div></div>' +
+              '<div class="bp-stat-kaart"><div class="bp-stat-label">Transacties</div><div class="bp-stat-num">' + txRows.length + '</div></div>' +
+              '<div class="bp-stat-kaart"><div class="bp-stat-label">Valuta</div><div class="bp-stat-num">' + esc(currency) + '</div></div>' +
+            '</div>' +
+            '<p class="bp-mini" style="margin-top:14px">Je wallet wordt automatisch bijgewerkt na een succesvolle betaling via Shopify. Bij vragen: neem contact op met support.</p>' +
+          '</div>' +
+
+          // Tab content: Opwaarderen
+          '<div class="bp-wallet-tabpanel" data-panel="opwaarderen" style="display:none" data-testid="wallet-panel-opwaarderen">' +
+            '<h2 class="bp-section-titel" style="margin-top:18px">Kies een bedrag</h2>' +
+            (topupEnabled
+              ? '<div class="bp-topup-grid">' +
+                  [25,50,100,250,500,1000].map(function(amt){
+                    return '<button class="bp-topup-bedrag" onclick="PP_Wallet.topup(' + amt + ')" data-testid="wallet-topup-' + amt + '">€ ' + amt + '</button>';
+                  }).join('') +
+                '</div>' +
+                '<p class="bp-mini" style="margin-top:14px">Je wordt doorgestuurd naar Shopify checkout. Het saldo wordt automatisch bijgeschreven na bevestiging.</p>'
+              : '<div class="bp-empty"><div class="bp-empty-titel">Opwaarderen tijdelijk uit</div>' +
+                '<div>De Shopify-koppeling wordt op dit moment geconfigureerd. Probeer later opnieuw of neem contact op met support voor handmatige opwaardering.</div></div>'
+            ) +
+          '</div>' +
+
+          // Tab content: Transacties
+          '<div class="bp-wallet-tabpanel" data-panel="transacties" style="display:none" data-testid="wallet-panel-transacties">' +
+            (txRows.length
+              ? '<div class="bp-tabel-scroll" style="margin-top:14px"><table class="bp-tabel" data-testid="wallet-tx-tabel"><thead><tr><th>Datum</th><th>Type</th><th>Bedrag</th><th>Status</th></tr></thead><tbody>' + txRows.join('') + '</tbody></table></div>'
+              : '<div class="bp-empty"><div class="bp-empty-titel">Nog geen transacties</div><div>Je transactiehistorie verschijnt hier na je eerste opwaardering.</div></div>'
+            ) +
+          '</div>' +
         '</div>';
     } catch(e) {
       main.innerHTML =
@@ -141,24 +175,38 @@
   }
 
   // ── TOPUP ──────────────────────────────────────────────────────────
-  async function topup() {
+  async function topup(amount) {
     try {
       var s = await db().collection('admin_settings').doc('global').get();
       var url = (s.exists && s.data() && s.data().shopify_config || {}).topup_checkout_url;
       if (!url) { toast('Opwaarderen nog niet beschikbaar', true); return; }
-      // Append uid + return_url als query params zodat Shopify webhook ze terug stuurt
       var u = encodeURIComponent(uid() || '');
       var ret = encodeURIComponent(window.location.origin + '/?pagina=wallet');
       var sep = url.indexOf('?') === -1 ? '?' : '&';
-      window.open(url + sep + 'wallet_uid=' + u + '&return_url=' + ret, '_blank', 'noopener');
+      var amt = amount ? '&amount=' + encodeURIComponent(amount) : '';
+      window.open(url + sep + 'wallet_uid=' + u + '&return_url=' + ret + amt, '_blank', 'noopener');
     } catch(e) {
       toast('Fout: ' + e.message, true);
     }
   }
 
+  function switchTab(btn, panel) {
+    try {
+      var tabs = document.querySelectorAll('.bp-wallet-tab');
+      tabs.forEach(function(t) { t.classList.remove('on'); });
+      btn.classList.add('on');
+      var panels = document.querySelectorAll('.bp-wallet-tabpanel');
+      panels.forEach(function(p) {
+        p.style.display = (p.getAttribute('data-panel') === panel) ? '' : 'none';
+      });
+    } catch(e) {}
+  }
+
   function refresh() { renderWallet(); }
 
   // ── ROUTE REGISTRATIE via wrapper (geen BP_PAGES mutatie) ─────────
+  // v1.0.4: Force-reset _laatstGerenderd + render lock zodat herhaalde
+  // navigatie naar 'wallet' altijd opnieuw initialiseert.
   function registerRoute() {
     if (!window.DY || typeof window.DY.toonPagina !== 'function') return;
     if (window.DY._pp_wallet_wrapped) return;
@@ -166,6 +214,9 @@
     var orig = window.DY.toonPagina;
     window.DY.toonPagina = function(pagina) {
       if (pagina === 'wallet') {
+        // Force fresh render — reset locks van eerdere renders
+        window.DY._laatstGerenderd = null;
+        if (window.DY.brandPortal) window.DY.brandPortal._renderLock = false;
         window.DY.pagina = pagina;
         return renderWallet();
       }
@@ -173,79 +224,44 @@
     };
   }
 
-  // ── MENU INJECTIE (vindt hamburger of profile-area en injecteer link) ─
+  // ── MENU INJECTIE — wallet alleen voor brand-users zichtbaar maken ─
   function injectMenuLink() {
-    // 1. Hamburger menu (extra-menu-overlay)
+    // Hamburger menu — alleen tonen als user een brand-doc heeft
     var menu = document.querySelector('#extra-menu-list, .extra-menu-list, [data-testid="extra-menu"]');
-    if (menu && !menu.querySelector('[data-testid="menu-wallet"]')) {
-      var li = document.createElement('li');
-      li.innerHTML =
-        '<button class="extra-menu-btn" onclick="window.DY.navigeer(\'wallet\'); var m=this.closest(\'.extra-menu-overlay\'); if(m) m.style.display=\'none\'" data-testid="menu-wallet">' +
-          '<i class="fa-solid fa-wallet" style="margin-right:8px"></i>Mijn wallet' +
-        '</button>';
-      menu.appendChild(li);
+    if (menu && !menu.querySelector('[data-testid="menu-wallet"]') && isLogged()) {
+      // Lazy check: alleen tonen voor brands
+      db().collection('brands').doc(uid()).get().then(function(snap) {
+        if (!snap.exists) return;
+        var li = document.createElement('li');
+        li.innerHTML =
+          '<button class="extra-menu-btn" onclick="window.DY.navigeer(\'wallet\'); var m=this.closest(\'.extra-menu-overlay\'); if(m) m.style.display=\'none\'" data-testid="menu-wallet">' +
+            '<i class="fa-solid fa-wallet" style="margin-right:8px"></i>Mijn wallet' +
+          '</button>';
+        menu.appendChild(li);
+      }).catch(function(){});
     }
-    // 2. Profile page acties + saldo-preview card
-    injectProfielKnop();
+    // Brand dashboard: voeg wallet card toe aan quick-grid
+    injectDashboardCard();
   }
 
-  // Injecteer Wallet knop + saldo preview op profiel-pagina (analoog aan brand-portal pattern)
-  async function injectProfielKnop() {
+  // Injecteer Wallet card in brand_dashboard quick-grid (na Merkprofiel)
+  function injectDashboardCard() {
     try {
-      if (!window.DY || window.DY.pagina !== 'profiel') return;
-      var main = document.getElementById('dy-main');
-      if (!main) return;
-      var acties = main.querySelector('.dy-profiel-acties');
+      if (!window.DY || window.DY.pagina !== 'brand_dashboard') return;
+      var grid = document.querySelector('.bp-quick-grid');
+      if (!grid) return;
+      if (grid.querySelector('[data-testid="brand-dash-wallet"]')) return;
 
-      // ── 1. Knop in dy-profiel-acties (naar wallet pagina) ─────────
-      if (acties && !acties.querySelector('#pp-wallet-knop')) {
-        var knop = document.createElement('button');
-        knop.id = 'pp-wallet-knop';
-        knop.className = 'dy-btn dy-btn-ghost';
-        knop.style.cssText = 'justify-content:flex-start;gap:8px;width:100%';
-        knop.setAttribute('data-testid', 'profile-wallet-btn');
-        knop.innerHTML =
-          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
-          '<rect x="2" y="6" width="20" height="14" rx="2"/><path d="M16 12h2"/><path d="M2 10h20"/></svg>' +
-          'Mijn wallet';
-        knop.onclick = function() { window.DY.navigeer('wallet'); };
-        acties.insertBefore(knop, acties.firstChild);
-      }
-
-      // ── 2. Saldo preview card bovenaan profile ─────────
-      if (isLogged() && !main.querySelector('#pp-wallet-preview')) {
-        var u = uid();
-        try {
-          var snap = await db().collection('users').doc(u).get();
-          var balance = snap.exists ? Number((snap.data() || {}).wallet_balance || 0) : 0;
-          // Vind een goede inject-locatie: na het eerste h1 of bovenaan
-          var anchor = main.querySelector('h1') || main.firstElementChild;
-          if (anchor && !main.querySelector('#pp-wallet-preview')) {
-            var card = document.createElement('div');
-            card.id = 'pp-wallet-preview';
-            card.setAttribute('data-testid', 'profile-wallet-preview');
-            card.style.cssText =
-              'margin:14px 0;padding:18px 20px;border-radius:16px;cursor:pointer;' +
-              'background:linear-gradient(135deg,rgba(212,145,10,0.16) 0%,rgba(255,255,255,0.04) 100%);' +
-              'border:1px solid rgba(212,145,10,0.30);' +
-              'display:flex;align-items:center;justify-content:space-between;gap:14px;' +
-              'transition:transform 0.15s,border-color 0.15s';
-            card.onmouseenter = function(){ card.style.transform='translateY(-1px)'; card.style.borderColor='#d4910a'; };
-            card.onmouseleave = function(){ card.style.transform=''; card.style.borderColor='rgba(212,145,10,0.30)'; };
-            card.onclick = function() { window.DY.navigeer('wallet'); };
-            card.innerHTML =
-              '<div style="min-width:0;flex:1">' +
-                '<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:#d4910a;font-weight:600">Wallet saldo</div>' +
-                '<div style="font-family:DM Serif Display,serif;font-size:1.8rem;color:#fcf8ef;line-height:1.1;margin-top:2px">€ ' + balance.toFixed(2) + '</div>' +
-                '<div style="font-size:0.78rem;color:rgba(252,248,239,0.65);margin-top:4px">Tik om transacties te bekijken & op te waarderen</div>' +
-              '</div>' +
-              '<div style="font-size:1.6rem;color:#d4910a">›</div>';
-            anchor.parentNode.insertBefore(card, anchor.nextSibling);
-          }
-        } catch(e) {
-          // Silent: rules / connectivity error → skip preview
-        }
-      }
+      var card = document.createElement('a');
+      card.href = 'javascript:void(0)';
+      card.className = 'bp-quick';
+      card.setAttribute('data-testid', 'brand-dash-wallet');
+      card.onclick = function() { window.DY.navigeer('wallet'); };
+      card.innerHTML =
+        '<div class="bp-quick-icon">💰</div>' +
+        '<div class="bp-quick-titel">Wallet</div>' +
+        '<div class="bp-quick-sub">Saldo & opwaarderen</div>';
+      grid.appendChild(card);
     } catch(e) { /* noop */ }
   }
 
@@ -267,6 +283,7 @@
     renderWallet: renderWallet,
     topup:        topup,
     refresh:      refresh,
-    VERSION:      '1.0.0'
+    switchTab:    switchTab,
+    VERSION:      '1.0.4'
   };
 })();

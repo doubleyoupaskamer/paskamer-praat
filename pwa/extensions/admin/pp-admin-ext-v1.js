@@ -223,15 +223,21 @@
   }
 
   // ── REGISTRATIE (zonder bestaande BP_PAGES te wijzigen) ────────────
+  // v1.0.4: force-reset lock zodat herhaalde nav altijd opnieuw initialiseert.
   function registerRoutes() {
     if (!window.DY || typeof window.DY.toonPagina !== 'function') return;
     if (window.DY._pp_admin_ext_wrapped) return;
     window.DY._pp_admin_ext_wrapped = true;
     var origToon = window.DY.toonPagina;
     window.DY.toonPagina = function(pagina) {
-      if (pagina === 'admin_wallet')     { window.DY.pagina = pagina; return renderAdminWallet(); }
-      if (pagina === 'admin_payments')   { window.DY.pagina = pagina; return renderAdminPayments(); }
-      if (pagina === 'admin_placements') { window.DY.pagina = pagina; return renderAdminPlacements(); }
+      if (pagina === 'admin_wallet' || pagina === 'admin_payments' || pagina === 'admin_placements') {
+        window.DY._laatstGerenderd = null;
+        if (window.DY.brandPortal) window.DY.brandPortal._renderLock = false;
+        window.DY.pagina = pagina;
+        if (pagina === 'admin_wallet')     return renderAdminWallet();
+        if (pagina === 'admin_payments')   return renderAdminPayments();
+        if (pagina === 'admin_placements') return renderAdminPlacements();
+      }
       return origToon.apply(this, arguments);
     };
   }
