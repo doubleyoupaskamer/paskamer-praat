@@ -23403,6 +23403,9 @@ DY._feedOutfitReview = function(docId, fotoUrl) {
   // Wacht tot popup gerenderd is, zoek dan het AI panel en trigger het
   // v60.1.41: triggerBtn is verwijderd uit overlay UI, dus we wachten alleen
   // op panelEl (de container waarin het analyse-resultaat rendert).
+  // v60.1.43: extra fallback — als fotoUrl null is, probeer het opnieuw te lezen
+  // uit de inmiddels geladen popup-hero-media zodat we niet onterecht
+  // de "Voeg een foto toe" fallback tonen.
   var pogingen = 0;
   var interval = setInterval(function() {
     pogingen++;
@@ -23411,6 +23414,13 @@ DY._feedOutfitReview = function(docId, fotoUrl) {
       clearInterval(interval);
       setTimeout(function() {
         try { panelEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e) {}
+        // Fallback foto-lookup uit de overlay zelf
+        if (!fotoUrl) {
+          var heroEl = document.querySelector('.dy-sd-hero-media, .dy-reel-bg-img-main, .dy-reel-bg-blur');
+          if (heroEl) {
+            fotoUrl = heroEl.currentSrc || heroEl.src || heroEl.getAttribute('src') || heroEl.getAttribute('poster') || null;
+          }
+        }
         DY.toonAIAnalyse(docId, fotoUrl || null, panelEl);
       }, 80);
     } else if (pogingen > 20) {

@@ -601,13 +601,31 @@
     score:   actScore,
     /* v60.1.41: 'outfit_analyse' triggert de bestaande DY._feedOutfitReview
        pipeline (opent overlay, draait AI analyse). Pure verplaatsing van
-       trigger-locatie, onderliggende AI/analyse flow ongewijzigd. */
+       trigger-locatie, onderliggende AI/analyse flow ongewijzigd.
+       v60.1.43 FIX: selector was '.dy-reel-bg' wat de wrapping DIV matcht
+       (geen src) → foto kwam null binnen → "Voeg een foto toe" werd getoond.
+       Nu specifieke selectors voor het echte image/video-element. */
     outfit_analyse: function(kaart) {
       if (!kaart) return;
       var docId = kaart.dataset && (kaart.dataset.docId || kaart.dataset.docid || kaart.getAttribute('data-doc-id'));
       if (!docId) return;
-      var img = kaart.querySelector('.dy-reel-bg, img, .dy-reel-bg-video');
-      var foto = (img && (img.currentSrc || img.src)) || null;
+      // Specifieke selectors — eerst hoofdfoto, dan video (poster), dan blurred fallback,
+      // dan eventuele overlay hero-media. AVATAR img is bewust uitgesloten.
+      var mediaEl = kaart.querySelector(
+        '.dy-reel-bg-img-main, .dy-reel-bg-video, .dy-reel-bg-blur, .dy-sd-hero-media'
+      );
+      var foto = null;
+      if (mediaEl) {
+        foto = mediaEl.currentSrc
+            || mediaEl.src
+            || mediaEl.getAttribute('src')
+            || mediaEl.getAttribute('poster')
+            || null;
+        // Negeer lege/empty/data-uri-placeholder
+        if (foto && (foto === 'about:blank' || foto.indexOf('data:image/svg') === 0)) {
+          foto = null;
+        }
+      }
       if (window.DY && typeof window.DY._feedOutfitReview === 'function') {
         window.DY._feedOutfitReview(docId, foto);
       }
