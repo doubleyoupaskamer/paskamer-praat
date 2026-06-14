@@ -213,7 +213,7 @@
     var html =
       '<div class="pp-uitg-header">' +
         '<span class="pp-uitg-eyebrow">Uitgelicht</span>' +
-        '<h2 class="pp-uitg-titel">Gesponsord door onze merken</h2>' +
+        '<h2 class="pp-uitg-titel">Gesponsord door onze partners</h2>' +
       '</div>' +
       '<div class="pp-uitg-list">';
     actief.forEach(function(c) {
