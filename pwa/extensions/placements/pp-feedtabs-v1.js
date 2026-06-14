@@ -88,26 +88,21 @@
       '.pp-uitg-leeg h3{font:400 1.3rem/1.2 "DM Serif Display","Cormorant Garamond",serif;color:#fcf8ef;margin:0 0 8px}' +
       '.pp-uitg-leeg p{font:400 14px/1.5 "DM Sans",sans-serif;margin:0 auto;max-width:340px;color:rgba(252,248,239,.6)}' +
       '.pp-uitg-loader{text-align:center;padding:60px 20px;color:rgba(252,248,239,.55);font:500 13px/1 "DM Sans",sans-serif}' +
-      // ── v60.1.68: Feed-overview grid ────────────────────────────────
+      // ── v60.1.69: Product-overview grid (brand_products) ──────────────
       '.pp-uitg-feed-header{padding:32px 4px 14px;margin-top:24px;border-bottom:1px solid rgba(252,248,239,.10);margin-bottom:18px}' +
-      '.pp-uitg-feed-grid{display:grid;grid-template-columns:1fr;gap:14px}' +
-      '@media(min-width:600px){.pp-uitg-feed-grid{grid-template-columns:repeat(2,1fr);gap:16px}}' +
-      '@media(min-width:1024px){.pp-uitg-feed-grid{grid-template-columns:repeat(3,1fr);gap:18px}}' +
-      '.pp-uitg-feed-kaart{background:rgba(255,255,255,.03);border:1px solid rgba(252,248,239,.08);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s ease,border-color .15s ease}' +
-      '.pp-uitg-feed-kaart:hover{transform:translateY(-2px);border-color:rgba(212,145,10,.32)}' +
-      '.pp-uitg-feed-img{aspect-ratio:3/4;background:#0f0c08 center/cover no-repeat;cursor:pointer;transition:opacity .15s ease}' +
-      '.pp-uitg-feed-img:hover{opacity:.92}' +
-      '.pp-uitg-feed-img--empty{background:linear-gradient(135deg,rgba(212,145,10,.08),rgba(255,255,255,.02))}' +
-      '.pp-uitg-feed-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}' +
-      '.pp-uitg-feed-user{display:flex;align-items:center;gap:8px}' +
-      '.pp-uitg-feed-ini{width:28px;height:28px;border-radius:50%;background:rgba(212,145,10,.18);color:#d4910a;display:flex;align-items:center;justify-content:center;font:700 11px/1 "DM Sans",sans-serif;flex-shrink:0}' +
-      '.pp-uitg-feed-naam{font:600 .82rem/1 "DM Sans",sans-serif;color:#fcf8ef;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
-      '.pp-uitg-feed-tekst{font:400 .82rem/1.45 "DM Sans",sans-serif;color:rgba(252,248,239,.72);margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;flex:1}' +
-      '.pp-uitg-leesmeer{color:#d4910a;font-weight:600;text-decoration:none}' +
-      '.pp-uitg-leesmeer:hover{text-decoration:underline}' +
-      '.pp-uitg-feed-acties{display:flex;gap:6px;margin-top:auto;padding-top:6px;border-top:1px solid rgba(252,248,239,.06)}' +
-      '.pp-uitg-act{flex:1;background:transparent;border:1px solid rgba(252,248,239,.1);color:rgba(252,248,239,.78);font:600 .76rem/1 "DM Sans",sans-serif;padding:8px 6px;border-radius:8px;cursor:pointer;transition:all .15s ease;-webkit-tap-highlight-color:transparent}' +
-      '.pp-uitg-act:hover,.pp-uitg-act:active{border-color:#d4910a;color:#d4910a;background:rgba(212,145,10,.08)}';
+      '.pp-uitg-feed-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}' +
+      '@media(min-width:600px){.pp-uitg-feed-grid{grid-template-columns:repeat(3,1fr);gap:14px}}' +
+      '@media(min-width:1024px){.pp-uitg-feed-grid{grid-template-columns:repeat(4,1fr);gap:16px}}' +
+      '@media(min-width:1400px){.pp-uitg-feed-grid{grid-template-columns:repeat(5,1fr)}}' +
+      '.pp-uitg-prod-kaart{display:flex;flex-direction:column;background:rgba(255,255,255,.03);border:1px solid rgba(252,248,239,.08);border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;transition:transform .15s ease,border-color .15s ease;cursor:pointer;-webkit-tap-highlight-color:transparent}' +
+      '.pp-uitg-prod-kaart:hover,.pp-uitg-prod-kaart:focus-visible{transform:translateY(-2px);border-color:rgba(212,145,10,.4);outline:none}' +
+      '.pp-uitg-prod-img{aspect-ratio:1/1;background:#0f0c08;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}' +
+      '.pp-uitg-prod-img img{width:100%;height:100%;object-fit:cover;display:block}' +
+      '.pp-uitg-prod-noimg{font-size:32px;color:rgba(252,248,239,.3);background:linear-gradient(135deg,rgba(212,145,10,.06),rgba(255,255,255,.02))}' +
+      '.pp-uitg-prod-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px}' +
+      '.pp-uitg-prod-brand{font:600 .68rem/1 "DM Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#d4910a;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+      '.pp-uitg-prod-titel{font:500 .82rem/1.3 "DM Sans",sans-serif;color:#fcf8ef;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.1em}' +
+      '.pp-uitg-prod-prijs{font:700 .88rem/1 "DM Sans",sans-serif;color:#fcf8ef;margin-top:4px}';
     document.head.appendChild(s);
   }
 
@@ -308,96 +303,93 @@
         '</div>';
     }
 
-    // ── v60.1.68: feed-overview grid daaronder ───────────────────────
+    // ── v60.1.69: producten-overview onder de partner-grid ──────────────
     html +=
       '<div class="pp-uitg-feed-header">' +
-        '<span class="pp-uitg-eyebrow">Community</span>' +
-        '<h2 class="pp-uitg-titel">Outfit feed overzicht</h2>' +
+        '<span class="pp-uitg-eyebrow">Shop</span>' +
+        '<h2 class="pp-uitg-titel">Producten van onze partners</h2>' +
       '</div>' +
-      '<div id="pp-uitg-feed-grid" class="pp-uitg-feed-grid" data-testid="pp-uitg-feed-grid">' +
-        '<div class="pp-uitg-loader">Feed laden…</div>' +
+      '<div id="pp-uitg-feed-grid" class="pp-uitg-feed-grid" data-testid="pp-uitg-prod-grid">' +
+        '<div class="pp-uitg-loader">Producten laden…</div>' +
       '</div>';
 
     grid.innerHTML = html;
-    loadFeedOverview();
+    loadProductenOverview();
   }
 
-  // ── Feed-overview: compacte grid van verhalen, hergebruikt DY handlers ──
-  function loadFeedOverview() {
+  // ── Producten van actieve partners — query brand_products collection ──
+  function loadProductenOverview() {
     var container = document.getElementById('pp-uitg-feed-grid');
     if (!container) return;
-
-    // Use cached verhalen if beschikbaar
-    var verhalen = (window.DY && DY._verhalenCache) || [];
-    if (verhalen.length) {
-      paintFeedOverview(container, verhalen.slice(0, 24));
-      return;
-    }
-    // Anders direct fetch (geen wijziging aan backend)
     var db = window.firebase && firebase.firestore ? firebase.firestore() : null;
-    if (!db) { paintFeedOverview(container, []); return; }
-    db.collection('verhalen').orderBy('aangemaakt', 'desc').limit(24).get()
+    if (!db) { paintProductenOverview(container, []); return; }
+    db.collection('brand_products')
+      .where('status', '==', 'actief')
+      .limit(36).get()
       .then(function(snap) {
         var items = [];
-        snap.forEach(function(d) { var v = d.data(); v.id = d.id; items.push(v); });
-        paintFeedOverview(container, items);
+        snap.forEach(function(d) {
+          var p = d.data();
+          p._id = d.id;
+          items.push(p);
+        });
+        paintProductenOverview(container, items);
       })
-      .catch(function() { paintFeedOverview(container, []); });
+      .catch(function(err) {
+        console.warn('[uitgelicht] brand_products query faalde:', err && err.code);
+        paintProductenOverview(container, []);
+      });
   }
 
-  function paintFeedOverview(container, items) {
+  function _fmtEuro(p) {
+    if (p == null || p === '') return '';
+    var n = Number(String(p).replace(',', '.'));
+    if (!isFinite(n)) return esc(String(p));
+    return '€ ' + n.toFixed(2).replace('.', ',');
+  }
+
+  function paintProductenOverview(container, items) {
     if (!container) return;
     if (!items || !items.length) {
-      container.innerHTML = '<div class="pp-uitg-leeg"><p>Nog geen feed-content beschikbaar.</p></div>';
+      container.innerHTML =
+        '<div class="pp-uitg-leeg" style="grid-column:1/-1">' +
+          '<p>Nog geen producten beschikbaar — partners voegen binnenkort hun collectie toe.</p>' +
+        '</div>';
       return;
     }
     var html = '';
-    items.forEach(function(v) {
-      var img = esc(v.afbeeldingUrl || v.imageUrl || '');
-      var naam = esc(v.eigenaarNaam || v.naam || 'Anoniem');
-      var ini = naam.slice(0, 2).toUpperCase();
-      var tekst = esc((v.tekst || v.beschrijving || '').slice(0, 140));
-      var vid = esc(v.id || '');
-      var likes = (v.likes || v.likeCount || 0);
+    items.forEach(function(p) {
+      var img = (p.afbeeldingen && p.afbeeldingen[0]) || '';
+      var titel = esc(p.titel || 'Product');
+      var brand = esc(p.brandNaam || '');
+      var url = esc(p.url || 'javascript:void(0)');
+      var prijs = _fmtEuro(p.prijs);
+      var pid = esc(p._id || '');
       html +=
-        '<article class="pp-uitg-feed-kaart" data-testid="pp-feed-kaart-' + vid + '">' +
-          (img ? '<div class="pp-uitg-feed-img" style="background-image:url(' + img + ')" onclick="PP_FeedTabs.openVerhaal(\'' + vid + '\')"></div>' :
-                 '<div class="pp-uitg-feed-img pp-uitg-feed-img--empty" onclick="PP_FeedTabs.openVerhaal(\'' + vid + '\')"></div>') +
-          '<div class="pp-uitg-feed-body">' +
-            '<div class="pp-uitg-feed-user">' +
-              '<span class="pp-uitg-feed-ini">' + ini + '</span>' +
-              '<span class="pp-uitg-feed-naam">' + naam + '</span>' +
-            '</div>' +
-            (tekst ? '<p class="pp-uitg-feed-tekst">' + tekst + (v.tekst && v.tekst.length > 140 ? '… ' +
-              '<a href="javascript:void(0)" class="pp-uitg-leesmeer" onclick="PP_FeedTabs.openVerhaal(\'' + vid + '\')">Lees meer →</a>' : '') + '</p>' : '') +
-            '<div class="pp-uitg-feed-acties">' +
-              '<button class="pp-uitg-act" title="Like" onclick="PP_FeedTabs.actie(\'like\',\'' + vid + '\')">♡ ' + likes + '</button>' +
-              '<button class="pp-uitg-act" title="Bewaar" onclick="PP_FeedTabs.actie(\'bewaar\',\'' + vid + '\')">⬇</button>' +
-              '<button class="pp-uitg-act" title="Deel" onclick="PP_FeedTabs.actie(\'deel\',\'' + vid + '\')">↗</button>' +
-              '<button class="pp-uitg-act" title="Meer" onclick="PP_FeedTabs.actie(\'meer\',\'' + vid + '\')">⋯</button>' +
-            '</div>' +
+        '<a class="pp-uitg-prod-kaart" ' +
+          'href="' + url + '" ' +
+          (url.indexOf('http') === 0 ? 'target="_blank" rel="noopener nofollow"' : '') + ' ' +
+          'data-testid="pp-uitg-prod-' + pid + '" ' +
+          'onclick="PP_FeedTabs.trackProd(\'' + pid + '\')">' +
+          (img
+            ? '<div class="pp-uitg-prod-img"><img src="' + esc(img) + '" alt="" loading="lazy" decoding="async"></div>'
+            : '<div class="pp-uitg-prod-img pp-uitg-prod-noimg">👜</div>') +
+          '<div class="pp-uitg-prod-body">' +
+            (brand ? '<div class="pp-uitg-prod-brand">' + brand + '</div>' : '') +
+            '<div class="pp-uitg-prod-titel">' + titel + '</div>' +
+            (prijs ? '<div class="pp-uitg-prod-prijs">' + prijs + '</div>' : '') +
           '</div>' +
-        '</article>';
+        '</a>';
     });
     container.innerHTML = html;
   }
 
-  function openVerhaal(id) {
+  function trackProductClick(id) {
     try {
-      if (window.DY && DY.toonDetail) DY.toonDetail(id);
-      else if (window.DY && DY.navigeer) DY.navigeer('detail', id);
+      if (window.DY && DY.brandPortal && DY.brandPortal._trackClick) {
+        DY.brandPortal._trackClick(id);
+      }
     } catch(_) {}
-  }
-
-  function feedActie(actie, id) {
-    try {
-      if (actie === 'like' && window.DY && DY.toggleLike) return DY.toggleLike(id);
-      if (actie === 'bewaar' && window.DY && DY.toggleBewaar) return DY.toggleBewaar(id);
-      if (actie === 'deel' && window.DY && DY.deelVerhaal) return DY.deelVerhaal(id);
-      if (actie === 'meer' && window.DY && DY.openVerhaalMenu) return DY.openVerhaalMenu(id);
-      // Fallback: open detail
-      openVerhaal(id);
-    } catch(_) { openVerhaal(id); }
   }
 
   function openCamp(id, brandId) {
@@ -449,8 +441,7 @@
   window.PP_FeedTabs = {
     refresh: tryAll,
     openCamp: openCamp,
-    openVerhaal: openVerhaal,
-    actie: feedActie,
+    trackProd: trackProductClick,
     renderUitgelicht: renderUitgelicht
   };
 })();
