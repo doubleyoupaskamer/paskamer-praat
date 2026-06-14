@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Header
-from fastapi.responses import Response
+from fastapi.responses import Response, FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -75,6 +75,25 @@ async def get_status_checks():
             check['timestamp'] = datetime.fromisoformat(check['timestamp'])
     
     return status_checks
+
+
+# ════════════════════════════════════════════════════════════════
+# PWA DEPLOY BUNDLE DOWNLOAD
+# Serveert /app/*.zip bundles voor handmatige Cloudflare deploys
+# ════════════════════════════════════════════════════════════════
+@api_router.get("/downloads/{filename}")
+async def download_bundle(filename: str):
+    # Restrictie: alleen .zip in /app, geen path traversal
+    if not filename.endswith(".zip") or "/" in filename or ".." in filename:
+        raise HTTPException(status_code=400, detail="Ongeldige bestandsnaam")
+    path = Path("/app") / filename
+    if not path.exists() or not path.is_file():
+        raise HTTPException(status_code=404, detail="Bestand niet gevonden")
+    return FileResponse(
+        path=str(path),
+        media_type="application/zip",
+        filename=filename,
+    )
 
 
 # ════════════════════════════════════════════════════════════════
