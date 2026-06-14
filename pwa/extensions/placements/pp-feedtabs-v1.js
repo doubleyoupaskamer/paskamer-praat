@@ -23,17 +23,26 @@
     var s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent =
-      // v60.1.67: definitieve fix — full-page block layout met force-hide
-      '.dy-main.pp-uitgelicht-modus{' +
-        'display:block !important;' +
+      // v60.1.70: definitieve fix — gebruik NATURAL page scroll, niet
+      // internal container scroll. Forceer body/html scroll én laat
+      // #dy-main als gewone block met visible overflow renderen.
+      'html:has(.dy-main.pp-uitgelicht-modus),' +
+      'body:has(.dy-main.pp-uitgelicht-modus){' +
         'overflow-y:auto !important;' +
         'overflow-x:hidden !important;' +
         'height:auto !important;' +
         'min-height:100vh !important;' +
+        'max-height:none !important' +
+      '}' +
+      '.dy-main.pp-uitgelicht-modus{' +
+        'display:block !important;' +
+        'overflow:visible !important;' +
+        'height:auto !important;' +
+        'min-height:auto !important;' +
         'max-height:none !important;' +
         'scroll-snap-type:none !important;' +
-        'padding-bottom:140px !important;' +
-        '-webkit-overflow-scrolling:touch' +
+        'padding-bottom:160px !important;' +
+        'position:relative !important' +
       '}' +
       '.dy-main.pp-uitgelicht-modus > #dy-verhalen,' +
       '.dy-main.pp-uitgelicht-modus > #dy-feed-sentinel,' +
@@ -42,13 +51,8 @@
       '.dy-main.pp-uitgelicht-modus > #dy-stories-row,' +
       '.dy-main.pp-uitgelicht-modus > #dy-feed-nav-strip,' +
       '.dy-main.pp-uitgelicht-modus > #dy-feed-filters{display:flex !important;flex-shrink:0 !important}' +
-      // Pas op mobile de outer scroll aan
-      '@media(max-width:1023px){' +
-        '.dy-main.pp-uitgelicht-modus{height:auto !important;max-height:none !important;overflow-y:visible !important}' +
-        'body:has(.dy-main.pp-uitgelicht-modus){overflow-y:auto !important;height:auto !important}' +
-      '}' +
       '#pp-uitgelicht-grid{' +
-        'padding:24px 16px 40px;' +
+        'padding:24px 16px 60px;' +
         'animation:ppUitgFadeIn .3s ease;' +
         'color:#fcf8ef;' +
         'width:100%;' +
@@ -176,6 +180,9 @@
       main.classList.remove('pp-uitgelicht-modus');
       main.classList.add('dy-feed-actief');
     }
+    // v60.1.70: verwijder body/html class
+    document.documentElement.classList.remove('pp-uitgelicht-active');
+    document.body.classList.remove('pp-uitgelicht-active');
   }
 
   // ── Stap 3: handler voor Uitgelicht tab klik ────────────────────────
@@ -205,7 +212,12 @@
     if (main && main.classList.contains('dy-feed-actief')) {
       main.classList.add('pp-uitgelicht-modus');
       main.classList.remove('dy-feed-actief');
+    } else if (main) {
+      main.classList.add('pp-uitgelicht-modus');
     }
+    // v60.1.70: ook body+html classes voor browsers zonder :has() support
+    document.documentElement.classList.add('pp-uitgelicht-active');
+    document.body.classList.add('pp-uitgelicht-active');
 
     renderUitgelicht();
   }
