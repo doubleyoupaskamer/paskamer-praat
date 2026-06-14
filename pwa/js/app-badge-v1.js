@@ -38,19 +38,21 @@
     if (!window.DY || !DY.user || !DY.db || DY.user.uid === _laatstUid) return;
     stop(); // veiligheidshalve vorige listeners stoppen
     _laatstUid = DY.user.uid;
+    var _uidSnapshot = DY.user.uid;  // v60.1.45: bewaar uid voor error-callback (DY.user kan null worden)
 
     // ─── Ongelezen meldingen ─────────────────────────────────────
     try {
       _unsubMeld = DY.db.collection('meldingen')
-        .where('userId', '==', DY.user.uid)
+        .where('userId', '==', _uidSnapshot)
         .where('gelezen', '==', false)
         .onSnapshot(function(snap) {
           _aantalMeld = snap ? (snap.size || 0) : 0;
           pasBadgeToe();
         }, function() {
           // Fallback zonder composite index
+          if (!DY.user || !DY.user.uid) return;  // v60.1.45: bail bij logout
           DY.db.collection('meldingen')
-            .where('userId', '==', DY.user.uid)
+            .where('userId', '==', _uidSnapshot)
             .limit(50).get()
             .then(function(snap) {
               _aantalMeld = (snap && snap.docs ? snap.docs : [])

@@ -84,7 +84,11 @@
 
   /**
    * Subscribe op admin_settings/global voor real-time placement updates.
-   * Call deze eenmaal bij app-init na Firebase init.
+   * Call deze eenmalig bij app-init na Firebase init.
+   *
+   * Failure-tolerant: bij permission-denied (rules niet gedeployed of
+   * anonieme user zonder read access) → silent fallback naar defaults.
+   * Geen console warnings — gebruikers hoeven dit niet te zien.
    */
   function subscribeAdminPlacements(firestore) {
     if (!firestore) return;
@@ -95,11 +99,12 @@
           _adminPlacements = data.placements_enabled || null;
           _adminPlacementsTs = Date.now();
         }
-      }, function(err) {
-        console.warn('[PP_Placements] admin_settings subscribe error:', err && err.code);
+      }, function(_err) {
+        // Silent: rules zonder admin_settings read = defaults to all-enabled
+        _adminPlacements = null;
       });
     } catch(e) {
-      console.warn('[PP_Placements] subscribe failed:', e.message);
+      // Silent
     }
   }
 

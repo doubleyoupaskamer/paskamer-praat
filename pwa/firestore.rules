@@ -659,5 +659,48 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ════════════════════════════════════════════════════════════════
+    // EXTENSIONS v1.0.0 — Admin Settings, Payments, Events, Users (wallet)
+    // ════════════════════════════════════════════════════════════════
+
+    // Admin settings: placements_enabled + feature_flags moeten publiek
+    // leesbaar zijn (anonieme users hebben dit nodig voor placement-gating).
+    // Schrijven alleen door admin.
+    match /admin_settings/{settingId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // Payments: alleen owner + admin mogen lezen. Schrijven uitsluitend
+    // server-side via Firebase Admin SDK (Cloud Function / FastAPI backend).
+    match /payments/{paymentId} {
+      allow read:   if isAdmin()
+                    || (isIngelogd() && resource.data.uid == request.auth.uid);
+      allow write:  if false;
+    }
+
+    // Events: append-only voor ingelogde users met whitelisted type.
+    // Update/delete alleen door aggregator (server-side via admin SDK).
+    match /events/{eventId} {
+      allow create: if isIngelogd()
+                    && request.resource.data.type in
+                       ['impression','product_click','campaign_click',
+                        'outfit_view','outfit_review','ai_query',
+                        'similar_view','purchase','wallet_topup','wallet_spend'];
+      allow read:   if isAdmin();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Users — uitbreiding voor wallet velden.
+    // Bestaande /users rules worden NIET overschreven; deze sub-regel geldt
+    // alleen voor wallet-gerelateerde velden. Schrijven van wallet_balance,
+    // transactions, shopify_customer_id ALLEEN server-side (Admin SDK).
+    // Lezen blijft via bestaande regel; deze rule blokkeert alleen
+    // client-side writes op de protected velden.
+    function _walletFieldsBlocked() {
+      return !(request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['wallet_balance', 'transactions', 'shopify_customer_id']));
+    }
   }
 }
