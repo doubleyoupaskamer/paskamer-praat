@@ -453,19 +453,16 @@
           return;
         }
         var b = bSnap.data();
-        // v60.1.42: client-side status filter om composite index (brandId+status) te vermijden
+        // v60.1.44: status-filter back-restored omdat Firestore rule
+        // alleen status=='actief' toestaat voor anonieme bezoekers
+        // (vereist composite index brand_products: brandId + status).
         var pSnap = await DY.db.collection('brand_products')
           .where('brandId','==', brandId)
-          .limit(100).get();
+          .where('status','==','actief')
+          .limit(24).get();
         var prods = [];
-        var prodDocs = [];
         pSnap.forEach(function(d) {
-          var pd = d.data();
-          if ((pd.status || '') === 'actief') prodDocs.push({ id: d.id, data: pd });
-        });
-        prodDocs = prodDocs.slice(0, 24);
-        prodDocs.forEach(function(d) {
-          var p = d.data;
+          var p = d.data();
           var img = (p.afbeeldingen && p.afbeeldingen[0]) || '';
           prods.push(
             '<a class="bp-prod-kaart" href="' + esc(p.url || '#') + '" target="_blank" rel="noopener nofollow" onclick="DY.brandPortal._trackClick(\'' + esc(d.id) + '\')" data-testid="brand-product-' + esc(d.id) + '">' +
