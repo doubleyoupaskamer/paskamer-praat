@@ -23,7 +23,10 @@
     var s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent =
-      '#pp-uitgelicht-grid{padding:20px 16px 90px;animation:ppUitgFadeIn .3s ease;color:#fcf8ef}' +
+      // v60.1.66: forceer normale scroll wanneer Uitgelicht actief is
+      '.dy-main.pp-uitgelicht-modus{display:block !important;overflow-y:auto !important;height:auto !important;min-height:100vh;scroll-snap-type:none !important;padding-bottom:120px}' +
+      '.dy-main.pp-uitgelicht-modus #dy-stories-row,.dy-main.pp-uitgelicht-modus #dy-feed-nav-strip,.dy-main.pp-uitgelicht-modus #dy-feed-filters{display:flex}' +
+      '#pp-uitgelicht-grid{padding:20px 16px 90px;animation:ppUitgFadeIn .3s ease;color:#fcf8ef;width:100%;box-sizing:border-box}' +
       '@keyframes ppUitgFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}' +
       '.pp-uitg-header{padding:8px 4px 18px;border-bottom:1px solid rgba(252,248,239,.10);margin-bottom:16px}' +
       '.pp-uitg-eyebrow{display:inline-block;font:600 11px/1 "DM Sans",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#d4910a;margin-bottom:6px}' +
@@ -47,6 +50,7 @@
       '.pp-uitg-tag{position:absolute;top:10px;right:12px;font:600 9px/1 "DM Sans",sans-serif;letter-spacing:.08em;' +
         'text-transform:uppercase;color:rgba(212,145,10,.95);background:rgba(212,145,10,.12);' +
         'padding:5px 9px;border-radius:100px}' +
+      '.pp-uitg-cta{display:block;margin-top:6px;font:600 .76rem/1 "DM Sans",sans-serif;color:#d4910a;letter-spacing:.02em}' +
       '.pp-uitg-leeg{text-align:center;padding:48px 20px;color:rgba(252,248,239,.65)}' +
       '.pp-uitg-leeg h3{font:400 1.3rem/1.2 "DM Serif Display","Cormorant Garamond",serif;color:#fcf8ef;margin:0 0 8px}' +
       '.pp-uitg-leeg p{font:400 14px/1.5 "DM Sans",sans-serif;margin:0 auto;max-width:340px;color:rgba(252,248,239,.6)}' +
@@ -118,12 +122,19 @@
     if (verhalen) verhalen.style.display = '';
     var sentinel = document.getElementById('dy-feed-sentinel');
     if (sentinel) sentinel.style.display = '';
+    // v60.1.66: herstel feed-actief class
+    var main = document.getElementById('dy-main');
+    if (main && main.classList.contains('pp-uitgelicht-modus')) {
+      main.classList.remove('pp-uitgelicht-modus');
+      main.classList.add('dy-feed-actief');
+    }
   }
 
   // ── Stap 3: handler voor Uitgelicht tab klik ────────────────────────
-  // v60.1.65: Uitgelicht functioneert nu als VOLLEDIGE feed pagina —
-  // brand-partners grid bovenaan, daaronder de reguliere feed met alle
-  // interacties (like, save, share, lees meer, AI, rapporteren).
+  // v60.1.66: stabiele oplossing — verbergt scroll-snap feed-reel
+  // (incompatibel met grid-layout) en toont partner-grid in eigen
+  // scrollbare container. Klik op kaart → opent merk-detail (full feed
+  // filtered to that brand via PP_CampaignRenderer.click).
   function handleUitgelichtClick(btn) {
     var bar = document.getElementById('dy-feed-filters');
     if (bar) {
@@ -135,28 +146,18 @@
     btn.classList.add('active');
     btn.classList.add('actief');
 
-    // BELANGRIJK: NIET meer verbergen — feed blijft zichtbaar zodat
-    // alle bestaande kaart-functionaliteit werkt.
+    // Verberg scroll-snap reel + sentinel (anders breekt layout)
     var verhalen = document.getElementById('dy-verhalen');
-    if (verhalen) verhalen.style.display = '';
+    if (verhalen) verhalen.style.display = 'none';
     var sentinel = document.getElementById('dy-feed-sentinel');
-    if (sentinel) sentinel.style.display = '';
+    if (sentinel) sentinel.style.display = 'none';
 
-    // Forceer dat de feed geladen is (via bestaande DY.setFilter)
-    try {
-      if (window.DY && typeof DY.setFilter === 'function') {
-        // Call _ppSetFilterOrig om wrapper-recursie te voorkomen,
-        // hergebruikt alle bestaande feed-loading logica.
-        var origFn = DY._ppSetFilterOrig || DY.setFilter;
-        // Roep alleen aan als de feed nog niet recent is geladen
-        if (!window._ppUitgFeedLoaded) {
-          window._ppUitgFeedLoaded = true;
-          // Reset na 60s zodat hertikken op tab refresht
-          setTimeout(function() { window._ppUitgFeedLoaded = false; }, 60000);
-          try { origFn.call(DY, 'recent', null); } catch(_) {}
-        }
-      }
-    } catch(_) {}
+    // Tijdelijk feed-actief class uitschakelen voor normale scroll
+    var main = document.getElementById('dy-main');
+    if (main && main.classList.contains('dy-feed-actief')) {
+      main.classList.add('pp-uitgelicht-modus');
+      main.classList.remove('dy-feed-actief');
+    }
 
     renderUitgelicht();
   }
@@ -250,6 +251,7 @@
           '<div class="pp-uitg-info">' +
             '<div class="pp-uitg-merk">' + esc(c.brandNaam || 'Merk') + '</div>' +
             '<div class="pp-uitg-msg">' + msg + '</div>' +
+            '<span class="pp-uitg-cta">Bekijk merk →</span>' +
           '</div>' +
           '<span class="pp-uitg-tag">Gesponsord</span>' +
         '</a>';
