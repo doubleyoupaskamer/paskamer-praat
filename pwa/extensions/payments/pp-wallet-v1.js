@@ -214,7 +214,6 @@
     var orig = window.DY.toonPagina;
     window.DY.toonPagina = function(pagina) {
       if (pagina === 'wallet') {
-        // Force fresh render — reset locks van eerdere renders
         window.DY._laatstGerenderd = null;
         if (window.DY.brandPortal) window.DY.brandPortal._renderLock = false;
         window.DY.pagina = pagina;
@@ -222,6 +221,13 @@
       }
       return orig.apply(this, arguments);
     };
+    // v1.0.6: Fix bootstrap race — als URL al deze route bevat, force-render
+    try {
+      var qs = new URLSearchParams(window.location.search);
+      if (qs.get('pagina') === 'wallet') {
+        window.DY.navigeer('wallet');
+      }
+    } catch(e) {}
   }
 
   // ── MENU INJECTIE — wallet alleen voor brand-users zichtbaar maken ─

@@ -148,6 +148,13 @@
       }
       return orig.apply(this, arguments);
     };
+    // v1.0.6: Fix bootstrap race — als URL al deze route bevat, force-render
+    try {
+      var qs = new URLSearchParams(window.location.search);
+      if (qs.get('pagina') === 'admin_campagne_diagnose') {
+        window.DY.navigeer('admin_campagne_diagnose');
+      }
+    } catch(e) {}
   }
 
   if (document.readyState === 'loading') {

@@ -240,6 +240,14 @@
       }
       return origToon.apply(this, arguments);
     };
+    // v1.0.6: Fix bootstrap race — als URL al een extension route bevat, force-render
+    try {
+      var qs = new URLSearchParams(window.location.search);
+      var p = qs.get('pagina');
+      if (p === 'admin_wallet' || p === 'admin_payments' || p === 'admin_placements') {
+        window.DY.navigeer(p);
+      }
+    } catch(e) {}
   }
 
   // ── AUTO-INJECT NAV BUTTONS in admin pagina's ──────────────────────
