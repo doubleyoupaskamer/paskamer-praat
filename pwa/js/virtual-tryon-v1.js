@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Virtual Try-On v1 (Gemini Nano Banana)
+// Doubleyou - Virtual Try-On v1 (Gemini Nano Banana)
 //
 // Modal-flow:
 //   1. Hub-menu opent "Probeer outfit virtueel"
@@ -341,7 +341,7 @@
     } catch (e) { watermarkUrl = src; }
 
     var shareData = {
-      title: 'Mijn paskamer - Paskamer Praat',
+      title: 'Mijn paskamer - Doubleyou',
       text:  'Bekijk mijn virtuele paskamer-look! https://paskamerpraat.nl',
       url:   'https://paskamerpraat.nl'
     };

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Error Boundary v1
+// Doubleyou - Error Boundary v1
 // Een dunne, globale safety net die ALS EERSTE script laadt.
 // Vangt onverwerkte JS-fouten en promise rejections zodat ze nooit
 // stilletjes in de console terechtkomen en (optioneel) gebatcht naar

@@ -22684,7 +22684,7 @@ html {
 
 /* ── 2. Topbar: logo mag de profiel-knop NOOIT wegduwen ──────────
    Op iOS rendert Cormorant Garamond serif net iets breder, waardoor
-   "Paskamer Praat" naar 2 regels brak en het profiel-icoon werd afgesneden. */
+   "Doubleyou" naar 2 regels brak en het profiel-icoon werd afgesneden. */
 .dy-topbar {
   gap: 8px;
   padding-left: max(var(--sp-4), env(safe-area-inset-left, 0px));

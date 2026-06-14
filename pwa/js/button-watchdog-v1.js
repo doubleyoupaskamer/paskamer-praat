@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Button Watchdog v1 (v57)
+// Doubleyou - Button Watchdog v1 (v57)
 //
 // Non-invasieve "stuck button" recovery + click telemetry.
 //

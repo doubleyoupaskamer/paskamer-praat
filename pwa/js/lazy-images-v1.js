@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Lazy Images v1 (non-invasief)
+// Doubleyou - Lazy Images v1 (non-invasief)
 // Voegt native `loading="lazy"` toe aan alle <img> die het nog niet
 // hebben, en upgrade `data-src` / `data-srcset` placeholders met een
 // IntersectionObserver.

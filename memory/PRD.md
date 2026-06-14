@@ -232,6 +232,29 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 ## Admin credentials
 - `williamdevriesis@gmail.com` - secret header `wivri` voor backend API
 
+## v60.1.75 (2026-02-14) - Full Doubleyou rebrand + centralized config
+- **Branding**: alle 195 occurrences van "Paskamer Praat" in productie
+  bestanden vervangen door "Doubleyou". CHANGELOG-*.md en workers/*
+  bleven intact (historische docs / aparte deploys).
+- **Tagline**: "Tailored for Tall & Plus Size" toegevoegd aan
+  page title, og:title, twitter:title, manifest.name + description.
+- **Manifest.json**: name "Doubleyou - Tailored for Tall & Plus Size",
+  short_name "Doubleyou", description bijgewerkt.
+- **Centrale config** (`extensions/config/pp-brand-config-v1.js`):
+  `window.PP_BRAND = { appName, tagline, fullName, organisation,
+  domain, version, contactEmail, formatDate }`. Frozen object.
+  Legal footer en andere extensies lezen versie/naam hieruit i.p.v.
+  hardcoded strings. Laadt als EERSTE script (`defer`) zodat alle
+  legacy code window.PP_BRAND kan gebruiken.
+- **Legal footer** (`pp-legal-footer-v1.js`): hardcoded "v60.1.72"
+  verwijderd, leest nu PP_BRAND.version. Jaar via `new Date().getFullYear()`
+  i.p.v. hardcoded "2026". Marker attr `data-pp-copy` voor live update.
+- **Voorwaarden**: dubbele "h.o.d.n. Doubleyou" naam-redundantie weggehaald.
+- **Cache discipline**: alle index.html + admin.html script/css tags
+  uniform `?v=60.1.75-doubleyou-rebrand`, SW VERSION naar
+  `v60.1.75-20260214-doubleyou-rebrand`.
+- **Stability**: 0 syntax errors (`node -c` pass op alle JS), JSON valid.
+
 ## v60.1.74 (2026-02-14) - Emails uniform + 3 P2 features
 - **Emails**: Alle `@paskamerpraat.nl` adressen (support/privacy/partners/no-reply/legal/security)
   vervangen door `info@doubleyousmallandtall.nl`. Scope: HTML, JS, MD, JSON

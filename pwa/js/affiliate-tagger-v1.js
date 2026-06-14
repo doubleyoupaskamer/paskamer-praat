@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Affiliate Auto-Tagger v1 (non-invasief)
+// Doubleyou - Affiliate Auto-Tagger v1 (non-invasief)
 //
 // Detecteert outbound links naar webshops, voegt jouw affiliate-tag toe
 // en logt clicks naar Firestore collection `kai_events`.

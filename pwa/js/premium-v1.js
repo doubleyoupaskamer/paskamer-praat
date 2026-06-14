@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Premium Tier v55 (Stripe checkout error-handling fix)
+// Doubleyou - Premium Tier v55 (Stripe checkout error-handling fix)
 //
 // v55 changes (vs v54):
 //   • Robuuste apiBase() fallback (LIVE_BACKEND_FALLBACK als aiHealth nog niet geladen)

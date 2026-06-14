@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat - Universele Campagne Renderer (v1.0.0)
+ * Doubleyou - Universele Campagne Renderer (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Final fix voor campagne-zichtbaarheid:

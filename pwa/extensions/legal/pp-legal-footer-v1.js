@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat - Legal Footer Injector (v1.0.0)
+ * Doubleyou - Legal Footer Injector (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  * Voegt op iedere pagina een discrete voorwaarden-footer toe en bewaakt
  * dat ingelogde merken hun acceptatie-versie hebben geregistreerd.
@@ -52,7 +52,9 @@
       '<a href="/voorwaarden/#av" data-testid="footer-av">Algemene Voorwaarden</a>' +
       '<span class="pp-legal-sep">·</span>' +
       '<a href="/voorwaarden/#campagnes" data-testid="footer-campagnes">Campagnevoorwaarden</a>' +
-      '<div style="margin-top:8px;opacity:.6">© 2026 Doubleyou Tailored for Tall & Plus Size - Paskamer Praat v60.1.72</div>';
+      '<div style="margin-top:8px;opacity:.6" data-pp-copy>\u00A9 ' + (new Date()).getFullYear() + ' '
+        + ((window.PP_BRAND && window.PP_BRAND.organisation) || 'Doubleyou Tailored for Tall & Plus Size')
+        + ' - Doubleyou ' + ((window.PP_BRAND && window.PP_BRAND.version) || 'v60.1.75') + '</div>';
     // Append aan body, niet aan dy-main, om scroll-snap conflicten te vermijden
     document.body.appendChild(f);
   }

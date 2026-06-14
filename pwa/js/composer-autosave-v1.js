@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Composer Auto-save v1
+// Doubleyou - Composer Auto-save v1
 // Slaat conceptversie automatisch op elke 3s in localStorage
 // Herstelt bij volgende bezoek (per composer-type, per user)
 //

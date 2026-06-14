@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Background Sync v1 (non-invasief opt-in)
+// Doubleyou - Background Sync v1 (non-invasief opt-in)
 //
 // Doel: failed POST-acties (likes, comments, AI requests) niet verloren
 // laten gaan wanneer de gebruiker even offline is. We slaan ze op in

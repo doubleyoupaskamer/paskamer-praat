@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Web Share Target client v1
+// Doubleyou - Web Share Target client v1
 // Vangt content op die naar de PWA gedeeld is en vult de composer in.
 // Werkt non-invasief: leest IndexedDB die door sw.js gevuld is.
 // ═══════════════════════════════════════════════════════════════════

@@ -1,4 +1,4 @@
-/* PaskamerPraat - Recente activiteit sectie in profiel v1
+/* Doubleyou - Recente activiteit sectie in profiel v1
  * Additieve extensie: injecteert een "Recente activiteit" blok in
  * het profiel (DY.renderProfiel). Toont de laatste 5 verhalen van
  * de huidige gebruiker uit de 'stories' collectie.

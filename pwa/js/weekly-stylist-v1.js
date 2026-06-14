@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Weekly Stylist Brief v1
+// Doubleyou - Weekly Stylist Brief v1
 //
 // Detecteert wanneer een nieuwe ISO-week is begonnen sinds de gebruiker
 // voor het laatst zijn weekbrief zag. Toont dan een non-blocking banner

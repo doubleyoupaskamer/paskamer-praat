@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat - Admin Premium Management (v1.0.0)
+ * Doubleyou - Admin Premium Management (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  * Route: admin_premium  →  /#admin_premium  (alleen DY._isAdmin())
  *

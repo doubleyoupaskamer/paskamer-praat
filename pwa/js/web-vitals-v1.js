@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Web Vitals v1 (non-invasief)
+// Doubleyou - Web Vitals v1 (non-invasief)
 //
 // Captured Core Web Vitals via PerformanceObserver en logt batched
 // naar Firestore `kai_events`. Pure browser API's, geen externe lib.

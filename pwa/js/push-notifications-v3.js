@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Push Notifications v1
+// Doubleyou - Push Notifications v1
 // Subscription flow met segmenten - werkt met bestaande SW push listener
 //
 // Architectuur:
@@ -285,7 +285,7 @@
     try {
       var reg = await navigator.serviceWorker.ready;
       await reg.showNotification('Notificaties staan aan ✨', {
-        body: 'Welkom bij Paskamer Praat - we houden je op de hoogte.',
+        body: 'Welkom bij Doubleyou - we houden je op de hoogte.',
         icon: '/icons/icon-192.png',
         badge: '/icons/icon-192.png',
         tag: 'pp-welcome',

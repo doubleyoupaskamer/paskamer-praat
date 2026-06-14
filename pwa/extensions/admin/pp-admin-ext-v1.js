@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat - Admin Panel Extensions (v1.0.0)
+ * Doubleyou - Admin Panel Extensions (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Voegt 3 nieuwe admin-modules toe:

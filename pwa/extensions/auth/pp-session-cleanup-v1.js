@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat - Session Cleanup & Cache Isolation (v1.0.0)
+ * Doubleyou - Session Cleanup & Cache Isolation (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  * Lost een kritiek lek op: na uitloggen bleven user-specifieke caches
  * (premium status, avatar, outfit scores, admin secret, etc.) zichtbaar.

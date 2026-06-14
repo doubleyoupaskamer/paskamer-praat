@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Notification Skin v1 (visual-only)
+// Doubleyou - Notification Skin v1 (visual-only)
 //
 // Eén gedeelde brand-aligned surface voor ALLE notification-componenten:
 //   - push-notifications modal       (#dy-push-modal)

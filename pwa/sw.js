@@ -1,4 +1,4 @@
-// Paskamer Praat - Service Worker v21
+// Doubleyou - Service Worker v21
 // Veilige runtime caching:
 //   - HTML/navigaties: NETWORK-FIRST met snelle fallback (max 3s) → altijd verse content na deploy
 //   - Versioned JS (/js/*-v*.js + /js/pwa-v*.js): CACHE-FIRST, immutable
@@ -10,7 +10,7 @@
 // Strategie is bewust simpel + bestand-naam-gebaseerd zodat een nieuwe deploy
 // (nieuwe versioned filename) automatisch niet uit cache komt.
 
-const VERSION       = 'v60.1.74-20260214-az-recente-factuur';
+const VERSION       = 'v60.1.75-20260214-doubleyou-rebrand';
 const STATIC_CACHE  = 'pp-static-' + VERSION;
 const RUNTIME_CACHE = 'pp-runtime-' + VERSION;
 const IMG_CACHE     = 'pp-images-' + VERSION;
@@ -275,7 +275,7 @@ self.addEventListener('fetch', event => {
 
 self.addEventListener('push', e => {
   let data = {
-    title: 'Paskamer Praat',
+    title: 'Doubleyou',
     body: 'Je hebt een nieuwe melding.',
     icon: '/icons/apple-touch-icon-180.png'
   };

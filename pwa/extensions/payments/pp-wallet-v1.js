@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat - Klant Wallet Module (v1.0.0)
+ * Doubleyou - Klant Wallet Module (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Toevoegingen ZONDER bestaande code te wijzigen:

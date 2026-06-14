@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Service Worker Auto-Update v1
+// Doubleyou - Service Worker Auto-Update v1
 // Non-invasief: detecteert nieuwe SW versie en activeert deze meteen
 // zodat gebruikers geen "oude versie cache" meer ervaren na een deploy.
 //

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - AI Fit Assistant Chat v1
+// Doubleyou - AI Fit Assistant Chat v1
 // Claude Sonnet 4.5 chat met community-context (RAG light)
 //
 // Werking:
@@ -351,7 +351,7 @@
       : 'Het maatprofiel van deze gebruiker is nog leeg. Vraag indien relevant om lengte/maat.';
 
     var communityTekst = (ctx.community && ctx.community.length)
-      ? '\n\nReviews uit de Paskamer Praat community (mensen met vergelijkbare lengte):\n' +
+      ? '\n\nReviews uit de Doubleyou community (mensen met vergelijkbare lengte):\n' +
         ctx.community.map(function(r, i) {
           return (i+1) + '. ' + (r.merk || 'merk?') + ' - ' + (r.item || 'item?') +
             ' (maat ' + (r.maat || '?') + ', lengte ' + (r.lengte || '?') + 'cm' +

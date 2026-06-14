@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat - Feed Tabs Restructure (v2.0.0)
+ * Doubleyou - Feed Tabs Restructure (v2.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  * Verbergt "Trending" en "Mijn posts" knoppen.
  * Voegt nieuwe "Uitgelicht" tab toe (campagnes + gesponsorde merken).

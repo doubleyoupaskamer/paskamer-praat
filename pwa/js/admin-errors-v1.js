@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Admin Server Errors v1 (v60)
+// Doubleyou - Admin Server Errors v1 (v60)
 //
 // Niet-invasieve companion voor admin.html:
 //   • Voegt een tweede panel toe in tab "Errors" met server-side

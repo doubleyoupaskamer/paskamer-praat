@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Skeletons + API Retry Toast v1 (non-invasief)
+// Doubleyou - Skeletons + API Retry Toast v1 (non-invasief)
 //
 // Twee dingen:
 //

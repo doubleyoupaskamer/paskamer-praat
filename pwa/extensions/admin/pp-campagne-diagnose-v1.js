@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat - Admin Campaign Diagnose Tool (v1.0.0)
+ * Doubleyou - Admin Campaign Diagnose Tool (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Doel: snel zien WAAROM campagnes wel/niet renderen op publieke views.

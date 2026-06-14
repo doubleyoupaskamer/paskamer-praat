@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat - Outfit AI Engine Hooks (v1.0.0)
+ * Doubleyou - Outfit AI Engine Hooks (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Prepareert de client-side API voor:

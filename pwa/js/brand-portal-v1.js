@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// PaskamerPraat - BRAND PORTAL MVP v1
+// Doubleyou - BRAND PORTAL MVP v1
 // ─────────────────────────────────────────────────────────────────────────
 // Self-contained module: registreer routes, render pagina's, RBAC enforced.
 // GEEN bestaande code aangepast. GEEN bestaande user flows gebroken.
@@ -395,7 +395,7 @@
         '<div class="bp-page">' +
           '<div class="bp-header">' +
             '<div class="bp-header-titel">' +
-              '<span class="bp-header-eyebrow">Paskamer Praat</span>' +
+              '<span class="bp-header-eyebrow">Doubleyou</span>' +
               '<h1>Merken</h1>' +
               '<p>Ontdek merken die speciaal voor de Tall &amp; Plus Size community ontworpen zijn.</p>' +
             '</div>' +
@@ -820,27 +820,27 @@
           await DY.db.collection('mail').add({
             to: [userEmail],
             message: {
-              subject: 'Je merkaanvraag bij Paskamer Praat is ontvangen',
+              subject: 'Je merkaanvraag bij Doubleyou is ontvangen',
               text:
                 'Hoi ' + (v.contact || '') + ',\n\n' +
-                'Bedankt voor je aanvraag om ' + (v.naam || 'je merk') + ' toe te voegen aan Paskamer Praat.\n\n' +
+                'Bedankt voor je aanvraag om ' + (v.naam || 'je merk') + ' toe te voegen aan Doubleyou.\n\n' +
                 'We beoordelen je aanvraag binnen 2 werkdagen. Je ontvangt een mail zodra je merk is goedgekeurd of als we extra informatie nodig hebben.\n\n' +
                 'Aanvraag-ID: ' + brandId + '\n' +
                 'Categorie: ' + (v.categorie || '-') + '\n' +
                 'Website: ' + (v.website || '-') + '\n\n' +
                 'Met vriendelijke groet,\n' +
-                'Het Paskamer Praat team\n' +
+                'Het Doubleyou team\n' +
                 'https://paskamerpraat.nl',
               html:
                 '<p>Hoi ' + esc(v.contact || '') + ',</p>' +
-                '<p>Bedankt voor je aanvraag om <strong>' + esc(v.naam || 'je merk') + '</strong> toe te voegen aan Paskamer Praat.</p>' +
+                '<p>Bedankt voor je aanvraag om <strong>' + esc(v.naam || 'je merk') + '</strong> toe te voegen aan Doubleyou.</p>' +
                 '<p>We beoordelen je aanvraag binnen <strong>2 werkdagen</strong>. Je ontvangt een mail zodra je merk is goedgekeurd of als we extra informatie nodig hebben.</p>' +
                 '<ul>' +
                   '<li>Aanvraag-ID: <code>' + esc(brandId) + '</code></li>' +
                   '<li>Categorie: ' + esc(v.categorie || '-') + '</li>' +
                   '<li>Website: ' + esc(v.website || '-') + '</li>' +
                 '</ul>' +
-                '<p>Met vriendelijke groet,<br>Het Paskamer Praat team<br>' +
+                '<p>Met vriendelijke groet,<br>Het Doubleyou team<br>' +
                 '<a href="https://paskamerpraat.nl">paskamerpraat.nl</a></p>'
             },
             // Metadata voor onze eigen worker of audit
@@ -858,7 +858,7 @@
           message: {
             subject: 'Nieuwe merkaanvraag: ' + (v.naam || 'onbekend'),
             text:
-              'Er is een nieuwe merkaanvraag binnengekomen op Paskamer Praat.\n\n' +
+              'Er is een nieuwe merkaanvraag binnengekomen op Doubleyou.\n\n' +
               'Bedrijfsnaam:   ' + (v.naam || '-') + '\n' +
               'Contactpersoon: ' + (v.contact || '-') + '\n' +
               'E-mail:         ' + (userEmail || '-') + '\n' +

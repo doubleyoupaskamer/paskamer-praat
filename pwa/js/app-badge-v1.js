@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - App Badge v1
+// Doubleyou - App Badge v1
 // Toont rood teller-bolletje op het app-icoon (Android 7+, iOS 16.4+, desktop)
 // Som van: ongelezen meldingen + ongelezen DM's
 //

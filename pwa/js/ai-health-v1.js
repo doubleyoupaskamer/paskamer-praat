@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - AI Backend Health & Config (v48-fix)
+// Doubleyou - AI Backend Health & Config (v48-fix)
 //
 // Centrale plek voor:
 //   1. apiBase() resolver - slimme default per host

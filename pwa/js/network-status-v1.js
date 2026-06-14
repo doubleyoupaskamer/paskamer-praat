@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Network Status Toast v1 (non-invasief)
+// Doubleyou - Network Status Toast v1 (non-invasief)
 // Toont een subtiele banner bij offline/online overgangen.
 //
 // • Offline → roodbruine pill "Geen verbinding - wijzigingen worden later

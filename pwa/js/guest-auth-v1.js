@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Guest Anonymous Auth v1 (v53)
+// Doubleyou - Guest Anonymous Auth v1 (v53)
 //
 // Doel: gasten (niet-ingelogde gebruikers) automatisch laten authenticeren
 // via Firebase Anonymous Authentication, zodat:

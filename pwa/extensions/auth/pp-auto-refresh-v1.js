@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat - Auto Refresh User Data (v1.0.0)
+ * Doubleyou - Auto Refresh User Data (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  * Garantie: BIJ IEDERE HANDELING van de gebruiker worden user-specifieke
  * gegevens (avatar, naam, premium status, profile, initialen) opnieuw

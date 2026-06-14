@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat - Placements Extension Helper (v1.0.0)
+ * Doubleyou - Placements Extension Helper (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Centrale helper voor placement-gating zonder bestaande code te wijzigen.

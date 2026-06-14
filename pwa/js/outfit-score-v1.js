@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - AI Outfit Score v1
+// Doubleyou - AI Outfit Score v1
 //
 // Voegt een compacte "Style Score" pill toe aan elke feed-card met een
 // foto. Klik → backend /api/outfit-score (Gemini Vision) → score 0-100

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Card Actions v1 (v50)
+// Doubleyou - Card Actions v1 (v50)
 //
 // Handlers voor de 8 nieuwe items in het card-hub menu van extra-menu-v3.js:
 //   - tryon     → Virtual Try-On modal openen met outfit-foto pre-filled
@@ -206,8 +206,8 @@
     var url = info.shareUrl;
     // Affiliate-tagger v46 doet de rest indien Zalando-link
     var shareData = {
-      title: 'Paskamer Praat - ' + info.author,
-      text: info.caption ? info.caption : 'Bekijk deze look op Paskamer Praat',
+      title: 'Doubleyou - ' + info.author,
+      text: info.caption ? info.caption : 'Bekijk deze look op Doubleyou',
       url: url
     };
     if (navigator.share) {

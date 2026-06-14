@@ -1,4 +1,4 @@
-/* PaskamerPraat - Brand A-Z sticky index bar v1
+/* Doubleyou - Brand A-Z sticky index bar v1
  * Additieve extensie: hooks in op BP.renderMerken (#bp-merken-lijst).
  * Bouwt automatisch een sticky A-Z balk boven de merkengrid op basis
  * van de zichtbare merknamen. Klik op een letter scrollt naar het

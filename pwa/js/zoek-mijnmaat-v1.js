@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Zoekfilter "Op mijn maat" v1
+// Doubleyou - Zoekfilter "Op mijn maat" v1
 // Voegt een extra filter toe aan de bestaande zoekbalk:
 //   "Alle" / "Vergelijkbaar (≥55%)" / "Zelfde bouw (≥75%)"
 // Non-invasief: wrapt DY.voerZoekUit en filtert resultaten post-render

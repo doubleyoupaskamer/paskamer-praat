@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Extra Hub Menu v2
+// Doubleyou - Extra Hub Menu v2
 // Drie-punten hamburger menu BINNEN elke feed-card, vlak boven de avatar.
 // Verbergt de oude losse FAB's (Vraag AI / Meldingen) volledig.
 //

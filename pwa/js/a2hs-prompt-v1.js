@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat - Custom Add-to-Home-Screen Prompt v1 (non-invasief)
+// Doubleyou - Custom Add-to-Home-Screen Prompt v1 (non-invasief)
 //
 // Vervangt de browser default install hint met een eigen, on-brand
-// bottom-sheet "Installeer Paskamer Praat".
+// bottom-sheet "Installeer Doubleyou".
 //
 // Gedrag:
 //   - Android/Desktop: vangt `beforeinstallprompt`, prevent default,
@@ -130,7 +130,7 @@
     el.innerHTML =
       '<div class="head">' +
         '<div class="icon">W</div>' +
-        '<div><div class="title" id="dy-a2hs-title">Installeer Paskamer Praat</div>' +
+        '<div><div class="title" id="dy-a2hs-title">Installeer Doubleyou</div>' +
         '<div class="sub">Sneller laden, offline & meldingen</div></div>' +
       '</div>' +
       '<div class="body">Voeg toe aan je startscherm voor de échte app-ervaring.</div>' +
