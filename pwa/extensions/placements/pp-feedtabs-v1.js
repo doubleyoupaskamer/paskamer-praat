@@ -23,38 +23,71 @@
     var s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent =
-      // v60.1.66: forceer normale scroll wanneer Uitgelicht actief is
-      '.dy-main.pp-uitgelicht-modus{display:block !important;overflow-y:auto !important;height:auto !important;min-height:100vh;scroll-snap-type:none !important;padding-bottom:120px}' +
-      '.dy-main.pp-uitgelicht-modus #dy-stories-row,.dy-main.pp-uitgelicht-modus #dy-feed-nav-strip,.dy-main.pp-uitgelicht-modus #dy-feed-filters{display:flex}' +
-      '#pp-uitgelicht-grid{padding:20px 16px 90px;animation:ppUitgFadeIn .3s ease;color:#fcf8ef;width:100%;box-sizing:border-box}' +
+      // v60.1.67: definitieve fix — full-page block layout met force-hide
+      '.dy-main.pp-uitgelicht-modus{' +
+        'display:block !important;' +
+        'overflow-y:auto !important;' +
+        'overflow-x:hidden !important;' +
+        'height:auto !important;' +
+        'min-height:100vh !important;' +
+        'max-height:none !important;' +
+        'scroll-snap-type:none !important;' +
+        'padding-bottom:140px !important;' +
+        '-webkit-overflow-scrolling:touch' +
+      '}' +
+      '.dy-main.pp-uitgelicht-modus > #dy-verhalen,' +
+      '.dy-main.pp-uitgelicht-modus > #dy-feed-sentinel,' +
+      '.dy-main.pp-uitgelicht-modus > .dy-welkom-banner,' +
+      '.dy-main.pp-uitgelicht-modus > .dy-fit-prompt{display:none !important}' +
+      '.dy-main.pp-uitgelicht-modus > #dy-stories-row,' +
+      '.dy-main.pp-uitgelicht-modus > #dy-feed-nav-strip,' +
+      '.dy-main.pp-uitgelicht-modus > #dy-feed-filters{display:flex !important;flex-shrink:0 !important}' +
+      // Pas op mobile de outer scroll aan
+      '@media(max-width:1023px){' +
+        '.dy-main.pp-uitgelicht-modus{height:auto !important;max-height:none !important;overflow-y:visible !important}' +
+        'body:has(.dy-main.pp-uitgelicht-modus){overflow-y:auto !important;height:auto !important}' +
+      '}' +
+      '#pp-uitgelicht-grid{' +
+        'padding:24px 16px 40px;' +
+        'animation:ppUitgFadeIn .3s ease;' +
+        'color:#fcf8ef;' +
+        'width:100%;' +
+        'max-width:1100px;' +
+        'margin:0 auto;' +
+        'box-sizing:border-box' +
+      '}' +
       '@keyframes ppUitgFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}' +
       '.pp-uitg-header{padding:8px 4px 18px;border-bottom:1px solid rgba(252,248,239,.10);margin-bottom:16px}' +
       '.pp-uitg-eyebrow{display:inline-block;font:600 11px/1 "DM Sans",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#d4910a;margin-bottom:6px}' +
-      '.pp-uitg-titel{font:400 1.4rem/1.2 "DM Serif Display","Cormorant Garamond",Georgia,serif;color:#fcf8ef;margin:0;letter-spacing:-.01em}' +
+      '.pp-uitg-titel{font:400 clamp(1.25rem,3.5vw,1.6rem)/1.2 "DM Serif Display","Cormorant Garamond",Georgia,serif;color:#fcf8ef;margin:0;letter-spacing:-.01em}' +
       '.pp-uitg-list{display:grid;grid-template-columns:1fr;gap:12px}' +
-      '@media(min-width:600px){.pp-uitg-list{grid-template-columns:repeat(2,1fr)}}' +
-      '@media(min-width:1024px){.pp-uitg-list{grid-template-columns:repeat(3,1fr)}}' +
-      '.pp-uitg-kaart{display:flex;align-items:center;gap:12px;padding:14px 16px;' +
+      '@media(min-width:600px){.pp-uitg-list{grid-template-columns:repeat(2,1fr);gap:14px}}' +
+      '@media(min-width:1024px){.pp-uitg-list{grid-template-columns:repeat(3,1fr);gap:16px}}' +
+      '.pp-uitg-kaart{' +
+        'display:flex;align-items:flex-start;gap:12px;padding:16px;' +
         'background:linear-gradient(135deg,rgba(212,145,10,.10) 0%,rgba(255,255,255,.04) 100%);' +
         'border:1px solid rgba(212,145,10,.28);border-radius:14px;text-decoration:none;color:#fcf8ef;' +
-        'position:relative;transition:transform .15s ease,border-color .15s ease;cursor:pointer;min-height:76px}' +
-      '.pp-uitg-kaart:hover,.pp-uitg-kaart:focus-visible{transform:translateY(-1px);border-color:#d4910a;outline:none}' +
+        'position:relative;transition:transform .15s ease,border-color .15s ease;' +
+        'cursor:pointer;min-height:96px;' +
+        '-webkit-tap-highlight-color:transparent' +
+      '}' +
+      '.pp-uitg-kaart:hover,.pp-uitg-kaart:focus-visible,.pp-uitg-kaart:active{transform:translateY(-1px);border-color:#d4910a;outline:none}' +
       '.pp-uitg-logo{flex-shrink:0;width:44px;height:44px;border-radius:10px;' +
         'background:rgba(255,255,255,.08);color:#d4910a;display:flex;align-items:center;justify-content:center;' +
         'font:700 15px/1 "DM Sans",sans-serif;letter-spacing:.02em}' +
-      '.pp-uitg-info{flex:1;min-width:0;padding-right:80px}' +
-      '.pp-uitg-merk{font:700 .9rem/1.25 "DM Sans",sans-serif;color:#fcf8ef;margin-bottom:3px;letter-spacing:-.005em;' +
+      '.pp-uitg-info{flex:1;min-width:0;padding-right:84px}' +
+      '.pp-uitg-merk{font:700 .92rem/1.25 "DM Sans",sans-serif;color:#fcf8ef;margin-bottom:4px;letter-spacing:-.005em;' +
         'overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
-      '.pp-uitg-msg{font:400 .85rem/1.35 "DM Sans",sans-serif;color:rgba(252,248,239,.78);' +
-        'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}' +
-      '.pp-uitg-tag{position:absolute;top:10px;right:12px;font:600 9px/1 "DM Sans",sans-serif;letter-spacing:.08em;' +
+      '.pp-uitg-msg{font:400 .85rem/1.4 "DM Sans",sans-serif;color:rgba(252,248,239,.78);' +
+        'display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}' +
+      '.pp-uitg-tag{position:absolute;top:12px;right:14px;font:600 9px/1 "DM Sans",sans-serif;letter-spacing:.08em;' +
         'text-transform:uppercase;color:rgba(212,145,10,.95);background:rgba(212,145,10,.12);' +
-        'padding:5px 9px;border-radius:100px}' +
-      '.pp-uitg-cta{display:block;margin-top:6px;font:600 .76rem/1 "DM Sans",sans-serif;color:#d4910a;letter-spacing:.02em}' +
-      '.pp-uitg-leeg{text-align:center;padding:48px 20px;color:rgba(252,248,239,.65)}' +
+        'padding:5px 9px;border-radius:100px;white-space:nowrap}' +
+      '.pp-uitg-cta{display:inline-block;margin-top:8px;font:600 .78rem/1 "DM Sans",sans-serif;color:#d4910a;letter-spacing:.02em}' +
+      '.pp-uitg-leeg{text-align:center;padding:60px 20px;color:rgba(252,248,239,.65)}' +
       '.pp-uitg-leeg h3{font:400 1.3rem/1.2 "DM Serif Display","Cormorant Garamond",serif;color:#fcf8ef;margin:0 0 8px}' +
       '.pp-uitg-leeg p{font:400 14px/1.5 "DM Sans",sans-serif;margin:0 auto;max-width:340px;color:rgba(252,248,239,.6)}' +
-      '.pp-uitg-loader{text-align:center;padding:40px 20px;color:rgba(252,248,239,.55);font:500 13px/1 "DM Sans",sans-serif}';
+      '.pp-uitg-loader{text-align:center;padding:60px 20px;color:rgba(252,248,239,.55);font:500 13px/1 "DM Sans",sans-serif}';
     document.head.appendChild(s);
   }
 
