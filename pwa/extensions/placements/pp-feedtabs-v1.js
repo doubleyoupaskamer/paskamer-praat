@@ -1,0 +1,280 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * PaskamerPraat — Feed Tabs Restructure (v2.0.0)
+ * ═══════════════════════════════════════════════════════════════════════
+ * Verbergt "Trending" en "Mijn posts" knoppen.
+ * Voegt nieuwe "Uitgelicht" tab toe (campagnes + gesponsorde merken).
+ * Werkt additief — geen wijzigingen in legacy pwa-v463-*.js.
+ *
+ * Tabs (na restructure):
+ *   1. Ontdek ⭐        (data-filter="recent")     — bestaand
+ *   2. Mijn postuur     (data-filter="vergelijk")  — bestaand
+ *   3. Uitgelicht       (data-filter="uitgelicht") — NIEUW
+ * ═══════════════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  var STYLE_ID = 'pp-feedtabs-style';
+  var GRID_ID = 'pp-uitgelicht-grid';
+  var TAB_ATTR = '[data-filter="uitgelicht"]';
+
+  // ── CSS injectie (eenmalig) ─────────────────────────────────────────
+  function ensureStyle() {
+    if (document.getElementById(STYLE_ID)) return;
+    var s = document.createElement('style');
+    s.id = STYLE_ID;
+    s.textContent =
+      '#pp-uitgelicht-grid{padding:20px 16px 60px;animation:ppUitgFadeIn .3s ease}' +
+      '@keyframes ppUitgFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}' +
+      '.pp-uitg-header{padding:8px 4px 18px;border-bottom:1px solid rgba(30,26,15,.08);margin-bottom:16px}' +
+      '.pp-uitg-eyebrow{display:inline-block;font:600 11px/1 "DM Sans",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#c67d06;margin-bottom:6px}' +
+      '.pp-uitg-titel{font:600 22px/1.2 "Cormorant Garamond",Georgia,serif;color:#1e1a0f;margin:0}' +
+      '.pp-uitg-list{display:grid;grid-template-columns:1fr;gap:12px}' +
+      '@media(min-width:600px){.pp-uitg-list{grid-template-columns:repeat(2,1fr)}}' +
+      '.pp-uitg-kaart{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#fdf8f0;border:1px solid rgba(30,26,15,.08);border-radius:14px;text-decoration:none;color:inherit;position:relative;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;cursor:pointer}' +
+      '.pp-uitg-kaart:hover{transform:translateY(-2px);box-shadow:0 8px 24px -8px rgba(30,26,15,.16);border-color:rgba(198,125,6,.4)}' +
+      '.pp-uitg-logo{flex-shrink:0;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#c67d06,#a36406);color:#fefcf5;display:flex;align-items:center;justify-content:center;font:700 16px/1 "DM Sans",sans-serif;letter-spacing:.02em}' +
+      '.pp-uitg-info{flex:1;min-width:0}' +
+      '.pp-uitg-merk{font:700 14px/1.25 "DM Sans",sans-serif;color:#1e1a0f;margin-bottom:3px;letter-spacing:-.005em}' +
+      '.pp-uitg-msg{font:400 13px/1.4 "DM Sans",sans-serif;color:rgba(30,26,15,.66);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}' +
+      '.pp-uitg-tag{position:absolute;top:10px;right:12px;font:600 9px/1 "DM Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#c67d06;background:rgba(198,125,6,.1);padding:4px 8px;border-radius:6px}' +
+      '.pp-uitg-leeg{text-align:center;padding:48px 20px;color:rgba(30,26,15,.6)}' +
+      '.pp-uitg-leeg h3{font:600 20px/1.2 "Cormorant Garamond",serif;color:#1e1a0f;margin:0 0 8px}' +
+      '.pp-uitg-leeg p{font:400 14px/1.5 "DM Sans",sans-serif;margin:0;max-width:340px;margin-left:auto;margin-right:auto}' +
+      '.pp-uitg-loader{text-align:center;padding:40px 20px;color:rgba(30,26,15,.5);font:500 13px/1 "DM Sans",sans-serif}';
+    document.head.appendChild(s);
+  }
+
+  function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
+
+  // ── Stap 1: verberg Trending + Mijn posts, voeg Uitgelicht toe ──────
+  function setupFilters() {
+    var bar = document.getElementById('dy-feed-filters');
+    if (!bar) return false;
+
+    // Verberg Trending
+    var trending = bar.querySelector('[data-filter="populair"]');
+    if (trending && trending.style.display !== 'none') {
+      trending.style.display = 'none';
+      trending.setAttribute('data-pp-hidden', 'trending');
+    }
+    // Verberg Mijn posts
+    var mijnPosts = bar.querySelector('[data-filter="mijn"]');
+    if (mijnPosts && mijnPosts.style.display !== 'none') {
+      mijnPosts.style.display = 'none';
+      mijnPosts.setAttribute('data-pp-hidden', 'mijn');
+    }
+
+    // Voeg Uitgelicht tab toe (idempotent)
+    if (!bar.querySelector(TAB_ATTR)) {
+      var btn = document.createElement('button');
+      btn.className = 'dy-filter';
+      btn.setAttribute('data-filter', 'uitgelicht');
+      btn.setAttribute('data-testid', 'feed-tab-uitgelicht');
+      btn.textContent = 'Uitgelicht';
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        handleUitgelichtClick(btn);
+      });
+      bar.appendChild(btn);
+    }
+    return true;
+  }
+
+  // ── Stap 2: wrap DY.setFilter zodat onze state reset bij andere tabs ─
+  function wrapSetFilter() {
+    if (!window.DY || typeof DY.setFilter !== 'function') return false;
+    if (DY._ppSetFilterWrapped) return true;
+    var orig = DY.setFilter;
+    DY._ppSetFilterWrapped = true;
+    DY.setFilter = function(filter, btn) {
+      // Reset Uitgelicht-state
+      restoreNormalFeed();
+      return orig.call(this, filter, btn);
+    };
+    return true;
+  }
+
+  function restoreNormalFeed() {
+    var bar = document.getElementById('dy-feed-filters');
+    if (bar) {
+      var ub = bar.querySelector(TAB_ATTR);
+      if (ub) { ub.classList.remove('active'); ub.classList.remove('actief'); }
+    }
+    var grid = document.getElementById(GRID_ID);
+    if (grid && grid.parentNode) grid.parentNode.removeChild(grid);
+    var verhalen = document.getElementById('dy-verhalen');
+    if (verhalen) verhalen.style.display = '';
+    var sentinel = document.getElementById('dy-feed-sentinel');
+    if (sentinel) sentinel.style.display = '';
+  }
+
+  // ── Stap 3: handler voor Uitgelicht tab klik ────────────────────────
+  function handleUitgelichtClick(btn) {
+    var bar = document.getElementById('dy-feed-filters');
+    if (bar) {
+      bar.querySelectorAll('.dy-filter').forEach(function(b) {
+        b.classList.remove('active');
+        b.classList.remove('actief');
+      });
+    }
+    btn.classList.add('active');
+    btn.classList.add('actief');
+
+    // Verberg normale verhalen-feed
+    var verhalen = document.getElementById('dy-verhalen');
+    if (verhalen) verhalen.style.display = 'none';
+    var sentinel = document.getElementById('dy-feed-sentinel');
+    if (sentinel) sentinel.style.display = 'none';
+
+    renderUitgelicht();
+  }
+
+  // ── Stap 4: render Uitgelicht grid ──────────────────────────────────
+  function renderUitgelicht() {
+    var existing = document.getElementById(GRID_ID);
+    if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+
+    var main = document.getElementById('dy-main');
+    if (!main) return;
+
+    var grid = document.createElement('div');
+    grid.id = GRID_ID;
+    grid.setAttribute('data-testid', 'pp-uitgelicht-grid');
+    grid.innerHTML = '<div class="pp-uitg-loader">Uitgelichte campagnes laden…</div>';
+
+    // Insert na #dy-feed-filters
+    var filters = document.getElementById('dy-feed-filters');
+    if (filters && filters.parentNode) {
+      filters.parentNode.insertBefore(grid, filters.nextSibling);
+    } else {
+      main.appendChild(grid);
+    }
+
+    // Probeer eerst de cache van de Universal Renderer
+    var camps = [];
+    try {
+      if (window.PP_CampaignRenderer && typeof PP_CampaignRenderer.getLive === 'function') {
+        camps = PP_CampaignRenderer.getLive() || [];
+      }
+    } catch(_) {}
+
+    if (camps.length) {
+      paintUitgelicht(grid, camps);
+      return;
+    }
+
+    // Fallback: directe Firestore .get() (werkt ook voor anoniem)
+    var db = window.firebase && firebase.firestore ? firebase.firestore() : null;
+    if (!db) { paintUitgelicht(grid, []); return; }
+
+    db.collection('campaigns').where('status', '==', 'live').limit(50).get()
+      .then(function(snap) {
+        var list = [];
+        snap.forEach(function(d) { var c = d.data(); c._id = d.id; list.push(c); });
+        paintUitgelicht(grid, list);
+      })
+      .catch(function() { paintUitgelicht(grid, []); });
+  }
+
+  function paintUitgelicht(grid, camps) {
+    if (!grid) return;
+    if (!camps || !camps.length) {
+      grid.innerHTML =
+        '<div class="pp-uitg-leeg" data-testid="pp-uitg-leeg">' +
+          '<h3>Nog niets uitgelicht</h3>' +
+          '<p>Hier verschijnen binnenkort gesponsorde merken en campagnes. Kom snel terug!</p>' +
+        '</div>';
+      return;
+    }
+    // Filter actieve campagnes (binnen start/eind datum)
+    var nu = Date.now();
+    var actief = camps.filter(function(c) {
+      var startMs = (c.startDatum && c.startDatum.toMillis) ? c.startDatum.toMillis() : null;
+      var eindMs  = (c.eindDatum  && c.eindDatum.toMillis)  ? c.eindDatum.toMillis()  : null;
+      if (startMs && nu < startMs) return false;
+      if (eindMs && nu > eindMs) return false;
+      return true;
+    });
+    if (!actief.length) {
+      paintUitgelicht(grid, []);
+      return;
+    }
+    var html =
+      '<div class="pp-uitg-header">' +
+        '<span class="pp-uitg-eyebrow">Uitgelicht</span>' +
+        '<h2 class="pp-uitg-titel">Gesponsord door onze merken</h2>' +
+      '</div>' +
+      '<div class="pp-uitg-list">';
+    actief.forEach(function(c) {
+      var ini = esc((c.brandNaam || '?').slice(0, 2).toUpperCase());
+      var msg = esc(c.boodschap || c.naam || '');
+      var cid = esc(c._id || '');
+      var bid = esc(c.brandId || '');
+      html +=
+        '<a class="pp-uitg-kaart" href="javascript:void(0)" ' +
+          'data-testid="pp-uitg-' + cid + '" ' +
+          'onclick="PP_FeedTabs.openCamp(\'' + cid + '\',\'' + bid + '\')">' +
+          '<div class="pp-uitg-logo">' + ini + '</div>' +
+          '<div class="pp-uitg-info">' +
+            '<div class="pp-uitg-merk">' + esc(c.brandNaam || 'Merk') + '</div>' +
+            '<div class="pp-uitg-msg">' + msg + '</div>' +
+          '</div>' +
+          '<span class="pp-uitg-tag">Gesponsord</span>' +
+        '</a>';
+    });
+    html += '</div>';
+    grid.innerHTML = html;
+  }
+
+  function openCamp(id, brandId) {
+    try {
+      if (window.PP_CampaignRenderer && PP_CampaignRenderer.click) {
+        PP_CampaignRenderer.click(id, brandId);
+      } else if (brandId && window.DY && DY.brandPortal && DY.brandPortal.toonMerkDetail) {
+        DY.brandPortal.toonMerkDetail(brandId);
+      }
+    } catch(_) {}
+  }
+
+  // ── Init + MutationObserver (legacy re-renders feed bij navigatie) ──
+  var _debounce = null;
+  function tryAll() {
+    ensureStyle();
+    setupFilters();
+    wrapSetFilter();
+  }
+  function scheduleTry() {
+    if (_debounce) return;
+    _debounce = setTimeout(function() { _debounce = null; tryAll(); }, 150);
+  }
+
+  function init() {
+    ensureStyle();
+    tryAll();
+    var obs = new MutationObserver(function(muts) {
+      // Alleen reageren als er nieuwe nodes zijn toegevoegd (geen recursie)
+      for (var i = 0; i < muts.length; i++) {
+        if (muts[i].addedNodes && muts[i].addedNodes.length) {
+          scheduleTry();
+          return;
+        }
+      }
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+    // Extra fallback voor late legacy boot
+    setTimeout(tryAll, 1200);
+    setTimeout(tryAll, 2500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    setTimeout(init, 600);
+  }
+
+  window.PP_FeedTabs = {
+    refresh: tryAll,
+    openCamp: openCamp,
+    renderUitgelicht: renderUitgelicht
+  };
+})();

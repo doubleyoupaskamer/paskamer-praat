@@ -9830,6 +9830,7 @@ DY.controleerMeldingen = function() {
       }, function(e) {
         // Fallback als onSnapshot faalt (bijv. geen composite index)
         // Gebruik .get() met client-side filter
+        if (!DY.user || !DY.user.uid) return; // v60.1.52: null-guard voor uitlog-race
         DY.db.collection('meldingen')
           .where('userId', '==', DY.user.uid)
           .limit(30).get()

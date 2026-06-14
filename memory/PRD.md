@@ -33,7 +33,30 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - **Backend download endpoint**: `/api/downloads/{filename}.zip` voor PWA bundle downloads
 - Deploy ZIP: `paskamerpraat-pwa-v60.1.43-merkprofiel.zip`
 
+### v60.1.52 — Feed Tabs Restructure + null-uid guard (huidige sessie)
+- **🆕 Navigatie Herstructurering** (`/extensions/placements/pp-feedtabs-v1.js` v2.0.0):
+  - Verbergt "Trending" tab (`data-filter="populair"`)
+  - Verbergt "Mijn posts" tab (`data-filter="mijn"`)
+  - Voegt **"Uitgelicht"** tab toe (`data-filter="uitgelicht"`)
+    - Toont alleen campagnes + gesponsorde merken (live van Firestore)
+    - Reuses `PP_CampaignRenderer.getLive()` cache, fallback `.get()` voor anoniem
+    - Klik op kaart → `PP_CampaignRenderer.click()` → brand detail
+  - Idempotente MutationObserver — overleeft legacy re-renders
+  - DY.setFilter wrapped → herstelt normale feed bij switch
+  - Volledig responsive (1-col mobile, 2-col desktop ≥600px)
+  - Brand-aligned styling (DM Sans + Cormorant Garamond)
+- **🐛 Fix legacy null-uid crash** (pwa-v463 line 9834):
+  - `controleerMeldingen` onSnapshot-error handler las `DY.user.uid` zonder null-check
+  - Added guard: `if (!DY.user || !DY.user.uid) return;`
+- Cache bumps: `?v=1.0.9-nav-restructure` + sw `v60.1.53`
+- Deploy ZIP: `/app/01-paskamerpraat-pwa-cloudflare.zip` (2.5 MB)
+
 ## Backlog / Volgende stappen
+**P0 — Wallet backend activatie (geblokkeerd op user-credentials):**
+- Shopify Admin API token → activeer auto-credit webhook
+- Firebase Service Account JSON → backend SDK voor wallet_balance update
+
+
 **P1 — Brand Portal verificatie (na deploy van v60.1.43):**
 - Product upload flow (drag/drop, compressie, 2MB limiet)
 - Campaign Builder (live budget berekening, objective settings)
