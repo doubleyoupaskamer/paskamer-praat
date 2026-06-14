@@ -526,8 +526,11 @@
         snap.forEach(function(d) {
           var c = d.data();
           var plaats = c.plaatsingen || [];
+          // v60.1.49: backward compat — legacy campagnes zonder plaatsingen-veld
+          // default naar 'feed' zodat ze niet onzichtbaar blijven na release.
+          if (!plaats.length) plaats = ['feed'];
           if (plaats.indexOf('feed') === -1) return;
-          // Datum-window check (start <= nu <= eind)
+          // Datum-window check (start <= nu <= eind) — alleen toepassen indien aanwezig
           var nuTs = Date.now();
           var startMs = (c.startDatum && c.startDatum.toMillis) ? c.startDatum.toMillis() : null;
           var eindMs  = (c.eindDatum  && c.eindDatum.toMillis)  ? c.eindDatum.toMillis()  : null;
@@ -535,6 +538,7 @@
           if (eindMs  && nuTs > eindMs)  return;
           live.push({ id: d.id, data: c });
         });
+        try { console.log('[brand-portal] live campagnes in feed:', live.length, '/', snap.size); } catch(_){}
         if (!live.length) {
           holder.innerHTML = '';
           return;

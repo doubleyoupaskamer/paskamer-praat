@@ -245,7 +245,7 @@
   // ── AUTO-INJECT NAV BUTTONS in admin pagina's ──────────────────────
   function injectAdminNav() {
     // Vind admin headers (admin_brands / admin_campagnes / admin_inkomsten)
-    var pages = ['admin_brands','admin_campagnes','admin_inkomsten','admin_wallet','admin_payments','admin_placements'];
+    var pages = ['admin_brands','admin_campagnes','admin_campagne_diagnose','admin_inkomsten','admin_wallet','admin_payments','admin_placements'];
     if (pages.indexOf(window.DY && window.DY.pagina) === -1) return;
     var page = document.querySelector('.bp-page');
     if (!page) return;
@@ -260,6 +260,7 @@
     var items = [
       { id:'admin_brands',    label:'Merken' },
       { id:'admin_campagnes', label:'Campagnes' },
+      { id:'admin_campagne_diagnose', label:'Diagnose' },
       { id:'admin_inkomsten', label:'Inkomsten' },
       { id:'admin_wallet',    label:'Wallets' },
       { id:'admin_payments',  label:'Payments' },
