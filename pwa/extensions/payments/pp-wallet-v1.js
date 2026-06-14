@@ -175,7 +175,7 @@
 
   // ── MENU INJECTIE (vindt hamburger of profile-area en injecteer link) ─
   function injectMenuLink() {
-    // Probeer hamburger-menu
+    // 1. Hamburger menu (extra-menu-overlay)
     var menu = document.querySelector('#extra-menu-list, .extra-menu-list, [data-testid="extra-menu"]');
     if (menu && !menu.querySelector('[data-testid="menu-wallet"]')) {
       var li = document.createElement('li');
@@ -185,6 +185,68 @@
         '</button>';
       menu.appendChild(li);
     }
+    // 2. Profile page acties + saldo-preview card
+    injectProfielKnop();
+  }
+
+  // Injecteer Wallet knop + saldo preview op profiel-pagina (analoog aan brand-portal pattern)
+  async function injectProfielKnop() {
+    try {
+      if (!window.DY || window.DY.pagina !== 'profiel') return;
+      var main = document.getElementById('dy-main');
+      if (!main) return;
+      var acties = main.querySelector('.dy-profiel-acties');
+
+      // ── 1. Knop in dy-profiel-acties (naar wallet pagina) ─────────
+      if (acties && !acties.querySelector('#pp-wallet-knop')) {
+        var knop = document.createElement('button');
+        knop.id = 'pp-wallet-knop';
+        knop.className = 'dy-btn dy-btn-ghost';
+        knop.style.cssText = 'justify-content:flex-start;gap:8px;width:100%';
+        knop.setAttribute('data-testid', 'profile-wallet-btn');
+        knop.innerHTML =
+          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+          '<rect x="2" y="6" width="20" height="14" rx="2"/><path d="M16 12h2"/><path d="M2 10h20"/></svg>' +
+          'Mijn wallet';
+        knop.onclick = function() { window.DY.navigeer('wallet'); };
+        acties.insertBefore(knop, acties.firstChild);
+      }
+
+      // ── 2. Saldo preview card bovenaan profile ─────────
+      if (isLogged() && !main.querySelector('#pp-wallet-preview')) {
+        var u = uid();
+        try {
+          var snap = await db().collection('users').doc(u).get();
+          var balance = snap.exists ? Number((snap.data() || {}).wallet_balance || 0) : 0;
+          // Vind een goede inject-locatie: na het eerste h1 of bovenaan
+          var anchor = main.querySelector('h1') || main.firstElementChild;
+          if (anchor && !main.querySelector('#pp-wallet-preview')) {
+            var card = document.createElement('div');
+            card.id = 'pp-wallet-preview';
+            card.setAttribute('data-testid', 'profile-wallet-preview');
+            card.style.cssText =
+              'margin:14px 0;padding:18px 20px;border-radius:16px;cursor:pointer;' +
+              'background:linear-gradient(135deg,rgba(212,145,10,0.16) 0%,rgba(255,255,255,0.04) 100%);' +
+              'border:1px solid rgba(212,145,10,0.30);' +
+              'display:flex;align-items:center;justify-content:space-between;gap:14px;' +
+              'transition:transform 0.15s,border-color 0.15s';
+            card.onmouseenter = function(){ card.style.transform='translateY(-1px)'; card.style.borderColor='#d4910a'; };
+            card.onmouseleave = function(){ card.style.transform=''; card.style.borderColor='rgba(212,145,10,0.30)'; };
+            card.onclick = function() { window.DY.navigeer('wallet'); };
+            card.innerHTML =
+              '<div style="min-width:0;flex:1">' +
+                '<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:#d4910a;font-weight:600">Wallet saldo</div>' +
+                '<div style="font-family:DM Serif Display,serif;font-size:1.8rem;color:#fcf8ef;line-height:1.1;margin-top:2px">€ ' + balance.toFixed(2) + '</div>' +
+                '<div style="font-size:0.78rem;color:rgba(252,248,239,0.65);margin-top:4px">Tik om transacties te bekijken & op te waarderen</div>' +
+              '</div>' +
+              '<div style="font-size:1.6rem;color:#d4910a">›</div>';
+            anchor.parentNode.insertBefore(card, anchor.nextSibling);
+          }
+        } catch(e) {
+          // Silent: rules / connectivity error → skip preview
+        }
+      }
+    } catch(e) { /* noop */ }
   }
 
   function init() {
