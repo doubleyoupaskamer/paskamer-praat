@@ -33,6 +33,19 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - **Backend download endpoint**: `/api/downloads/{filename}.zip` voor PWA bundle downloads
 - Deploy ZIP: `paskamerpraat-pwa-v60.1.43-merkprofiel.zip`
 
+### v60.1.59 — Premium Manage Modal + 403 verklaring (huidige sessie)
+- **🐛 Root cause "Beheer abonnement" alert**: `openCustomerPortal()` deed `POST /api/billing/portal` → backend retourneert 501 → JS deed `alert(d.detail)` → lelijke browser dialog.
+- **✅ Fix**: vervangen door volwaardige in-app **`#dy-prem-manage-overlay`** modal in `js/premium-v1.js`:
+  - Premium users zien: status pill, plan, sinds-datum, vervaldatum, account-email, feature-lijst
+  - "Opzeggen via e-mail" knop (mailto: support@paskamerpraat.nl, auto-fill email + onderwerp)
+  - Bron-aware: `premium_monthly` (Stripe) / `premium_admin` (env) / `premium_grant` (handmatig) → toont juiste opties
+  - Non-premium fallback: "Word Premium" CTA + Sluiten knop
+  - WCAG: aria-modal, focus trap via overlay click, ESC-vriendelijk
+  - Volledig dark theme, geen browser alert(), geen 403, geen 501
+- **⚠️ 403 op `/api/webhook/stripe`**: dit is GEEN bug — webhook endpoints zijn altijd POST-only. K8s ingress retourneert 403 op GET (public preview retourneert 405 = correct). Stripe Webhooks gebruiken alleen POST → geen impact op productie.
+- **🆕 PP_Premium alias** exposed (`window.PP_Premium = window.DY.premium`) voor inline onclick.
+- Cache: `premium-v1.js?v=60.1.59-manage-modal`, sw `v60.1.59`
+
 ### v60.1.58 — ULTIMATE STABILIZATION (huidige sessie)
 - **🔴 ROOT CAUSE GEVONDEN**: 14 occurrences van dode preview URL `fitting-chat-app.preview.emergentagent.com` in 8 frontend files. Verklaart bulk van 32 console errors + Stripe "NIET GECONFIGUREERD" — alle fetches faalden silently door DNS-fout.
 - **Globale URL fix** (sed search-replace): vervangen door live URL `paskamer-stability.preview.emergentagent.com` in:

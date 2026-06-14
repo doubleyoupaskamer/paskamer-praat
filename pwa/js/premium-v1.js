@@ -296,29 +296,145 @@
   }
 
   // ─── Customer Portal (cancel/manage abonnement) ──────────────────
+  // v60.1.59: vervangt vorige alert/portal-call door volwaardige in-app
+  // beheer-modal. Geen 501-alert meer — graceful fallback voor alle states.
   async function openCustomerPortal() {
-    var base = apiBase();
-    if (!base) {
-      alert('Kan geen verbinding maken met de server.');
+    var modal = document.getElementById('dy-prem-manage-overlay');
+    if (modal) { modal.remove(); }
+    var overlay = document.createElement('div');
+    overlay.id = 'dy-prem-manage-overlay';
+    overlay.setAttribute('data-testid', 'prem-manage-overlay');
+    overlay.style.cssText =
+      'position:fixed;inset:0;z-index:9999;background:rgba(11,9,5,.78);' +
+      'backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;' +
+      'animation:dyPremFade .2s ease;font-family:"DM Sans",system-ui,sans-serif';
+    overlay.innerHTML =
+      '<style>' +
+        '@keyframes dyPremFade{from{opacity:0}to{opacity:1}}' +
+        '@keyframes dyPremSlide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}' +
+        '.dy-prem-card{background:#1e1a0f;border:1px solid rgba(212,145,10,.28);border-radius:18px;max-width:480px;width:100%;color:#fcf8ef;padding:28px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6);animation:dyPremSlide .25s ease}' +
+        '.dy-prem-card .dy-prem-eyebrow{font:600 11px/1 "DM Sans",sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#d4910a;margin:0 0 8px}' +
+        '.dy-prem-card h2{font:400 1.55rem/1.15 "DM Serif Display","Cormorant Garamond",Georgia,serif;margin:0 0 6px}' +
+        '.dy-prem-card .dy-prem-sub{margin:0 0 18px;color:rgba(252,248,239,.65);font-size:.85rem}' +
+        '.dy-prem-card .dy-prem-pill{display:inline-block;padding:5px 11px;border-radius:100px;font:600 .7rem/1.2 "DM Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-right:6px;margin-bottom:6px}' +
+        '.dy-prem-card .dy-prem-pill.ok{background:rgba(34,197,94,.18);color:#5fd592}' +
+        '.dy-prem-card .dy-prem-pill.warn{background:rgba(245,158,11,.18);color:#f5b94a}' +
+        '.dy-prem-card .dy-prem-pill.test{background:rgba(212,145,10,.18);color:#d4910a}' +
+        '.dy-prem-card .dy-prem-pill.fail{background:rgba(239,68,68,.18);color:#ff8585}' +
+        '.dy-prem-kv{display:grid;grid-template-columns:1fr 1.2fr;gap:8px 14px;font-size:.86rem;margin:14px 0 20px;padding:14px 16px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(252,248,239,.06)}' +
+        '.dy-prem-kv dt{color:rgba(252,248,239,.55);font-weight:500}' +
+        '.dy-prem-kv dd{margin:0;color:#fcf8ef;word-break:break-word}' +
+        '.dy-prem-feat{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:0 0 18px}' +
+        '.dy-prem-feat li{list-style:none;display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.16);border-radius:8px;font-size:.78rem;color:rgba(252,248,239,.92)}' +
+        '.dy-prem-feat li::before{content:"";width:6px;height:6px;border-radius:50%;background:#5fd592;flex-shrink:0}' +
+        '.dy-prem-actions{display:flex;flex-direction:column;gap:8px}' +
+        '.dy-prem-btn{font:600 .88rem/1 "DM Sans",sans-serif;padding:12px 18px;border-radius:100px;cursor:pointer;border:none;transition:all .15s ease;text-decoration:none;text-align:center;display:inline-block}' +
+        '.dy-prem-btn.primary{background:#d4910a;color:#1e1a0f}' +
+        '.dy-prem-btn.primary:hover{background:#b87807;transform:translateY(-1px)}' +
+        '.dy-prem-btn.ghost{background:transparent;color:#fcf8ef;border:1px solid rgba(252,248,239,.16)}' +
+        '.dy-prem-btn.ghost:hover{border-color:#d4910a;color:#d4910a}' +
+        '.dy-prem-btn.danger{background:transparent;color:#ff8585;border:1px solid rgba(239,68,68,.3)}' +
+        '.dy-prem-btn.danger:hover{background:rgba(239,68,68,.08)}' +
+        '.dy-prem-close{position:absolute;top:14px;right:18px;font-size:24px;line-height:1;color:rgba(252,248,239,.45);background:none;border:none;cursor:pointer;padding:6px}' +
+        '.dy-prem-close:hover{color:#fcf8ef}' +
+      '</style>' +
+      '<div class="dy-prem-card" style="position:relative" role="dialog" aria-modal="true" data-testid="prem-manage-card">' +
+        '<button class="dy-prem-close" data-testid="prem-manage-close" aria-label="Sluiten" onclick="document.getElementById(\'dy-prem-manage-overlay\').remove()">×</button>' +
+        '<p class="dy-prem-eyebrow">Premium account</p>' +
+        '<h2>Beheer je abonnement</h2>' +
+        '<div data-testid="prem-manage-body" id="dy-prem-manage-body">' +
+          '<p class="dy-prem-sub">Status laden…</p>' +
+        '</div>' +
+      '</div>';
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+
+    // Load status (force-fresh) + render
+    var status = await fetchStatus(true);
+    renderManageBody(status || { is_premium: false });
+  }
+
+  function _formatDate(iso) {
+    if (!iso || iso === 'admin-override') return null;
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return null;
+      return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch (e) { return null; }
+  }
+  function _esc(s) { var d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
+
+  function renderManageBody(status) {
+    var body = document.getElementById('dy-prem-manage-body');
+    if (!body) return;
+    var isPrem = !!(status && status.is_premium);
+    var plan = (status && (status.plan || '')) || '';
+    var src = isPrem
+      ? (plan === 'premium_admin'  ? 'admin-toegang'
+        : plan === 'premium_grant' ? 'handmatig toegekend'
+        : plan === 'premium_monthly' ? 'Stripe (€4,99/maand)'
+        : 'actief')
+      : null;
+    var activated = _formatDate(status && status.activated_at);
+    var expires   = _formatDate(status && status.expires_at);
+    var emailNow  = (status && status.email) || getEmailFromAuth() || getUserKey();
+
+    if (!isPrem) {
+      body.innerHTML =
+        '<p class="dy-prem-sub">Je hebt op dit moment <strong>geen actief Premium abonnement</strong>. Ontgrendel onbeperkt try-on, AI Style Score &amp; meer.</p>' +
+        '<div class="dy-prem-kv" data-testid="prem-status-block">' +
+          '<dt>Status</dt><dd><span class="dy-prem-pill fail">Niet actief</span></dd>' +
+          '<dt>Account</dt><dd>' + _esc(emailNow || '—') + '</dd>' +
+        '</div>' +
+        '<div class="dy-prem-actions">' +
+          '<button class="dy-prem-btn primary" data-testid="prem-cta-upgrade" onclick="document.getElementById(\'dy-prem-manage-overlay\').remove(); PP_Premium.openUpgrade();">Word Premium — €4,99/maand</button>' +
+          '<button class="dy-prem-btn ghost" onclick="document.getElementById(\'dy-prem-manage-overlay\').remove()">Sluiten</button>' +
+        '</div>';
       return;
     }
-    try {
-      var r = await fetch(base + '/api/billing/portal?user_key=' + encodeURIComponent(getUserKey()), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      var rawText = await r.text();
-      var d = null;
-      try { d = rawText ? JSON.parse(rawText) : null; } catch (e) { console.error('[premium] portal JSON parse failed:', rawText.slice(0,300)); }
-      if (!r.ok || !d || !d.url) {
-        alert((d && d.detail) ? d.detail : ('Kon abonnement-beheer niet openen (' + r.status + ').'));
-        return;
-      }
-      window.location.href = d.url;
-    } catch (e) {
-      console.error('[premium] portal network error:', e);
-      alert('Geen verbinding. Probeer opnieuw.');
+
+    var pillClass = plan === 'premium_admin' ? 'test' : 'ok';
+    var pillLabel = plan === 'premium_admin' ? 'Admin' : 'Actief';
+
+    var manageBtns = '';
+    if (plan === 'premium_monthly') {
+      // Stripe-paid user: support email-based cancel until Customer Portal live
+      var mailto = 'mailto:support@paskamerpraat.nl?subject=' +
+        encodeURIComponent('Opzeggen Premium — ' + (emailNow || '')) +
+        '&body=' + encodeURIComponent('Hoi, ik wil mijn Premium abonnement opzeggen.\nE-mail: ' + (emailNow || ''));
+      manageBtns =
+        '<a class="dy-prem-btn ghost" href="' + mailto + '" data-testid="prem-mailto-cancel">Opzeggen via e-mail</a>' +
+        '<button class="dy-prem-btn danger" data-testid="prem-info-portal" onclick="alert(\'De Stripe Customer Portal wordt binnenkort beschikbaar. Voor nu kun je opzeggen via e-mail — verwerking binnen 24u.\')">Annuleren via Stripe (binnenkort)</button>';
+    } else if (plan === 'premium_admin') {
+      manageBtns = '<p class="dy-prem-sub" style="margin:0">Deze toegang is verleend via admin-override. Beheer via Admin → Premium.</p>';
+    } else {
+      // Grant / unknown source
+      manageBtns =
+        '<p class="dy-prem-sub" style="margin:0 0 4px">Toegang handmatig toegekend. Neem contact op met support voor wijzigingen.</p>' +
+        '<a class="dy-prem-btn ghost" href="mailto:support@paskamerpraat.nl?subject=Premium%20account%20vraag">Contact support</a>';
     }
+
+    body.innerHTML =
+      '<p class="dy-prem-sub">Bedankt dat je Premium gebruikt. Hier zie je je status, vervaldatum en beheeropties.</p>' +
+      '<div class="dy-prem-kv" data-testid="prem-status-block">' +
+        '<dt>Status</dt><dd><span class="dy-prem-pill ' + pillClass + '">' + pillLabel + '</span></dd>' +
+        '<dt>Plan</dt><dd>' + _esc(src || '—') + '</dd>' +
+        (activated ? '<dt>Sinds</dt><dd>' + _esc(activated) + '</dd>' : '') +
+        (expires   ? '<dt>Vervalt op</dt><dd>' + _esc(expires) + '</dd>' : '') +
+        '<dt>Account</dt><dd>' + _esc(emailNow || '—') + '</dd>' +
+      '</div>' +
+      '<ul class="dy-prem-feat" data-testid="prem-feat-list">' +
+        '<li>Virtual Try-on</li>' +
+        '<li>AI Style Score</li>' +
+        '<li>AI Fit Chat</li>' +
+        '<li>Vergelijkbaar zoeken</li>' +
+        '<li>Outfit analyse</li>' +
+        '<li>Premium badge</li>' +
+      '</ul>' +
+      '<div class="dy-prem-actions">' +
+        manageBtns +
+        '<button class="dy-prem-btn ghost" data-testid="prem-manage-dismiss" onclick="document.getElementById(\'dy-prem-manage-overlay\').remove()">Doorgaan</button>' +
+      '</div>';
   }
 
 
@@ -483,6 +599,8 @@
     openPortal: openCustomerPortal,
     getUserKey: getUserKey,
   };
+  // v60.1.59 alias — gebruikt in inline onclick van manage-modal
+  window.PP_Premium = window.DY.premium;
 
   // ─── Init ────────────────────────────────────────────────────────
   function init() {
