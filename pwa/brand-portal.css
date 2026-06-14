@@ -8,6 +8,8 @@
   max-width: 920px;
   margin: 0 auto;
   padding: 20px 16px;
+  padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+  min-height: 100vh;
   color: #fcf8ef;
   font-family: 'DM Sans', sans-serif;
 }

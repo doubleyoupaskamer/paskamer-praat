@@ -104,14 +104,13 @@
     var pagina = window.DY && window.DY.pagina;
     var placement = routeToPlacement(pagina);
     if (!placement) return;
+    // v1.0.10: skip 'feed' placement — campagnes worden EXCLUSIEF getoond
+    // via de "Uitgelicht" tab (pp-feedtabs-v1.js) en de /merken sectie
+    // (brand-portal-v1.js bp-campagne-feed). Geen duplicate header-strip meer.
+    if (placement === 'feed') return;
     var main = document.getElementById('dy-main');
     if (!main) return;
-    // Feed: gebruik #dy-main of een container daarbinnen
-    if (placement === 'feed') {
-      injectStrip('feed', main, 'Uitgelicht');
-    } else {
-      injectStrip(placement, main, 'Aangeboden');
-    }
+    injectStrip(placement, main, 'Aangeboden');
   }
 
   function subscribe() {

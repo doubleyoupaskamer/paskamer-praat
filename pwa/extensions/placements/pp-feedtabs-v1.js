@@ -17,51 +17,62 @@
   var GRID_ID = 'pp-uitgelicht-grid';
   var TAB_ATTR = '[data-filter="uitgelicht"]';
 
-  // ── CSS injectie (eenmalig) ─────────────────────────────────────────
+  // ── CSS injectie (eenmalig) — dark theme matching brand portal ──────
   function ensureStyle() {
     if (document.getElementById(STYLE_ID)) return;
     var s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent =
-      '#pp-uitgelicht-grid{padding:20px 16px 60px;animation:ppUitgFadeIn .3s ease}' +
+      '#pp-uitgelicht-grid{padding:20px 16px 90px;animation:ppUitgFadeIn .3s ease;color:#fcf8ef}' +
       '@keyframes ppUitgFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}' +
-      '.pp-uitg-header{padding:8px 4px 18px;border-bottom:1px solid rgba(30,26,15,.08);margin-bottom:16px}' +
-      '.pp-uitg-eyebrow{display:inline-block;font:600 11px/1 "DM Sans",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#c67d06;margin-bottom:6px}' +
-      '.pp-uitg-titel{font:600 22px/1.2 "Cormorant Garamond",Georgia,serif;color:#1e1a0f;margin:0}' +
+      '.pp-uitg-header{padding:8px 4px 18px;border-bottom:1px solid rgba(252,248,239,.10);margin-bottom:16px}' +
+      '.pp-uitg-eyebrow{display:inline-block;font:600 11px/1 "DM Sans",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#d4910a;margin-bottom:6px}' +
+      '.pp-uitg-titel{font:400 1.4rem/1.2 "DM Serif Display","Cormorant Garamond",Georgia,serif;color:#fcf8ef;margin:0;letter-spacing:-.01em}' +
       '.pp-uitg-list{display:grid;grid-template-columns:1fr;gap:12px}' +
       '@media(min-width:600px){.pp-uitg-list{grid-template-columns:repeat(2,1fr)}}' +
-      '.pp-uitg-kaart{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#fdf8f0;border:1px solid rgba(30,26,15,.08);border-radius:14px;text-decoration:none;color:inherit;position:relative;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;cursor:pointer}' +
-      '.pp-uitg-kaart:hover{transform:translateY(-2px);box-shadow:0 8px 24px -8px rgba(30,26,15,.16);border-color:rgba(198,125,6,.4)}' +
-      '.pp-uitg-logo{flex-shrink:0;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#c67d06,#a36406);color:#fefcf5;display:flex;align-items:center;justify-content:center;font:700 16px/1 "DM Sans",sans-serif;letter-spacing:.02em}' +
-      '.pp-uitg-info{flex:1;min-width:0}' +
-      '.pp-uitg-merk{font:700 14px/1.25 "DM Sans",sans-serif;color:#1e1a0f;margin-bottom:3px;letter-spacing:-.005em}' +
-      '.pp-uitg-msg{font:400 13px/1.4 "DM Sans",sans-serif;color:rgba(30,26,15,.66);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}' +
-      '.pp-uitg-tag{position:absolute;top:10px;right:12px;font:600 9px/1 "DM Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#c67d06;background:rgba(198,125,6,.1);padding:4px 8px;border-radius:6px}' +
-      '.pp-uitg-leeg{text-align:center;padding:48px 20px;color:rgba(30,26,15,.6)}' +
-      '.pp-uitg-leeg h3{font:600 20px/1.2 "Cormorant Garamond",serif;color:#1e1a0f;margin:0 0 8px}' +
-      '.pp-uitg-leeg p{font:400 14px/1.5 "DM Sans",sans-serif;margin:0;max-width:340px;margin-left:auto;margin-right:auto}' +
-      '.pp-uitg-loader{text-align:center;padding:40px 20px;color:rgba(30,26,15,.5);font:500 13px/1 "DM Sans",sans-serif}';
+      '@media(min-width:1024px){.pp-uitg-list{grid-template-columns:repeat(3,1fr)}}' +
+      '.pp-uitg-kaart{display:flex;align-items:center;gap:12px;padding:14px 16px;' +
+        'background:linear-gradient(135deg,rgba(212,145,10,.10) 0%,rgba(255,255,255,.04) 100%);' +
+        'border:1px solid rgba(212,145,10,.28);border-radius:14px;text-decoration:none;color:#fcf8ef;' +
+        'position:relative;transition:transform .15s ease,border-color .15s ease;cursor:pointer;min-height:76px}' +
+      '.pp-uitg-kaart:hover,.pp-uitg-kaart:focus-visible{transform:translateY(-1px);border-color:#d4910a;outline:none}' +
+      '.pp-uitg-logo{flex-shrink:0;width:44px;height:44px;border-radius:10px;' +
+        'background:rgba(255,255,255,.08);color:#d4910a;display:flex;align-items:center;justify-content:center;' +
+        'font:700 15px/1 "DM Sans",sans-serif;letter-spacing:.02em}' +
+      '.pp-uitg-info{flex:1;min-width:0;padding-right:80px}' +
+      '.pp-uitg-merk{font:700 .9rem/1.25 "DM Sans",sans-serif;color:#fcf8ef;margin-bottom:3px;letter-spacing:-.005em;' +
+        'overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+      '.pp-uitg-msg{font:400 .85rem/1.35 "DM Sans",sans-serif;color:rgba(252,248,239,.78);' +
+        'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}' +
+      '.pp-uitg-tag{position:absolute;top:10px;right:12px;font:600 9px/1 "DM Sans",sans-serif;letter-spacing:.08em;' +
+        'text-transform:uppercase;color:rgba(212,145,10,.95);background:rgba(212,145,10,.12);' +
+        'padding:5px 9px;border-radius:100px}' +
+      '.pp-uitg-leeg{text-align:center;padding:48px 20px;color:rgba(252,248,239,.65)}' +
+      '.pp-uitg-leeg h3{font:400 1.3rem/1.2 "DM Serif Display","Cormorant Garamond",serif;color:#fcf8ef;margin:0 0 8px}' +
+      '.pp-uitg-leeg p{font:400 14px/1.5 "DM Sans",sans-serif;margin:0 auto;max-width:340px;color:rgba(252,248,239,.6)}' +
+      '.pp-uitg-loader{text-align:center;padding:40px 20px;color:rgba(252,248,239,.55);font:500 13px/1 "DM Sans",sans-serif}';
     document.head.appendChild(s);
   }
 
   function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
 
-  // ── Stap 1: verberg Trending + Mijn posts, voeg Uitgelicht toe ──────
+  // ── Stap 1: verberg alleen "Mijn posts", voeg Uitgelicht toe ────────
+  // (Trending blijft zichtbaar — user koos voor 4-tab structuur)
   function setupFilters() {
     var bar = document.getElementById('dy-feed-filters');
     if (!bar) return false;
 
-    // Verberg Trending
-    var trending = bar.querySelector('[data-filter="populair"]');
-    if (trending && trending.style.display !== 'none') {
-      trending.style.display = 'none';
-      trending.setAttribute('data-pp-hidden', 'trending');
-    }
-    // Verberg Mijn posts
+    // Verberg ALLEEN Mijn posts (Trending blijft staan)
     var mijnPosts = bar.querySelector('[data-filter="mijn"]');
     if (mijnPosts && mijnPosts.style.display !== 'none') {
       mijnPosts.style.display = 'none';
       mijnPosts.setAttribute('data-pp-hidden', 'mijn');
+    }
+    // Als Trending eerder verborgen was (oudere versie): herstel
+    var trending = bar.querySelector('[data-filter="populair"]');
+    if (trending && trending.getAttribute('data-pp-hidden') === 'trending') {
+      trending.style.display = '';
+      trending.removeAttribute('data-pp-hidden');
     }
 
     // Voeg Uitgelicht tab toe (idempotent)

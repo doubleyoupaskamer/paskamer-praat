@@ -33,7 +33,29 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - **Backend download endpoint**: `/api/downloads/{filename}.zip` voor PWA bundle downloads
 - Deploy ZIP: `paskamerpraat-pwa-v60.1.43-merkprofiel.zip`
 
-### v60.1.52 — Feed Tabs Restructure + null-uid guard (huidige sessie)
+### v60.1.54 — UI cleanup + dark cards + Trending herstel + Merken clipping (huidige sessie)
+- **🗑️ Duplicate header strip verwijderd** (`pp-campaign-renderer-v1.js`):
+  - `tryInject()` skipt nu volledig het `'feed'` placement
+  - Geen "Voor jou geselecteerd" duplicate meer bovenaan /feed en /merken
+  - Campagnes verschijnen UITSLUITEND in: (a) Uitgelicht-tab, (b) bestaande /merken `bp-campagne-feed` sectie, (c) andere placements (stories/ai_assist/outfit_review/similar)
+- **🔄 Trending tab hersteld** (`pp-feedtabs-v1.js`):
+  - Alleen "Mijn posts" wordt nog verborgen
+  - Tab-volgorde: Ontdek ⭐ → Mijn postuur → Trending → Uitgelicht
+  - Herstel-logica voor oude clients die Trending eerder verborgen hadden
+- **🎨 Dark theme cards in Uitgelicht** (huisstijl-normalisatie):
+  - Verwijderd: hardcoded cream/beige (`#fdf8f0`, `#1e1a0f` op licht)
+  - Gebruik nu dark tokens matching `.bp-campagne-kaart`:
+    - background `linear-gradient(135deg, rgba(212,145,10,.10), rgba(255,255,255,.04))`
+    - border `rgba(212,145,10,.28)`, text `#fcf8ef`, accent `#d4910a`
+  - WCAG AA contrast: white text op solid dark backing
+  - Responsive grid: 1-col mobile / 2-col 600px+ / 3-col 1024px+
+- **📐 Merken pagina clipping fix** (`brand-portal.css`):
+  - `.bp-page` krijgt `min-height: 100vh` + `padding-bottom: calc(120px + env(safe-area-inset-bottom))`
+  - Geen content cut-off meer onderaan op mobile/desktop
+- Cache bumps: ext `?v=1.0.10`, css `?v=60.1.54-merken-clipping`, sw `v60.1.54`
+- Deploy ZIP: `/app/01-paskamerpraat-pwa-cloudflare.zip` (2.5 MB)
+
+### v60.1.52 — Feed Tabs Restructure + null-uid guard
 - **🆕 Navigatie Herstructurering** (`/extensions/placements/pp-feedtabs-v1.js` v2.0.0):
   - Verbergt "Trending" tab (`data-filter="populair"`)
   - Verbergt "Mijn posts" tab (`data-filter="mijn"`)
