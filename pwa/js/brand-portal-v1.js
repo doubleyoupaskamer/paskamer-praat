@@ -402,8 +402,12 @@
             (isLogged() ? '' :
               '<button class="bp-btn bp-btn-ghost" onclick="DY.brandPortal.openPortaal()" data-testid="brand-portal-cta-merken">Ben jij een merk? <strong>Word partner</strong></button>') +
           '</div>' +
+          '<div id="bp-campagne-feed" class="bp-campagne-feed"></div>' +
           '<div id="bp-merken-lijst" class="bp-merken-grid">' + loaderHTML() + '</div>' +
         '</div>';
+
+      // v60.1.44: render live campagnes bovenaan (plaatsingen.includes('feed'))
+      BP._renderLiveCampagnesInFeed();
 
       try {
         // Haal approved brands op met actieve live campagnes
@@ -501,6 +505,105 @@
           uid: uid() || null, ts: nu()
         }).catch(function(){});
       } catch(e) {}
+    };
+
+    // ════════════════════════════════════════════════════════════════════
+    // v60.1.44 — LIVE CAMPAGNES IN MERKEN-TAB FEED
+    // Toont actieve campagnes (status=='live' + plaatsingen.includes('feed'))
+    // bovenaan de /merken pagina. Tracks impressions + clicks.
+    // ════════════════════════════════════════════════════════════════════
+    BP._campagneImprBatched = {};
+    BP._renderLiveCampagnesInFeed = async function() {
+      var holder = document.getElementById('bp-campagne-feed');
+      if (!holder) return;
+      try {
+        // Geen orderBy: alleen status==live filter (geen composite index nodig).
+        // Client-side filter op plaatsingen.includes('feed').
+        var snap = await DY.db.collection('campaigns')
+          .where('status','==','live')
+          .limit(50).get();
+        var live = [];
+        snap.forEach(function(d) {
+          var c = d.data();
+          var plaats = c.plaatsingen || [];
+          if (plaats.indexOf('feed') === -1) return;
+          // Datum-window check (start <= nu <= eind)
+          var nuTs = Date.now();
+          var startMs = (c.startDatum && c.startDatum.toMillis) ? c.startDatum.toMillis() : null;
+          var eindMs  = (c.eindDatum  && c.eindDatum.toMillis)  ? c.eindDatum.toMillis()  : null;
+          if (startMs && nuTs < startMs) return;
+          if (eindMs  && nuTs > eindMs)  return;
+          live.push({ id: d.id, data: c });
+        });
+        if (!live.length) {
+          holder.innerHTML = '';
+          return;
+        }
+        // Render carousel-strip
+        var cards = live.map(function(item) {
+          var c = item.data;
+          var logo = ''; // brand-logo via brandNaam → eventueel later, voor nu initialen
+          var initialen = esc((c.brandNaam || '?').slice(0,2).toUpperCase());
+          var msg = esc(c.boodschap || c.naam || '');
+          return '<a class="bp-campagne-kaart" href="javascript:void(0)" ' +
+            'onclick="DY.brandPortal._campagneClick(\'' + esc(item.id) + '\',\'' + esc(c.brandId||'') + '\')" ' +
+            'data-testid="campagne-kaart-' + esc(item.id) + '">' +
+            '<div class="bp-campagne-logo">' + initialen + '</div>' +
+            '<div class="bp-campagne-info">' +
+              '<div class="bp-campagne-merk">' + esc(c.brandNaam || 'Merk') + '</div>' +
+              '<div class="bp-campagne-msg">' + msg + '</div>' +
+            '</div>' +
+            '<span class="bp-campagne-tag">Gesponsord</span>' +
+          '</a>';
+        }).join('');
+        holder.innerHTML =
+          '<div class="bp-campagne-header">' +
+            '<span class="bp-header-eyebrow">Uitgelicht</span>' +
+            '<h2 class="bp-campagne-h2">Actieve campagnes</h2>' +
+          '</div>' +
+          '<div class="bp-campagne-strip">' + cards + '</div>';
+        // Track impressions (één per campagne per page-view)
+        // Note: campaigns.impressies aggregate-increment is NIET toegestaan door
+        // Firestore rules voor non-admins. We loggen alleen events; een
+        // server-side aggregator (Cloud Function / Cloudflare Worker) somt later.
+        live.forEach(function(item) {
+          if (BP._campagneImprBatched[item.id]) return;
+          BP._campagneImprBatched[item.id] = true;
+          try {
+            DY.db.collection('campaign_events').add({
+              type: 'impression',          // whitelisted in firestore.rules
+              subtype: 'campaign',         // differentiator voor aggregator
+              campaignId: item.id,
+              brandId: item.data.brandId || null,
+              plaatsing: 'feed',
+              uid: uid() || null,
+              ts: nu()
+            }).catch(function(){});
+          } catch(e) {}
+        });
+      } catch(e) {
+        try { console.warn('[brand-portal] live campagnes laden mislukt', e && (e.code || e.message)); } catch(_){}
+        holder.innerHTML = '';
+      }
+    };
+
+    BP._campagneClick = function(campaignId, brandId) {
+      try {
+        DY.db.collection('campaign_events').add({
+          type: 'campaign_click',       // whitelisted in firestore.rules
+          campaignId: campaignId,
+          brandId: brandId || null,
+          plaatsing: 'feed',
+          uid: uid() || null,
+          ts: nu()
+        }).catch(function(){});
+        // Note: campaigns.clicks aggregate-increment is NIET toegestaan door
+        // Firestore rules voor non-admins. Server-side aggregator somt events.
+      } catch(e) {}
+      // Navigeer naar het merk (klikt door naar brand-detail)
+      if (brandId) {
+        BP.toonMerkDetail(brandId);
+      }
     };
 
     // ════════════════════════════════════════════════════════════════════
@@ -962,7 +1065,10 @@
             '<label class="bp-veld"><span>BTW-nummer</span><input name="btw" maxlength="20" placeholder="bv. NL123456789B01" data-testid="brand-profiel-btw" value="' + esc(brand.btw || '') + '"></label>' +
             '<label class="bp-veld"><span>Korte omschrijving (max 280 tekens)</span><textarea name="omschrijving" maxlength="280" rows="3" data-testid="brand-profiel-omschr">' + esc(brand.omschrijving || '') + '</textarea></label>' +
             '<div class="bp-form-fouten" id="bp-profiel-fouten" role="alert" aria-live="polite"></div>' +
-            '<button type="submit" class="bp-btn bp-btn-primair" data-testid="brand-profiel-submit">Wijzigingen opslaan</button>' +
+            '<div class="bp-profiel-acties">' +
+              '<button type="submit" class="bp-btn bp-btn-primair" data-testid="brand-profiel-submit">Wijzigingen opslaan</button>' +
+              '<button type="button" class="bp-btn bp-btn-ghost" onclick="window.open(\'/?pagina=merken\', \'_blank\', \'noopener\')" data-testid="brand-profiel-preview">Bekijk als klant ↗</button>' +
+            '</div>' +
           '</form>' +
         '</div>';
 

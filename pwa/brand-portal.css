@@ -531,3 +531,81 @@
 
 /* Voorkom dat headings overflowen op ALLE breedtes */
 .bp-page h1, .bp-page h2 { word-break: break-word; overflow-wrap: anywhere; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   v60.1.44 — Live campagne feed op /merken + profiel-acties
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Profiel form: submit + "Bekijk als klant" naast elkaar */
+.bp-profiel-acties {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  margin-top: 12px;
+}
+
+/* Live campagnes strip bovenaan /merken */
+.bp-campagne-feed {
+  margin: 4px 0 24px;
+}
+.bp-campagne-feed:empty { display: none; }
+.bp-campagne-header {
+  margin-bottom: 12px;
+}
+.bp-campagne-h2 {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400;
+  font-size: 1.4rem;
+  margin: 4px 0 0;
+  color: #fcf8ef;
+}
+.bp-campagne-strip {
+  display: flex; gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.bp-campagne-kaart {
+  display: flex; align-items: center; gap: 12px;
+  flex: 0 0 auto;
+  width: 320px; max-width: 88vw;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(212,145,10,0.10) 0%, rgba(255,255,255,0.04) 100%);
+  border: 1px solid rgba(212,145,10,0.28);
+  border-radius: 14px;
+  text-decoration: none; color: #fcf8ef;
+  transition: transform 0.15s, border-color 0.15s;
+  scroll-snap-align: start;
+  position: relative;
+}
+.bp-campagne-kaart:hover {
+  transform: translateY(-1px);
+  border-color: #d4910a;
+}
+.bp-campagne-logo {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; color: #d4910a;
+  flex-shrink: 0;
+}
+.bp-campagne-info { flex: 1; min-width: 0; }
+.bp-campagne-merk {
+  font-size: 0.82rem; font-weight: 700; color: #fcf8ef;
+  margin-bottom: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bp-campagne-msg {
+  font-size: 0.84rem; color: rgba(252,248,239,0.78);
+  line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.bp-campagne-tag {
+  position: absolute; top: 8px; right: 10px;
+  font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: rgba(212,145,10,0.85);
+  background: rgba(212,145,10,0.10);
+  padding: 2px 8px; border-radius: 100px;
+  font-weight: 600;
+}
