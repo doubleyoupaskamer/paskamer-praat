@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "collection": "users",
+  "version": "1.0.0",
+  "date": "2026-02-14",
+  "description": "Velden die NIET aanwezig zijn in de huidige users-docs maar nodig zijn voor de uitbreidingen (wallet, placements, AI hooks). Bestaande velden zijn NIET opnieuw gedeclareerd.",
+  "missing_fields": {
+    "wallet_balance": {
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "required": true,
+      "writeable_by": "server_only",
+      "description": "Huidige saldo in EUR (in centen × 100). Alleen server-side updates via Cloud Function of FastAPI endpoint."
+    },
+    "wallet_currency": {
+      "type": "string",
+      "enum": ["EUR", "USD"],
+      "default": "EUR",
+      "required": true,
+      "description": "Valuta van de wallet. EUR is default voor NL markt."
+    },
+    "transactions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id":          { "type": "string" },
+          "type":        { "type": "string", "enum": ["topup", "spend", "refund", "manual_adjust", "campaign_charge"] },
+          "amount":      { "type": "number", "description": "Positief = credit, negatief = debit" },
+          "currency":    { "type": "string" },
+          "ts":          { "type": "timestamp" },
+          "source":      { "type": "string", "enum": ["shopify", "admin", "campaign_engine", "system"] },
+          "ref_id":      { "type": "string", "description": "Shopify order id of admin uid of campaign id" },
+          "description": { "type": "string" }
+        },
+        "required": ["id", "type", "amount", "ts", "source"]
+      },
+      "default": [],
+      "max_items": 500,
+      "description": "Embedded transaction log. Bij >500 items roteer naar separate /user_transactions collection."
+    },
+    "plaatsingen": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["feed", "stories", "outfit_review", "ai_assist", "similar_items"] },
+      "default": ["feed"],
+      "description": "Per-user opt-in voor welke campaign-plaatsingen worden getoond. Backward compatible: ontbrekend = alle plaatsingen actief."
+    },
+    "feature_flags": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": { "type": "boolean" },
+      "description": "Granular feature toggles per user. Bv. { ai_assist_v2: true, wallet_beta: false }"
+    },
+    "shopify_customer_id": {
+      "type": "string",
+      "writeable_by": "server_only",
+      "nullable": true,
+      "description": "Shopify customer GID (gid://shopify/Customer/123). Gezet bij eerste Shopify checkout."
+    },
+    "outfit_stats": {
+      "type": "object",
+      "properties": {
+        "total_outfits":   { "type": "number", "default": 0 },
+        "avg_ai_score":    { "type": "number", "default": 0 },
+        "total_reviews":   { "type": "number", "default": 0 },
+        "last_outfit_ts":  { "type": "timestamp", "nullable": true }
+      },
+      "default": { "total_outfits": 0, "avg_ai_score": 0, "total_reviews": 0, "last_outfit_ts": null },
+      "writeable_by": "server_only",
+      "description": "Aggregate stats per user voor het AI-assistant profiel."
+    },
+    "last_login": {
+      "type": "timestamp",
+      "writeable_by": "server_only",
+      "description": "Bijgewerkt bij elke succesvolle Firebase Auth login via Cloud Function trigger."
+    },
+    "consent": {
+      "type": "object",
+      "properties": {
+        "marketing":  { "type": "boolean", "default": false },
+        "analytics":  { "type": "boolean", "default": true },
+        "ai_training":{ "type": "boolean", "default": false },
+        "ts":         { "type": "timestamp" }
+      },
+      "description": "GDPR consent tracking voor marketing/analytics/AI."
+    }
+  },
+  "rules_changes_required": [
+    "users.wallet_balance: allow write: if false; (server-only via admin SDK)",
+    "users.transactions: allow write: if false;",
+    "users.shopify_customer_id: allow write: if false;",
+    "users.outfit_stats: allow write: if false;",
+    "users.plaatsingen: allow update: if request.auth.uid == userId;",
+    "users.feature_flags: allow read: if request.auth.uid == userId; allow write: if isAdmin();",
+    "users.consent: allow write: if request.auth.uid == userId;"
+  ]
+}

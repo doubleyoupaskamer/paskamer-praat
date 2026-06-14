@@ -1,0 +1,26 @@
+{
+  "collection": "outfits",
+  "version": "1.0.0",
+  "data_contract": {
+    "ownership_model": "self_owned_user_uploaded",
+    "writeable_by_client_owner": [
+      "imageUrl", "caption", "tags", "visibility"
+    ],
+    "writeable_by_ai_engine_only": [
+      "ai_score", "ai_score_breakdown", "ai_score_generated_at",
+      "ai_score_model_version", "similar_items", "similar_items_generated_at",
+      "color_palette", "occasion_tags"
+    ],
+    "writeable_by_aggregator_only": ["reviews_aggregate"],
+    "embedded_subdata": {
+      "reviews": {
+        "max_items": 100,
+        "spillover_collection": "outfit_reviews",
+        "write_protocol": "Add to embedded array AND mirror to subcollection; aggregator updates reviews_aggregate"
+      }
+    },
+    "visibility_levels": ["public", "followers", "private"],
+    "ai_engine_trigger": "Cloud Function onCreate(/outfits/{id}) → Gemini Vision API → write back ai_score* fields",
+    "similar_items_refresh_frequency": "On new outfit creation + nightly cron for staleness"
+  }
+}

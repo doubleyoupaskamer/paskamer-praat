@@ -1,0 +1,40 @@
+{
+  "collection": "payments",
+  "version": "1.0.0",
+  "recommended_indexes": [
+    {
+      "collectionGroup": "payments",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "uid",        "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ],
+      "rationale": "User payment history view."
+    },
+    {
+      "collectionGroup": "payments",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",     "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ],
+      "rationale": "Admin: pending/failed payments oplijsten voor handmatige review."
+    },
+    {
+      "collectionGroup": "payments",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "idempotency_key", "order": "ASCENDING" }
+      ],
+      "rationale": "Webhook dedupe lookup (vereist uniqueness check)."
+    },
+    {
+      "collectionGroup": "payments",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "shopify_order_id", "order": "ASCENDING" }
+      ],
+      "rationale": "Cross-reference vanaf Shopify admin."
+    }
+  ]
+}

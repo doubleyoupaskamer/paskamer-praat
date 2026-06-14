@@ -1,0 +1,33 @@
+{
+  "collection": "users",
+  "version": "1.0.0",
+  "data_contract": {
+    "primary_key": "uid (Firebase Auth UID)",
+    "ownership_model": "self_owned_with_admin_override",
+    "core_fields_existing": [
+      "uid", "email", "displayName", "role", "createdAt"
+    ],
+    "new_fields_introduced_in_this_release": [
+      "wallet_balance", "wallet_currency", "transactions",
+      "plaatsingen", "feature_flags",
+      "shopify_customer_id", "outfit_stats",
+      "last_login", "consent"
+    ],
+    "writeable_by_client": [
+      "displayName", "plaatsingen", "consent"
+    ],
+    "writeable_by_server_only": [
+      "role", "wallet_balance", "transactions",
+      "shopify_customer_id", "outfit_stats",
+      "last_login", "feature_flags"
+    ],
+    "readable_by_self": "ALL",
+    "readable_by_admin": "ALL",
+    "readable_by_others": "displayName + role only (via /users_public projection)",
+    "retention_policy": "indefinite (account-bound)",
+    "deletion_policy": "GDPR-erasure: nullify PII + retain anonymous outfit_stats for ML training (if consent.ai_training)",
+    "audit_log": "writes to /users/{uid} → mirrored to /user_audit_log/{auto_id}",
+    "encryption_at_rest": "Firestore default (Google-managed keys)",
+    "pii_fields": ["email", "displayName", "shopify_customer_id"]
+  }
+}

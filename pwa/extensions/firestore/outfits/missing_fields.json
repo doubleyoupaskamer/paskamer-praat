@@ -1,0 +1,107 @@
+{
+  "collection": "outfits",
+  "version": "1.0.0",
+  "date": "2026-02-14",
+  "missing_fields": {
+    "ai_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "writeable_by": "ai_engine_only",
+      "nullable": true,
+      "description": "Algehele AI-style-score (0-100). Berekend door Gemini Vision na upload. Combineert kleur-harmonie, silhouette-fit, gelegenheid."
+    },
+    "ai_score_breakdown": {
+      "type": "object",
+      "writeable_by": "ai_engine_only",
+      "properties": {
+        "color_harmony":     { "type": "number", "minimum": 0, "maximum": 100 },
+        "silhouette_fit":    { "type": "number", "minimum": 0, "maximum": 100 },
+        "occasion_match":    { "type": "number", "minimum": 0, "maximum": 100 },
+        "trend_alignment":   { "type": "number", "minimum": 0, "maximum": 100 },
+        "confidence":        { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "description": "Per-dimensie score voor transparantie."
+    },
+    "ai_score_generated_at": {
+      "type": "timestamp",
+      "nullable": true,
+      "writeable_by": "ai_engine_only"
+    },
+    "ai_score_model_version": {
+      "type": "string",
+      "writeable_by": "ai_engine_only",
+      "description": "Bv. 'gemini-3-pro-vision-v1' — voor reproducibility en re-scoring na model update."
+    },
+    "similar_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id":      { "type": "string", "description": "brand_products doc id" },
+          "similarity":   { "type": "number", "minimum": 0, "maximum": 1 },
+          "category":     { "type": "string" },
+          "image_url":    { "type": "string", "format": "uri" },
+          "matched_on":   { "type": "array", "items": { "type": "string", "enum": ["color", "silhouette", "category", "occasion"] } }
+        }
+      },
+      "default": [],
+      "max_items": 20,
+      "writeable_by": "ai_engine_only",
+      "description": "Top-20 vergelijkbare items uit brand_products. Berekend via Vision embedding + cosine similarity."
+    },
+    "similar_items_generated_at": {
+      "type": "timestamp",
+      "nullable": true,
+      "writeable_by": "ai_engine_only"
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id":         { "type": "string" },
+          "uid":        { "type": "string", "description": "Reviewer Firebase UID" },
+          "display_name": { "type": "string" },
+          "stars":      { "type": "number", "minimum": 1, "maximum": 5 },
+          "comment":    { "type": "string", "maxLength": 500 },
+          "ts":         { "type": "timestamp" },
+          "helpful_count": { "type": "number", "default": 0 }
+        }
+      },
+      "default": [],
+      "max_items": 100,
+      "description": "Embedded outfit reviews. Bij >100 roteer naar /outfit_reviews subcollection."
+    },
+    "reviews_aggregate": {
+      "type": "object",
+      "writeable_by": "aggregator_only",
+      "properties": {
+        "count":     { "type": "number", "default": 0 },
+        "avg_stars": { "type": "number", "default": 0 },
+        "distribution": {
+          "type": "object",
+          "properties": {
+            "5": { "type": "number" }, "4": { "type": "number" },
+            "3": { "type": "number" }, "2": { "type": "number" },
+            "1": { "type": "number" }
+          }
+        }
+      },
+      "description": "Summary stats voor performante render zonder reviews-array door te lopen."
+    },
+    "occasion_tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "AI-gegenereerde tags: 'business', 'casual', 'evening', 'sport', etc."
+    },
+    "color_palette": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+      "default": [],
+      "writeable_by": "ai_engine_only",
+      "description": "Top-5 hex colors uit de outfit. Berekend bij upload via Vision."
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "collection": "admin_settings",
+  "version": "1.0.0",
+  "date": "2026-02-14",
+  "description": "Globale platform-instellingen, beheerbaar via admin panel. Singleton document: admin_settings/global.",
+  "missing_fields": {
+    "placements_enabled": {
+      "type": "object",
+      "default": {
+        "feed": true,
+        "stories": false,
+        "outfit_review": false,
+        "ai_assist": false,
+        "similar_items": false
+      },
+      "description": "Master kill-switch per placement type. False = render-pipeline rendert niet."
+    },
+    "campaign_pricing": {
+      "type": "object",
+      "default": {
+        "feed_cpm_cents":         200,
+        "stories_cpm_cents":      350,
+        "outfit_review_cpm_cents":250,
+        "ai_assist_cpm_cents":    400,
+        "similar_items_cpm_cents":300
+      },
+      "description": "Cost-per-mille pricing per placement. Aggregator gebruikt deze om spend te berekenen."
+    },
+    "feature_flags": {
+      "type": "object",
+      "default": {
+        "wallet_topup_enabled":  false,
+        "shopify_checkout_live": false,
+        "ai_scoring_enabled":    false,
+        "similar_engine_enabled":false,
+        "auto_pause_enabled":    true,
+        "events_aggregator_enabled": true,
+        "outfit_reviews_enabled": false
+      },
+      "description": "Global feature toggles. Default UIT zodat features kunnen worden gestaged."
+    },
+    "shopify_config": {
+      "type": "object",
+      "writeable_by": "admin_only",
+      "default": {
+        "shop_domain":        "",
+        "storefront_token":   "",
+        "admin_token_secret_ref": "",
+        "webhook_secret_ref":  "",
+        "topup_variant_ids":   [],
+        "currency":           "EUR"
+      },
+      "description": "Shopify integration config. SECRETS (tokens) leven in env vars; hier alleen REFERENCES."
+    },
+    "aggregator_config": {
+      "type": "object",
+      "default": {
+        "batch_size":            500,
+        "max_batches_per_run":   10,
+        "cron_schedule_cron":   "*/15 * * * *",
+        "last_run_at":          null,
+        "last_run_status":      "never",
+        "last_run_processed":   0,
+        "last_run_duration_ms": 0
+      },
+      "description": "Configuratie + telemetrie van event-aggregator Cloudflare Worker."
+    },
+    "fraud_protection": {
+      "type": "object",
+      "default": {
+        "max_events_per_session_min": 100,
+        "bot_ua_patterns":            ["bot", "crawler", "spider"],
+        "blocked_countries":          [],
+        "session_dedupe_enabled":     true
+      }
+    },
+    "billing": {
+      "type": "object",
+      "default": {
+        "currency":            "EUR",
+        "vat_rate_pct":        21,
+        "invoice_prefix":      "PP",
+        "min_wallet_topup_cents": 1000,
+        "max_wallet_topup_cents": 1000000
+      }
+    },
+    "updated_at": { "type": "timestamp" },
+    "updated_by": { "type": "string", "description": "Admin uid die laatste wijziging deed." }
+  }
+}

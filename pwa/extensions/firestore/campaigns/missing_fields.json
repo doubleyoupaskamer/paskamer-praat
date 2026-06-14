@@ -1,0 +1,71 @@
+{
+  "collection": "campaigns",
+  "version": "1.0.0",
+  "date": "2026-02-14",
+  "missing_fields": {
+    "ctr": {
+      "type": "number",
+      "default": 0,
+      "computed": true,
+      "writeable_by": "aggregator_only",
+      "description": "Click-Through-Rate als clicks/impressies. Bijgewerkt door event-aggregator Cloudflare Worker."
+    },
+    "spend": {
+      "type": "number",
+      "default": 0,
+      "writeable_by": "aggregator_only",
+      "description": "Cumulatief uitgegeven budget in EUR. Bijgewerkt elke 15 min via aggregator."
+    },
+    "spend_today": {
+      "type": "number",
+      "default": 0,
+      "writeable_by": "aggregator_only",
+      "description": "Spend vandaag (UTC dag-grens). Reset elke 00:00 UTC."
+    },
+    "remaining_budget": {
+      "type": "number",
+      "computed": true,
+      "description": "totaalBudget - spend. Wordt door aggregator gezet en gebruikt voor auto-pause bij <=0."
+    },
+    "last_aggregated_at": {
+      "type": "timestamp",
+      "writeable_by": "aggregator_only",
+      "description": "Tijdstip van laatste aggregator-run die deze doc bijgewerkt heeft."
+    },
+    "auto_paused": {
+      "type": "boolean",
+      "default": false,
+      "writeable_by": "aggregator_only",
+      "description": "Door aggregator gepauzeerd (budget op of buiten datum-window)."
+    },
+    "targeting": {
+      "type": "object",
+      "default": {},
+      "properties": {
+        "geo":         { "type": "array", "items": { "type": "string" }, "default": [] },
+        "age_min":     { "type": "number", "nullable": true },
+        "age_max":     { "type": "number", "nullable": true },
+        "interests":   { "type": "array", "items": { "type": "string" }, "default": [] },
+        "exclude_users": { "type": "array", "items": { "type": "string" }, "default": [] }
+      },
+      "description": "Targeting criteria voor matching engine."
+    },
+    "creative": {
+      "type": "object",
+      "default": {},
+      "properties": {
+        "type":       { "type": "string", "enum": ["image", "carousel", "video"] },
+        "assets":     { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "cta_label":  { "type": "string" },
+        "cta_url":    { "type": "string", "format": "uri" }
+      },
+      "description": "Creative assets (afbeeldingen/video + CTA). Storage path verwacht."
+    },
+    "performance_24h": {
+      "type": "object",
+      "default": { "impressions": 0, "clicks": 0, "ctr": 0 },
+      "writeable_by": "aggregator_only",
+      "description": "Rolling 24-uur stats voor real-time admin dashboard."
+    }
+  }
+}

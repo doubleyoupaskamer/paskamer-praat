@@ -1,0 +1,19 @@
+{
+  "collection": "payments",
+  "version": "1.0.0",
+  "data_contract": {
+    "ownership_model": "system_owned_immutable",
+    "writeable_by_client": "NONE",
+    "writeable_by_server_only": ["ALL_FIELDS"],
+    "readable_by_owner_uid": ["amount_cents", "currency", "status", "created_at", "type", "shopify_order_id"],
+    "readable_by_admin": "ALL",
+    "audit_log_collection": "payments_audit",
+    "idempotency_strategy": "idempotency_key uniqueness enforced via Cloud Function pre-write check; double-webhook reject with 200 (already processed)",
+    "compliance": {
+      "PSD2": "Strong Customer Authentication via Shopify Checkout",
+      "PCI_DSS": "No card data stored — Shopify handles tokenization",
+      "GDPR": "Retain 7 years for financial audit, then pseudonymize uid"
+    },
+    "refund_policy": "Manual via admin panel → triggers Shopify Admin API refund + wallet debit"
+  }
+}

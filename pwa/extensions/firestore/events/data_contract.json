@@ -1,0 +1,28 @@
+{
+  "collection": "events",
+  "version": "1.0.0",
+  "data_contract": {
+    "ownership_model": "append_only_log",
+    "writeable_by_client": [
+      "type (whitelisted)", "subtype", "campaignId", "brandId",
+      "productId", "plaatsing", "uid", "ts", "session_id", "metadata"
+    ],
+    "writeable_by_aggregator_only": [
+      "processed", "processed_at", "processed_batch_id"
+    ],
+    "writeable_by_cloudflare_only": [
+      "ip_country", "user_agent_hash", "device_type"
+    ],
+    "client_can_update": false,
+    "client_can_delete": false,
+    "admin_can_read": true,
+    "user_can_read_own": "uid == request.auth.uid (optional, default deny)",
+    "billing_relevance": "Used for revenue calculation: count(type=impression) × CPM",
+    "anti_fraud_strategies": [
+      "session_id dedupe (max 1 impression per campaign per session)",
+      "user_agent_hash blacklist for known bots",
+      "ip_country anomaly detection",
+      "rate_limit per session (max 100 events/min)"
+    ]
+  }
+}

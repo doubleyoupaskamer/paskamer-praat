@@ -1,0 +1,39 @@
+{
+  "collection": "payments",
+  "version": "1.0.0",
+  "date": "2026-02-14",
+  "description": "Nieuwe collection voor Shopify payment tracking + wallet credits. Bestond niet eerder.",
+  "schema": {
+    "id":                { "type": "string", "description": "Auto-generated Firestore doc id" },
+    "uid":               { "type": "string", "description": "User Firebase UID die topup deed" },
+    "type":              { "type": "string", "enum": ["topup", "refund", "manual_adjust", "campaign_charge"] },
+    "amount_cents":      { "type": "number", "description": "Bedrag in centen (integer-only to avoid float errors)" },
+    "currency":          { "type": "string", "enum": ["EUR", "USD"], "default": "EUR" },
+    "status":            { "type": "string", "enum": ["pending", "completed", "failed", "refunded"], "default": "pending" },
+    "shopify_order_id":  { "type": "string", "nullable": true, "description": "gid://shopify/Order/123" },
+    "shopify_checkout_id": { "type": "string", "nullable": true },
+    "shopify_customer_id": { "type": "string", "nullable": true },
+    "webhook_received_at": { "type": "timestamp", "nullable": true },
+    "wallet_credited_at":  { "type": "timestamp", "nullable": true },
+    "error_message":     { "type": "string", "nullable": true },
+    "metadata":          { "type": "object", "default": {} },
+    "created_at":        { "type": "timestamp" },
+    "updated_at":        { "type": "timestamp" }
+  },
+  "missing_fields": {
+    "idempotency_key": {
+      "type": "string",
+      "required": true,
+      "description": "Unieke key (Shopify webhook id of admin uuid). Voorkomt double-crediting bij webhook retries."
+    },
+    "wallet_balance_before": {
+      "type": "number",
+      "writeable_by": "server_only",
+      "description": "Snapshot van wallet_balance vóór deze transactie. Voor audit."
+    },
+    "wallet_balance_after": {
+      "type": "number",
+      "writeable_by": "server_only"
+    }
+  }
+}

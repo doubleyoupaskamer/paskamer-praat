@@ -1,0 +1,28 @@
+{
+  "collection": "campaigns",
+  "version": "1.0.0",
+  "data_contract": {
+    "ownership_model": "brand_owned_with_admin_moderation",
+    "lifecycle_states": ["draft", "review", "live", "paused", "completed", "rejected"],
+    "writeable_by_client_owner": [
+      "naam", "startDatum", "eindDatum", "budgetTotaal", "budgetDag",
+      "plaatsingen", "boodschap", "biedstrategie", "doel", "creative", "targeting"
+    ],
+    "writeable_by_admin_only": ["status"],
+    "writeable_by_aggregator_only": [
+      "ctr", "spend", "spend_today", "remaining_budget",
+      "impressies", "clicks", "auto_paused", "last_aggregated_at",
+      "performance_24h"
+    ],
+    "immutable_after_live": ["brandId", "aangemaakt"],
+    "billing_unit": "CPM (cost per mille impressions)",
+    "default_cpm_cents": 200,
+    "auto_pause_conditions": [
+      "remaining_budget <= 0",
+      "now > eindDatum",
+      "spend_today >= budgetDag"
+    ],
+    "data_retention": "indefinite (financial audit trail)",
+    "deletion_policy": "soft_delete via status='deleted', physical retain for 7 years"
+  }
+}

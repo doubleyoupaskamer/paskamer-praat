@@ -1,0 +1,43 @@
+{
+  "collection": "campaigns",
+  "version": "1.0.0",
+  "recommended_indexes": [
+    {
+      "collectionGroup": "campaigns",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",     "order": "ASCENDING" },
+        { "fieldPath": "plaatsingen","arrayConfig": "CONTAINS" }
+      ],
+      "rationale": "Live feed-rendering: status==live + plaatsing contains 'feed'."
+    },
+    {
+      "collectionGroup": "campaigns",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",       "order": "ASCENDING" },
+        { "fieldPath": "auto_paused",  "order": "ASCENDING" },
+        { "fieldPath": "eindDatum",    "order": "ASCENDING" }
+      ],
+      "rationale": "Aggregator scan: vind live+non-paused+nog-niet-eind campaigns."
+    },
+    {
+      "collectionGroup": "campaigns",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "brandId",            "order": "ASCENDING" },
+        { "fieldPath": "last_aggregated_at", "order": "DESCENDING" }
+      ],
+      "rationale": "Brand-dashboard: recent geüpdate campagnes eerst."
+    },
+    {
+      "collectionGroup": "campaigns",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "auto_paused", "order": "ASCENDING" },
+        { "fieldPath": "spend",       "order": "DESCENDING" }
+      ],
+      "rationale": "Admin overzicht: hoog-spend campaigns sorteren."
+    }
+  ]
+}

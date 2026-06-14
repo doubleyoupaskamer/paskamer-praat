@@ -1,0 +1,42 @@
+{
+  "collection": "outfits",
+  "version": "1.0.0",
+  "recommended_indexes": [
+    {
+      "collectionGroup": "outfits",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ai_score",     "order": "DESCENDING" },
+        { "fieldPath": "ts",           "order": "DESCENDING" }
+      ],
+      "rationale": "Top-scoring outfits voor 'Highlights' feed."
+    },
+    {
+      "collectionGroup": "outfits",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "occasion_tags", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "ai_score",      "order": "DESCENDING" }
+      ],
+      "rationale": "Occasion-filter: 'business outfits sorted by AI score'."
+    },
+    {
+      "collectionGroup": "outfits",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "uid", "order": "ASCENDING" },
+        { "fieldPath": "ai_score_generated_at", "order": "ASCENDING" }
+      ],
+      "rationale": "AI engine: find user's outfits that need (re-)scoring."
+    },
+    {
+      "collectionGroup": "outfits",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "reviews_aggregate.count", "order": "DESCENDING" },
+        { "fieldPath": "ts",                      "order": "DESCENDING" }
+      ],
+      "rationale": "Most-reviewed feed sortering."
+    }
+  ]
+}

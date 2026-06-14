@@ -1,0 +1,50 @@
+{
+  "collection": "events",
+  "version": "1.0.0",
+  "recommended_indexes": [
+    {
+      "collectionGroup": "events",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "processed", "order": "ASCENDING" },
+        { "fieldPath": "ts",        "order": "ASCENDING" }
+      ],
+      "rationale": "Aggregator query: alle onverwerkte events op volgorde van ontstaan."
+    },
+    {
+      "collectionGroup": "events",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "campaignId", "order": "ASCENDING" },
+        { "fieldPath": "type",       "order": "ASCENDING" },
+        { "fieldPath": "ts",         "order": "DESCENDING" }
+      ],
+      "rationale": "Per-campagne timeline view in admin dashboard."
+    },
+    {
+      "collectionGroup": "events",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "brandId", "order": "ASCENDING" },
+        { "fieldPath": "ts",      "order": "DESCENDING" }
+      ],
+      "rationale": "Brand analytics: alle events voor brand binnen periode."
+    },
+    {
+      "collectionGroup": "events",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "type",         "order": "ASCENDING" },
+        { "fieldPath": "ip_country",   "order": "ASCENDING" },
+        { "fieldPath": "ts",           "order": "DESCENDING" }
+      ],
+      "rationale": "Geo-rapportage per event-type."
+    }
+  ],
+  "TTL_policy": {
+    "enabled": true,
+    "field": "ts",
+    "duration_days": 365,
+    "rationale": "Events ouder dan 1 jaar worden geaggregeerd opgeslagen elders en hier verwijderd."
+  }
+}

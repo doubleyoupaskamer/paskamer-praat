@@ -1,0 +1,40 @@
+{
+  "collection": "users",
+  "version": "1.0.0",
+  "recommended_indexes": [
+    {
+      "collectionGroup": "users",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "shopify_customer_id", "order": "ASCENDING" }
+      ],
+      "rationale": "Webhook lookup van Shopify customer → user mapping."
+    },
+    {
+      "collectionGroup": "users",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "wallet_balance", "order": "DESCENDING" }
+      ],
+      "rationale": "Admin top-balance dashboard sortering."
+    },
+    {
+      "collectionGroup": "users",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "plaatsingen", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "last_login",  "order": "DESCENDING" }
+      ],
+      "rationale": "Bepaal actieve audience per placement voor campaign reach-estimate."
+    },
+    {
+      "collectionGroup": "users",
+      "scope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "consent.marketing", "order": "ASCENDING" },
+        { "fieldPath": "last_login",        "order": "DESCENDING" }
+      ],
+      "rationale": "Mailing-eligible users segmenteren (GDPR compliant)."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+name = "pp-event-aggregator"
+main = "aggregator-worker.js"
+compatibility_date = "2026-02-14"
+
+# Cron trigger: elke 15 minuten
+[triggers]
+crons = ["*/15 * * * *"]
+
+# ── SECRETS (set via wrangler secret put) ──────────────────────────────
+# wrangler secret put FIRESTORE_PROJECT_ID
+# wrangler secret put FIRESTORE_SERVICE_ACCOUNT_JSON_B64
+# wrangler secret put ADMIN_TRIGGER_SECRET
+
+[vars]
+AGGREGATOR_BATCH_ID_PREFIX = "agg"

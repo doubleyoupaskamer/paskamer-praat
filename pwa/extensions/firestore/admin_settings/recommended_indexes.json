@@ -1,0 +1,11 @@
+{
+  "collection": "admin_settings",
+  "version": "1.0.0",
+  "recommended_indexes": [],
+  "rationale": "Singleton document (admin_settings/global). Geen indexes nodig — directe doc-lookup.",
+  "caching_strategy": {
+    "client_cache_ttl_seconds": 60,
+    "cache_invalidation": "On admin save → broadcast via Firestore real-time listener",
+    "fallback_on_read_error": "Use embedded defaults from this contract"
+  }
+}

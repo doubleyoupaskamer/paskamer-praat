@@ -1,0 +1,75 @@
+{
+  "collection": "events",
+  "alias_for": "campaign_events",
+  "version": "1.0.0",
+  "date": "2026-02-14",
+  "description": "Append-only event log. Een nieuwe `events` collectie wordt naast `campaign_events` gebruikt voor uitgebreide event-types. Migratie wordt NIET geforceerd — beide collections runnen parallel tot natural aging.",
+  "missing_fields": {
+    "processed": {
+      "type": "boolean",
+      "default": false,
+      "writeable_by": "aggregator_only",
+      "description": "Idempotency-marker: true zodra event door aggregator is meegeteld. Forceert at-most-once aggregation."
+    },
+    "processed_at": {
+      "type": "timestamp",
+      "nullable": true,
+      "writeable_by": "aggregator_only",
+      "description": "Wanneer aggregator dit event verwerkt heeft."
+    },
+    "processed_batch_id": {
+      "type": "string",
+      "nullable": true,
+      "writeable_by": "aggregator_only",
+      "description": "UUID van de aggregator-run die dit event verwerkte. Voor debugging/replay."
+    },
+    "session_id": {
+      "type": "string",
+      "nullable": true,
+      "description": "Anonieme session-cookie (client-side gegenereerd). Voor dedupe binnen sessie."
+    },
+    "user_agent_hash": {
+      "type": "string",
+      "nullable": true,
+      "description": "SHA-256 hash van user-agent. Bot-detection zonder PII opslag."
+    },
+    "ip_country": {
+      "type": "string",
+      "length": 2,
+      "nullable": true,
+      "description": "ISO 3166 country code uit Cloudflare CF-IPCountry header. Voor geo-rapportage."
+    },
+    "device_type": {
+      "type": "string",
+      "enum": ["mobile", "tablet", "desktop", "unknown"],
+      "default": "unknown",
+      "description": "Device classification voor placement-effectiviteit."
+    },
+    "event_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Monetaire waarde van event (bv. conversie EUR). Default 0 voor non-financial events."
+    },
+    "metadata": {
+      "type": "object",
+      "default": {},
+      "description": "Vrije key-value bag voor extra event-specifieke data. Max 10 keys."
+    }
+  },
+  "existing_fields_used_as_is": [
+    "type",         "subtype",  "campaignId", "brandId",
+    "productId",    "plaatsing","uid",        "ts"
+  ],
+  "type_whitelist": [
+    "impression",
+    "product_click",
+    "campaign_click",
+    "outfit_view",
+    "outfit_review",
+    "ai_query",
+    "similar_view",
+    "purchase",
+    "wallet_topup",
+    "wallet_spend"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "collection": "admin_settings",
+  "version": "1.0.0",
+  "data_contract": {
+    "doc_id": "global",
+    "ownership_model": "admin_only_singleton",
+    "writeable_by_client": "NONE",
+    "writeable_by_admin": [
+      "placements_enabled", "campaign_pricing", "feature_flags",
+      "shopify_config (refs only, not secrets)", "aggregator_config",
+      "fraud_protection", "billing"
+    ],
+    "readable_by_client": [
+      "placements_enabled", "feature_flags",
+      "billing.currency", "billing.vat_rate_pct"
+    ],
+    "readable_by_admin": "ALL",
+    "change_audit": "On any write → mirror to /admin_settings_history/{auto_id} with diff + admin uid + ts",
+    "secrets_storage": "Cloudflare Worker env vars (NEVER in Firestore)",
+    "real_time_propagation": "Frontend subscribes via onSnapshot to /admin_settings/global; max 1s latency"
+  }
+}
