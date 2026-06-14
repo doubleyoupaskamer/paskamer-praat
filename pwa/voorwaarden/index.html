@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Voorwaarden — Paskamer Praat</title>
+<meta name="theme-color" content="#1e1a0f">
+<style>
+  :root{--bg:#1e1a0f;--surface:rgba(255,255,255,.04);--accent:#d4910a;--text:#fcf8ef;--muted:rgba(252,248,239,.65);--border:rgba(252,248,239,.10)}
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:400 16px/1.55 "DM Sans",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 120px}
+  .back{display:inline-flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;font-weight:600;font-size:.86rem;margin-bottom:24px}
+  .back:hover{text-decoration:underline}
+  h1{font:400 clamp(1.8rem,4vw,2.4rem)/1.15 "DM Serif Display",Georgia,serif;letter-spacing:-.01em;margin:0 0 6px}
+  .eyebrow{display:block;font:600 11px/1 "DM Sans",sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .lead{color:var(--muted);font-size:1rem;margin:0 0 26px;max-width:640px}
+  nav.tabs{display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:24px;position:sticky;top:0;background:var(--bg);z-index:5;padding-top:12px}
+  .tab{font:600 .82rem/1 "DM Sans",sans-serif;padding:9px 14px;background:transparent;border:1px solid var(--border);color:rgba(252,248,239,.72);border-radius:100px;cursor:pointer;transition:all .15s ease;text-decoration:none}
+  .tab:hover{color:var(--text);border-color:rgba(212,145,10,.4)}
+  .tab.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+  article{display:none;animation:fadeIn .25s ease}
+  article.on{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  article h2{font:400 clamp(1.3rem,3vw,1.7rem)/1.2 "DM Serif Display",Georgia,serif;margin:0 0 4px}
+  article h3{font:600 1.02rem/1.3 "DM Sans",sans-serif;color:var(--text);margin:28px 0 10px;letter-spacing:-.005em}
+  article p{margin:0 0 14px;color:rgba(252,248,239,.86)}
+  article ul,article ol{padding-left:22px;margin:0 0 16px;color:rgba(252,248,239,.86)}
+  article li{margin-bottom:6px}
+  article strong{color:var(--text);font-weight:600}
+  article em{color:var(--muted)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;background:rgba(255,255,255,.02);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{background:rgba(212,145,10,.08);color:var(--accent);font:600 .75rem/1 "DM Sans",sans-serif;letter-spacing:.05em;text-transform:uppercase}
+  .meta{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;font-size:.84rem;color:var(--muted);margin:0 0 22px}
+  .meta strong{color:var(--text)}
+  .footer-bar{margin-top:42px;padding:18px 0 0;border-top:1px solid var(--border);color:var(--muted);font-size:.82rem;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between}
+  .footer-bar a{color:var(--accent);text-decoration:none}
+  .footer-bar a:hover{text-decoration:underline}
+  .disclaimer{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.22);border-radius:10px;padding:12px 14px;font-size:.84rem;color:#f5b94a;margin:0 0 22px}
+  @media(max-width:600px){.wrap{padding:20px 16px 100px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/" data-testid="voorwaarden-back">← Terug naar Paskamer Praat</a>
+  <span class="eyebrow">Juridische documenten</span>
+  <h1>Voorwaarden &amp; Privacy</h1>
+  <p class="lead">Alles wat je moet weten over het gebruik van Paskamer Praat als merk of community-lid. Lees zorgvuldig door — bij registratie ga je hiermee akkoord.</p>
+
+  <div class="disclaimer">⚠️ Dit zijn concept-versies (v1.0, 14&nbsp;feb&nbsp;2026). Definitieve juridische review door specialist volgt voor publicatie.</div>
+
+  <nav class="tabs" role="tablist" aria-label="Documenten">
+    <a class="tab on" data-doc="reglement" role="tab" aria-selected="true" href="#reglement" data-testid="vw-tab-reglement">Gebruikersreglement</a>
+    <a class="tab" data-doc="aup" role="tab" href="#aup" data-testid="vw-tab-aup">Acceptable Use</a>
+    <a class="tab" data-doc="privacy" role="tab" href="#privacy" data-testid="vw-tab-privacy">Privacy &amp; Cookies</a>
+    <a class="tab" data-doc="av" role="tab" href="#av" data-testid="vw-tab-av">Algemene Voorwaarden</a>
+    <a class="tab" data-doc="campagnes" role="tab" href="#campagnes" data-testid="vw-tab-campagnes">Campagnevoorwaarden</a>
+  </nav>
+
+  <!-- 1. Gebruikersreglement -->
+  <article id="art-reglement" class="on" data-doc="reglement">
+    <div class="meta"><strong>Versie 1.0</strong> · 14 februari 2026 · <strong>Beheerder:</strong> Newnewnet Media B.V. h.o.d.n. Paskamer Praat · <strong>Contact:</strong> support@paskamerpraat.nl</div>
+    <h2>Gebruikersreglement Merkenportaal</h2>
+
+    <h3>Artikel 1 — Definities</h3>
+    <p><strong>Platform</strong>: paskamerpraat.nl en gerelateerde diensten. <strong>Merk</strong>: zakelijke gebruiker met merkaccount. <strong>Content</strong>: alle geüploade materialen. <strong>Campagne</strong>: promotionele plaatsing. <strong>Wallet</strong>: digitaal saldo binnen het platform. <strong>Premium</strong>: maandelijkse abonnementsvorm.</p>
+
+    <h3>Artikel 2 — Toegang en registratie</h3>
+    <ol>
+      <li>Toegang uitsluitend voor zakelijke gebruikers ingeschreven bij KvK of EU-equivalent.</li>
+      <li>Bij registratie verklaar je bevoegd te zijn om namens de onderneming te handelen.</li>
+      <li>Het merk is verantwoordelijk voor alle account-activiteiten.</li>
+      <li>Accounts zijn niet overdraagbaar.</li>
+    </ol>
+
+    <h3>Artikel 3 — Verplichtingen Merk</h3>
+    <p>Het merk handelt conform wet- en regelgeving (Reclamecode, AVG, Auteurswet), deze voorwaarden, het AUP en handleidingen. Alle Content moet rechtmatig, waarheidsgetrouw en niet misleidend zijn.</p>
+
+    <h3>Artikel 4 — Licentie</h3>
+    <p>Het merk verleent Paskamer Praat een wereldwijde, niet-exclusieve, royalty-vrije licentie om aangeleverde Content te tonen, technisch te verwerken en beschikbaar te maken binnen het platform. IE-rechten op de software blijven bij Paskamer Praat.</p>
+
+    <h3>Artikel 5 — Campagnes</h3>
+    <p>Het merk kan Campagnes plaatsen op feed, stories, ai_assist, outfit_review, similar of uitgelicht placements. Paskamer Praat behoudt zich het recht voor Campagnes te weigeren of te verwijderen. Statistieken zijn indicatief — geen garantie op bereik of conversie.</p>
+
+    <h3>Artikel 6 — Betalingen</h3>
+    <p>Wallet-saldo (via Shopify/Stripe top-up) is uitsluitend besteedbaar binnen het platform en niet uitbetaalbaar. Premium-abonnement € 4,99/mnd, automatische verlenging via Stripe. Opzegging via support@paskamerpraat.nl. Geen restitutie van betaalde periodes.</p>
+
+    <h3>Artikel 7 — AI</h3>
+    <p>AI-functionaliteiten zijn ondersteunend en indicatief. Het merk blijft verantwoordelijk voor beoordeling en publicatie van AI-output. AI-output mag niet voor autonome besluiten over personen worden gebruikt.</p>
+
+    <h3>Artikel 8 — Moderatie</h3>
+    <p>Paskamer Praat kan Content of accounts verwijderen/blokkeren bij overtreding. Bij minder ernstige zaken volgt eerst een herstelmogelijkheid van 14 dagen. Beroep mogelijk binnen 14 dagen via support@paskamerpraat.nl.</p>
+
+    <h3>Artikel 9 — Aansprakelijkheid</h3>
+    <p>Aansprakelijkheid Paskamer Praat beperkt tot directe schade door grove schuld of opzet, maximaal 6 maanden vergoeding of € 5.000. Indirecte schade (gederfde winst etc.) uitgesloten. Merk vrijwaart tegen aanspraken voortvloeiend uit aangeleverde Content.</p>
+
+    <h3>Artikel 10 — Toepasselijk recht</h3>
+    <p>Nederlands recht. Bevoegde rechter: Rechtbank Amsterdam.</p>
+  </article>
+
+  <!-- 2. AUP -->
+  <article id="art-aup" data-doc="aup">
+    <div class="meta"><strong>Versie 1.0</strong> · Onderdeel van het Gebruikersreglement</div>
+    <h2>Acceptable Use Policy (AUP)</h2>
+
+    <h3>Toegestaan</h3>
+    <ul>
+      <li>Eigen producten en collecties promoten</li>
+      <li>Eerlijke, transparante campagnes aanmaken</li>
+      <li>Waarheidsgetrouwe productinformatie delen</li>
+      <li>AI-functies als ondersteuning gebruiken</li>
+      <li>Eigen campagne-statistieken analyseren</li>
+    </ul>
+
+    <h3>Illegale of schadelijke content (verboden)</h3>
+    <ul>
+      <li>Illegale producten of diensten</li>
+      <li>Wapens, drugs, gokken, tabak of alcohol buiten wettelijke kaders</li>
+      <li>Schadelijk voor minderjarigen</li>
+      <li>Discriminerend, haatzaaiend of beledigend</li>
+    </ul>
+
+    <h3>Inbreuk op rechten van derden (verboden)</h3>
+    <ul>
+      <li>Schending van auteursrecht, merkrecht of modelrecht</li>
+      <li>Afbeeldingen zonder licentie</li>
+      <li>Portretten zonder schriftelijke toestemming</li>
+      <li>Onrechtmatige verwerking van persoonsgegevens</li>
+    </ul>
+
+    <h3>Misleiding en manipulatie (verboden)</h3>
+    <ul>
+      <li>Misleidende productinformatie (prijs, beschikbaarheid, eigenschappen)</li>
+      <li>Oneerlijke handelspraktijken (Reclamecode-overtredingen)</li>
+      <li>Manipulatie van reviews, likes of follower-aantallen</li>
+      <li>Bots, automatisering of nepaccounts</li>
+      <li>Affiliate-content zonder duidelijke "Gesponsord"-disclosure</li>
+    </ul>
+
+    <h3>Spam (verboden)</h3>
+    <ul>
+      <li>Ongevraagde commerciële communicatie (Tw 11.7)</li>
+      <li>Massa-DM's, bulk-tagging, e-mailadres-harvesting</li>
+    </ul>
+
+    <h3>Technisch misbruik (verboden)</h3>
+    <ul>
+      <li>Scraping, crawling, geautomatiseerde data-extractie</li>
+      <li>Reverse engineering, omzeiling van beveiliging</li>
+      <li>DoS, excessive polling, infrastructure-belasting</li>
+      <li>Delen van API-keys, tokens, inloggegevens</li>
+    </ul>
+
+    <h3>Escalatieladder</h3>
+    <table>
+      <thead><tr><th>Niveau</th><th>Voorbeeld</th><th>Maatregel</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Kleine richtlijn-overtreding</td><td>Waarschuwing + 14 dagen correctie</td></tr>
+        <tr><td>2</td><td>Tweede overtreding</td><td>Content-verwijdering + waarschuwing</td></tr>
+        <tr><td>3</td><td>Ernstige overtreding</td><td>Tijdelijke opschorting (7–30 dagen)</td></tr>
+        <tr><td>4</td><td>Herhaling of zware overtreding</td><td>Permanente beëindiging</td></tr>
+        <tr><td>5</td><td>Strafbare feiten</td><td>Beëindiging + aangifte</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Meldingsprocedure</h3>
+    <p>Vermoed je een overtreding? Mail naar <strong>support@paskamerpraat.nl</strong> met onderwerp "AUP-melding — [URL of accountnaam]". Beschermd voor klokkenluiders.</p>
+  </article>
+
+  <!-- 3. Privacy -->
+  <article id="art-privacy" data-doc="privacy">
+    <div class="meta"><strong>Versie 1.0</strong> · 14 februari 2026 · <strong>Verwerkingsverantwoordelijke:</strong> Newnewnet Media B.V. · <strong>Contact AVG:</strong> privacy@paskamerpraat.nl</div>
+    <h2>Privacyverklaring &amp; Cookiebeleid</h2>
+
+    <h3>Welke gegevens verwerken wij?</h3>
+    <p><strong>Van community-leden:</strong> naam, e-mail, profielfoto, posts, likes, opgeslagen items, AI-scores, IP-adres, device-info, sessietijden.</p>
+    <p><strong>Van merken:</strong> bedrijfsnaam, KvK, BTW, adres, contactgegevens, gehashed wachtwoord, logo, productafbeeldingen, campagne-data, Stripe-tokens (geen kaartdata).</p>
+    <p><strong>Van anonieme bezoekers:</strong> IP, browser-info, pageviews, anonieme session-ID (cookie).</p>
+
+    <h3>Rechtsgronden</h3>
+    <table>
+      <thead><tr><th>Doel</th><th>Rechtsgrond AVG</th></tr></thead>
+      <tbody>
+        <tr><td>Account &amp; content tonen</td><td>Uitvoering overeenkomst</td></tr>
+        <tr><td>Betalingen</td><td>Overeenkomst + wettelijke bewaarplicht</td></tr>
+        <tr><td>Statistieken merken (aggregaat)</td><td>Gerechtvaardigd belang</td></tr>
+        <tr><td>Beveiliging &amp; fraudepreventie</td><td>Gerechtvaardigd belang</td></tr>
+        <tr><td>AI-suggesties</td><td>Overeenkomst + (waar nodig) toestemming</td></tr>
+        <tr><td>Marketing e-mail</td><td>Opt-in toestemming</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Bewaartermijnen</h3>
+    <ul>
+      <li>Actief account: voor de duur van het account</li>
+      <li>Inactief community-account: 24 maanden na laatste login</li>
+      <li>Inactief merk-account: 12 maanden na laatste login</li>
+      <li>Betalingsgegevens: 7 jaar (wettelijk)</li>
+      <li>Support-tickets: 24 maanden</li>
+      <li>Beveiligingslogs: 12 maanden</li>
+    </ul>
+
+    <h3>Sub-verwerkers</h3>
+    <table>
+      <thead><tr><th>Partij</th><th>Doel</th><th>Vestiging</th></tr></thead>
+      <tbody>
+        <tr><td>Google Firebase</td><td>Auth, database, opslag</td><td>EU (Belgium/Frankfurt)</td></tr>
+        <tr><td>Cloudflare</td><td>CDN, beveiliging</td><td>EU/US (SCC's)</td></tr>
+        <tr><td>Stripe Ireland</td><td>Betalingen</td><td>Ierland</td></tr>
+        <tr><td>Shopify</td><td>Wallet top-ups</td><td>Ierland/Canada (SCC's)</td></tr>
+        <tr><td>Emergent LLM (OpenAI/Anthropic/Google)</td><td>AI-functies</td><td>EU/US (SCC's + DPA)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Cookies</h3>
+    <p><strong>Functioneel (geen toestemming):</strong> firebase-auth, dy_consent, dy_locale, dy_theme.</p>
+    <p><strong>Analytisch (anoniem):</strong> _ga/_gid indien actief, dy_item_poll_id.</p>
+    <p><strong>Marketing/tracking:</strong> momenteel <strong>geen</strong> 3rd-party cookies. Indien dat verandert, expliciete opt-in via cookiebanner.</p>
+
+    <h3>Uw rechten</h3>
+    <ul>
+      <li><strong>Inzage</strong>, <strong>rectificatie</strong>, <strong>verwijdering</strong>, <strong>beperking</strong>, <strong>bezwaar</strong>, <strong>dataportabiliteit</strong>, <strong>intrekken toestemming</strong> — via privacy@paskamerpraat.nl</li>
+      <li><strong>Klacht</strong> bij Autoriteit Persoonsgegevens: autoriteitpersoonsgegevens.nl</li>
+    </ul>
+    <p>Reactie binnen 30 dagen. Identificatie kan worden gevraagd.</p>
+
+    <h3>Beveiliging</h3>
+    <ul>
+      <li>TLS-encryptie (HTTPS-only)</li>
+      <li>Encryption-at-rest via Firebase</li>
+      <li>Bcrypt wachtwoord-hashing</li>
+      <li>Strict CSP, owner-aware caching, cross-tab logout</li>
+      <li>Datalek-melding binnen 72u aan AP (AVG art. 33)</li>
+    </ul>
+
+    <h3>Geen kinderen onder 16</h3>
+    <p>Het platform is niet bedoeld voor kinderen onder 16. Accounts van minderjarigen worden verwijderd tenzij ouderlijke toestemming wordt geleverd.</p>
+  </article>
+
+  <!-- 4. Algemene Voorwaarden B2B -->
+  <article id="art-av" data-doc="av">
+    <div class="meta"><strong>Versie 1.0</strong> · 14 februari 2026 · B2B-voorwaarden voor Merken</div>
+    <h2>Algemene Voorwaarden Merken (B2B)</h2>
+    <h3>1. Toepasselijkheid</h3>
+    <p>Van toepassing op alle overeenkomsten met zakelijke afnemers. Inkoopvoorwaarden van het merk worden uitdrukkelijk uitgesloten.</p>
+    <h3>2. Diensten</h3>
+    <p>Diensten geleverd op best-effort "as-is" basis. Geen uptime-SLA tenzij schriftelijk overeengekomen. Onderhoud kan zonder kennisgeving plaatsvinden.</p>
+    <h3>3. Prijzen &amp; betaling</h3>
+    <ul><li>Prijzen excl. BTW, in EUR</li><li>Premium €4,99/mnd, automatische verlenging via Stripe</li><li>Wallet-saldo niet uitbetaalbaar</li><li>Bij niet-betaling kan dienstverlening worden opgeschort</li></ul>
+    <h3>4. Duur &amp; opzegging</h3>
+    <p>Onbepaalde tijd, maandelijks opzegbaar via support@paskamerpraat.nl met 1 maand opzegtermijn. Geen restitutie van betaalde periodes.</p>
+    <h3>5. Aansprakelijkheid</h3>
+    <p>Beperkt tot directe schade door grove schuld/opzet. Max. 6 maanden vergoeding of €5.000 per gebeurtenis. Indirecte schade uitgesloten. Merk vrijwaart tegen aanspraken voortvloeiend uit aangeleverde Content.</p>
+    <h3>6. Geheimhouding</h3>
+    <p>Vertrouwelijke informatie blijft vertrouwelijk gedurende overeenkomst + 3 jaar daarna.</p>
+    <h3>7. Wijzigingen</h3>
+    <p>30 dagen aankondiging vooraf. Bij wezenlijke wijziging: kosteloze beëindiging binnen 30 dagen.</p>
+    <h3>8. Toepasselijk recht</h3>
+    <p>Nederlands recht. Bevoegde rechter: Rechtbank Amsterdam.</p>
+  </article>
+
+  <!-- 5. Campagnevoorwaarden -->
+  <article id="art-campagnes" data-doc="campagnes">
+    <div class="meta"><strong>Versie 1.0</strong> · Aanvulling op AV Merken</div>
+    <h2>Campagnevoorwaarden</h2>
+    <h3>1. Aanmaak &amp; goedkeuring</h3>
+    <p>Het merk maakt campagne aan via Merkenportaal. Paskamer Praat kan binnen 72u weigeren met motivering. Bij weigering wordt budget niet aangesproken.</p>
+    <h3>2. Plaatsing &amp; bereik</h3>
+    <p>Plaatsing start na goedkeuring + startDatum. Bereik is <em>indicatief</em>. Geen gegarandeerd aantal impressies tenzij schriftelijk overeengekomen.</p>
+    <h3>3. Tarifering</h3>
+    <ul><li>Pay-per-placement, CPM (per impressie) of CPC (per klik)</li><li>Tarieven actueel in Merkenportaal → Tarieven</li><li>Budget wordt van Wallet afgeschreven bij levering</li></ul>
+    <h3>4. Metingen</h3>
+    <p>Impressies = unieke weergave per sessie. Klikken = bewuste interactie. Discrepantie met externe analytics geaccepteerd binnen ±15%.</p>
+    <h3>5. Annulering &amp; pauze</h3>
+    <p>Merk kan pauzeren/stoppen. Resterend budget terug naar Wallet. Reeds geleverde impressies worden niet gerestitueerd.</p>
+    <h3>6. Content-richtlijnen</h3>
+    <ul><li>Afbeeldingen ≥800px, JPG/PNG/WebP, ≤5MB</li><li>Geen all-caps, geen excessieve emoji</li><li>Prijzen incl. BTW (B2C-zicht)</li><li>Disclosure bij affiliate</li><li>Geen onbewezen claims</li></ul>
+    <h3>7. Geen resultaatgarantie</h3>
+    <p>Paskamer Praat garandeert geen specifieke verkopen, conversies, CTR, volgers of posities.</p>
+    <h3>8. Conflicten</h3>
+    <p>Eerst overleg met support@paskamerpraat.nl. Bij geen oplossing binnen 30 dagen: toepassing Art. 8 AV Merken.</p>
+  </article>
+
+  <div class="footer-bar">
+    <span>© 2026 Newnewnet Media B.V. — Alle rechten voorbehouden</span>
+    <span><a href="mailto:support@paskamerpraat.nl">support@paskamerpraat.nl</a> · <a href="mailto:privacy@paskamerpraat.nl">privacy@paskamerpraat.nl</a></span>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var tabs = document.querySelectorAll('.tab');
+    var articles = document.querySelectorAll('article[data-doc]');
+    function show(doc){
+      tabs.forEach(function(t){ t.classList.toggle('on', t.dataset.doc===doc); t.setAttribute('aria-selected', t.dataset.doc===doc ? 'true':'false'); });
+      articles.forEach(function(a){ a.classList.toggle('on', a.dataset.doc===doc); });
+      try { history.replaceState(null,'','#'+doc); } catch(e){}
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(e){ e.preventDefault(); show(t.dataset.doc); });
+    });
+    // Init from hash
+    var h = (location.hash||'').replace('#','');
+    if (h && document.querySelector('article[data-doc="'+h+'"]')) show(h);
+  })();
+</script>
+</body>
+</html>

@@ -6,8 +6,9 @@
 /challenges            /index.html    200
 /post-van-de-week      /index.html    200
 /outfit-vergelijker    /index.html    200
-/voorwaarden           /index.html    200
-/privacy               /index.html    200
+/voorwaarden           /voorwaarden/index.html    200
+/voorwaarden/*         /voorwaarden/index.html    200
+/privacy               /voorwaarden/index.html    200
 /community-regels      /index.html    200
 /beta                  /index.html    200
 /profiel/*             /index.html    200
