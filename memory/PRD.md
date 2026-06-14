@@ -33,6 +33,14 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - **Backend download endpoint**: `/api/downloads/{filename}.zip` voor PWA bundle downloads
 - Deploy ZIP: `paskamerpraat-pwa-v60.1.43-merkprofiel.zip`
 
+### v60.1.56 — Admin Premium Override (huidige sessie)
+- **🔑 Admin-account `williamdevriesis@gmail.com` krijgt altijd Premium-toegang** zonder betaling:
+  - Backend (`/api/premium/status`): leest `ADMIN_PREMIUM_EMAILS` env var (comma-separated list), case-insensitive match op `email` of `user_key` query param
+  - Frontend (`premium-v1.js`): `fetchStatus()` stuurt nu ook `&email=<currentUser.email>` mee zodat backend override kan toepassen ook bij Firebase-UID gebaseerde keys
+  - Response: `{"is_premium":true,"plan":"premium_admin","activated_at":"admin-override"}`
+- Env: `ADMIN_PREMIUM_EMAILS=williamdevriesis@gmail.com` toegevoegd aan `/app/backend/.env`
+- Cache bumps: `premium-v1.js?v=60.1.56-admin-override`, sw.js `v60.1.56`
+
 ### v60.1.55 — Stripe Premium Checkout + Outfit Score stub (huidige sessie)
 - **💳 Stripe Premium Checkout** (via `emergentintegrations.payments.stripe.checkout`):
   - `POST /api/checkout/session` — body `{package_id, origin_url, user_key, email}` → `{url, session_id}`

@@ -100,7 +100,13 @@
     var base = apiBase();
     if (!base) return { is_premium: false };
     try {
-      var r = await fetch(base + '/api/premium/status?user_key=' + encodeURIComponent(getUserKey()), { cache: 'no-store' });
+      // v60.1.56: stuur email mee zodat backend admin-override kan toepassen
+      var emailParam = '';
+      try {
+        var ae = getEmailFromAuth();
+        if (ae) emailParam = '&email=' + encodeURIComponent(ae);
+      } catch (e) { /* ignore */ }
+      var r = await fetch(base + '/api/premium/status?user_key=' + encodeURIComponent(getUserKey()) + emailParam, { cache: 'no-store' });
       if (!r.ok) return { is_premium: false };
       var d = await r.json();
       setCached(d);

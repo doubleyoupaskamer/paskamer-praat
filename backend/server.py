@@ -518,8 +518,26 @@ async def get_checkout_status(session_id: str, request: Request):
 
 
 @api_router.get("/premium/status")
-async def premium_status(user_key: str):
+async def premium_status(user_key: str, email: Optional[str] = None):
+    # Admin-override: emails in ADMIN_PREMIUM_EMAILS krijgen altijd premium
+    admin_emails = [
+        e.strip().lower()
+        for e in os.environ.get("ADMIN_PREMIUM_EMAILS", "").split(",")
+        if e.strip()
+    ]
+    candidate_email = (email or "").strip().lower()
+    candidate_key = (user_key or "").strip().lower()
+    if admin_emails and (candidate_email in admin_emails or candidate_key in admin_emails):
+        return {
+            "is_premium": True,
+            "plan": "premium_admin",
+            "activated_at": "admin-override",
+            "email": email or user_key,
+        }
+
     rec = await db.premium_users.find_one({"user_key": user_key})
+    if not rec and email:
+        rec = await db.premium_users.find_one({"email": email})
     if not rec:
         return {"is_premium": False}
     return {
