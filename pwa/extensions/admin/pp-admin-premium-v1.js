@@ -471,6 +471,14 @@
     setTimeout(init, 300);
   }
 
+  // v60.1.60: cache-reset bij logout/userchange (session-cleanup hook)
+  document.addEventListener('pp:logout', function() {
+    _state = { tab: 'status', stripe: null, lastTest: null, users: [], txns: [], events: [], entitlements: null };
+  });
+  document.addEventListener('pp:userchange', function() {
+    _state = { tab: 'status', stripe: null, lastTest: null, users: [], txns: [], events: [], entitlements: null };
+  });
+
   window.PP_AdminPremium = {
     tab: setTab,
     runTestCheckout: runTestCheckout,

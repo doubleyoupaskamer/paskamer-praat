@@ -33,6 +33,25 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - **Backend download endpoint**: `/api/downloads/{filename}.zip` voor PWA bundle downloads
 - Deploy ZIP: `paskamerpraat-pwa-v60.1.43-merkprofiel.zip`
 
+### v60.1.60 — Session Cleanup & Cache Isolation (huidige sessie)
+- **🔴 Root cause**: na logout bleven user-specifieke caches in localStorage staan → vorige avatar/premium/instellingen lekte naar volgende sessie of guest-state.
+- **🆕 Nieuwe extension**: `/app/pwa/extensions/auth/pp-session-cleanup-v1.js` (269 lines):
+  - Wrapt `DY.uitloggen` — voert legacy cleanup uit + extra purge
+  - **localStorage purge** (exact keys): `dy_premium_cache`, `dy_premium_email`, `dy_premium_userkey`, `dy_premium_pending`, `dy_admin_secret`, `dy_saved_looks`, `dy_bookmark_queue`, `dy_overlay_dismissed_until`, `dy_brand_portal_*`, `dy_wallet_*`, `dy_user_*`, `dy_garderobe_*`, `dy_notif_cache`, `dy_ai_chat_session`
+  - **Prefix purge**: `dy_outfit_score_*`, `dy_activiteit_maand_*`, `dy_premium_*`, `dy_wallet_*`, `dy_brand_portal*`, `dy_ai_*`, `dy_review_draft_*`, `dy_outfit_draft_*`
+  - **sessionStorage purge**: `_dy_actieve_pagina`, `dy_overlay_gezien`, `dy_safety_shown`, `dy_route_freeze`
+  - **Whitelist (NIET gewist)**: `dy_app_version`, `dy_install_v`, `dy_pwa_geinstalleerd`, `dy_item_poll_id`, `dy_item_poll_stem`, `dy_consent`, `dy_theme`, `dy_locale`
+  - **In-memory cleanup**: `PP_CampaignRenderer._unsubscribe`, `PP_FeedTabs` Uitgelicht-grid, `PP_Wallet._state`, `PP_AdminPremium._state`
+  - **Topbar refresh**: ruimt avatar-img src op zodat geen vorige avatar zichtbaar blijft
+  - **User-switch detectie**: `firebase.auth().onAuthStateChanged` vergelijkt UID — bij wijziging triggers automatisch purge + premium-refetch
+  - **Cross-tab sync**: luistert op `storage` events voor `firebase:authUser:*` — logout in tab A wist ook tab B/C
+  - **CustomEvents**: `pp:logout`, `pp:userchange`, `pp:login` — andere extensions kunnen zelf hun state resetten
+- **Premium-v1.js**: luistert nu op `pp:logout` (wist `dy_premium_cache` + sluit manage-modal) en `pp:userchange` (forceer fresh fetch).
+- **Admin-premium-v1.js**: reset internal `_state` op `pp:logout` / `pp:userchange`.
+- Public API: `window.PP_Session.purgeAll()` voor handmatige purge in dev-tools.
+- Cache: `?v=1.0.12-session`, sw `v60.1.60`
+- Deploy ZIP: 2.5 MB
+
 ### v60.1.59 — Premium Manage Modal + 403 verklaring (huidige sessie)
 - **🐛 Root cause "Beheer abonnement" alert**: `openCustomerPortal()` deed `POST /api/billing/portal` → backend retourneert 501 → JS deed `alert(d.detail)` → lelijke browser dialog.
 - **✅ Fix**: vervangen door volwaardige in-app **`#dy-prem-manage-overlay`** modal in `js/premium-v1.js`:

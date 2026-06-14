@@ -119,6 +119,18 @@
     return !!s.is_premium;
   }
 
+  // v60.1.60: luister naar session-events voor cache-isolatie
+  document.addEventListener('pp:logout', function() {
+    try { localStorage.removeItem(LS_CACHE); } catch (e) { /* ignore */ }
+    var modal = document.getElementById('dy-prem-manage-overlay');
+    if (modal) modal.remove();
+  });
+  document.addEventListener('pp:userchange', function() {
+    try { localStorage.removeItem(LS_CACHE); } catch (e) { /* ignore */ }
+    // Forceer fresh fetch voor nieuwe user
+    setTimeout(function() { fetchStatus(true); }, 50);
+  });
+
   // ─── Upgrade modal ───────────────────────────────────────────────
   function openUpgradeModal() {
     if (document.getElementById('dy-premium-modal')) return;
