@@ -21,7 +21,21 @@
   function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
   function isAdmin() { return !!(window.DY && window.DY._isAdmin && window.DY._isAdmin()); }
   function apiBase() {
-    if (window.DY && DY.config && DY.config.API_BASE) return DY.config.API_BASE;
+    // 1) aiHealth resolver (canonical bron)
+    try {
+      var b = (window.DY && window.DY.aiHealth && window.DY.aiHealth.apiBase && window.DY.aiHealth.apiBase()) || '';
+      if (b) return b;
+    } catch (e) { /* ignore */ }
+    // 2) Hostname-based fallback (zelfde patroon als premium-v1)
+    try {
+      var host = (location.hostname || '').toLowerCase();
+      if (host.indexOf('paskamerpraat.nl') >= 0 ||
+          host.indexOf('emergentagent.com') >= 0 ||
+          host.indexOf('cloudflare') >= 0 ||
+          host.indexOf('pages.dev') >= 0) {
+        return 'https://paskamer-stability.preview.emergentagent.com';
+      }
+    } catch (e) { /* ignore */ }
     return window.location.origin;
   }
   function adminEmail() {
@@ -161,9 +175,18 @@
   function renderStatus() {
     var s = _state.stripe;
     if (!s) return '<div class="ppap-card">Status laden…</div>';
-    if (s.__error) return errorCard('Stripe status', s.__error, s.__body);
+    if (s.__error) return errorCard('Stripe status', s.__error, s.__body) +
+      '<div class="ppap-card"><h3>Backend verbinding <span class="ppap-pill fail">UNREACHABLE</span></h3>' +
+      '<dl class="ppap-kv"><dt>Doel-URL</dt><dd>' + esc(apiBase()) + '</dd><dt>Status</dt><dd>' + esc(s.__status || 'netwerk-fout') + '</dd></dl></div>';
     var keyOK = s.stripe_configured;
     return [
+      '<div class="ppap-card">',
+        '<h3>Backend verbinding <span class="ppap-pill ok">ONLINE</span></h3>',
+        '<dl class="ppap-kv">',
+          '<dt>API base</dt><dd>' + esc(apiBase()) + '</dd>',
+          '<dt>Frontend host</dt><dd>' + esc(location.hostname) + '</dd>',
+        '</dl>',
+      '</div>',
       '<div class="ppap-card" data-testid="ppap-stripe-card">',
         '<h3>Stripe configuratie ',
           '<span class="ppap-pill ' + (keyOK ? 'ok' : 'fail') + '">' + (keyOK ? 'Gekoppeld' : 'Niet geconfigureerd') + '</span>',

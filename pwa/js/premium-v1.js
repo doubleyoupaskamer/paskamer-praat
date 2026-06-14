@@ -28,7 +28,7 @@
   // Hardcoded LIVE backend fallback — used als aiHealth nog niet geladen is
   // bij vroege click (race condition op iOS PWA). Komt overeen met
   // LIVE_BACKEND in ai-health-v1.js.
-  var LIVE_BACKEND_FALLBACK = 'https://fitting-chat-app.preview.emergentagent.com';
+  var LIVE_BACKEND_FALLBACK = 'https://paskamer-stability.preview.emergentagent.com';
   function apiBase() {
     try {
       var b = (window.DY && window.DY.aiHealth && window.DY.aiHealth.apiBase && window.DY.aiHealth.apiBase()) || '';

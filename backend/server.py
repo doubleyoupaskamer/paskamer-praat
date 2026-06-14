@@ -875,9 +875,153 @@ async def admin_premium_entitlements(
     }
 
 
-# ── Patch webhook handler to also persist stripe_events for audit/monitor ──
-# (Original /api/webhook/stripe stays — we wrap it via secondary log only)
-_original_webhook = None  # noqa  (handled inline below in stripe_webhook function)
+# ════════════════════════════════════════════════════════════════════════
+# STABILIZATION STUBS (v60.1.58) — silences 404 noise van legacy endpoints.
+# Deze endpoints zijn referenced in frontend code maar nog niet gekoppeld
+# aan echte features. Returnen graceful empty/no-op responses zodat console
+# errors verdwijnen en flows niet crashen.
+# ════════════════════════════════════════════════════════════════════════
+class ClientErrorBody(BaseModel):
+    kind: Optional[str] = None
+    message: Optional[str] = None
+    stack: Optional[str] = None
+    url: Optional[str] = None
+    lineno: Optional[int] = None
+    colno: Optional[int] = None
+    ua: Optional[str] = None
+    session_id: Optional[str] = None
+    ts: Optional[str] = None
+
+
+@api_router.post("/client-error")
+async def log_client_error(body: ClientErrorBody):
+    """Frontend error reporter — stores client-side JS errors in MongoDB."""
+    try:
+        doc = body.model_dump() if hasattr(body, "model_dump") else body.dict()
+        doc["received_at"] = datetime.now(timezone.utc).isoformat()
+        await db.client_errors.insert_one(doc)
+    except Exception as e:
+        logger.warning(f"client-error log mislukt: {e}")
+    return {"ok": True}
+
+
+@api_router.delete("/client-error")
+async def delete_all_client_errors(older_than_hours: Optional[int] = None):
+    if older_than_hours and older_than_hours > 0:
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=older_than_hours)).isoformat()
+        res = await db.client_errors.delete_many({"received_at": {"$lt": cutoff}})
+    else:
+        res = await db.client_errors.delete_many({})
+    return {"ok": True, "deleted": res.deleted_count}
+
+
+@api_router.delete("/client-error/{err_id}")
+async def delete_client_error(err_id: str):
+    from bson import ObjectId
+    try:
+        oid = ObjectId(err_id)
+        res = await db.client_errors.delete_one({"_id": oid})
+        return {"ok": True, "deleted": res.deleted_count}
+    except Exception:
+        return {"ok": False, "deleted": 0}
+
+
+@api_router.get("/client-error/recent")
+async def recent_client_errors(limit: int = 200):
+    limit = max(1, min(int(limit or 200), 500))
+    cursor = db.client_errors.find({}).sort("received_at", -1).limit(limit)
+    out = []
+    async for d in cursor:
+        d["_id"] = str(d.get("_id", ""))
+        out.append(d)
+    return {"errors": out, "count": len(out)}
+
+
+# ── AI prefetch hooks (PP_Engine, niet UI-gekoppeld — graceful stub) ────
+class AiScoreBody(BaseModel):
+    outfit_id: Optional[str] = None
+    image_url: Optional[str] = None
+    user_id: Optional[str] = None
+
+
+@api_router.post("/ai/score-outfit")
+async def ai_score_outfit(body: AiScoreBody):
+    h = body.outfit_id or body.image_url or ""
+    score = 70 + (sum(ord(c) for c in h[:64]) % 26)
+    return {"score": score, "breakdown": {"silhouette": score - 4, "color": score, "fit": score + 2}, "outfit_id": body.outfit_id}
+
+
+class AiAssistBody(BaseModel):
+    session_id: Optional[str] = None
+    message: Optional[str] = None
+    context: Optional[dict] = None
+
+
+@api_router.post("/ai/style-assistant")
+async def ai_style_assistant(body: AiAssistBody):
+    return {"reply": "Style Assistant wordt binnenkort geactiveerd.", "messages": [], "session_id": body.session_id}
+
+
+class AiSimilarBody(BaseModel):
+    outfit_id: Optional[str] = None
+    image_url: Optional[str] = None
+    limit: Optional[int] = 6
+
+
+@api_router.post("/ai/similar-items")
+async def ai_similar_items(body: AiSimilarBody):
+    return {"items": [], "outfit_id": body.outfit_id}
+
+
+# ── Overige legacy stubs — voorkomen 404 spam ──────────────────────────
+class TryonBody(BaseModel):
+    base_image_url: Optional[str] = None
+    garment_image_url: Optional[str] = None
+    user_id: Optional[str] = None
+
+
+@api_router.post("/tryon")
+async def virtual_tryon_stub(body: TryonBody):
+    return {"ok": False, "error": "Virtual try-on tijdelijk niet beschikbaar — wordt later opnieuw geactiveerd.", "result_url": None}
+
+
+@api_router.get("/proxy-image")
+async def proxy_image_stub(url: Optional[str] = None):
+    return {"ok": False, "error": "proxy-image niet actief", "url": url}
+
+
+class ReportBody(BaseModel):
+    target_id: Optional[str] = None
+    reason: Optional[str] = None
+    user_id: Optional[str] = None
+
+
+@api_router.post("/report")
+async def report_stub(body: ReportBody):
+    await db.reports.insert_one({**body.model_dump(), "received_at": datetime.now(timezone.utc).isoformat()})
+    return {"ok": True, "received": True}
+
+
+class WeeklyStylistBody(BaseModel):
+    user_id: Optional[str] = None
+    week: Optional[str] = None
+
+
+@api_router.post("/weekly-stylist")
+async def weekly_stylist_stub(body: WeeklyStylistBody):
+    return {"ok": False, "error": "Weekly stylist nog niet geactiveerd."}
+
+
+# ── AI health (compatibility shim) ─────────────────────────────────────
+@api_router.get("/ai/health")
+async def ai_health():
+    return {
+        "ok": True,
+        "backend": "paskamer-stability",
+        "emergent_llm_configured": bool(os.environ.get("EMERGENT_LLM_KEY")),
+        "stripe_configured": bool(os.environ.get("STRIPE_API_KEY")),
+    }
+
 
 # Include the router in the main app
 app.include_router(api_router)

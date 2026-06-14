@@ -29,8 +29,8 @@
     }
     if (window.DY && typeof window.DY.apiBase === 'string') return window.DY.apiBase;
     var host = (location.hostname || '').toLowerCase();
-    if (host.indexOf('emergentagent.com') >= 0) return 'https://fitting-chat-app.preview.emergentagent.com';
-    if (host.indexOf('paskamerpraat.nl') >= 0) return 'https://fitting-chat-app.preview.emergentagent.com';
+    if (host.indexOf('emergentagent.com') >= 0) return 'https://paskamer-stability.preview.emergentagent.com';
+    if (host.indexOf('paskamerpraat.nl') >= 0) return 'https://paskamer-stability.preview.emergentagent.com';
     return DEFAULT_API_BASE;
   }
 
@@ -91,7 +91,7 @@
   }
 
   // ─── apiBase met absolute fallback (v59: robuust tegen stale aiHealth) ───
-  var LIVE_BACKEND = 'https://fitting-chat-app.preview.emergentagent.com';
+  var LIVE_BACKEND = 'https://paskamer-stability.preview.emergentagent.com';
   function apiBase() {
     try {
       if (window.DY && window.DY.aiHealth && typeof window.DY.aiHealth.apiBase === 'function') {

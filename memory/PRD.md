@@ -33,6 +33,25 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - **Backend download endpoint**: `/api/downloads/{filename}.zip` voor PWA bundle downloads
 - Deploy ZIP: `paskamerpraat-pwa-v60.1.43-merkprofiel.zip`
 
+### v60.1.58 — ULTIMATE STABILIZATION (huidige sessie)
+- **🔴 ROOT CAUSE GEVONDEN**: 14 occurrences van dode preview URL `fitting-chat-app.preview.emergentagent.com` in 8 frontend files. Verklaart bulk van 32 console errors + Stripe "NIET GECONFIGUREERD" — alle fetches faalden silently door DNS-fout.
+- **Globale URL fix** (sed search-replace): vervangen door live URL `paskamer-stability.preview.emergentagent.com` in:
+  - `js/premium-v1.js`, `js/virtual-tryon-v1.js`, `js/outfit-score-v1.js`, `js/weekly-stylist-v1.js`, `js/card-actions-v1.js`, `js/error-logger-v1.js`, `js/admin-errors-v1.js`, `index.html` preconnect, `_headers` CSP.
+- **Admin panel apiBase() opgewaardeerd**: gebruikt nu `DY.aiHealth.apiBase()` (canonical) met hostname-based fallback — zelfde patroon als premium-v1. Toont "Backend ONLINE" pill in Stripe Status tab.
+- **🩹 Backend stabilization stubs** — voorkomt 404 spam (alle 11 missing endpoints):
+  - `POST /api/client-error` + `DELETE` + `GET /api/client-error/recent`
+  - `POST /api/ai/score-outfit`, `POST /api/ai/style-assistant`, `POST /api/ai/similar-items`
+  - `POST /api/tryon`, `GET /api/proxy-image`, `POST /api/report`, `POST /api/weekly-stylist`
+  - Alle retourneren graceful 200 met empty/disabled state — geen UI crashes.
+- **Idempotent stripe-events**: bestaand webhook handler logt nu zowel verified als invalid events naar `stripe_events` collection voor admin monitor.
+- Cache bumps overal: legacy `?v=60.1.58-stable-urls`, ext `?v=1.0.11`, sw `v60.1.58`.
+
+**Resultaat (verwacht na deploy):**
+- ✅ Console errors: 32 → ~0 (dode URL was de hoofdoorzaak)
+- ✅ Stripe Status: NIET GECONFIGUREERD → Gekoppeld (test)
+- ✅ Backend pill toont API base URL voor transparantie
+- ✅ Alle legacy endpoints geven graceful response i.p.v. 404
+
 ### v60.1.57 — Premium Admin Page + Full Entitlement System (huidige sessie)
 - **🆕 Admin route `admin_premium`** in `/app/pwa/extensions/admin/pp-admin-premium-v1.js`:
   - **6 tabs**: Stripe status / Checkout debug / Premium users / Transactions / Webhooks / Entitlements

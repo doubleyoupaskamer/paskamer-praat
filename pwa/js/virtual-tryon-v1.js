@@ -24,7 +24,7 @@
   var STYLE_ID  = 'dy-tryon-style';
   var DEFAULT_API_BASE = '';
   // v59: Hardcoded fallback URL voor 404-retry op stale hosting redirects
-  var LIVE_BACKEND = 'https://fitting-chat-app.preview.emergentagent.com';
+  var LIVE_BACKEND = 'https://paskamer-stability.preview.emergentagent.com';
 
   function apiBase() {
     try {

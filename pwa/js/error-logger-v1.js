@@ -38,8 +38,8 @@
       }
     } catch (e) { /* ignore */ }
     var host = (location.hostname || '').toLowerCase();
-    if (host.indexOf('emergentagent.com') >= 0) return 'https://fitting-chat-app.preview.emergentagent.com';
-    if (host.indexOf('paskamerpraat.nl') >= 0) return 'https://fitting-chat-app.preview.emergentagent.com';
+    if (host.indexOf('emergentagent.com') >= 0) return 'https://paskamer-stability.preview.emergentagent.com';
+    if (host.indexOf('paskamerpraat.nl') >= 0) return 'https://paskamer-stability.preview.emergentagent.com';
     return '';
   }
 

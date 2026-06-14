@@ -348,7 +348,7 @@
       // Server-side queue: gegarandeerde opslag in MongoDB moderation_reports
       var apiBase = (window.DY && window.DY.aiHealth && window.DY.aiHealth.apiBase)
         ? window.DY.aiHealth.apiBase()
-        : 'https://fitting-chat-app.preview.emergentagent.com';
+        : 'https://paskamer-stability.preview.emergentagent.com';
       fetch(apiBase + '/api/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
