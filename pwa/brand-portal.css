@@ -471,3 +471,63 @@
   outline: 2px solid #d4910a;
   outline-offset: 2px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   v60.1.43 — Merkprofiel page + mobile clipping fixes
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Logo-upload blok op merkprofiel */
+.bp-profiel-logo-rij {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.bp-profiel-logo-preview {
+  width: 96px; height: 96px; border-radius: 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(252,248,239,0.12);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0;
+}
+.bp-profiel-logo-preview img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.bp-profiel-logo-acties {
+  display: flex; flex-direction: column; gap: 6px; min-width: 0;
+}
+
+/* Mobile clipping fixes — alleen op smalle breakpoints, desktop ongewijzigd */
+@media (max-width: 600px) {
+  /* Dashboard header: voorkom horizontal overflow van logo + tekst */
+  .bp-dash-header {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .bp-dash-header > div { min-width: 0; flex: 1 1 100%; }
+  .bp-dash-logo { order: -1; }
+
+  /* Brand-detail hero: zelfde fix */
+  .bp-merk-hero {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .bp-merk-hero > div { min-width: 0; }
+  .bp-merk-hero h1 { word-break: break-word; font-size: 1.35rem; }
+}
+
+@media (max-width: 380px) {
+  /* Zeer smalle schermen (oude iPhones, gevouwen telefoons): grids smaller */
+  .bp-merken-grid,
+  .bp-prod-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+  .bp-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .bp-stat-num { font-size: 1.3rem; }
+  .bp-stat-kaart { padding: 12px; }
+  .bp-page { padding: 16px 12px; }
+}
+
+/* Voorkom dat headings overflowen op ALLE breedtes */
+.bp-page h1, .bp-page h2 { word-break: break-word; overflow-wrap: anywhere; }

@@ -179,6 +179,7 @@
       brand_login:           BP.renderBrandLogin,
       brand_pending:         BP.renderPending,
       brand_dashboard:       BP.renderDashboard,
+      brand_profiel:         BP.renderProfiel,
       brand_producten:       BP.renderProducten,
       brand_product_nieuw:   BP.renderProductForm,
       brand_campagnes:       BP.renderCampagnes,
@@ -228,6 +229,7 @@
             var directKey = {
               merken:'renderMerken', brand_register:'renderRegister', brand_login:'renderBrandLogin',
               brand_pending:'renderPending', brand_dashboard:'renderDashboard',
+              brand_profiel:'renderProfiel',
               brand_producten:'renderProducten', brand_product_nieuw:'renderProductForm',
               brand_campagnes:'renderCampagnes', brand_campagne_nieuw:'renderCampagneForm',
               brand_analytics:'renderAnalytics',
@@ -903,8 +905,179 @@
     };
 
     BP.openBrandInstellingen = function() {
-      // MVP: hergebruik registratie-form als edit-form
-      DY.navigeer('brand_register');
+      // v60.1.43: dedicated merkprofiel pagina i.p.v. register-form hergebruik
+      DY.navigeer('brand_profiel');
+    };
+
+    // ════════════════════════════════════════════════════════════════════
+    // MERKPROFIEL (v60.1.43) — bewerken van bestaande brand-data
+    // Geen wachtwoord, geen TC-acceptatie, geen account-aanmaak; alleen update.
+    // ════════════════════════════════════════════════════════════════════
+    BP.renderProfiel = async function() {
+      var main = document.getElementById('dy-main');
+      if (!main) return;
+      main.style.background = '#0a0806';
+      main.style.paddingBottom = '90px';
+      main.innerHTML = '<div class="bp-page">' + loaderHTML() + '</div>';
+      if (!isLogged()) { DY.navigeer('brand_register'); return; }
+      var brand = await BP.getBrand(true);
+      if (!brand) { DY.navigeer('brand_register'); return; }
+      // Profiel mag in ALLE statussen bewerkt worden (ook pending/rejected),
+      // zodat een merk z'n gegevens kan corrigeren na review-feedback.
+
+      var huidigLogo = brand.logo || '';
+      main.innerHTML =
+        '<div class="bp-page bp-page-form">' +
+          '<button class="bp-back" onclick="DY.navigeer(\'brand_dashboard\')" data-testid="brand-profiel-back">&larr; Dashboard</button>' +
+          '<h1>Merkprofiel</h1>' +
+          '<p class="bp-sub">Werk je merkgegevens bij. Het logo en de bedrijfsinformatie zijn zichtbaar voor klanten op de Merken-tab.</p>' +
+          '<form id="bp-profiel-form" autocomplete="off" novalidate>' +
+            // ── Logo blok ──
+            '<div class="bp-veld">' +
+              '<span>Logo</span>' +
+              '<div class="bp-profiel-logo-rij">' +
+                '<div class="bp-profiel-logo-preview" id="bp-logo-preview">' +
+                  (huidigLogo
+                    ? '<img src="' + esc(huidigLogo) + '" alt="" data-testid="brand-profiel-logo-img">'
+                    : '<div class="bp-merk-initialen">' + esc((brand.naam||'?').slice(0,2).toUpperCase()) + '</div>') +
+                '</div>' +
+                '<div class="bp-profiel-logo-acties">' +
+                  '<label class="bp-btn bp-btn-ghost" style="cursor:pointer;display:inline-flex;">' +
+                    '<input type="file" name="logo" accept="image/png,image/jpeg,image/webp" data-testid="brand-profiel-logo" style="display:none">' +
+                    (huidigLogo ? 'Logo vervangen' : 'Logo uploaden') +
+                  '</label>' +
+                  '<span class="bp-mini">PNG/JPG/WebP, max 2 MB</span>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            '<label class="bp-veld"><span>Bedrijfsnaam *</span><input name="naam" required maxlength="80" data-testid="brand-profiel-naam" value="' + esc(brand.naam || '') + '"></label>' +
+            '<label class="bp-veld"><span>Contactpersoon *</span><input name="contact" required maxlength="80" data-testid="brand-profiel-contact" value="' + esc(brand.contact || '') + '"></label>' +
+            '<label class="bp-veld"><span>Contact e-mail</span><input type="email" name="contactEmail" maxlength="120" data-testid="brand-profiel-email" value="' + esc(brand.contactEmail || '') + '"></label>' +
+            '<label class="bp-veld"><span>Telefoon</span><input type="tel" name="telefoon" maxlength="40" placeholder="bv. +31 6 12345678" data-testid="brand-profiel-tel" value="' + esc(brand.telefoon || '') + '"></label>' +
+            '<label class="bp-veld"><span>Website *</span><input type="url" name="website" required placeholder="https://" data-testid="brand-profiel-website" value="' + esc(brand.website || '') + '"></label>' +
+            '<label class="bp-veld"><span>Instagram</span><input name="instagram" placeholder="@merknaam" data-testid="brand-profiel-instagram" value="' + esc(brand.instagram || '') + '"></label>' +
+            '<label class="bp-veld"><span>TikTok</span><input name="tiktok" placeholder="@merknaam" data-testid="brand-profiel-tiktok" value="' + esc(brand.tiktok || '') + '"></label>' +
+            '<label class="bp-veld"><span>Categorie *</span><select name="categorie" required data-testid="brand-profiel-cat">' +
+              '<option value="">Kies een categorie...</option>' +
+              CATEGORIEEN.map(function(c){ return '<option value="' + esc(c) + '"' + (brand.categorie===c?' selected':'') + '>' + esc(c) + '</option>'; }).join('') +
+            '</select></label>' +
+            '<label class="bp-veld"><span>BTW-nummer</span><input name="btw" maxlength="20" placeholder="bv. NL123456789B01" data-testid="brand-profiel-btw" value="' + esc(brand.btw || '') + '"></label>' +
+            '<label class="bp-veld"><span>Korte omschrijving (max 280 tekens)</span><textarea name="omschrijving" maxlength="280" rows="3" data-testid="brand-profiel-omschr">' + esc(brand.omschrijving || '') + '</textarea></label>' +
+            '<div class="bp-form-fouten" id="bp-profiel-fouten" role="alert" aria-live="polite"></div>' +
+            '<button type="submit" class="bp-btn bp-btn-primair" data-testid="brand-profiel-submit">Wijzigingen opslaan</button>' +
+          '</form>' +
+        '</div>';
+
+      // ── Live logo preview bij file-select ──
+      var logoInput = main.querySelector('input[name="logo"]');
+      var preview = document.getElementById('bp-logo-preview');
+      if (logoInput) {
+        logoInput.addEventListener('change', function() {
+          var f = logoInput.files && logoInput.files[0];
+          if (!f) return;
+          if (f.size > 2 * 1024 * 1024) {
+            toast('Logo is groter dan 2 MB.', true);
+            logoInput.value = '';
+            return;
+          }
+          var reader = new FileReader();
+          reader.onload = function(ev) {
+            preview.innerHTML = '<img src="' + ev.target.result + '" alt="" data-testid="brand-profiel-logo-img">';
+          };
+          reader.readAsDataURL(f);
+        });
+      }
+
+      // ── Submit handler ──
+      var form = document.getElementById('bp-profiel-form');
+      var foutBox = document.getElementById('bp-profiel-fouten');
+      var submitBtn = form.querySelector('button[type=submit]');
+
+      form.addEventListener('submit', async function(ev) {
+        ev.preventDefault();
+        foutBox.textContent = '';
+        if (!rateLimitOK('brand_profiel_save', 1500)) { foutBox.textContent = 'Even rustig...'; return; }
+        var d = new FormData(form);
+        var v = {
+          naam: (d.get('naam')||'').trim(),
+          contact: (d.get('contact')||'').trim(),
+          contactEmail: (d.get('contactEmail')||'').trim().toLowerCase(),
+          telefoon: (d.get('telefoon')||'').trim(),
+          website: (d.get('website')||'').trim(),
+          instagram: (d.get('instagram')||'').trim(),
+          tiktok: (d.get('tiktok')||'').trim(),
+          categorie: (d.get('categorie')||'').trim(),
+          btw: (d.get('btw')||'').trim(),
+          omschrijving: (d.get('omschrijving')||'').trim(),
+          logoFile: d.get('logo')
+        };
+        var errs = [];
+        if (!v.naam || v.naam.length < 2) errs.push('Bedrijfsnaam ontbreekt.');
+        if (!v.contact) errs.push('Contactpersoon ontbreekt.');
+        if (v.contactEmail && !EMAIL_RX.test(v.contactEmail)) errs.push('Contact e-mail is ongeldig.');
+        if (!URL_RX.test(v.website)) errs.push('Website moet beginnen met https://.');
+        if (!v.categorie) errs.push('Kies een categorie.');
+        if (v.btw && !BTW_RX.test(v.btw)) errs.push('BTW-nummer formaat onjuist.');
+        if (v.logoFile && v.logoFile.size > 2 * 1024 * 1024) errs.push('Logo is groter dan 2 MB.');
+        if (errs.length) {
+          foutBox.innerHTML = errs.map(function(x){ return '• ' + esc(x); }).join('<br>');
+          try { foutBox.scrollIntoView({ behavior:'smooth', block:'center' }); } catch(e){}
+          return;
+        }
+
+        submitBtn.disabled = true; submitBtn.textContent = 'Bezig...';
+        try {
+          // 1. Upload nieuw logo indien gekozen
+          var logoUrl = brand.logo || '';
+          if (v.logoFile && v.logoFile.size) {
+            try {
+              var path = 'brands/' + uid() + '/logo_' + Date.now() + '_' + (v.logoFile.name||'logo');
+              var ref = firebase.storage().ref().child(path);
+              var snap = await ref.put(v.logoFile);
+              logoUrl = await snap.ref.getDownloadURL();
+            } catch(e) {
+              try { console.warn('[brand-portal] logo upload mislukt', e); } catch(_){}
+              toast('Logo upload mislukt — overige gegevens worden wel opgeslagen.', true);
+            }
+          }
+
+          // 2. brands/{uid} updaten
+          var update = {
+            naam: v.naam,
+            contact: v.contact,
+            contactEmail: v.contactEmail || brand.contactEmail || '',
+            telefoon: v.telefoon,
+            website: v.website,
+            instagram: v.instagram,
+            tiktok: v.tiktok,
+            categorie: v.categorie,
+            btw: v.btw,
+            omschrijving: v.omschrijving,
+            logo: logoUrl,
+            laatsteUpdate: nu()
+          };
+          await DY.db.collection('brands').doc(uid()).set(update, { merge: true });
+
+          // 3. Audit-log
+          try {
+            await DY.db.collection('brand_admin_log').add({
+              type: 'brand_profile_updated', brandId: uid(),
+              door: uid(), ts: nu()
+            });
+          } catch(e) {}
+
+          BP.clearCache();
+          toast('Merkprofiel bijgewerkt.');
+          DY.navigeer('brand_dashboard');
+        } catch(err) {
+          try { console.error('[brand-portal] profiel save fout', err); } catch(e){}
+          var msg = (err && err.message) || 'Onbekende fout.';
+          if (err && err.code === 'permission-denied') msg = 'Toegang geweigerd. Probeer opnieuw in te loggen.';
+          foutBox.textContent = 'Fout: ' + msg;
+          submitBtn.disabled = false; submitBtn.textContent = 'Wijzigingen opslaan';
+        }
+      });
     };
 
     // ════════════════════════════════════════════════════════════════════
@@ -1658,6 +1831,7 @@
     BP_PAGES.brand_login          = BP.renderBrandLogin;
     BP_PAGES.brand_pending        = BP.renderPending;
     BP_PAGES.brand_dashboard      = BP.renderDashboard;
+    BP_PAGES.brand_profiel        = BP.renderProfiel;
     BP_PAGES.brand_producten      = BP.renderProducten;
     BP_PAGES.brand_product_nieuw  = BP.renderProductForm;
     BP_PAGES.brand_campagnes      = BP.renderCampagnes;
