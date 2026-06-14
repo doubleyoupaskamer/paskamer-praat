@@ -209,6 +209,8 @@
   // ── REGISTRATIE (zonder bestaande BP_PAGES te wijzigen) ────────────
   function registerRoutes() {
     if (!window.DY || typeof window.DY.toonPagina !== 'function') return;
+    if (window.DY._pp_admin_ext_wrapped) return;
+    window.DY._pp_admin_ext_wrapped = true;
     var origToon = window.DY.toonPagina;
     window.DY.toonPagina = function(pagina) {
       if (pagina === 'admin_wallet')     { window.DY.pagina = pagina; return renderAdminWallet(); }
@@ -218,10 +220,48 @@
     };
   }
 
+  // ── AUTO-INJECT NAV BUTTONS in admin pagina's ──────────────────────
+  function injectAdminNav() {
+    // Vind admin headers (admin_brands / admin_campagnes / admin_inkomsten)
+    var pages = ['admin_brands','admin_campagnes','admin_inkomsten','admin_wallet','admin_payments','admin_placements'];
+    if (pages.indexOf(window.DY && window.DY.pagina) === -1) return;
+    var page = document.querySelector('.bp-page');
+    if (!page) return;
+    if (page.querySelector('.pp-admin-nav')) return; // al geinjecteerd
+
+    var h1 = page.querySelector('h1');
+    if (!h1) return;
+    var nav = document.createElement('div');
+    nav.className = 'pp-admin-nav';
+    nav.setAttribute('data-testid', 'pp-admin-nav');
+    var current = window.DY.pagina;
+    var items = [
+      { id:'admin_brands',    label:'Merken' },
+      { id:'admin_campagnes', label:'Campagnes' },
+      { id:'admin_inkomsten', label:'Inkomsten' },
+      { id:'admin_wallet',    label:'Wallets' },
+      { id:'admin_payments',  label:'Payments' },
+      { id:'admin_placements',label:'Placements' }
+    ];
+    nav.innerHTML = items.map(function(it) {
+      var on = it.id === current;
+      return '<button class="pp-admin-nav-btn' + (on ? ' on' : '') + '" onclick="window.DY.navigeer(\'' + it.id + '\')" data-testid="pp-nav-' + it.id + '">' + it.label + '</button>';
+    }).join('');
+    h1.parentNode.insertBefore(nav, h1);
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', registerRoutes);
+    document.addEventListener('DOMContentLoaded', function() {
+      registerRoutes();
+      var obs = new MutationObserver(injectAdminNav);
+      obs.observe(document.body, { childList: true, subtree: true });
+    });
   } else {
-    setTimeout(registerRoutes, 100);
+    setTimeout(function() {
+      registerRoutes();
+      var obs = new MutationObserver(injectAdminNav);
+      obs.observe(document.body, { childList: true, subtree: true });
+    }, 100);
   }
 
   window.PP_AdminExt = {

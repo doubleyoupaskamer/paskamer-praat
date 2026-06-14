@@ -1,0 +1,48 @@
+/* Klant wallet styles — v1.0.0 */
+
+.bp-wallet-hero {
+  margin-top: 18px;
+  padding: 28px 24px;
+  background: linear-gradient(135deg, rgba(212,145,10,0.16) 0%, rgba(255,255,255,0.04) 100%);
+  border: 1px solid rgba(212,145,10,0.30);
+  border-radius: 20px;
+}
+.bp-wallet-saldo {
+  display: flex; align-items: baseline; gap: 8px;
+  margin-top: 8px;
+}
+.bp-wallet-saldo-valuta {
+  font-size: 1.4rem;
+  color: #d4910a;
+  font-weight: 700;
+}
+.bp-wallet-saldo-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 3rem;
+  line-height: 1;
+  color: #fcf8ef;
+  font-weight: 400;
+}
+.bp-wallet-acties {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-top: 20px;
+}
+.bp-tx-amount {
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+.bp-tx-amount.positive { color: #81c784; }
+.bp-tx-amount.negative { color: #ef9a9a; }
+.bp-section-titel {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400;
+  font-size: 1.4rem;
+  color: #fcf8ef;
+  margin: 0 0 12px;
+}
+
+@media (max-width: 600px) {
+  .bp-wallet-saldo-num { font-size: 2.4rem; }
+  .bp-wallet-hero { padding: 22px 18px; }
+}

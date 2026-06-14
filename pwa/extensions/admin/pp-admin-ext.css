@@ -69,3 +69,29 @@
 }
 .bp-toggle input:checked + .bp-toggle-slider { background: #d4910a; }
 .bp-toggle input:checked + .bp-toggle-slider::before { transform: translateX(22px); }
+
+/* Admin navigation bar (auto-injected) */
+.pp-admin-nav {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin: 0 0 18px;
+}
+.pp-admin-nav-btn {
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(252,248,239,0.10);
+  border-radius: 100px;
+  color: #fcf8ef;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pp-admin-nav-btn:hover {
+  background: rgba(212,145,10,0.10);
+  border-color: rgba(212,145,10,0.30);
+}
+.pp-admin-nav-btn.on {
+  background: rgba(212,145,10,0.20);
+  border-color: #d4910a;
+  color: #d4910a;
+  font-weight: 600;
+}
