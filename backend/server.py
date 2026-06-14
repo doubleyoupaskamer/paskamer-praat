@@ -97,6 +97,93 @@ async def download_bundle(filename: str):
 
 
 # ════════════════════════════════════════════════════════════════
+# v60.1.46 — AI Health + Wardrobe Recommend endpoints
+# Geactiveerd om "Wat te dragen deze week"-popup netwerkfout op te lossen.
+# ════════════════════════════════════════════════════════════════
+class WardrobeRecommendRequest(BaseModel):
+    user_key: Optional[str] = None
+    saved_items: Optional[List[dict]] = None
+    recent_scores: Optional[List[dict]] = None
+    weather: Optional[str] = None
+    occasion: Optional[str] = "dagelijks"
+
+
+@api_router.get("/ai/health")
+async def ai_health():
+    """Health check voor frontend AI-gating (ai-health-v1.js)."""
+    key_set = bool(os.environ.get("EMERGENT_LLM_KEY"))
+    return {
+        "status": "ok",
+        "emergent_key_configured": key_set,
+        "endpoints": ["/api/wardrobe/recommend"],
+    }
+
+
+@api_router.post("/wardrobe/recommend")
+async def wardrobe_recommend(req: WardrobeRecommendRequest):
+    """Genereert 3 outfit-ideeën uit opgeslagen looks via Emergent LLM Key.
+
+    Fallback bij geen items of geen key: heldere, niet-crashende response zodat
+    de popup nooit een lege/Netwerkfout staat ziet.
+    """
+    saved = req.saved_items or []
+    if not saved:
+        return {
+            "ok": True,
+            "fallback": True,
+            "ideas": [],
+            "message": "Bewaar eerst 1 of meer looks via het kaart-menu om persoonlijke aanbevelingen te krijgen.",
+        }
+
+    key = os.environ.get("EMERGENT_LLM_KEY")
+    if not key:
+        return {
+            "ok": True,
+            "fallback": True,
+            "ideas": [
+                {"titel": "Klassieke combinatie",
+                 "omschrijving": "Combineer je favoriete top met een neutrale broek voor een tijdloze look."},
+                {"titel": "Layer it up",
+                 "omschrijving": "Probeer je opgeslagen jas over een fijngebreide trui — perfect voor de huidige tijd van het jaar."},
+                {"titel": "Statement accent",
+                 "omschrijving": "Voeg één opvallend item toe (kleur, textuur of accessoire) aan een rustige basis-outfit."},
+            ],
+            "message": "AI service niet geconfigureerd — toon algemene tips.",
+        }
+
+    # Met Emergent LLM Key: real recommendation via Claude/Gemini
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage  # type: ignore
+
+        items_text = "\n".join([
+            f"- {i.get('title','onbekend')} ({i.get('category','')})"
+            for i in saved[:10]
+        ])
+        prompt = (
+            f"Je bent een persoonlijke stylist. Stel 3 outfit-combinaties voor uit deze opgeslagen looks "
+            f"van een gebruiker:\n{items_text}\n\nGelegenheid: {req.occasion}. Weer: {req.weather or 'normaal'}.\n"
+            f"Geef EXACT 3 ideeën, elk met titel (max 30 tekens) en korte omschrijving (max 120 tekens). "
+            f"Antwoord in JSON: [{{\"titel\":\"...\",\"omschrijving\":\"...\"}}]"
+        )
+        chat = LlmChat(api_key=key, session_id=f"wardrobe-{req.user_key or 'anon'}",
+                       system_message="Je bent een Nederlandse stylist voor de Paskamer Praat community.").with_model("openai", "gpt-4o-mini")
+        reply = await chat.send_message(UserMessage(text=prompt))
+        import json as _json, re as _re
+        m = _re.search(r"\[.*\]", reply, _re.DOTALL)
+        ideas = _json.loads(m.group(0)) if m else []
+        return {"ok": True, "ideas": ideas[:3]}
+    except Exception as e:
+        return {
+            "ok": True,
+            "fallback": True,
+            "ideas": [
+                {"titel": "Try a classic", "omschrijving": "Combineer je top-favoriet met een neutrale onderkant."},
+            ],
+            "message": f"AI tijdelijk onbeschikbaar — fallback geactiveerd. ({str(e)[:80]})",
+        }
+
+
+# ════════════════════════════════════════════════════════════════
 # PASKAMERPRAAT — Admin Image Generator (Gemini Nano Banana)
 # v60.1.14 — admin-only hero/banner generator via EMERGENT_LLM_KEY
 # ════════════════════════════════════════════════════════════════

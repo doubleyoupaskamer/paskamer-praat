@@ -194,15 +194,31 @@
   }
 
   async function togglePlacement(key, enabled) {
+    // v1.0.2: Gebruik nested object i.p.v. dotted-path met set+merge.
+    // set+merge met "placements_enabled.feed" schrijft soms een letterlijk
+    // veld met die naam i.p.v. nested update → toggles springen terug.
+    var doc = db().collection('admin_settings').doc('global');
     try {
-      var patch = {};
-      patch['placements_enabled.' + key] = !!enabled;
-      patch['updated_at'] = nu();
-      patch['updated_by'] = (window.DY.user || {}).uid || 'unknown';
-      await db().collection('admin_settings').doc('global').set(patch, { merge: true });
+      // Lees huidige state om merge correct te doen
+      var snap = await doc.get();
+      var current = (snap.exists ? (snap.data() || {}).placements_enabled : null) || {
+        feed: true, stories: false, outfit_review: false, ai_assist: false, similar_items: false
+      };
+      current[key] = !!enabled;
+      var patch = {
+        placements_enabled: current,
+        updated_at: nu(),
+        updated_by: (window.DY.user || {}).uid || 'unknown'
+      };
+      await doc.set(patch, { merge: true });
       toast('Placement ' + key + ' is nu ' + (enabled ? 'AAN' : 'UIT'));
     } catch(e) {
-      toast('Fout: ' + e.message, true);
+      toast('Fout bij opslaan: ' + (e.code || e.message), true);
+      // Reset UI naar oude waarde
+      try {
+        var cb = document.querySelector('[data-testid="placement-toggle-' + key + '"]');
+        if (cb) cb.checked = !enabled;
+      } catch(_){}
     }
   }
 

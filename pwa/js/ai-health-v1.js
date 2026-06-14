@@ -23,7 +23,8 @@
   //   1. window.DY.apiBase als die expliciet is gezet → gebruik die
   //   2. Hostname matched → gebruik harde fallback (LIVE Emergent backend)
   //   3. Anders → relatief (same-origin, voor lokale dev)
-  var LIVE_BACKEND = 'https://fitting-chat-app.preview.emergentagent.com';
+  // v60.1.46: bijgewerkte LIVE_BACKEND URL (oude fitting-chat-app preview is dood)
+  var LIVE_BACKEND = 'https://paskamer-stability.preview.emergentagent.com';
 
   function resolveApiBase() {
     if (window.DY && typeof window.DY.apiBase === 'string' && window.DY.apiBase) {
