@@ -99,16 +99,37 @@ PASKAMERPRAAT_STYLE_PROMPT = (
 )
 
 
-@api_router.post("/admin/generate-image")
-async def generate_image(req: ImageGenRequest, x_admin_secret: Optional[str] = Header(None)):
-    """Admin-only endpoint to generate hero/banner images via Gemini Nano Banana.
+def _check_admin_access(x_admin_secret: Optional[str], x_user_email: Optional[str]) -> None:
+    """v60.1.44: shared admin-gate voor image + video endpoints.
     
-    Auth: shared secret via X-Admin-Secret header.
-    Returns: { ok, mime_type, base64, prompt_used }
+    Defense in depth:
+    1. ADMIN_GEN_SECRET moet matchen (gatekeeper)
+    2. ADMIN_USER_EMAIL moet matchen indien gezet (email gate)
+    
+    Raises HTTPException 403 bij falen.
     """
     expected_secret = os.environ.get('ADMIN_GEN_SECRET')
     if not expected_secret or x_admin_secret != expected_secret:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=403, detail="Forbidden: invalid admin secret")
+    
+    expected_email = os.environ.get('ADMIN_USER_EMAIL')
+    if expected_email:
+        if not x_user_email or x_user_email.strip().lower() != expected_email.strip().lower():
+            raise HTTPException(status_code=403, detail="Forbidden: account heeft geen toegang tot deze functie")
+
+
+@api_router.post("/admin/generate-image")
+async def generate_image(
+    req: ImageGenRequest,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    """Admin-only endpoint to generate hero/banner images via Gemini Nano Banana.
+    
+    Auth: X-Admin-Secret + X-User-Email (defense in depth).
+    Returns: { ok, mime_type, base64, prompt_used }
+    """
+    _check_admin_access(x_admin_secret, x_user_email)
     
     api_key = os.environ.get('EMERGENT_LLM_KEY')
     if not api_key:
@@ -153,6 +174,102 @@ async def generate_image(req: ImageGenRequest, x_admin_secret: Optional[str] = H
     except Exception as e:
         logger.exception("Image generation failed")
         raise HTTPException(status_code=500, detail=f"Generatie mislukt: {str(e)}")
+
+
+# ════════════════════════════════════════════════════════════════
+# v60.1.44 — Admin Video Generator (Sora 2 via EMERGENT_LLM_KEY)
+# Text-to-video, UGC/editorial quality, admin-only
+# ════════════════════════════════════════════════════════════════
+
+class VideoGenRequest(BaseModel):
+    prompt: str
+    size: Optional[str] = "1280x720"     # "1280x720" | "1792x1024" | "1024x1792" | "1024x1024"
+    duration: Optional[int] = 8           # 4 | 8 | 12 seconds
+    model: Optional[str] = "sora-2"       # "sora-2" | "sora-2-pro"
+    style_hint: Optional[str] = "paskamerpraat"
+
+
+PASKAMERPRAAT_VIDEO_STYLE = (
+    "Editorial fashion video in the style of high-end magazine campaigns. "
+    "Cinematic warm lighting, soft golden hour glow, shallow depth of field. "
+    "Subtle natural camera movement (slow dolly or gentle pan), realistic motion. "
+    "Inclusive body diversity (tall, plus-size, petite, unisex bodies), natural skin textures, "
+    "real proportions, no airbrushing, no AI uncanny artifacts. "
+    "Confident grounded poses with realistic small movements. "
+    "Warm earth-tone palette (cream, camel, clay-gold, deep brown). "
+    "Sharp UGC/social media reel quality, 24fps cinematic feel, no flicker. "
+)
+
+
+@api_router.post("/admin/generate-video")
+async def generate_video(
+    req: VideoGenRequest,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    """Admin-only Sora 2 text-to-video generation.
+    
+    Auth: X-Admin-Secret + X-User-Email (defense in depth).
+    Long-running (2-5 min synchronous). Returns base64-encoded MP4.
+    """
+    _check_admin_access(x_admin_secret, x_user_email)
+    
+    api_key = os.environ.get('EMERGENT_LLM_KEY')
+    if not api_key:
+        raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY niet geconfigureerd")
+    
+    # Validate inputs
+    valid_sizes = {"1280x720", "1792x1024", "1024x1792", "1024x1024"}
+    valid_durations = {4, 8, 12}
+    valid_models = {"sora-2", "sora-2-pro"}
+    if req.size not in valid_sizes:
+        raise HTTPException(status_code=400, detail=f"Invalid size. Allowed: {sorted(valid_sizes)}")
+    if req.duration not in valid_durations:
+        raise HTTPException(status_code=400, detail=f"Invalid duration. Allowed: {sorted(valid_durations)}")
+    if req.model not in valid_models:
+        raise HTTPException(status_code=400, detail=f"Invalid model. Allowed: {sorted(valid_models)}")
+    
+    full_prompt = f"{PASKAMERPRAAT_VIDEO_STYLE}\n\nSCENE: {req.prompt}"
+    
+    try:
+        # Per playbook: nieuwe instance per request
+        from emergentintegrations.llm.openai.video_generation import OpenAIVideoGeneration
+        import asyncio
+        video_gen = OpenAIVideoGeneration(api_key=api_key)
+        
+        # Sora 2 generation is synchronous + long (2-5 min). Use thread executor
+        # zodat asyncio event loop niet blokkeert.
+        loop = asyncio.get_event_loop()
+        video_bytes = await loop.run_in_executor(
+            None,
+            lambda: video_gen.text_to_video(
+                prompt=full_prompt,
+                model=req.model,
+                size=req.size,
+                duration=req.duration,
+                max_wait_time=600,  # 10 min max
+            )
+        )
+        
+        if not video_bytes:
+            raise HTTPException(status_code=502, detail="Video generatie mislukt (geen output)")
+        
+        b64 = base64.b64encode(video_bytes).decode('ascii')
+        return {
+            "ok": True,
+            "mime_type": "video/mp4",
+            "base64": b64,
+            "prompt_used": full_prompt,
+            "size": req.size,
+            "duration": req.duration,
+            "model": req.model,
+            "size_bytes": len(video_bytes),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Video generation failed")
+        raise HTTPException(status_code=500, detail=f"Video generatie mislukt: {str(e)}")
 
 
 # Include the router in the main app
