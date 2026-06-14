@@ -378,6 +378,243 @@ async def generate_video(
         raise HTTPException(status_code=500, detail=f"Video generatie mislukt: {str(e)}")
 
 
+# ════════════════════════════════════════════════════════════════════════
+# STRIPE CHECKOUT (v60.1.55) — Premium subscription via emergentintegrations
+# ════════════════════════════════════════════════════════════════════════
+from fastapi import Request
+from emergentintegrations.payments.stripe.checkout import (
+    StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
+)
+
+# Server-side packages (NEVER accept amount from frontend!)
+PREMIUM_PACKAGES = {
+    "premium_monthly": {"amount": 4.99, "currency": "eur", "label": "Premium maandelijks"},
+}
+
+_STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY")
+
+
+def _get_stripe_checkout(http_request: Request) -> StripeCheckout:
+    host_url = str(http_request.base_url).rstrip("/")
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    return StripeCheckout(api_key=_STRIPE_API_KEY, webhook_url=webhook_url)
+
+
+class CheckoutSessionBody(BaseModel):
+    package_id: str
+    origin_url: str
+    user_key: str
+    email: Optional[str] = None
+
+
+@api_router.post("/checkout/session")
+async def create_checkout_session(body: CheckoutSessionBody, request: Request):
+    if not _STRIPE_API_KEY:
+        raise HTTPException(status_code=503, detail="Stripe niet geconfigureerd")
+    if body.package_id not in PREMIUM_PACKAGES:
+        raise HTTPException(status_code=400, detail="Ongeldig pakket")
+    pkg = PREMIUM_PACKAGES[body.package_id]
+
+    # Bouw success/cancel URLs uit frontend origin (NOOIT hardcoded)
+    origin = body.origin_url.rstrip("/")
+    success_url = f"{origin}/feed?premium=success&session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{origin}/feed?premium=cancel"
+
+    metadata = {
+        "package_id": body.package_id,
+        "user_key": body.user_key,
+        "email": (body.email or "")[:120],
+        "source": "paskamerpraat_premium",
+    }
+
+    try:
+        checkout = _get_stripe_checkout(request)
+        req = CheckoutSessionRequest(
+            amount=float(pkg["amount"]),
+            currency=pkg["currency"],
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata=metadata,
+        )
+        session: CheckoutSessionResponse = await checkout.create_checkout_session(req)
+    except Exception as e:
+        logger.exception("Stripe checkout creation failed")
+        raise HTTPException(status_code=502, detail=f"Stripe-fout: {str(e)[:160]}")
+
+    # Sla transactie op als 'initiated' VOOR redirect (verplichte stap)
+    await db.payment_transactions.insert_one({
+        "session_id": session.session_id,
+        "user_key": body.user_key,
+        "email": body.email,
+        "package_id": body.package_id,
+        "amount": pkg["amount"],
+        "currency": pkg["currency"],
+        "payment_status": "initiated",
+        "status": "open",
+        "premium_activated": False,
+        "metadata": metadata,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+
+    return {"url": session.url, "session_id": session.session_id}
+
+
+@api_router.get("/checkout/status/{session_id}")
+async def get_checkout_status(session_id: str, request: Request):
+    if not _STRIPE_API_KEY:
+        raise HTTPException(status_code=503, detail="Stripe niet geconfigureerd")
+    try:
+        checkout = _get_stripe_checkout(request)
+        status: CheckoutStatusResponse = await checkout.get_checkout_status(session_id)
+    except Exception as e:
+        logger.exception("Stripe status fetch failed")
+        raise HTTPException(status_code=502, detail=f"Stripe-fout: {str(e)[:160]}")
+
+    txn = await db.payment_transactions.find_one({"session_id": session_id})
+    premium_activated = bool(txn and txn.get("premium_activated"))
+
+    # Idempotent: ken premium alleen toe bij EERSTE succes-poll
+    if status.payment_status == "paid" and not premium_activated and txn:
+        user_key = txn.get("user_key") or (status.metadata or {}).get("user_key")
+        email = txn.get("email") or (status.metadata or {}).get("email")
+        expires_at = datetime.now(timezone.utc).isoformat()
+        await db.premium_users.update_one(
+            {"user_key": user_key},
+            {"$set": {
+                "user_key": user_key,
+                "email": email,
+                "plan": "premium_monthly",
+                "is_premium": True,
+                "activated_at": datetime.now(timezone.utc).isoformat(),
+                "last_session_id": session_id,
+            }},
+            upsert=True,
+        )
+        await db.payment_transactions.update_one(
+            {"session_id": session_id},
+            {"$set": {
+                "payment_status": status.payment_status,
+                "status": status.status,
+                "premium_activated": True,
+                "completed_at": datetime.now(timezone.utc).isoformat(),
+            }},
+        )
+        premium_activated = True
+    elif txn:
+        # Update status/payment_status zonder dubbel toekennen
+        await db.payment_transactions.update_one(
+            {"session_id": session_id},
+            {"$set": {"payment_status": status.payment_status, "status": status.status}},
+        )
+
+    return {
+        "session_id": session_id,
+        "status": status.status,
+        "payment_status": status.payment_status,
+        "amount_total": status.amount_total,
+        "currency": status.currency,
+        "premium_activated": premium_activated,
+    }
+
+
+@api_router.get("/premium/status")
+async def premium_status(user_key: str):
+    rec = await db.premium_users.find_one({"user_key": user_key})
+    if not rec:
+        return {"is_premium": False}
+    return {
+        "is_premium": bool(rec.get("is_premium")),
+        "plan": rec.get("plan"),
+        "activated_at": rec.get("activated_at"),
+        "email": rec.get("email"),
+    }
+
+
+@api_router.post("/billing/portal")
+async def billing_portal(user_key: str):
+    # Stripe Customer Portal vereist een customer-id die we via test-key
+    # niet beschikbaar hebben. Retourneer duidelijke melding zonder 500.
+    raise HTTPException(
+        status_code=501,
+        detail="Abonnement-beheer wordt binnenkort beschikbaar. Stuur ons een mail voor opzegging.",
+    )
+
+
+@api_router.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    body_bytes = await request.body()
+    signature = request.headers.get("Stripe-Signature", "")
+    try:
+        checkout = _get_stripe_checkout(request)
+        evt = await checkout.handle_webhook(body_bytes, signature)
+    except Exception as e:
+        logger.warning(f"Stripe webhook verificatie mislukt: {e}")
+        raise HTTPException(status_code=400, detail="Invalid webhook")
+
+    # Update transactie + activeer premium bij paid event
+    if evt.session_id:
+        txn = await db.payment_transactions.find_one({"session_id": evt.session_id})
+        if txn and evt.payment_status == "paid" and not txn.get("premium_activated"):
+            user_key = txn.get("user_key") or (evt.metadata or {}).get("user_key")
+            email = txn.get("email") or (evt.metadata or {}).get("email")
+            await db.premium_users.update_one(
+                {"user_key": user_key},
+                {"$set": {
+                    "user_key": user_key,
+                    "email": email,
+                    "plan": "premium_monthly",
+                    "is_premium": True,
+                    "activated_at": datetime.now(timezone.utc).isoformat(),
+                    "last_session_id": evt.session_id,
+                }},
+                upsert=True,
+            )
+            await db.payment_transactions.update_one(
+                {"session_id": evt.session_id},
+                {"$set": {
+                    "payment_status": evt.payment_status,
+                    "premium_activated": True,
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                    "webhook_event_id": evt.event_id,
+                }},
+            )
+    return {"received": True}
+
+
+# ════════════════════════════════════════════════════════════════════════
+# Outfit Score stub — voorkomt 404 spam, geeft deterministic placeholder.
+# Volledige Gemini-Vision implementatie wordt later toegevoegd.
+# ════════════════════════════════════════════════════════════════════════
+class OutfitScoreRequest(BaseModel):
+    photo_b64: Optional[str] = None
+    photo_mime: Optional[str] = "image/jpeg"
+    uid: Optional[str] = None
+    request_id: Optional[str] = None
+    image_hash: Optional[str] = None
+
+
+@api_router.post("/outfit-score")
+async def outfit_score(req: OutfitScoreRequest):
+    # Deterministic placeholder op basis van image_hash (geen LLM-call)
+    h = req.image_hash or req.request_id or ""
+    score = 70 + (sum(ord(c) for c in h) % 26)  # 70-95
+    if score >= 90:
+        label, tips = "Iconisch", ["Sterke silhouet en kleurkeuze", "Geweldige proporties"]
+    elif score >= 80:
+        label, tips = "Top fit", ["Mooie balans tussen lagen", "Accessoires passen perfect"]
+    elif score >= 70:
+        label, tips = "Goede look", ["Voeg een statement-stuk toe", "Speel met textuur"]
+    else:
+        label, tips = "Solide basis", ["Probeer iets meer contrast", "Schoenen kunnen scherper"]
+    return {
+        "score": score,
+        "label": label,
+        "tips": tips,
+        "request_id": req.request_id,
+        "image_hash": req.image_hash,
+    }
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

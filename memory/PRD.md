@@ -33,6 +33,21 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - **Backend download endpoint**: `/api/downloads/{filename}.zip` voor PWA bundle downloads
 - Deploy ZIP: `paskamerpraat-pwa-v60.1.43-merkprofiel.zip`
 
+### v60.1.55 — Stripe Premium Checkout + Outfit Score stub (huidige sessie)
+- **💳 Stripe Premium Checkout** (via `emergentintegrations.payments.stripe.checkout`):
+  - `POST /api/checkout/session` — body `{package_id, origin_url, user_key, email}` → `{url, session_id}`
+  - `GET /api/checkout/status/{session_id}` — Stripe-status + idempotent premium-activatie
+  - `GET /api/premium/status?user_key=...` — `{is_premium, plan, activated_at, email}`
+  - `POST /api/billing/portal?user_key=...` — placeholder 501 (test-key heeft geen customer portal)
+  - `POST /api/webhook/stripe` — webhook handler met signature-verificatie + idempotent activatie
+- **🔒 Security**: Server-side `PREMIUM_PACKAGES = {premium_monthly: 4.99 EUR}`. Frontend kan amount NIET manipuleren.
+- **🧾 MongoDB collections**:
+  - `payment_transactions`: `{session_id, user_key, email, package_id, amount, currency, payment_status, status, premium_activated, metadata, created_at, completed_at}`
+  - `premium_users`: `{user_key, email, plan, is_premium, activated_at, last_session_id}`
+- **🎯 Idempotency**: premium wordt MAXIMAAL 1× toegekend per session_id (zowel via status-poll als webhook).
+- **🛠️ Outfit Score stub** (`POST /api/outfit-score`): deterministic placeholder 70-95 op basis van `image_hash`. Stopt 404-spam in console; volledige Gemini Vision implementatie kan later.
+- Env: `STRIPE_API_KEY=sk_test_emergent` toegevoegd aan `/app/backend/.env`.
+
 ### v60.1.54 — UI cleanup + dark cards + Trending herstel + Merken clipping (huidige sessie)
 - **🗑️ Duplicate header strip verwijderd** (`pp-campaign-renderer-v1.js`):
   - `tryInject()` skipt nu volledig het `'feed'` placement
