@@ -892,6 +892,9 @@ DY.updateNav = function() {
   } else if (sbAvatar && DY.user) {
     var nm = (DY.profile && DY.profile.displayName) || DY.user.displayName || DY.user.email || '?';
     sbAvatar.innerHTML = '<span style="font-weight:700;font-size:0.75rem;color:var(--clay)">' + nm.slice(0,2).toUpperCase() + '</span>';
+  } else if (sbAvatar) {
+    // v60.1.61 fix: GAST-state — wis oude avatar/initialen, toon generic person icon
+    sbAvatar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:60%;height:60%;color:var(--clay);opacity:.85"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
   }
   // Sidebar notificatie badge synchroniseren met topbar badge
   var topBadge = document.getElementById('dy-notif-badge');

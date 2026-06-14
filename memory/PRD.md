@@ -33,6 +33,11 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - **Backend download endpoint**: `/api/downloads/{filename}.zip` voor PWA bundle downloads
 - Deploy ZIP: `paskamerpraat-pwa-v60.1.43-merkprofiel.zip`
 
+### v60.1.61 — Guest-avatar fix (huidige sessie)
+- **🔴 ROOT CAUSE**: in `pwa-v463-*.js` `DY.updateNav()` regel 890-895 stond een `if/else-if` zonder **else**-tak voor uitgelogde state. Logout zette label correct op "Inloggen" maar avatar-HTML met oude initialen ("WI") bleef in DOM.
+- **🩹 Fix**: derde tak toegevoegd die `sbAvatar.innerHTML` reset naar generic person SVG icon wanneer `!DY.user`.
+- Cache: legacy `?v=60.1.61-guest-avatar-fix`, sw `v60.1.61`
+
 ### v60.1.60 — Session Cleanup & Cache Isolation (huidige sessie)
 - **🔴 Root cause**: na logout bleven user-specifieke caches in localStorage staan → vorige avatar/premium/instellingen lekte naar volgende sessie of guest-state.
 - **🆕 Nieuwe extension**: `/app/pwa/extensions/auth/pp-session-cleanup-v1.js` (269 lines):
