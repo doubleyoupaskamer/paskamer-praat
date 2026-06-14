@@ -84,12 +84,26 @@
       if (!raw) return null;
       var o = JSON.parse(raw);
       if (!o || !o.ts) return null;
-      if (Date.now() - o.ts > 5 * 60 * 1000) return null; // 5 min TTL
+      // v60.1.62: TTL verlaagd van 5min naar 30s voor aggressievere refresh
+      if (Date.now() - o.ts > 30 * 1000) return null;
+      // v60.1.62: verifieer dat cache bij huidige user hoort (anti-leak)
+      var curEmail = (getEmailFromAuth() || '').toLowerCase();
+      var curKey = (getUserKey() || '').toLowerCase();
+      if (o._owner_email && curEmail && o._owner_email !== curEmail) return null;
+      if (o._owner_key && curKey && o._owner_key !== curKey) return null;
       return o;
     } catch (e) { return null; }
   }
   function setCached(state) {
-    try { localStorage.setItem(LS_CACHE, JSON.stringify({ ...state, ts: Date.now() })); } catch (e) { /* ignore */ }
+    try {
+      // v60.1.62: tag cache met owner zodat user-switch hem niet hergebruikt
+      var payload = Object.assign({}, state, {
+        ts: Date.now(),
+        _owner_email: (getEmailFromAuth() || '').toLowerCase(),
+        _owner_key: (getUserKey() || '').toLowerCase(),
+      });
+      localStorage.setItem(LS_CACHE, JSON.stringify(payload));
+    } catch (e) { /* ignore */ }
   }
 
   async function fetchStatus(force) {
@@ -489,8 +503,9 @@
       if (firstItem) pop.insertBefore(btn, firstItem);
       else pop.appendChild(btn);
 
+      // v60.1.62: ALTIJD force-fresh fetch bij menu-open (geen stale cache)
       // Voor premium users: label aanpassen naar "Beheer abonnement"
-      fetchStatus(false).then(function (s) {
+      fetchStatus(true).then(function (s) {
         if (s && s.is_premium) {
           var label = btn.querySelector('.dy-card-hub-item-label');
           var pill = btn.querySelector('.dy-card-hub-item-pill');

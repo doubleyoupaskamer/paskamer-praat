@@ -33,6 +33,28 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - **Backend download endpoint**: `/api/downloads/{filename}.zip` voor PWA bundle downloads
 - Deploy ZIP: `paskamerpraat-pwa-v60.1.43-merkprofiel.zip`
 
+### v60.1.62 — Auto-Refresh User Data + Owner-Aware Cache (huidige sessie)
+- **🔴 Root cause "oude gegevens"**: 
+  1. Premium cache TTL was **5 minuten** → user-switch toonde 5 min lang oude status.
+  2. Cache had geen owner-tag → cache van user A bleef bestaan voor user B.
+  3. Hub-menu render gebruikte `fetchStatus(false)` (cached) → toonde stale "Upgrade naar Premium" voor admin-override users.
+  4. Geen auto-refresh op page-navigation of window-focus.
+- **🆕 Owner-aware cache** in `premium-v1.js`:
+  - TTL verlaagd van 300s → **30s**
+  - Cache wordt getagged met `_owner_email` + `_owner_key`
+  - `getCached()` verifieert dat cache bij huidige user hoort → anders return null (forceer fresh)
+- **🆕 Hub-menu altijd fresh**: `injectIntoCardHub` gebruikt nu `fetchStatus(true)` ipv `false`
+- **🆕 Nieuwe module** `/extensions/auth/pp-auto-refresh-v1.js` (190 lines):
+  - **Triggers**: `pp:login`, `pp:userchange`, window focus, visibility change, DY.navigeer/toonPagina wrapper, 60s heartbeat
+  - **Wat wordt vernieuwd**:
+    - `DY.profile` ← Firestore `users/{uid}` met `source:'server'` (bypass IndexedDB cache)
+    - Premium status ← force-fresh API call
+    - Avatar/initialen DOM ← `DY.updateTopbarAvatar()` + `DY.updateNav()`
+    - Campagnes ← `PP_CampaignRenderer.refresh()`
+  - **Throttle**: 800ms burst-protectie + 60s heartbeat
+  - Fires `pp:refreshed` event voor andere modules
+- Cache: ext `?v=1.0.13`, `?v=60.1.62-owner-aware-cache`, sw `v60.1.62`
+
 ### v60.1.61 — Guest-avatar fix (huidige sessie)
 - **🔴 ROOT CAUSE**: in `pwa-v463-*.js` `DY.updateNav()` regel 890-895 stond een `if/else-if` zonder **else**-tak voor uitgelogde state. Logout zette label correct op "Inloggen" maar avatar-HTML met oude initialen ("WI") bleef in DOM.
 - **🩹 Fix**: derde tak toegevoegd die `sbAvatar.innerHTML` reset naar generic person SVG icon wanneer `!DY.user`.
