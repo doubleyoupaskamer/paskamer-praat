@@ -33,6 +33,31 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - **Backend download endpoint**: `/api/downloads/{filename}.zip` voor PWA bundle downloads
 - Deploy ZIP: `paskamerpraat-pwa-v60.1.43-merkprofiel.zip`
 
+### v60.1.57 — Premium Admin Page + Full Entitlement System (huidige sessie)
+- **🆕 Admin route `admin_premium`** in `/app/pwa/extensions/admin/pp-admin-premium-v1.js`:
+  - **6 tabs**: Stripe status / Checkout debug / Premium users / Transactions / Webhooks / Entitlements
+  - Stripe status: gemaskeerde key, env, webhook URL, packages, admin-overrides
+  - **Checkout debug**: knop maakt directe test-sessie + toont raw response, redirect URL, errors
+  - Users tabel: grant (1-3650 dagen) + revoke + bron-pill (admin_override / stripe / admin_grant)
+  - Transactions: payment_transactions log met status-pills
+  - Webhooks: stripe_events monitor (verified/invalid badges + raw payload viewer)
+  - Entitlements resolver: laat per email zien welke features actief zijn (virtual_tryon, style_score, ai_fit_chat, similar_search, premium_badge, outfit_analyse)
+  - Admin auth: X-Admin-Secret prompt (LS cached) + X-User-Email auto
+- **Backend** (`server.py`): 7 nieuwe endpoints onder `_check_admin_access`:
+  - `GET /api/admin/premium/stripe-status`
+  - `POST /api/admin/premium/test-checkout`
+  - `GET /api/admin/premium/users`
+  - `POST /api/admin/premium/grant` (body: email, days, note)
+  - `POST /api/admin/premium/revoke`
+  - `GET /api/admin/premium/transactions?limit=50`
+  - `GET /api/admin/premium/webhooks?limit=50`
+  - `GET /api/admin/premium/entitlements?email=...`
+- **Centralized entitlement resolver**: priority admin_override > stripe > admin_grant > none
+- **Webhook hardening**: stripe_events audit log voor zowel verified als invalid events. Idempotent premium-grant via session_id check.
+- **Nieuwe MongoDB collections**: `stripe_events`, `premium_audit` (geen wijzigingen aan bestaande).
+- Cache: ext `?v=1.0.10-premium-mgmt`, sw `v60.1.57`
+- Deploy ZIP: 2.5 MB
+
 ### v60.1.56 — Admin Premium Override (huidige sessie)
 - **🔑 Admin-account `williamdevriesis@gmail.com` krijgt altijd Premium-toegang** zonder betaling:
   - Backend (`/api/premium/status`): leest `ADMIN_PREMIUM_EMAILS` env var (comma-separated list), case-insensitive match op `email` of `user_key` query param

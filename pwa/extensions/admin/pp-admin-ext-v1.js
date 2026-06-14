@@ -272,7 +272,8 @@
       { id:'admin_inkomsten', label:'Inkomsten' },
       { id:'admin_wallet',    label:'Wallets' },
       { id:'admin_payments',  label:'Payments' },
-      { id:'admin_placements',label:'Placements' }
+      { id:'admin_placements',label:'Placements' },
+      { id:'admin_premium',   label:'Premium' }
     ];
     nav.innerHTML = items.map(function(it) {
       var on = it.id === current;

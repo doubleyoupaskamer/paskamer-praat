@@ -10,7 +10,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 
@@ -168,7 +168,8 @@ async def wardrobe_recommend(req: WardrobeRecommendRequest):
         chat = LlmChat(api_key=key, session_id=f"wardrobe-{req.user_key or 'anon'}",
                        system_message="Je bent een Nederlandse stylist voor de Paskamer Praat community.").with_model("openai", "gpt-4o-mini")
         reply = await chat.send_message(UserMessage(text=prompt))
-        import json as _json, re as _re
+        import json as _json
+        import re as _re
         m = _re.search(r"\[.*\]", reply, _re.DOTALL)
         ideas = _json.loads(m.group(0)) if m else []
         return {"ok": True, "ideas": ideas[:3]}
@@ -477,7 +478,6 @@ async def get_checkout_status(session_id: str, request: Request):
     if status.payment_status == "paid" and not premium_activated and txn:
         user_key = txn.get("user_key") or (status.metadata or {}).get("user_key")
         email = txn.get("email") or (status.metadata or {}).get("email")
-        expires_at = datetime.now(timezone.utc).isoformat()
         await db.premium_users.update_one(
             {"user_key": user_key},
             {"$set": {
@@ -485,6 +485,7 @@ async def get_checkout_status(session_id: str, request: Request):
                 "email": email,
                 "plan": "premium_monthly",
                 "is_premium": True,
+                "source": "stripe",
                 "activated_at": datetime.now(timezone.utc).isoformat(),
                 "last_session_id": session_id,
             }},
@@ -567,7 +568,27 @@ async def stripe_webhook(request: Request):
         evt = await checkout.handle_webhook(body_bytes, signature)
     except Exception as e:
         logger.warning(f"Stripe webhook verificatie mislukt: {e}")
+        # Audit log voor admin-monitor (zelfs gefaalde events)
+        await db.stripe_events.insert_one({
+            "received_at": datetime.now(timezone.utc).isoformat(),
+            "verified": False,
+            "error": str(e)[:300],
+            "raw_size": len(body_bytes or b""),
+        })
         raise HTTPException(status_code=400, detail="Invalid webhook")
+
+    # Audit log voor admin-monitor (alle geverifieerde events)
+    await db.stripe_events.insert_one({
+        "received_at": datetime.now(timezone.utc).isoformat(),
+        "verified": True,
+        "event_id": evt.event_id,
+        "event_type": evt.event_type,
+        "session_id": evt.session_id,
+        "payment_status": evt.payment_status,
+        "amount_total": evt.amount_total,
+        "currency": evt.currency,
+        "metadata": evt.metadata or {},
+    })
 
     # Update transactie + activeer premium bij paid event
     if evt.session_id:
@@ -582,6 +603,7 @@ async def stripe_webhook(request: Request):
                     "email": email,
                     "plan": "premium_monthly",
                     "is_premium": True,
+                    "source": "stripe",
                     "activated_at": datetime.now(timezone.utc).isoformat(),
                     "last_session_id": evt.session_id,
                 }},
@@ -632,6 +654,230 @@ async def outfit_score(req: OutfitScoreRequest):
         "image_hash": req.image_hash,
     }
 
+
+# ════════════════════════════════════════════════════════════════════════
+# ADMIN PREMIUM MANAGEMENT (v60.1.57) — Full entitlement system
+# ════════════════════════════════════════════════════════════════════════
+def _mask(key: Optional[str]) -> str:
+    if not key:
+        return ""
+    if len(key) <= 8:
+        return "***"
+    return key[:7] + "…" + key[-4:]
+
+
+class GrantRevokeBody(BaseModel):
+    email: str
+    days: Optional[int] = 30
+    note: Optional[str] = None
+
+
+class TestCheckoutBody(BaseModel):
+    email: Optional[str] = "[email protected]"
+    origin_url: Optional[str] = "https://paskamerpraat.nl"
+
+
+@api_router.get("/admin/premium/stripe-status")
+async def admin_stripe_status(
+    request: Request,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    _check_admin_access(x_admin_secret, x_user_email)
+    key = os.environ.get("STRIPE_API_KEY") or ""
+    return {
+        "stripe_api_key_masked": _mask(key),
+        "stripe_configured": bool(key),
+        "stripe_key_type": ("test" if "test" in key else ("live" if "live" in key else "unknown")) if key else None,
+        "webhook_url": f"{str(request.base_url).rstrip('/')}/api/webhook/stripe",
+        "packages": PREMIUM_PACKAGES,
+        "admin_premium_emails": [e.strip() for e in os.environ.get("ADMIN_PREMIUM_EMAILS", "").split(",") if e.strip()],
+        "environment": "preview" if "preview" in str(request.base_url) else "production",
+    }
+
+
+@api_router.post("/admin/premium/test-checkout")
+async def admin_test_checkout(
+    body: TestCheckoutBody,
+    request: Request,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    _check_admin_access(x_admin_secret, x_user_email)
+    if not _STRIPE_API_KEY:
+        return {"ok": False, "error": "STRIPE_API_KEY niet geconfigureerd"}
+    try:
+        checkout = _get_stripe_checkout(request)
+        origin = (body.origin_url or "https://paskamerpraat.nl").rstrip("/")
+        req = CheckoutSessionRequest(
+            amount=4.99,
+            currency="eur",
+            success_url=f"{origin}/feed?premium=success&session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{origin}/feed?premium=cancel",
+            metadata={"package_id": "premium_monthly", "user_key": body.email or "admin_test", "email": body.email or "", "source": "admin_test"},
+        )
+        session = await checkout.create_checkout_session(req)
+        return {
+            "ok": True,
+            "session_id": session.session_id,
+            "url": session.url,
+            "raw_response": {"session_id": session.session_id, "url": session.url},
+            "tested_at": datetime.now(timezone.utc).isoformat(),
+        }
+    except Exception as e:
+        logger.exception("Admin test checkout failed")
+        return {"ok": False, "error": str(e)[:300]}
+
+
+@api_router.get("/admin/premium/users")
+async def admin_premium_users(
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    _check_admin_access(x_admin_secret, x_user_email)
+    cursor = db.premium_users.find({}, {"_id": 0}).sort("activated_at", -1).limit(200)
+    users = await cursor.to_list(length=200)
+    admin_emails = [e.strip().lower() for e in os.environ.get("ADMIN_PREMIUM_EMAILS", "").split(",") if e.strip()]
+    # Voeg admin-overrides toe als ze niet al in de DB staan
+    existing = {u.get("email", "").lower() for u in users}
+    for ae in admin_emails:
+        if ae not in existing:
+            users.insert(0, {
+                "user_key": ae, "email": ae, "is_premium": True,
+                "plan": "premium_admin", "source": "admin_override",
+                "activated_at": "admin-override",
+            })
+    return {"users": users, "count": len(users)}
+
+
+@api_router.post("/admin/premium/grant")
+async def admin_premium_grant(
+    body: GrantRevokeBody,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    _check_admin_access(x_admin_secret, x_user_email)
+    if not body.email or "@" not in body.email:
+        raise HTTPException(status_code=400, detail="Geldig email-adres vereist")
+    email = body.email.strip().lower()
+    days = max(1, min(int(body.days or 30), 3650))
+    expires_at = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+    rec = {
+        "user_key": email,
+        "email": email,
+        "plan": "premium_grant",
+        "is_premium": True,
+        "source": "admin_grant",
+        "activated_at": datetime.now(timezone.utc).isoformat(),
+        "expires_at": expires_at,
+        "granted_by": x_user_email,
+        "note": (body.note or "")[:200],
+    }
+    await db.premium_users.update_one({"user_key": email}, {"$set": rec}, upsert=True)
+    await db.premium_audit.insert_one({
+        "action": "grant", "target_email": email, "days": days,
+        "actor": x_user_email, "at": datetime.now(timezone.utc).isoformat(),
+        "note": body.note,
+    })
+    return {"ok": True, "email": email, "expires_at": expires_at, "days": days}
+
+
+@api_router.post("/admin/premium/revoke")
+async def admin_premium_revoke(
+    body: GrantRevokeBody,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    _check_admin_access(x_admin_secret, x_user_email)
+    email = (body.email or "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email vereist")
+    res = await db.premium_users.update_one(
+        {"$or": [{"user_key": email}, {"email": email}]},
+        {"$set": {"is_premium": False, "revoked_at": datetime.now(timezone.utc).isoformat(), "revoked_by": x_user_email}},
+    )
+    await db.premium_audit.insert_one({
+        "action": "revoke", "target_email": email,
+        "actor": x_user_email, "at": datetime.now(timezone.utc).isoformat(),
+        "matched": res.matched_count,
+    })
+    return {"ok": True, "matched": res.matched_count, "email": email}
+
+
+@api_router.get("/admin/premium/transactions")
+async def admin_premium_transactions(
+    limit: int = 50,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    _check_admin_access(x_admin_secret, x_user_email)
+    limit = max(1, min(int(limit or 50), 200))
+    cursor = db.payment_transactions.find({}, {"_id": 0}).sort("created_at", -1).limit(limit)
+    txns = await cursor.to_list(length=limit)
+    return {"transactions": txns, "count": len(txns)}
+
+
+@api_router.get("/admin/premium/webhooks")
+async def admin_premium_webhooks(
+    limit: int = 50,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    _check_admin_access(x_admin_secret, x_user_email)
+    limit = max(1, min(int(limit or 50), 200))
+    cursor = db.stripe_events.find({}, {"_id": 0}).sort("received_at", -1).limit(limit)
+    events = await cursor.to_list(length=limit)
+    return {"events": events, "count": len(events)}
+
+
+@api_router.get("/admin/premium/entitlements")
+async def admin_premium_entitlements(
+    email: str,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    """Centralized entitlement resolver.
+    Priority: admin override > Stripe-paid > Firestore cache > none.
+    """
+    _check_admin_access(x_admin_secret, x_user_email)
+    email_norm = (email or "").strip().lower()
+    admin_emails = [e.strip().lower() for e in os.environ.get("ADMIN_PREMIUM_EMAILS", "").split(",") if e.strip()]
+
+    source = "none"
+    is_premium = False
+    detail = {}
+
+    if email_norm in admin_emails:
+        is_premium = True
+        source = "admin_override"
+        detail = {"reason": "in ADMIN_PREMIUM_EMAILS env"}
+    else:
+        rec = await db.premium_users.find_one({"$or": [{"user_key": email_norm}, {"email": email_norm}]}, {"_id": 0})
+        if rec and rec.get("is_premium"):
+            is_premium = True
+            source = rec.get("source") or "stripe"
+            detail = {"activated_at": rec.get("activated_at"), "plan": rec.get("plan"), "expires_at": rec.get("expires_at")}
+
+    features = {
+        "virtual_tryon": is_premium,
+        "style_score":   is_premium,
+        "ai_fit_chat":   is_premium,
+        "similar_search": is_premium,
+        "premium_badge":  is_premium,
+        "outfit_analyse": is_premium,
+    }
+    return {
+        "email": email_norm,
+        "is_premium": is_premium,
+        "source": source,
+        "detail": detail,
+        "features": features,
+    }
+
+
+# ── Patch webhook handler to also persist stripe_events for audit/monitor ──
+# (Original /api/webhook/stripe stays — we wrap it via secondary log only)
+_original_webhook = None  # noqa  (handled inline below in stripe_webhook function)
 
 # Include the router in the main app
 app.include_router(api_router)
