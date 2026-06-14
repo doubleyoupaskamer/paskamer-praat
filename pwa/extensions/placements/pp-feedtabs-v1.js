@@ -97,6 +97,7 @@
     if (DY._ppSetFilterWrapped) return true;
     var orig = DY.setFilter;
     DY._ppSetFilterWrapped = true;
+    DY._ppSetFilterOrig = orig; // v60.1.65: expose origineel voor Uitgelicht
     DY.setFilter = function(filter, btn) {
       // Reset Uitgelicht-state
       restoreNormalFeed();
@@ -120,6 +121,9 @@
   }
 
   // ── Stap 3: handler voor Uitgelicht tab klik ────────────────────────
+  // v60.1.65: Uitgelicht functioneert nu als VOLLEDIGE feed pagina —
+  // brand-partners grid bovenaan, daaronder de reguliere feed met alle
+  // interacties (like, save, share, lees meer, AI, rapporteren).
   function handleUitgelichtClick(btn) {
     var bar = document.getElementById('dy-feed-filters');
     if (bar) {
@@ -131,11 +135,28 @@
     btn.classList.add('active');
     btn.classList.add('actief');
 
-    // Verberg normale verhalen-feed
+    // BELANGRIJK: NIET meer verbergen — feed blijft zichtbaar zodat
+    // alle bestaande kaart-functionaliteit werkt.
     var verhalen = document.getElementById('dy-verhalen');
-    if (verhalen) verhalen.style.display = 'none';
+    if (verhalen) verhalen.style.display = '';
     var sentinel = document.getElementById('dy-feed-sentinel');
-    if (sentinel) sentinel.style.display = 'none';
+    if (sentinel) sentinel.style.display = '';
+
+    // Forceer dat de feed geladen is (via bestaande DY.setFilter)
+    try {
+      if (window.DY && typeof DY.setFilter === 'function') {
+        // Call _ppSetFilterOrig om wrapper-recursie te voorkomen,
+        // hergebruikt alle bestaande feed-loading logica.
+        var origFn = DY._ppSetFilterOrig || DY.setFilter;
+        // Roep alleen aan als de feed nog niet recent is geladen
+        if (!window._ppUitgFeedLoaded) {
+          window._ppUitgFeedLoaded = true;
+          // Reset na 60s zodat hertikken op tab refresht
+          setTimeout(function() { window._ppUitgFeedLoaded = false; }, 60000);
+          try { origFn.call(DY, 'recent', null); } catch(_) {}
+        }
+      }
+    } catch(_) {}
 
     renderUitgelicht();
   }
