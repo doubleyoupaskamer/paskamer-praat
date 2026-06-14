@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Guest Anonymous Auth v1 (v53)
+// Paskamer Praat - Guest Anonymous Auth v1 (v53)
 //
 // Doel: gasten (niet-ingelogde gebruikers) automatisch laten authenticeren
 // via Firebase Anonymous Authentication, zodat:
@@ -11,7 +11,7 @@
 //
 // Non-invasief: laadt VÓÓR ai-fit-chat-v3 en zet alleen
 // firebase.auth().signInAnonymously() in gang als er nog geen currentUser is.
-// Bij faal: silent fallback — bestaande error-flow van ai-fit-chat blijft werken.
+// Bij faal: silent fallback - bestaande error-flow van ai-fit-chat blijft werken.
 // ═══════════════════════════════════════════════════════════════════
 (function () {
   'use strict';
@@ -32,7 +32,7 @@
     try {
       if (fbAuth.setPersistence && window.firebase && window.firebase.auth && window.firebase.auth.Auth && window.firebase.auth.Auth.Persistence) {
         return fbAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL).catch(function () {
-          // private mode kan LOCAL blokkeren — val terug op SESSION
+          // private mode kan LOCAL blokkeren - val terug op SESSION
           return fbAuth.setPersistence(window.firebase.auth.Auth.Persistence.SESSION).catch(function () {});
         });
       }
@@ -111,7 +111,7 @@
       return;
     }
 
-    // Wacht 1 onAuthStateChanged tick — kan zijn dat persistente sessie nog laadt
+    // Wacht 1 onAuthStateChanged tick - kan zijn dat persistente sessie nog laadt
     var restored = await new Promise(function (resolve) {
       var to = setTimeout(function () { resolve(null); }, 1200);
       var unsub = fbAuth.onAuthStateChanged(function (user) {
@@ -125,7 +125,7 @@
       window[STATE_FLAG] = { ok: true, uid: restored.uid, anonymous: !!restored.isAnonymous, restored: true };
       try { window.dispatchEvent(new CustomEvent('dy-guest-auth-ready', { detail: { uid: restored.uid, anonymous: !!restored.isAnonymous, restored: true } })); } catch (e) {}
       // v60.1.11 AUTH FIX: als de restored user al ECHT (non-anon) is,
-      // dan klaar — geen anon sign-in nodig.
+      // dan klaar - geen anon sign-in nodig.
       if (!restored.isAnonymous) return;
       return;
     }

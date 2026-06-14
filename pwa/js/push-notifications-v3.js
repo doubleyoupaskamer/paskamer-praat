@@ -1,15 +1,15 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Push Notifications v1
-// Subscription flow met segmenten — werkt met bestaande SW push listener
+// Paskamer Praat - Push Notifications v1
+// Subscription flow met segmenten - werkt met bestaande SW push listener
 //
 // Architectuur:
 //  - Geen extra Firebase SDK (bestaande compat SDK heeft geen Messaging),
 //    gebruikt standaard Web Push API rechtstreeks via de service worker.
 //  - VAPID public key wordt opgehaald uit Firestore: app_config/push.vapid_public
-//    (eenmalig in te stellen door admin — geen code-deploy nodig).
+//    (eenmalig in te stellen door admin - geen code-deploy nodig).
 //  - Subscription endpoint + keys + voorkeuren worden opgeslagen in Firestore
 //    onder users/{uid}/push_subscriptions/{endpointId} (te lezen door backend).
-//  - Voorkeuren per segment op users/{uid}.push_voorkeuren — backend honoreert
+//  - Voorkeuren per segment op users/{uid}.push_voorkeuren - backend honoreert
 //    deze bij verzenden via de web-push library.
 //
 // UI:
@@ -43,7 +43,7 @@
   function init() {
     if (!window.DY) { setTimeout(init, 300); return; }
     injectStyles();
-    // GEEN eigen bel-FAB meer — entry alleen via hub-menu in feed-card.
+    // GEEN eigen bel-FAB meer - entry alleen via hub-menu in feed-card.
     // Ruim eventuele oude FAB-instanties op (uit gecachte JS-versies).
     purgeLegacyBtn();
   }
@@ -71,7 +71,7 @@
         '</button>' +
         '<div class="dy-push-emoji">🔔</div>' +
         '<h3>Blijf op de hoogte</h3>' +
-        '<p class="dy-push-intro">Krijg directe meldingen — kies waarover.</p>' +
+        '<p class="dy-push-intro">Krijg directe meldingen - kies waarover.</p>' +
         '<div class="dy-push-status" id="dy-push-status"></div>' +
         '<div class="dy-push-opties" id="dy-push-opties">' +
           checkbox('reacties',   'Reacties op mijn posts',         true) +
@@ -253,7 +253,7 @@
             .set({ actief: false, uitgezetOp: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
         } catch (e) {}
       }
-      // Reset checkboxes uitschakelen niet — voorkeuren blijven bewaard voor evt. terug
+      // Reset checkboxes uitschakelen niet - voorkeuren blijven bewaard voor evt. terug
       updateStatus();
       try {
         if (typeof DY.trackPWAEvent === 'function') DY.trackPWAEvent('push_uitgezet', {});
@@ -285,7 +285,7 @@
     try {
       var reg = await navigator.serviceWorker.ready;
       await reg.showNotification('Notificaties staan aan ✨', {
-        body: 'Welkom bij Paskamer Praat — we houden je op de hoogte.',
+        body: 'Welkom bij Paskamer Praat - we houden je op de hoogte.',
         icon: '/icons/icon-192.png',
         badge: '/icons/icon-192.png',
         tag: 'pp-welcome',
@@ -357,7 +357,7 @@
 }
 @keyframes dy-push-slide { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* Clay-glow accent boven in de modal — identiek aan .dy-dsppop-glow */
+/* Clay-glow accent boven in de modal - identiek aan .dy-dsppop-glow */
 .dy-push-card::before {
   content: ''; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
   width: 240px; height: 240px;
@@ -455,7 +455,7 @@
 .dy-push-primair:disabled { opacity: .6; cursor: wait; transform: none; box-shadow: none; }
 .dy-push-uit { background: transparent; color: var(--danger, #c0392b); border: 1px solid var(--danger, #c0392b); }
 .dy-push-uit:hover { background: rgba(192,57,43,0.08); }
-/* WCAG 2.4.7 — focus indicator voor keyboard nav (push modal) */
+/* WCAG 2.4.7 - focus indicator voor keyboard nav (push modal) */
 .dy-push-primair:focus-visible,
 .dy-push-uit:focus-visible,
 .dy-push-opt:focus-visible {
@@ -473,7 +473,7 @@
 body.dy-push-lock { overflow: hidden !important; touch-action: none; }
 
 /* ═══════════════════════════════════════════════════════════════
-   DARK MODE — v43 contrast fix voor push modal
+   DARK MODE - v43 contrast fix voor push modal
    Zelfde aanpak als AI Style Assistant: alle text-tokens
    expliciet overriden zodat ze contrast houden in dark mode.
    ═══════════════════════════════════════════════════════════════ */

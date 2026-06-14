@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Weekly Stylist Brief v1
+// Paskamer Praat - Weekly Stylist Brief v1
 //
 // Detecteert wanneer een nieuwe ISO-week is begonnen sinds de gebruiker
 // voor het laatst zijn weekbrief zag. Toont dan een non-blocking banner
@@ -270,7 +270,7 @@
   function init() {
     var week = currentWeek();
     if (isSeenThisWeek(week)) return; // al gezien deze week
-    // Wacht op health-check + 4 seconden — niet direct bij page-load (laat feed eerst laden)
+    // Wacht op health-check + 4 seconden - niet direct bij page-load (laat feed eerst laden)
     function maybeShow() {
       var p = (window.DY && window.DY.aiHealth && window.DY.aiHealth.isHealthy)
         ? window.DY.aiHealth.isHealthy()
@@ -289,7 +289,7 @@
     init();
   }
 
-  // Public API — voor handmatige trigger uit hub-menu
+  // Public API - voor handmatige trigger uit hub-menu
   window.DY = window.DY || {};
   window.DY.weeklyStylist = {
     open:  function() { openModal(currentWeek()); },

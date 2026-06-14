@@ -1,12 +1,12 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Error Boundary v1
+// Paskamer Praat - Error Boundary v1
 // Een dunne, globale safety net die ALS EERSTE script laadt.
 // Vangt onverwerkte JS-fouten en promise rejections zodat ze nooit
 // stilletjes in de console terechtkomen en (optioneel) gebatcht naar
 // Firestore kunnen voor diagnostiek.
 //
 // Belangrijk:
-//   - Geen `event.preventDefault()` — we onderdrukken niets, alleen
+//   - Geen `event.preventDefault()` - we onderdrukken niets, alleen
 //     observeren + structureren. (Verbergen = bugs verstoppen.)
 //   - Dedup: identieke fouten binnen 5s niet dubbel loggen.
 //   - Buffer in geheugen tot max 50; oudste valt eruit (ring).

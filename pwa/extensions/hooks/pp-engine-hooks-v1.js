@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat — Outfit AI Engine Hooks (v1.0.0)
+ * PaskamerPraat - Outfit AI Engine Hooks (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Prepareert de client-side API voor:
@@ -11,7 +11,7 @@
  *   - Deze module is NOG NIET gekoppeld aan UI.
  *   - Alleen hooks/API exposed via window.PP_Engine.
  *   - Server-side AI calls gaan via backend FastAPI /api/ai/*
- *   - Geen UI rendering — pure data fetch + cache.
+ *   - Geen UI rendering - pure data fetch + cache.
  * ═══════════════════════════════════════════════════════════════════════ */
 (function() {
   'use strict';

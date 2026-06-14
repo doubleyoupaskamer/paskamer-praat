@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Zoekfilter "Op mijn maat" v1
+// Paskamer Praat - Zoekfilter "Op mijn maat" v1
 // Voegt een extra filter toe aan de bestaande zoekbalk:
 //   "Alle" / "Vergelijkbaar (≥55%)" / "Zelfde bouw (≥75%)"
 // Non-invasief: wrapt DY.voerZoekUit en filtert resultaten post-render
@@ -31,7 +31,7 @@
         try {
           await orig.call(this, q);
         } catch (err) {
-          // Origineel faalde — log, maar laat filter alsnog draaien
+          // Origineel faalde - log, maar laat filter alsnog draaien
           // op wat al gerenderd is. Voorkomt unhandled rejection.
           try { console.warn('[mijnmaat] voerZoekUit error:', err); } catch (e) { /* noop */ }
           throw err; // doorgeven aan eventuele caller catch
@@ -145,7 +145,7 @@
       return;
     }
 
-    // Geen maatprofiel? Filter is niet bruikbaar — toon hint, toon alles
+    // Geen maatprofiel? Filter is niet bruikbaar - toon hint, toon alles
     var mijn = DY.profile || {};
     var heeftProfiel = !!(mijn.lengte || mijn.maat);
     if (!heeftProfiel) {

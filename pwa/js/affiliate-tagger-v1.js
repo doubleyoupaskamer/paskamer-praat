@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Affiliate Auto-Tagger v1 (non-invasief)
+// Paskamer Praat - Affiliate Auto-Tagger v1 (non-invasief)
 //
 // Detecteert outbound links naar webshops, voegt jouw affiliate-tag toe
 // en logt clicks naar Firestore collection `kai_events`.
@@ -25,7 +25,7 @@
 // Veiligheid:
 //   - Voegt nooit een tag toe als die al aanwezig is (idempotent)
 //   - Bewaart originele href als `data-pp-href-original`
-//   - Geeft nooit een error — silent log op problemen
+//   - Geeft nooit een error - silent log op problemen
 // ═══════════════════════════════════════════════════════════════════
 (function() {
   'use strict';
@@ -34,7 +34,7 @@
   if (window.__ppAffiliateInit) return;
   window.__ppAffiliateInit = true;
 
-  // ── Default config — overschrijfbaar via DY.affiliateConfig ──
+  // ── Default config - overschrijfbaar via DY.affiliateConfig ──
   var defaultConfig = {
     enabled: true,
     networks: {

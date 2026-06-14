@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — App Badge v1
+// Paskamer Praat - App Badge v1
 // Toont rood teller-bolletje op het app-icoon (Android 7+, iOS 16.4+, desktop)
 // Som van: ongelezen meldingen + ongelezen DM's
 //
@@ -7,7 +7,7 @@
 //  - Luistert realtime via Firestore op `meldingen` en `gesprekken`
 //  - Berekent totaal aantal ongelezen items per gebruiker
 //  - Roept navigator.setAppBadge(n) aan (of clearAppBadge wanneer 0)
-//  - Werkt 100% non-invasief — naast bestaande DY.controleerMeldingen
+//  - Werkt 100% non-invasief - naast bestaande DY.controleerMeldingen
 // ═══════════════════════════════════════════════════════════════════
 (function() {
   'use strict';

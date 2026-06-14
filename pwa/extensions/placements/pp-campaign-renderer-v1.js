@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat — Universele Campagne Renderer (v1.0.0)
+ * PaskamerPraat - Universele Campagne Renderer (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Final fix voor campagne-zichtbaarheid:
@@ -104,7 +104,7 @@
     var pagina = window.DY && window.DY.pagina;
     var placement = routeToPlacement(pagina);
     if (!placement) return;
-    // v1.0.10: skip 'feed' placement — campagnes worden EXCLUSIEF getoond
+    // v1.0.10: skip 'feed' placement - campagnes worden EXCLUSIEF getoond
     // via de "Uitgelicht" tab (pp-feedtabs-v1.js) en de /merken sectie
     // (brand-portal-v1.js bp-campagne-feed). Geen duplicate header-strip meer.
     if (placement === 'feed') return;

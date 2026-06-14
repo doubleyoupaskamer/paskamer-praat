@@ -1,8 +1,8 @@
-# Campagnevoorwaarden — Paskamer Praat
+# Campagnevoorwaarden - Paskamer Praat
 
-**Versie 1.0 — 14 februari 2026** | Aanvulling op AV Merken (B2B)
+**Versie 1.0 - 14 februari 2026** | Aanvulling op AV Merken (B2B)
 
-> ⚠️ Concept — juridische review vereist.
+> ⚠️ Concept - juridische review vereist.
 
 ## 1. Campagne-creatie
 - Merk maakt Campagne via Merkenportaal aan
@@ -33,7 +33,7 @@
 ## 5. Metingen
 - Impressies = unieke weergave bij gebruiker (1× per sessie)
 - Klikken = bewuste interactie met CTA
-- Meting via interne tooling — niet ge-audit door externe partij
+- Meting via interne tooling - niet ge-audit door externe partij
 - Discrepantie met externe analytics wordt geaccepteerd binnen ±15%
 
 ## 6. Annulering en pauze

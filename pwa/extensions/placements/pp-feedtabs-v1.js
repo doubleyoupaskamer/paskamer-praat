@@ -1,14 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat — Feed Tabs Restructure (v2.0.0)
+ * PaskamerPraat - Feed Tabs Restructure (v2.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  * Verbergt "Trending" en "Mijn posts" knoppen.
  * Voegt nieuwe "Uitgelicht" tab toe (campagnes + gesponsorde merken).
- * Werkt additief — geen wijzigingen in legacy pwa-v463-*.js.
+ * Werkt additief - geen wijzigingen in legacy pwa-v463-*.js.
  *
  * Tabs (na restructure):
- *   1. Ontdek ⭐        (data-filter="recent")     — bestaand
- *   2. Mijn postuur     (data-filter="vergelijk")  — bestaand
- *   3. Uitgelicht       (data-filter="uitgelicht") — NIEUW
+ *   1. Ontdek ⭐        (data-filter="recent")     - bestaand
+ *   2. Mijn postuur     (data-filter="vergelijk")  - bestaand
+ *   3. Uitgelicht       (data-filter="uitgelicht") - NIEUW
  * ═══════════════════════════════════════════════════════════════════════ */
 (function() {
   'use strict';
@@ -17,13 +17,13 @@
   var GRID_ID = 'pp-uitgelicht-grid';
   var TAB_ATTR = '[data-filter="uitgelicht"]';
 
-  // ── CSS injectie (eenmalig) — dark theme matching brand portal ──────
+  // ── CSS injectie (eenmalig) - dark theme matching brand portal ──────
   function ensureStyle() {
     if (document.getElementById(STYLE_ID)) return;
     var s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent =
-      // v60.1.70: definitieve fix — gebruik NATURAL page scroll, niet
+      // v60.1.70: definitieve fix - gebruik NATURAL page scroll, niet
       // internal container scroll. Forceer body/html scroll én laat
       // #dy-main als gewone block met visible overflow renderen.
       'html:has(.dy-main.pp-uitgelicht-modus),' +
@@ -113,7 +113,7 @@
   function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
 
   // ── Stap 1: verberg alleen "Mijn posts", voeg Uitgelicht toe ────────
-  // (Trending blijft zichtbaar — user koos voor 4-tab structuur)
+  // (Trending blijft zichtbaar - user koos voor 4-tab structuur)
   function setupFilters() {
     var bar = document.getElementById('dy-feed-filters');
     if (!bar) return false;
@@ -186,7 +186,7 @@
   }
 
   // ── Stap 3: handler voor Uitgelicht tab klik ────────────────────────
-  // v60.1.66: stabiele oplossing — verbergt scroll-snap feed-reel
+  // v60.1.66: stabiele oplossing - verbergt scroll-snap feed-reel
   // (incompatibel met grid-layout) en toont partner-grid in eigen
   // scrollbare container. Klik op kaart → opent merk-detail (full feed
   // filtered to that brand via PP_CampaignRenderer.click).
@@ -329,7 +329,7 @@
     loadProductenOverview();
   }
 
-  // ── Producten van actieve partners — query brand_products collection ──
+  // ── Producten van actieve partners - query brand_products collection ──
   function loadProductenOverview() {
     var container = document.getElementById('pp-uitg-feed-grid');
     if (!container) return;
@@ -365,7 +365,7 @@
     if (!items || !items.length) {
       container.innerHTML =
         '<div class="pp-uitg-leeg" style="grid-column:1/-1">' +
-          '<p>Nog geen producten beschikbaar — partners voegen binnenkort hun collectie toe.</p>' +
+          '<p>Nog geen producten beschikbaar - partners voegen binnenkort hun collectie toe.</p>' +
         '</div>';
       return;
     }

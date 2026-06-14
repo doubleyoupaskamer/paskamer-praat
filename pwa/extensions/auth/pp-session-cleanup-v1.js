@@ -1,18 +1,18 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat — Session Cleanup & Cache Isolation (v1.0.0)
+ * PaskamerPraat - Session Cleanup & Cache Isolation (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  * Lost een kritiek lek op: na uitloggen bleven user-specifieke caches
  * (premium status, avatar, outfit scores, admin secret, etc.) zichtbaar.
  *
  * Werkwijze (additief, niet-invasief):
- *   1. Wrapt DY.uitloggen() — wist alle user-specifieke storage keys.
+ *   1. Wrapt DY.uitloggen() - wist alle user-specifieke storage keys.
  *   2. Luistert op firebase.auth().onAuthStateChanged voor user-switch.
  *      Bij UID-change: forceer cache-purge + reload van premium status.
  *   3. Stuurt CustomEvents `pp:logout` en `pp:userchange` zodat extensies
  *      hun eigen state kunnen resetten.
  *   4. Vernieuwt avatar/topbar/UI direct na logout.
  *
- * GEEN refactor — legacy DY.uitloggen blijft draaien. Wij voegen alleen
+ * GEEN refactor - legacy DY.uitloggen blijft draaien. Wij voegen alleen
  * extra purge-logica toe NA de bestaande cleanup.
  * ═══════════════════════════════════════════════════════════════════════ */
 (function() {
@@ -115,11 +115,11 @@
   // ── In-memory cleanup van extensies ─────────────────────────────────
   function wipeExtensionState() {
     try {
-      // Universal Campaign Renderer — stop onSnapshot listener
+      // Universal Campaign Renderer - stop onSnapshot listener
       if (window.PP_CampaignRenderer && typeof window.PP_CampaignRenderer._unsubscribe === 'function') {
         try { window.PP_CampaignRenderer._unsubscribe(); } catch(_) {}
       }
-      // Feed tabs — reset Uitgelicht-state, herstel feed
+      // Feed tabs - reset Uitgelicht-state, herstel feed
       if (window.PP_FeedTabs && typeof window.PP_FeedTabs.refresh === 'function') {
         var grid = document.getElementById('pp-uitgelicht-grid');
         if (grid && grid.parentNode) grid.parentNode.removeChild(grid);
@@ -155,7 +155,7 @@
     } catch (e) { /* ignore */ }
   }
 
-  // ── Wrap DY.uitloggen — extra cleanup NA legacy logout ──────────────
+  // ── Wrap DY.uitloggen - extra cleanup NA legacy logout ──────────────
   function wrapLogout() {
     if (!window.DY || typeof window.DY.uitloggen !== 'function') return false;
     if (window.DY._ppSessionWrapped) return true;
@@ -165,7 +165,7 @@
       var lastUid = (window.DY && window.DY.user && window.DY.user.uid) || null;
       try { await orig.apply(this, arguments); }
       catch (e) { console.warn('[pp-session] legacy uitloggen error:', e); }
-      // Extra purge (idempotent — legacy heeft al deel gedaan)
+      // Extra purge (idempotent - legacy heeft al deel gedaan)
       try {
         var lsRemoved = wipeLocalStorage();
         var ssRemoved = wipeSessionStorage();
@@ -194,7 +194,7 @@
         var prevUid = _lastUid;
         _lastUid = uid;
         if (!uid) {
-          // Logout-pad — al afgehandeld door wrapLogout, maar safety net:
+          // Logout-pad - al afgehandeld door wrapLogout, maar safety net:
           try { document.dispatchEvent(new CustomEvent('pp:logout', { detail: { prevUid: prevUid } })); } catch(_) {}
           return;
         }
@@ -209,7 +209,7 @@
           // Force premium status refetch
           try { if (window.DY && DY.premium && DY.premium.status) DY.premium.status(true); } catch(_) {}
         } else {
-          // Eerste login of refresh — vuur login event
+          // Eerste login of refresh - vuur login event
           try { document.dispatchEvent(new CustomEvent('pp:login', { detail: { uid: uid } })); } catch(_) {}
         }
       });
@@ -220,7 +220,7 @@
   function watchTabSync() {
     window.addEventListener('storage', function(ev) {
       if (!ev.key) return;
-      // Firebase auth gebruikt 'firebase:authUser:*' — bij verwijdering = logout
+      // Firebase auth gebruikt 'firebase:authUser:*' - bij verwijdering = logout
       if (ev.key.indexOf('firebase:authUser:') === 0 && ev.newValue == null) {
         console.info('[pp-session] cross-tab logout detected, purging this tab');
         try {

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Notification Skin v1 (visual-only)
+// Paskamer Praat - Notification Skin v1 (visual-only)
 //
 // Eén gedeelde brand-aligned surface voor ALLE notification-componenten:
 //   - push-notifications modal       (#dy-push-modal)
@@ -13,7 +13,7 @@
 // Werking:
 //   - Hoge-specificiteit overrides die platte crème vervangen door de
 //     premium gradient van de AI Style Assistant / Crown popover.
-//   - GEEN logic-wijzigingen, geen DOM-wijzigingen — alleen CSS.
+//   - GEEN logic-wijzigingen, geen DOM-wijzigingen - alleen CSS.
 //   - Gebruikt bestaande CSS-tokens (--cream, --warm, --clay, --ink) uit
 //     app.css zodat dark-mode + responsive automatisch meedoen.
 //
@@ -252,7 +252,7 @@
       '    color: var(--cream,#fdf8f0) !important;',
       '    border-color: rgba(198,125,6,0.34) !important;',
       '  }',
-      /* Dark-mode text overrides — fix slecht contrast op donker oppervlak */
+      /* Dark-mode text overrides - fix slecht contrast op donker oppervlak */
       '  html .dy-card-modal-frame .dy-card-modal-title,',
       '  html .dy-card-modal-frame .dy-card-modal-body,',
       '  html .dy-card-modal-frame .dy-card-modal-body *,',

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Error Logger v1 (v57)
+// Paskamer Praat - Error Logger v1 (v57)
 //
 // Non-invasieve productie logging. Vangt alle frontend-fouten af en
 // stuurt ze geclassificeerd naar /api/client-error.

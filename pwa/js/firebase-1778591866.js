@@ -21,9 +21,9 @@ window.DY.auth = auth;
 window.DY.user = null;
 window.DY.profile = null;
 
-// Auth state listener — directe en betrouwbare auth sync
+// Auth state listener - directe en betrouwbare auth sync
 auth.onAuthStateChanged(async (user) => {
-  // Update user direct — geen vertraging
+  // Update user direct - geen vertraging
   window.DY.user = user;
 
   if (user && !user.isAnonymous) {
@@ -34,13 +34,13 @@ auth.onAuthStateChanged(async (user) => {
         displayName: user.displayName || (user.email ? user.email.split('@')[0] : 'gebruiker'),
         email: user.email,
         avatar: user.photoURL || null,
-        _minimaal: true  // markeer als minimaal — wordt overschreven door loadProfile
+        _minimaal: true  // markeer als minimaal - wordt overschreven door loadProfile
       };
     }
-    // Laad volledig profiel op achtergrond — blokkeert de app NIET
+    // Laad volledig profiel op achtergrond - blokkeert de app NIET
     DY.loadProfile(user.uid).catch(function() {});
   } else if (user && user.isAnonymous) {
-    // Anonieme Firebase Auth sessie — alleen voor presence tracking
+    // Anonieme Firebase Auth sessie - alleen voor presence tracking
     window.DY.user    = null;  // App ziet anonieme users als uitgelogd
     window.DY.profile = null;
     // WEL onAuthReady aanroepen zodat gast UI direct laadt (was 8s vertraging)
@@ -50,11 +50,11 @@ auth.onAuthStateChanged(async (user) => {
     window.DY.profile = null;
   }
 
-  // Anonieme users worden als gast behandeld — stuur null door aan de app
+  // Anonieme users worden als gast behandeld - stuur null door aan de app
   // Dit voorkomt een dubbele onAuthReady aanroep na logout (presence triggert anonSignIn)
   var _authArg = (user && user.isAnonymous) ? null : user;
 
-  // Sla auth result op — app-final.js pikt het op zodra het geladen is
+  // Sla auth result op - app-final.js pikt het op zodra het geladen is
   window.DY._pendingAuthUser  = _authArg;
   window.DY._pendingAuthReady = true;
 
@@ -110,7 +110,7 @@ DY.loadProfile = async function(uid) {
   } else {
     const data = snap.data();
 
-    // Synchroniseer veldnamen — website gebruikt dspPoints of punten, app gebruikt dsp_lifetime
+    // Synchroniseer veldnamen - website gebruikt dspPoints of punten, app gebruikt dsp_lifetime
     if (!data.dsp_lifetime && (data.dspPoints || data.punten)) {
       const legacy = data.dspPoints || data.punten || 0;
       data.dsp_lifetime = legacy;
@@ -147,7 +147,7 @@ DY.huidigSeizoen = function() {
 };
 
 
-// Streak bijhouden — elke dag dat je inlogt telt mee
+// Streak bijhouden - elke dag dat je inlogt telt mee
 DY.checkStreak = async function(ref) {
   const nu = new Date();
   const vandaag = new Date(nu.getFullYear(), nu.getMonth(), nu.getDate());
@@ -161,13 +161,13 @@ DY.checkStreak = async function(ref) {
   
   const laatsteDag = new Date(laasteDate.getFullYear(), laasteDate.getMonth(), laasteDate.getDate());
   
-  // Al vandaag ingelogd — geen streak update nodig
+  // Al vandaag ingelogd - geen streak update nodig
   if (laatsteDag.getTime() === vandaag.getTime()) return;
   
   let nieuweStreak = DY.profile.streak || 0;
   
   if (laatsteDag.getTime() === gisteren.getTime()) {
-    // Gisteren actief — streak omhoog
+    // Gisteren actief - streak omhoog
     nieuweStreak += 1;
   } else {
     // Streak verbroken

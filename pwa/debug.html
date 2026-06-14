@@ -524,7 +524,7 @@ function doLogin() {
     .then(uc => {
       if (!OWNERS.includes(uc.user.uid)) {
         auth.signOut();
-        err.textContent = 'Geen toegang — alleen beheerders';
+        err.textContent = 'Geen toegang - alleen beheerders';
         return;
       }
       document.getElementById('auth').style.display = 'none';

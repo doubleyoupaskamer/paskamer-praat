@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — AI Fit Assistant Chat v1
+// Paskamer Praat - AI Fit Assistant Chat v1
 // Claude Sonnet 4.5 chat met community-context (RAG light)
 //
 // Werking:
@@ -30,7 +30,7 @@
   function init() {
     if (!window.DY) { setTimeout(init, 200); return; }
     injectStyles();
-    // GEEN eigen FAB meer — de drie-puntjes hub-knop in elke feed-card
+    // GEEN eigen FAB meer - de drie-puntjes hub-knop in elke feed-card
     // is de enige entry point. Verwijder eventuele oude FAB-instanties
     // die nog door cached JS zijn aangemaakt.
     purgeLegacyFab();
@@ -140,7 +140,7 @@
 
   // ─── Open / Close ───────────────────────────────────────────────
   function openChat() {
-    // AI Style Assistent is volledig toegankelijk — ook voor niet-ingelogde gebruikers.
+    // AI Style Assistent is volledig toegankelijk - ook voor niet-ingelogde gebruikers.
     // (Notificaties hebben wel een auth-gate; zie push-notifications-v3.js)
     var ov = buildOverlay();
     ov.classList.add('open');
@@ -222,7 +222,7 @@
       body.appendChild(welkomBlok());
       sugg.style.display = 'flex';
       // Suggesties zijn bewust generiek + fit-/lengte-gericht.
-      // Geen merken (H&M/Zara/Bershka etc.) als entry-suggestie — de AI
+      // Geen merken (H&M/Zara/Bershka etc.) als entry-suggestie - de AI
       // routeert via de system prompt automatisch DoubleYou-first.
       sugg.innerHTML = ''
         + suggChip('Welke hoodie past bij mijn lengte en bouw?')
@@ -268,7 +268,7 @@
   }
   function renderMarkdown(t) {
     // Lichte md-render: **bold**, *italic*, paragrafen, links.
-    // GEEN lijsten meer — de tone-of-voice gebruikt lopende tekst.
+    // GEEN lijsten meer - de tone-of-voice gebruikt lopende tekst.
     t = escapeHtml(t);
     t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     t = t.replace(/(^|[^*])\*([^*\n]+?)\*/g, '$1<em>$2</em>');
@@ -306,7 +306,7 @@
     };
 
     // Probeer 5 community reviews met vergelijkbare lengte (±5cm) of maat te vinden.
-    // Skip volledig wanneer er geen ingelogde user is — Firestore rules
+    // Skip volledig wanneer er geen ingelogde user is - Firestore rules
     // blokkeren reviews-collection voor anonieme bezoekers en zouden anders
     // een 'permission-denied' promise rejection in de console opleveren.
     try {
@@ -353,10 +353,10 @@
     var communityTekst = (ctx.community && ctx.community.length)
       ? '\n\nReviews uit de Paskamer Praat community (mensen met vergelijkbare lengte):\n' +
         ctx.community.map(function(r, i) {
-          return (i+1) + '. ' + (r.merk || 'merk?') + ' — ' + (r.item || 'item?') +
+          return (i+1) + '. ' + (r.merk || 'merk?') + ' - ' + (r.item || 'item?') +
             ' (maat ' + (r.maat || '?') + ', lengte ' + (r.lengte || '?') + 'cm' +
             (r.score ? ', fit ' + r.score + '/5' : '') + ')' +
-            (r.commentaar ? ' — "' + r.commentaar + '"' : '');
+            (r.commentaar ? ' - "' + r.commentaar + '"' : '');
         }).join('\n')
       : '';
 
@@ -431,7 +431,7 @@
         // Specifieke melding voor niet-ingelogde gebruikers: de Firestore rules
         // blokkeren toegang tot `app_config/ai` zonder auth. Vraag log-in.
         if (!(DY.user && DY.user.uid)) {
-          throw new Error('Log in om de AI Stylist te gebruiken — dat houdt het gesprek persoonlijk en bewaart je geschiedenis.');
+          throw new Error('Log in om de AI Stylist te gebruiken - dat houdt het gesprek persoonlijk en bewaart je geschiedenis.');
         }
         throw new Error('AI is momenteel niet beschikbaar. Probeer het later opnieuw.');
       }
@@ -501,7 +501,7 @@
         var k = await DY._kleurenGetAPIKey();
         if (k) return k;
       } catch (e) {
-        // Permission denied voor gast — val terug op directe Firestore lees
+        // Permission denied voor gast - val terug op directe Firestore lees
       }
     }
     // Fallback: direct uit Firestore lezen
@@ -511,7 +511,7 @@
         if (doc.exists && doc.data().anthropic_key) return doc.data().anthropic_key;
       }
     } catch (e) {
-      // Firestore blokkeert (rules) — terug naar null
+      // Firestore blokkeert (rules) - terug naar null
     }
     return null;
   }
@@ -557,7 +557,7 @@
   max-height: 92vh;
   max-height: 92dvh;
   min-height: 320px;
-  /* Eén consistente surface — identieke gradient-logica als de crown popover.
+  /* Eén consistente surface - identieke gradient-logica als de crown popover.
      Verving de vlakke cream zodat de AI Style Assistant volledig blendt met
      het design system: cream → warm linear basis + 2 radial clay accent glows. */
   background:
@@ -582,7 +582,7 @@
 }
 @keyframes dy-ai-slide { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* Subtiele clay-glow boven aan de modal — zelfde accent als .dy-dsppop-glow */
+/* Subtiele clay-glow boven aan de modal - zelfde accent als .dy-dsppop-glow */
 .dy-ai-chat-glow {
   position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
   width: 260px; height: 220px;
@@ -693,7 +693,7 @@
   border-color: var(--clay, #c67d06);
   color: var(--clay-d, #a56605);
 }
-/* WCAG 2.4.7 — focus indicator voor keyboard navigatie */
+/* WCAG 2.4.7 - focus indicator voor keyboard navigatie */
 .dy-ai-sugg-chip:focus-visible,
 .dy-ai-chat-icon:focus-visible,
 .dy-ai-send:focus-visible {
@@ -751,7 +751,7 @@
 
 .dy-ai-chat-form {
   position: relative; z-index: 1;
-  flex: 0 0 auto;       /* nooit krimpen — input blijft altijd zichtbaar */
+  flex: 0 0 auto;       /* nooit krimpen - input blijft altijd zichtbaar */
   display: flex; gap: var(--sp-2, 0.5rem); align-items: flex-end;
   /* v43: extra 12px bottom clearance voor Android nav-bar
      (Android Chrome stuurt geen safe-area-inset-bottom in non-PWA mode,
@@ -813,7 +813,7 @@
 body.dy-ai-chat-lock { overflow: hidden !important; touch-action: none; }
 
 /* ════════════════════════════════════════════════════════════════
-   DARK MODE — comprehensive token override (v43)
+   DARK MODE - comprehensive token override (v43)
    De host-app definieert --ink, --ink-soft, --ink-muted, --clay-d
    als donkere kleuren. In Android Chrome dark mode pakt het OS deze
    donkere kleuren via prefers-color-scheme over, waardoor donkere
@@ -830,15 +830,15 @@ body.dy-ai-chat-lock { overflow: hidden !important; touch-action: none; }
   }
   /* Borders blijven warm-gold, geen aanpassing nodig */
 
-  /* Header titles — voorheen --ink (donker), nu lichte cream */
+  /* Header titles - voorheen --ink (donker), nu lichte cream */
   .dy-ai-chat-titel strong { color: #fef5d6; }
   .dy-ai-chat-titel small  { color: #d4c89a; }
 
-  /* Welkom block — titels en paragraaf naar licht */
+  /* Welkom block - titels en paragraaf naar licht */
   .dy-ai-welkom h3 { color: #fef5d6; }
   .dy-ai-welkom p  { color: #e8d8a8; }
 
-  /* Suggestie chips — lichte tekst op donkere glass-cards */
+  /* Suggestie chips - lichte tekst op donkere glass-cards */
   .dy-ai-sugg-chip {
     background: rgba(254,237,182,0.10);
     border-color: rgba(232,185,74,0.40);
@@ -850,7 +850,7 @@ body.dy-ai-chat-lock { overflow: hidden !important; touch-action: none; }
     border-color: #e8b94a;
   }
 
-  /* Input field — donker met lichte tekst */
+  /* Input field - donker met lichte tekst */
   #dy-ai-input {
     background: rgba(20,16,8,0.55);
     border-color: rgba(232,185,74,0.40);
@@ -864,7 +864,7 @@ body.dy-ai-chat-lock { overflow: hidden !important; touch-action: none; }
   #dy-ai-input::placeholder { color: rgba(245,237,218,0.62); }
   #dy-ai-input::-webkit-input-placeholder { color: rgba(245,237,218,0.62); }
 
-  /* Assistent-bubble — donker met lichte tekst */
+  /* Assistent-bubble - donker met lichte tekst */
   .dy-ai-msg-assistant .dy-ai-bubble {
     background: rgba(254,237,182,0.08);
     border-color: rgba(232,185,74,0.28);
@@ -874,9 +874,9 @@ body.dy-ai-chat-lock { overflow: hidden !important; touch-action: none; }
   .dy-ai-msg-assistant .dy-ai-bubble a { color: #fde4a3; }
   .dy-ai-msg-assistant .dy-ai-bubble a:hover { color: #fff5d6; }
 
-  /* User bubble blijft donkere ink — die werkt al goed (white tekst) */
+  /* User bubble blijft donkere ink - die werkt al goed (white tekst) */
 
-  /* Icon close-button — lichte rand + lichte tekst */
+  /* Icon close-button - lichte rand + lichte tekst */
   .dy-ai-chat-icon {
     background: rgba(254,237,182,0.08);
     border-color: rgba(232,185,74,0.32);
@@ -888,7 +888,7 @@ body.dy-ai-chat-lock { overflow: hidden !important; touch-action: none; }
     border-color: #e8b94a;
   }
 
-  /* Send-button (verstuur) — clay-d ipv ink in dark mode, beter contrast */
+  /* Send-button (verstuur) - clay-d ipv ink in dark mode, beter contrast */
   .dy-ai-stuur {
     background: linear-gradient(135deg, #c67d06, #8a5503);
     color: #fff5d6;
@@ -899,7 +899,7 @@ body.dy-ai-chat-lock { overflow: hidden !important; touch-action: none; }
   /* Typing dots */
   .dy-ai-typing span { background: rgba(245,237,218,0.55); }
 
-  /* Status-dot (groen) — wat extra glow op dark */
+  /* Status-dot (groen) - wat extra glow op dark */
   .dy-ai-chat-dot { box-shadow: 0 0 0 4px rgba(26,107,58,0.32); }
 }
 `;

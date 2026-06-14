@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Button Watchdog v1 (v57)
+// Paskamer Praat - Button Watchdog v1 (v57)
 //
 // Non-invasieve "stuck button" recovery + click telemetry.
 //
@@ -7,7 +7,7 @@
 //   1. Detecteert buttons die >10sec disabled blijven → auto re-enable
 //      (voorkomt vastgelopen UI bij niet-afgehandelde async fouten)
 //   2. Logt failed clicks (button-id, label, duration) naar error-logger
-//   3. Geen wijziging aan bestaande click-handlers — werkt parallel
+//   3. Geen wijziging aan bestaande click-handlers - werkt parallel
 //
 // Targets:
 //   • Alle <button>, <a class="btn">, .feed-action, .story-button

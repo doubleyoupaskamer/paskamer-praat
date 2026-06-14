@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Card Actions v1 (v50)
+// Paskamer Praat - Card Actions v1 (v50)
 //
 // Handlers voor de 8 nieuwe items in het card-hub menu van extra-menu-v3.js:
 //   - tryon     → Virtual Try-On modal openen met outfit-foto pre-filled
@@ -206,7 +206,7 @@
     var url = info.shareUrl;
     // Affiliate-tagger v46 doet de rest indien Zalando-link
     var shareData = {
-      title: 'Paskamer Praat — ' + info.author,
+      title: 'Paskamer Praat - ' + info.author,
       text: info.caption ? info.caption : 'Bekijk deze look op Paskamer Praat',
       url: url
     };
@@ -366,7 +366,7 @@
             logEvent('cardaction_report_queued', { report_id: j.report_id, pid: info.pid, reden: reden });
           }
         })
-        .catch(function() { /* offline-safe — Firestore + LS hide blijven werken */ });
+        .catch(function() { /* offline-safe - Firestore + LS hide blijven werken */ });
       // Verberg lokaal direct
       addToList(LS_HIDDEN, info.pid);
       if (card && card.parentNode) {
@@ -374,7 +374,7 @@
         card.style.opacity = '0';
         setTimeout(function() { try { card.remove(); } catch (e) {} }, 320);
       }
-      toast('Rapport ontvangen — bedankt 🙏', 'ok');
+      toast('Rapport ontvangen - bedankt 🙏', 'ok');
       logEvent('cardaction_report', { pid: info.pid, reden: reden });
     }, 'Rapporteer');
   }
@@ -609,7 +609,7 @@
       if (!kaart) return;
       var docId = kaart.dataset && (kaart.dataset.docId || kaart.dataset.docid || kaart.getAttribute('data-doc-id'));
       if (!docId) return;
-      // Specifieke selectors — eerst hoofdfoto, dan video (poster), dan blurred fallback,
+      // Specifieke selectors - eerst hoofdfoto, dan video (poster), dan blurred fallback,
       // dan eventuele overlay hero-media. AVATAR img is bewust uitgesloten.
       var mediaEl = kaart.querySelector(
         '.dy-reel-bg-img-main, .dy-reel-bg-video, .dy-reel-bg-blur, .dy-sd-hero-media'

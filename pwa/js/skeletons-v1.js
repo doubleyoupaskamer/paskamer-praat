@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Skeletons + API Retry Toast v1 (non-invasief)
+// Paskamer Praat - Skeletons + API Retry Toast v1 (non-invasief)
 //
 // Twee dingen:
 //
@@ -12,7 +12,7 @@
 //    - Auto-hide na 8s als gebruiker niets doet
 //    - Stack-aware (max 1 zichtbaar tegelijk)
 //
-// Geen breaking changes — alleen additieve UI helpers.
+// Geen breaking changes - alleen additieve UI helpers.
 // ═══════════════════════════════════════════════════════════════════
 (function() {
   'use strict';
@@ -61,7 +61,7 @@
   }
 
   function findFeedRoot() {
-    // v60.1 fix: NOOIT meer fallback naar <main> — dat zorgde ervoor dat op
+    // v60.1 fix: NOOIT meer fallback naar <main> - dat zorgde ervoor dat op
     // niet-feed pagina's (home, profiel, brand-portal, voorwaarden, etc.)
     // skeleton-cards in #dy-main werden geïnjecteerd. Alleen echte
     // feed-containers triggeren skeletons.

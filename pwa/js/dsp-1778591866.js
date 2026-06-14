@@ -1,4 +1,4 @@
-// DSP Punten Systeem — volledig reglement
+// DSP Punten Systeem - volledig reglement
 window.DY = window.DY || {};
 
 // Lifetime niveaus
@@ -76,7 +76,7 @@ DY.BADGES = [
   // Punten mijlpalen
   { id: 'dsp_100',           emoji: '⭐',  naam: 'Honderd punten',      omschrijving: '100 DSP punten bereikt',               check: (p) => (p.dsp_lifetime || 0) >= 100 },
   { id: 'dsp_500',           emoji: '🌟',  naam: 'Vijfhonderd punten',  omschrijving: '500 DSP punten bereikt',               check: (p) => (p.dsp_lifetime || 0) >= 500 },
-  { id: 'dsp_1500',          emoji: '💫',  naam: 'Duizend vijfhonderd', omschrijving: '1500 DSP punten bereikt — Elite lid',   check: (p) => (p.dsp_lifetime || 0) >= 1500 },
+  { id: 'dsp_1500',          emoji: '💫',  naam: 'Duizend vijfhonderd', omschrijving: '1500 DSP punten bereikt - Elite lid',   check: (p) => (p.dsp_lifetime || 0) >= 1500 },
   // Loyaliteit
   { id: 'streak_7',          emoji: '🔥',  naam: 'Wekelijkse vaste',    omschrijving: '7 dagen op rij actief',                check: (p) => (p.streak || 0) >= 7 },
   { id: 'streak_30',         emoji: '💪',  naam: 'Maandvast',           omschrijving: '30 dagen op rij actief',               check: (p) => (p.streak || 0) >= 30 },
@@ -241,7 +241,7 @@ DY.ontneemPunten = async function(actieKey, extraData = {}) {
   const uid = DY.user.uid;
   const ref = DY.db.collection('users').doc(uid);
 
-  // Check of deze actie ooit is gelogd — zo niet, niets aftrekken
+  // Check of deze actie ooit is gelogd - zo niet, niets aftrekken
   const logCheck = await DY.db.collection('dsp_log')
     .where('uid', '==', uid)
     .where('actie', '==', actieKey)
@@ -286,7 +286,7 @@ DY.toonOntneemMelding = function(pts, label) {
   if (!DY._dspPopupActief) DY._verwerkDspQueue();
 };
 
-// Puntenmelding — centraal via popup queue
+// Puntenmelding - centraal via popup queue
 DY.toonPuntenMelding = function(pts, label) {
   DY._dspQueue = DY._dspQueue || [];
   DY._dspQueue.push({ type: 'punten', pts, label });
@@ -295,7 +295,7 @@ DY.toonPuntenMelding = function(pts, label) {
 
 // DSP log ophalen voor profiel pagina
 DY.getDSPLog = async function(uid, limit = 20) {
-  // Geen orderBy om samengestelde index te vermijden — sorteer client-side
+  // Geen orderBy om samengestelde index te vermijden - sorteer client-side
   const snap = await DY.db.collection('dsp_log')
     .where('uid', '==', uid)
     .limit(50)
@@ -320,7 +320,7 @@ DY.registreerActie = async function(actieKey, extraData) {
   return await DY.geefPunten(actieKey, extraData || {});
 };
 
-// DY.toast — algemene notificatie (zonder DSP punten) — blijft als lichte toast
+// DY.toast - algemene notificatie (zonder DSP punten) - blijft als lichte toast
 DY.toast = function(tekst) {
   document.querySelectorAll('.dy-toast-info').forEach(t => t.remove());
 

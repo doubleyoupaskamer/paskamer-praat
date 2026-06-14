@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Custom Add-to-Home-Screen Prompt v1 (non-invasief)
+// Paskamer Praat - Custom Add-to-Home-Screen Prompt v1 (non-invasief)
 //
 // Vervangt de browser default install hint met een eigen, on-brand
 // bottom-sheet "Installeer Paskamer Praat".
@@ -13,7 +13,7 @@
 //   - Toont niet als app al gestart als PWA (standalone display mode).
 //   - Niet vóór 8s op de site (vermijdt prompt-spam bij eerste klik).
 //
-// Werkt naast bestaande inline `<install banner>` in index.html — als
+// Werkt naast bestaande inline `<install banner>` in index.html - als
 // die al actief is, doet deze script niets dubbel.
 // ═══════════════════════════════════════════════════════════════════
 (function() {
@@ -38,7 +38,7 @@
     } catch (e) { /* noop */ }
     // Fallback: comprehensive matchMedia checks voor Samsung/Android/iOS/Desktop.
     // Samsung Internet rapporteert geïnstalleerde PWA's regelmatig als
-    // 'minimal-ui' of 'fullscreen' i.p.v. 'standalone' — dus alle modes checken.
+    // 'minimal-ui' of 'fullscreen' i.p.v. 'standalone' - dus alle modes checken.
     try {
       if (window.matchMedia('(display-mode: standalone)').matches) return true;
       if (window.matchMedia('(display-mode: minimal-ui)').matches) return true;
@@ -122,7 +122,7 @@
 
   function showAndroidPrompt(deferredEvent) {
     if (recentlyDismissed() || isStandalone()) return;
-    // v60.1: voorkom dubbel-prompt — als de inline install-banner al
+    // v60.1: voorkom dubbel-prompt - als de inline install-banner al
     // zichtbaar is in DOM, niet ook nog een eigen sheet tonen.
     var inlineBanner = document.getElementById('dy-install-banner');
     if (inlineBanner && inlineBanner.style && inlineBanner.style.display === 'flex') return;
@@ -157,7 +157,7 @@
   function showIosInstructions() {
     if (recentlyDismissed() || isStandalone()) return;
     // v60.1: voorkom dat deze overlay de inline install-banner blokkeert
-    // op iOS — de inline banner heeft een eigen "Hoe?" knop met alert().
+    // op iOS - de inline banner heeft een eigen "Hoe?" knop met alert().
     // Als de inline banner zichtbaar is (of binnenkort wordt getoond), niet
     // overlappen.
     try {

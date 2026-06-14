@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat — Admin Panel Extensions (v1.0.0)
+ * PaskamerPraat - Admin Panel Extensions (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Voegt 3 nieuwe admin-modules toe:
@@ -102,7 +102,7 @@
       main.innerHTML =
         '<div class="bp-page">' +
           '<button class="bp-back" onclick="PP_AdminExt.renderAdminWallet()" data-testid="admin-tx-back">&larr; Wallets</button>' +
-          '<h1>Transacties — ' + esc(uid) + '</h1>' +
+          '<h1>Transacties - ' + esc(uid) + '</h1>' +
           (rows.length
             ? '<div class="bp-tabel-scroll"><table class="bp-tabel"><thead><tr><th>Type</th><th>Bedrag</th><th>Status</th><th>Shopify Order</th><th>Datum</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>'
             : '<div class="bp-empty"><div class="bp-empty-titel">Geen transacties</div></div>'
@@ -240,7 +240,7 @@
       }
       return origToon.apply(this, arguments);
     };
-    // v1.0.6: Fix bootstrap race — als URL al een extension route bevat, force-render
+    // v1.0.6: Fix bootstrap race - als URL al een extension route bevat, force-render
     try {
       var qs = new URLSearchParams(window.location.search);
       var p = qs.get('pagina');

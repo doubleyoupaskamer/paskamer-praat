@@ -1,6 +1,6 @@
 # Gebruikersreglement Merkenportaal Paskamer Praat
 
-**Versie 1.0 — 14 februari 2026**
+**Versie 1.0 - 14 februari 2026**
 **Beheerder**: Doubleyou Tailored for Tall & Plus Size h.o.d.n. *Paskamer Praat*
 **Contact**: support@paskamerpraat.nl
 
@@ -10,7 +10,7 @@
 
 ---
 
-## Artikel 1 — Definities
+## Artikel 1 - Definities
 
 1. **Platform**: de website, PWA en backend-diensten beschikbaar via
    paskamerpraat.nl en gerelateerde subdomeinen.
@@ -31,7 +31,7 @@
 
 ---
 
-## Artikel 2 — Toegang en registratie
+## Artikel 2 - Toegang en registratie
 
 1. Toegang tot het Merkenportaal is uitsluitend toegestaan voor
    geregistreerde Merken die handelen vanuit een onderneming
@@ -51,7 +51,7 @@
 
 ---
 
-## Artikel 3 — Verplichtingen Merk
+## Artikel 3 - Verplichtingen Merk
 
 1. Het Merk handelt te allen tijde in overeenstemming met:
    (a) toepasselijke wet- en regelgeving (waaronder Reclamecode,
@@ -69,7 +69,7 @@
 
 ---
 
-## Artikel 4 — Licentie en intellectueel eigendom
+## Artikel 4 - Licentie en intellectueel eigendom
 
 1. Het Merk verleent Paskamer Praat een wereldwijde, niet-exclusieve,
    royalty-vrije, sublicensieerbare licentie om de aangeleverde Content
@@ -86,7 +86,7 @@
 
 ---
 
-## Artikel 5 — Campagnes en plaatsingen
+## Artikel 5 - Campagnes en plaatsingen
 
 1. Het Merk kan via het Merkenportaal Campagnes aanmaken en plaatsen op
    beschikbare placements (feed, stories, ai_assist, outfit_review,
@@ -103,7 +103,7 @@
 
 ---
 
-## Artikel 6 — Wallet, betalingen en abonnementen
+## Artikel 6 - Wallet, betalingen en abonnementen
 
 1. Wallet-saldo wordt opgewaardeerd via geïntegreerde betalingsproviders
    (Shopify/Stripe).
@@ -120,7 +120,7 @@
 
 ---
 
-## Artikel 7 — AI-functionaliteiten
+## Artikel 7 - AI-functionaliteiten
 
 1. Het Platform biedt AI-gestuurde suggesties (outfit-score, style-
    assistant, productaanbevelingen, beeldgeneratie).
@@ -134,7 +134,7 @@
 
 ---
 
-## Artikel 8 — Moderatie en handhaving
+## Artikel 8 - Moderatie en handhaving
 
 1. Paskamer Praat behoudt zich het recht voor om zonder voorafgaande
    kennisgeving:
@@ -148,7 +148,7 @@
 
 ---
 
-## Artikel 9 — Beëindiging
+## Artikel 9 - Beëindiging
 
 1. Het Merk kan het account op ieder moment beëindigen via
    support@paskamerpraat.nl.
@@ -162,7 +162,7 @@
 
 ---
 
-## Artikel 10 — Aansprakelijkheid
+## Artikel 10 - Aansprakelijkheid
 
 1. Paskamer Praat is uitsluitend aansprakelijk voor directe schade
    voortvloeiend uit grove schuld of opzet aan haar zijde.
@@ -176,7 +176,7 @@
 
 ---
 
-## Artikel 11 — Wijzigingen
+## Artikel 11 - Wijzigingen
 
 1. Paskamer Praat kan deze voorwaarden wijzigen. Wijzigingen worden
    minimaal dertig (30) dagen voor inwerkingtreding aangekondigd via
@@ -188,7 +188,7 @@
 
 ---
 
-## Artikel 12 — Toepasselijk recht en geschillen
+## Artikel 12 - Toepasselijk recht en geschillen
 
 1. Op deze overeenkomst is Nederlands recht van toepassing.
 2. Geschillen worden voorgelegd aan de bevoegde rechter in het

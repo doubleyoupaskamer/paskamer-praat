@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Wardrobe Recommender v1 (v52)
+// Paskamer Praat - Wardrobe Recommender v1 (v52)
 //
 // Combineert saved items (dy_saved_posts) + recent outfit scores
 // (dy_recent_scores) en vraagt /api/wardrobe/recommend om een

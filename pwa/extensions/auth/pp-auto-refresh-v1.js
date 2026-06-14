@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat — Auto Refresh User Data (v1.0.0)
+ * PaskamerPraat - Auto Refresh User Data (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  * Garantie: BIJ IEDERE HANDELING van de gebruiker worden user-specifieke
  * gegevens (avatar, naam, premium status, profile, initialen) opnieuw
@@ -18,7 +18,7 @@
  *   • Premium status (force-fresh fetch zonder cache)
  *   • PP_CampaignRenderer cache (anti-stale campagnes)
  *
- * NON-BREAKING: alleen toevoegingen — geen wijziging in legacy logica.
+ * NON-BREAKING: alleen toevoegingen - geen wijziging in legacy logica.
  * ═══════════════════════════════════════════════════════════════════════ */
 (function() {
   'use strict';
@@ -41,13 +41,13 @@
       try {
         snap = await window.DY.db.collection('users').doc(uid).get({ source: 'server' });
       } catch (e) {
-        // Fallback voor netwerkproblemen — gebruik cache
+        // Fallback voor netwerkproblemen - gebruik cache
         snap = await window.DY.db.collection('users').doc(uid).get();
       }
       if (snap && snap.exists) {
         window.DY.profile = snap.data();
       }
-    } catch (e) { /* swallow — graceful */ }
+    } catch (e) { /* swallow - graceful */ }
   }
 
   // ── Forceer fresh premium-status fetch ──────────────────────────────
@@ -81,7 +81,7 @@
     } catch (e) { /* ignore */ }
   }
 
-  // ── Hoofdrefresh — throttled om duplicates te voorkomen ─────────────
+  // ── Hoofdrefresh - throttled om duplicates te voorkomen ─────────────
   function scheduleRefresh(reason) {
     var now = Date.now();
     if (now - _lastRefreshTs < THROTTLE_MS) {
@@ -153,7 +153,7 @@
   });
   // Geen refresh on logout (cleanup module doet dat al)
 
-  // ── Window focus listener — return uit andere tab ───────────────────
+  // ── Window focus listener - return uit andere tab ───────────────────
   window.addEventListener('focus', function() { scheduleRefresh('focus'); });
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible') scheduleRefresh('visible');

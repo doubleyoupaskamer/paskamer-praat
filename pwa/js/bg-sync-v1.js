@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Background Sync v1 (non-invasief opt-in)
+// Paskamer Praat - Background Sync v1 (non-invasief opt-in)
 //
 // Doel: failed POST-acties (likes, comments, AI requests) niet verloren
 // laten gaan wanneer de gebruiker even offline is. We slaan ze op in
@@ -8,7 +8,7 @@
 // (Safari/iOS), vallen we terug op een 'online' listener die de queue
 // alsnog probeert te draineren via fetch op de page-thread.
 //
-// • GEEN globale fetch monkey-patch — Firebase/Anthropic SDK blijven
+// • GEEN globale fetch monkey-patch - Firebase/Anthropic SDK blijven
 //   ongemoeid. Andere scripts gebruiken expliciet `DY.bgSync.queue()`.
 // • Companion bij sw.js (v44+): de SW handelt het 'sync' event af met
 //   tag 'pp-bg-sync' en stuurt PP_BG_SYNC_REPLAYED messages terug.

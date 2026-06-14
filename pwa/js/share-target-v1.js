@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Web Share Target client v1
+// Paskamer Praat - Web Share Target client v1
 // Vangt content op die naar de PWA gedeeld is en vult de composer in.
 // Werkt non-invasief: leest IndexedDB die door sw.js gevuld is.
 // ═══════════════════════════════════════════════════════════════════
@@ -132,7 +132,7 @@
 
       // 3. Focus + toast
       try { ta.focus(); } catch (e) {}
-      showToast('Gedeelde content geladen — klaar om te plaatsen');
+      showToast('Gedeelde content geladen - klaar om te plaatsen');
 
       // 4. Tracking (als beschikbaar)
       try {
@@ -183,7 +183,7 @@
   // ─── Start flow ──────────────────────────────────────────────────
   waitForDY(function() {
     // Ga naar composer (renderNieuwVerhaal). Als gebruiker niet ingelogd is
-    // toont de bestaande flow gewoon de login prompt — non-invasief.
+    // toont de bestaande flow gewoon de login prompt - non-invasief.
     try { DY.navigeer('nieuw'); } catch (e) {}
 
     // Lees gedeelde payload uit IDB (na korte vertraging zodat composer rendert)

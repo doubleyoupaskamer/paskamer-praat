@@ -1,9 +1,9 @@
-# Algemene Voorwaarden Merken (B2B) — Paskamer Praat
+# Algemene Voorwaarden Merken (B2B) - Paskamer Praat
 
-**Versie 1.0 — 14 februari 2026**
+**Versie 1.0 - 14 februari 2026**
 **Doubleyou Tailored for Tall & Plus Size h.o.d.n. Paskamer Praat**
 
-> ⚠️ Concept — juridische review vereist.
+> ⚠️ Concept - juridische review vereist.
 
 ## Art. 1 Toepasselijkheid
 Deze voorwaarden zijn van toepassing op alle overeenkomsten tussen
@@ -21,7 +21,7 @@ inkoopvoorwaarden van het Merk wordt uitdrukkelijk uitgesloten.
 1. Alle prijzen zijn exclusief BTW, in EUR.
 2. Premium-abonnement € 4,99/mnd, automatische maandelijkse verlenging
    via Stripe.
-3. Campagne-budget via Wallet — vooraf opwaarderen via Shopify/Stripe.
+3. Campagne-budget via Wallet - vooraf opwaarderen via Shopify/Stripe.
 4. Wallet-saldo niet uitbetaalbaar, alleen besteedbaar binnen Platform.
 5. Bij niet-tijdige betaling kan dienstverlening worden opgeschort.
 6. Facturen worden elektronisch verstrekt via e-mail.

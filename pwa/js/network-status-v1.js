@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Network Status Toast v1 (non-invasief)
+// Paskamer Praat - Network Status Toast v1 (non-invasief)
 // Toont een subtiele banner bij offline/online overgangen.
 //
-// • Offline → roodbruine pill "Geen verbinding — wijzigingen worden later
+// • Offline → roodbruine pill "Geen verbinding - wijzigingen worden later
 //   verstuurd". Blijft staan tot online.
 // • Online (na offline) → groene pill "Weer online" (3 sec, dan fade).
 // • Respecteert `prefers-reduced-motion`.
@@ -100,7 +100,7 @@
 
   function showOffline() {
     if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-    setMessage('offline', 'Geen verbinding — wijzigingen worden later verstuurd', true);
+    setMessage('offline', 'Geen verbinding - wijzigingen worden later verstuurd', true);
     startPing();
   }
 

@@ -652,7 +652,7 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
 .dy-main:has(.dy-form-wrap) {
   background: #0a0806;
 }
-/* Form-wrap specifieke input styling — alleen profiel bewerken / fit identity */
+/* Form-wrap specifieke input styling - alleen profiel bewerken / fit identity */
 .dy-main:has(.dy-form-wrap) .dy-input {
   background: rgba(13,11,5,0.97);
   border-color: rgba(198,125,6,0.18);
@@ -724,7 +724,7 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
 .dy-form-wrap { padding: var(--sp-4) var(--sp-3) var(--sp-12); max-width: 600px; margin: 0 auto; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   UNIFIED PREMIUM COMPOSER — Verhaal · Story · Review
+   UNIFIED PREMIUM COMPOSER - Verhaal · Story · Review
    Één design system, alle drie identiek donker en premium
    ═══════════════════════════════════════════════════════════════════ */
 
@@ -1397,7 +1397,7 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
   position: relative;
   overflow: hidden;
 }
-/* Subtiele clay glow bovenin — geeft diepte zonder afleiden */
+/* Subtiele clay glow bovenin - geeft diepte zonder afleiden */
 .dy-profiel-hero::before {
   content: '';
   position: absolute;
@@ -2058,7 +2058,7 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
 .dy-leaderboard-optin { padding: var(--sp-4) var(--sp-1); text-align: center; }
 
 .dy-challenges-wrap { padding: var(--sp-2) var(--sp-3) var(--sp-8); }
-/* ── Challenge kaarten — premium dark mobile-first ──────────────── */
+/* ── Challenge kaarten - premium dark mobile-first ──────────────── */
 .dy-challenge-kaart {
   background:
     linear-gradient(160deg, rgba(198,125,6,0.07) 0%, rgba(10,8,6,0) 50%),
@@ -3876,7 +3876,7 @@ video.dy-detail-foto {
   min-height: calc(100vh - var(--topbar-h) - var(--nav-h));
   padding-bottom: 80px;
 }
-/* Modegenoten — kaarten in dark context */
+/* Modegenoten - kaarten in dark context */
 .dy-gp-wrap .dy-kaart {
   background: rgba(20,16,6,0.97);
   border-color: rgba(198,125,6,0.14);
@@ -6281,7 +6281,7 @@ video.dy-detail-foto {
   padding-bottom: calc(var(--sp-10) + env(safe-area-inset-bottom, 0px));
 }
 
-/* Ambient glow — groter, zachter, meer luxe */
+/* Ambient glow - groter, zachter, meer luxe */
 .dy-deel-glow {
   position: absolute;
   top: -80px; left: 50%;
@@ -6329,7 +6329,7 @@ video.dy-detail-foto {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Goud sheen overlay — subtiel */
+/* Goud sheen overlay - subtiel */
 .dy-deel-kaart::before {
   content: '';
   position: absolute;
@@ -6537,7 +6537,7 @@ video.dy-detail-foto {
   border: 1px solid rgba(198,125,6,0.18);
   letter-spacing: 0.05em; font-family: 'DM Sans', sans-serif; line-height: 1.4;
 }
-/* Primair — Verhaal */
+/* Primair - Verhaal */
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(1) {
   background: linear-gradient(135deg, var(--clay) 0%, #b86d04 100%); color: #fff;
 }
@@ -6547,13 +6547,13 @@ video.dy-detail-foto {
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(1) .dy-deel-kaart-omschr { color: rgba(255,255,255,0.7); }
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(1) .dy-deel-kaart-pijl { color: rgba(255,255,255,0.6); }
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(1) .dy-deel-kaart-pts { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.22); color: #fff; }
-/* Secundair — Story */
+/* Secundair - Story */
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(2) { background: rgba(30,24,8,0.97); border-color: rgba(198,125,6,0.22); }
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(2):hover { border-color: var(--clay); background: rgba(45,36,12,1.0); }
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(2) .dy-deel-kaart-icon { background: rgba(198,125,6,0.14); color: var(--clay); }
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(2) .dy-deel-kaart-naam { color: rgba(253,248,240,0.95); }
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(2) .dy-deel-kaart-omschr { color: rgba(253,248,240,0.60); }
-/* Tertiair — Review */
+/* Tertiair - Review */
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(3) { background: rgba(30,24,8,0.97); border-color: rgba(198,125,6,0.22); }
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(3):hover { border-color: var(--clay); background: rgba(45,36,12,1.0); }
 .dy-deel-grid--kvs .dy-deel-kaart--kvs:nth-child(3) .dy-deel-kaart-icon { background: rgba(198,125,6,0.14); color: var(--clay); }
@@ -7156,7 +7156,7 @@ video.dy-detail-foto {
   padding: 0 0 100px;
 }
 
-/* Stap secties in review — dark premium */
+/* Stap secties in review - dark premium */
 .dy-rv-stap {
   background: rgba(255,255,255,0.02);
   border-bottom: 1px solid rgba(198,125,6,0.08);
@@ -7210,7 +7210,7 @@ video.dy-detail-foto {
   gap: 14px;
 }
 
-/* Sterren — groot en zichtbaar op donkere bg */
+/* Sterren - groot en zichtbaar op donkere bg */
 .dy-rv-sterren-groot {
   display: flex;
   gap: 6px;
@@ -9415,7 +9415,7 @@ video
   gap: 10px;
 }
 
-/* 3-koloms met W midden — alleen desktop */
+/* 3-koloms met W midden - alleen desktop */
 .dy-wk-product-grid--3col {
   grid-template-columns: repeat(2, 1fr);
   align-items: stretch;
@@ -10223,7 +10223,7 @@ video
   border-bottom: 1px solid rgba(198,125,6,0.10);
   position: -webkit-sticky; position: sticky;
   /* Plakt direct onder .dy-vr-header (sticky top:0, hoogte ≈ 70px).
-     Werkt op mobiel, desktop en alle andere devices — geen topbar-offset
+     Werkt op mobiel, desktop en alle andere devices - geen topbar-offset
      nodig want .dy-vr-header zelf vangt de eerste sticky positie op. */
   top: 70px;
   z-index: 40;
@@ -10251,7 +10251,7 @@ video
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   TOPLEDEN LEADERBOARD — PREMIUM DARK DESIGN
+   TOPLEDEN LEADERBOARD - PREMIUM DARK DESIGN
    ═══════════════════════════════════════════════════════════════════ */
 
 .dy-lb2-wrap {
@@ -10312,7 +10312,7 @@ video
 }
 .dy-lb2-podium-item:active { transform: scale(0.94) !important; }
 
-/* Goud — #1 — grootst en meest prominent */
+/* Goud - #1 - grootst en meest prominent */
 .dy-lb2-podium-item.goud { transform: scale(1.10); }
 .dy-lb2-podium-item.goud:active { transform: scale(1.05); }
 
@@ -10870,7 +10870,7 @@ img {
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* v60.1.24 — Mobile-only motion enhancement.
+/* v60.1.24 - Mobile-only motion enhancement.
    Subtiele W-watermark animatie + shimmer placeholder + fade-in image.
    GPU-accelerated (transform + opacity), respect prefers-reduced-motion. */
 @media (max-width: 767px) {
@@ -11180,7 +11180,7 @@ img {
     z-index: 0;
     pointer-events: none;
   }
-  /* Tekst-overlay onderaan de foto (niet meer fullwidth — alleen over foto) */
+  /* Tekst-overlay onderaan de foto (niet meer fullwidth - alleen over foto) */
   .dy-hm-hero-text-overlay {
     position: absolute;
     left: 0;
@@ -11241,7 +11241,7 @@ img {
     0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.7; }
     50% { transform: translateX(-50%) translateY(6px); opacity: 0.25; }
   }
-  /* CTA-panel rechts (zoals het menu links) — geen los blok onderaan */
+  /* CTA-panel rechts (zoals het menu links) - geen los blok onderaan */
   .dy-hm-hero-content {
     position: relative;
     z-index: 3;
@@ -13012,7 +13012,7 @@ strong.dy-dsp-label {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   DESKTOP FEED — definitief blok v7
+   DESKTOP FEED - definitief blok v7
    Strategie: exact de mobiele architectuur op desktop
    Container = vaste hoogte + overflow:hidden
    Stories = altijd zichtbaar als flex-shrink:0
@@ -13255,7 +13255,7 @@ strong.dy-dsp-label {
     flex-shrink: 0 !important;
   }
 
-  /* ── 15. Overlay tekst: compact — referentie = "Lees meer →" (0.72rem) ── */
+  /* ── 15. Overlay tekst: compact - referentie = "Lees meer →" (0.72rem) ── */
   .dy-feed-reel .dy-reel-item .dy-reel-titel {
     /* Net groter dan preview, compact voor 380px kaart */
     font-size: 0.95rem !important;
@@ -13293,7 +13293,7 @@ strong.dy-dsp-label {
   }
 }
 
-/* Extra: 1280px+ schermen — iets grotere kaart ── */
+/* Extra: 1280px+ schermen - iets grotere kaart ── */
 @media (min-width: 1280px) {
   .dy-feed-reel {
     width: 400px !important;
@@ -13551,7 +13551,7 @@ strong.dy-dsp-label {
 .dy-admin-online-device { color: var(--ink-muted); font-size: 0.70rem; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dy-admin-online-tijd { color: var(--ink-muted); font-size: 0.70rem; text-align: right; white-space: nowrap; }
 
-/* v60.1.37: mobile (< 600px) — herstructureer rij naar 2 lagen zodat niets afgesneden wordt */
+/* v60.1.37: mobile (< 600px) - herstructureer rij naar 2 lagen zodat niets afgesneden wordt */
 @media (max-width: 599px) {
   .dy-admin-online-rij {
     grid-template-columns: 8px 1fr auto;
@@ -13616,7 +13616,7 @@ strong.dy-dsp-label {
 .dy-admin-pwa-rij > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .dy-admin-pwa-ts { color: var(--ink-muted); font-size: 0.70rem; text-align: right; }
 
-/* v60.1.37: mobile (< 600px) — herstructureer PWA rij naar 2 lagen */
+/* v60.1.37: mobile (< 600px) - herstructureer PWA rij naar 2 lagen */
 @media (max-width: 599px) {
   .dy-admin-pwa-rij {
     grid-template-columns: 20px 1fr auto;
@@ -13641,7 +13641,7 @@ strong.dy-dsp-label {
   .dy-admin-kpi-val { font-size: 1.5rem; }
 }
 
-/* ── Privacy Center — Mijn Gegevens blok ────────────────────── */
+/* ── Privacy Center - Mijn Gegevens blok ────────────────────── */
 .dy-pc-export-blok {
   display: flex;
   flex-direction: row;
@@ -13738,7 +13738,7 @@ strong.dy-dsp-label {
   }
 }
 
-/* ── Community regels — uitgebreid ──────────────────────────── */
+/* ── Community regels - uitgebreid ──────────────────────────── */
 .dy-moderatie-sectie-titel {
   font-size: 0.68rem;
   font-weight: 800;
@@ -13926,7 +13926,7 @@ strong.dy-dsp-label {
 .dy-look-spotlight-media img,
 
 
-/* ── Lookbook preview cards — volledig responsive ────────────── */
+/* ── Lookbook preview cards - volledig responsive ────────────── */
 
 /* Tablet: 3 kolommen al bij 480px (bestaand) */
 /* Grote tablet: 4 kolommen */
@@ -13966,7 +13966,7 @@ strong.dy-dsp-label {
   }
 }
 
-/* Look tile: altijd in bounds — geen overflow */
+/* Look tile: altijd in bounds - geen overflow */
 .dy-look-tile {
   width: 100%;
   min-width: 0; /* voorkomt overflow in grid */
@@ -14166,7 +14166,7 @@ strong.dy-dsp-label {
   overscroll-behavior: contain;
 }
 
-/* ── Trust Layer — Community Safe Space ─────────────────────── */
+/* ── Trust Layer - Community Safe Space ─────────────────────── */
 
 /* Trust badge: feed/story/profiel header */
 .dy-trust-badge {
@@ -14188,7 +14188,7 @@ strong.dy-dsp-label {
   opacity: 0.75;
 }
 
-/* Content verified badge — absolute, geen layout shift */
+/* Content verified badge - absolute, geen layout shift */
 .dy-verified-badge {
   position: absolute;
   top: 8px;
@@ -14209,7 +14209,7 @@ strong.dy-dsp-label {
   user-select: none;
 }
 
-/* Report knop op reel kaart — minimaal, 1-tap */
+/* Report knop op reel kaart - minimaal, 1-tap */
 .dy-reel-report-btn {
   background: none;
   border: none;
@@ -14236,7 +14236,7 @@ strong.dy-dsp-label {
   white-space: nowrap;
 }
 
-/* Sessie-banner safety microcopy — eenmalig, niet-storend */
+/* Sessie-banner safety microcopy - eenmalig, niet-storend */
 .dy-safety-banner {
   display: flex;
   align-items: center;
@@ -14251,7 +14251,7 @@ strong.dy-dsp-label {
 .dy-safety-banner svg { flex-shrink: 0; opacity: 0.6; }
 
 /* ══════════════════════════════════════════════════════════════
-   MELD MODAL — Report pop-up
+   MELD MODAL - Report pop-up
    ══════════════════════════════════════════════════════════════ */
 
 /* Overlay */
@@ -14280,7 +14280,7 @@ strong.dy-dsp-label {
   -webkit-backdrop-filter: blur(4px);
 }
 
-/* Sheet — bottom sheet mobile, centered modal desktop */
+/* Sheet - bottom sheet mobile, centered modal desktop */
 .dy-meld-sheet {
   position: relative;
   z-index: 1;
@@ -14507,7 +14507,7 @@ strong.dy-dsp-label {
 }
 
 /* ── Post van de week ─────────────────────────────────────────── */
-/* OvdW gebruikt dy-pg-header — geen eigen header CSS nodig */
+/* OvdW gebruikt dy-pg-header - geen eigen header CSS nodig */
 
 .dy-ovdw-toolbar {
   display: flex;
@@ -14691,7 +14691,7 @@ strong.dy-dsp-label {
 
 /* ══════════════════════════════════════════════════════════════════
    DESKTOP ARCHITECTUUR v221
-   CSS Grid App Shell — alle cascade conflicts opgelost
+   CSS Grid App Shell - alle cascade conflicts opgelost
    
    Gevonden en gefixte issues:
    1. body/html overflow-x:hidden breekt position:sticky
@@ -14710,7 +14710,7 @@ strong.dy-dsp-label {
 .dy-sidebar { display: none; }
 
 /* ══════════════════════════════════════════════════════════════════
-   DESKTOP GRID ARCHITECTUUR — min-width: 1024px
+   DESKTOP GRID ARCHITECTUUR - min-width: 1024px
    ══════════════════════════════════════════════════════════════════ */
 @media (min-width: 1024px) {
 
@@ -15014,7 +15014,7 @@ strong.dy-dsp-label {
    EINDE DESKTOP ARCHITECTUUR v221
    ══════════════════════════════════════════════════════════════════ */
 
-/* ── REVIEW POPUP — zelfde sheet pattern als dy-bpos ─────────────── */
+/* ── REVIEW POPUP - zelfde sheet pattern als dy-bpos ─────────────── */
 .dy-rv-popup-backdrop {
   position: fixed;
   inset: 0;
@@ -15085,7 +15085,7 @@ strong.dy-dsp-label {
 .dy-rv-popup-sluit:hover { background: rgba(253,248,240,0.15); color: rgba(253,248,240,0.95); }
 .dy-rv-popup-foto {
   width: 100%;
-  height: auto;          /* hoogte volgt aspect ratio — geen crop */
+  height: auto;          /* hoogte volgt aspect ratio - geen crop */
   max-height: 60vh;      /* voorkomt dat een staande foto de modal domineert */
   object-fit: contain;   /* volledige foto zichtbaar, geen clipping */
   display: block;
@@ -15118,7 +15118,7 @@ strong.dy-dsp-label {
 /* ── EINDE REVIEW POPUP ────────────────────────────────────────── */
 
 /* ══════════════════════════════════════════════════════════════════
-   VERHAAL POPUP — unified "lees meer" overlay
+   VERHAAL POPUP - unified "lees meer" overlay
    Hergebruikt .dy-sd-* classes voor consistente story detail styling
    ══════════════════════════════════════════════════════════════════ */
 .dy-vp-backdrop {
@@ -15157,7 +15157,7 @@ strong.dy-dsp-label {
   transform: translateY(100%);
   transition: transform 0.36s cubic-bezier(0.32,0.72,0,1);
   position: relative;
-  /* FIX 7: GPU compositing — geen paint tijdens transitie */
+  /* FIX 7: GPU compositing - geen paint tijdens transitie */
   will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -15166,7 +15166,7 @@ strong.dy-dsp-label {
 .dy-vp-in .dy-vp-sheet { transform: translateY(0); }
 .dy-vp-out .dy-vp-sheet { transform: translateY(100%); transition-duration: 0.26s; }
 
-/* Topnav — zelfde structuur als .dy-sd-topnav */
+/* Topnav - zelfde structuur als .dy-sd-topnav */
 .dy-vp-topnav {
   display: flex;
   align-items: center;
@@ -15228,7 +15228,7 @@ strong.dy-dsp-label {
 }
 /* ══ EINDE VERHAAL POPUP ══ */
 
-/* ── Rapporteren knoppen — cross-view consistent ─────────────────── */
+/* ── Rapporteren knoppen - cross-view consistent ─────────────────── */
 
 /* Look tile: klein icoon rechts in de actie-cluster */
 .dy-look-tile-report {
@@ -15293,7 +15293,7 @@ strong.dy-dsp-label {
 /* ── EINDE RAPPORTEREN KNOPPEN ──────────────────────────────────── */
 
 /* ═══════════════════════════════════════════════════════════════════
-   KLEUREN AI — Feature Styles
+   KLEUREN AI - Feature Styles
    ═══════════════════════════════════════════════════════════════════ */
 
 
@@ -15526,7 +15526,7 @@ strong.dy-dsp-label {
   width: 64px;
 }
 .dy-kai-bol {
-  /* Vaste aspect ratio 1:1 via width+height — niet uitrekken */
+  /* Vaste aspect ratio 1:1 via width+height - niet uitrekken */
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -15726,13 +15726,13 @@ strong.dy-dsp-label {
 /* Desktop: sidebar active state */
 .dy-sb-item[data-pagina="kleuren_ai"].active { color: var(--clay); }
 
-/* Upload knoppen — galerij + camera */
+/* Upload knoppen - galerij + camera */
 
 .dy-kai-upload-knop--primair:hover { background: var(--clay-l); }
 
 .dy-kai-upload-knop--secundair:hover { border-color: var(--clay); color: var(--clay); }
 
-/* Kleuren AI v248 — Verhaal knop en vergelijk opties */
+/* Kleuren AI v248 - Verhaal knop en vergelijk opties */
 
 .dy-kai-upload-knop--verhaal:hover {
   border-color: var(--clay);
@@ -16021,7 +16021,7 @@ strong.dy-dsp-label {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   VERGELIJK OUTFIT — Premium 3-Layer UI v255
+   VERGELIJK OUTFIT - Premium 3-Layer UI v255
    ════════════════════════════════════════════════════════════════ */
 
 /* ── CTA Knoppen ─────────────────────────────────────────────── */
@@ -16397,7 +16397,7 @@ strong.dy-dsp-label {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   AFBEELDING DISPLAY v257 — nooit afsnijden, altijd contain
+   AFBEELDING DISPLAY v257 - nooit afsnijden, altijd contain
    ════════════════════════════════════════════════════════════════ */
 
 /* Preview in analyse tab */
@@ -16419,7 +16419,7 @@ strong.dy-dsp-label {
   line-height: 0;
 }
 
-/* Vergelijk slots — outfit volledig zichtbaar */
+/* Vergelijk slots - outfit volledig zichtbaar */
 .dy-kai-verg-slot {
   position: relative;
   background: var(--warm, #f5f0e8);
@@ -16483,7 +16483,7 @@ strong.dy-dsp-label {
   border-radius: 50%;
 }
 
-/* Opgeslagen analyses — geen afsnijding */
+/* Opgeslagen analyses - geen afsnijding */
 .dy-kai-opgeslagen-foto img,
 .dy-kai-opgeslagen-foto {
   width: 100%;
@@ -16510,7 +16510,7 @@ strong.dy-dsp-label {
   border-radius: 10px;
 }
 
-/* Responsief — mobiel */
+/* Responsief - mobiel */
 @media (max-width: 600px) {
   .dy-kai-preview-img { max-height: 55vh !important; }
   .dy-kai-verg-slot img { max-height: 220px !important; }
@@ -16522,7 +16522,7 @@ strong.dy-dsp-label {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v260 — UX + PERFORMANCE VERBETERINGEN
+   v260 - UX + PERFORMANCE VERBETERINGEN
    ════════════════════════════════════════════════════════════════ */
 
 /* Mobiele nav: zorg dat labels niet afgekapt worden */
@@ -16576,13 +16576,13 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v261fix — Tab label + Upload knoppen fixes
+   v261fix - Tab label + Upload knoppen fixes
    ════════════════════════════════════════════════════════════════ */
 
-/* Tab "Vergelijk outfit" — twee regels, gecentreerd, geen afkapping */
+/* Tab "Vergelijk outfit" - twee regels, gecentreerd, geen afkapping */
 
 
-/* Upload knoppen — gelijke breedte, netjes gestapeld, volledig responsief */
+/* Upload knoppen - gelijke breedte, netjes gestapeld, volledig responsief */
 
 
 
@@ -16627,11 +16627,11 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   UPLOAD KNOPPEN + NAV TAB — v262 SCHONE DEFINITIE
+   UPLOAD KNOPPEN + NAV TAB - v262 SCHONE DEFINITIE
    Alle conflicterende definities verwijderd, één bron van waarheid
    ════════════════════════════════════════════════════════════════ */
 
-/* Nav tab label — twee regels toegestaan */
+/* Nav tab label - twee regels toegestaan */
 .dy-nav-item span {
   white-space: normal;
   overflow: visible;
@@ -16643,7 +16643,7 @@ geen layout shift */
   display: block;
 }
 
-/* Upload knoppen container — altijd drie naast elkaar */
+/* Upload knoppen container - altijd drie naast elkaar */
 .dy-kai-upload-knoppen {
   display: flex;
   flex-direction: row;
@@ -16655,7 +16655,7 @@ geen layout shift */
   box-sizing: border-box;
 }
 
-/* Upload knop — gelijke afmeting, gecentreerd */
+/* Upload knop - gelijke afmeting, gecentreerd */
 .dy-kai-upload-knop {
   display: flex;
   flex-direction: column;
@@ -16714,11 +16714,11 @@ geen layout shift */
   }
 }
 
-/* Tab "Vergelijk outfit" — kleinere font voor twee regels in smalle tab */
+/* Tab "Vergelijk outfit" - kleinere font voor twee regels in smalle tab */
 
 
 /* ════════════════════════════════════════════════════════════════
-   v263 — Tab label optimaal
+   v263 - Tab label optimaal
    ════════════════════════════════════════════════════════════════ */
 
 /* Kleuren AI tab: exacte font-size zodat VERGELIJK en OUTFIT
@@ -16726,7 +16726,7 @@ geen layout shift */
 
 
 /* ════════════════════════════════════════════════════════════════
-   v265 — Kleurstalen fallback + lege staat
+   v265 - Kleurstalen fallback + lege staat
    ════════════════════════════════════════════════════════════════ */
 
 /* Bericht als er echt geen kleuren zijn */
@@ -16748,15 +16748,15 @@ geen layout shift */
 /* dy-kai-palette: zie definitie boven */
 
 /* ════════════════════════════════════════════════════════════════
-   v266 — TAB CONSISTENTIE + HEADER FULL-BLEED
+   v266 - TAB CONSISTENTIE + HEADER FULL-BLEED
    Één schone definitie, geen conflicten
    ════════════════════════════════════════════════════════════════ */
 
-/* ── Nav tab "Vergelijk outfit" — consistente typografie ─────────
+/* ── Nav tab "Vergelijk outfit" - consistente typografie ─────────
    Zelfde font-size als andere tabs (0.58rem) is te breed voor uppercase
    "VERGELIJK" in uppercase + letter-spacing = ~88px > 60px tab breedte
    Oplossing: mixed case (geen uppercase), geen extra letter-spacing
-   → "Vergelijk" ≈ 58px, "outfit" ≈ 36px — past in beide regels   */
+   → "Vergelijk" ≈ 58px, "outfit" ≈ 36px - past in beide regels   */
 .dy-nav-item[data-pagina="kleuren_ai"] span {
   font-size: 0.58rem;
   font-weight: 600;
@@ -16816,7 +16816,7 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v267 — STIJLADVIES TAB
+   v267 - STIJLADVIES TAB
    ════════════════════════════════════════════════════════════════ */
 
 /* ── Stijladvies wrapper ──────────────────────────────────────── */
@@ -16999,8 +16999,8 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v268 — PROGRESSIEVE ANALYSE UI
-   Kleuren tonen vóór AI klaar is — perceived performance boost
+   v268 - PROGRESSIEVE ANALYSE UI
+   Kleuren tonen vóór AI klaar is - perceived performance boost
    ════════════════════════════════════════════════════════════════ */
 
 /* Partial resultaat (kleuren wel, AI nog niet) */
@@ -17040,7 +17040,7 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v269 — ADMIN ACTIVITEIT TAB
+   v269 - ADMIN ACTIVITEIT TAB
    ════════════════════════════════════════════════════════════════ */
 
 .dy-adm-act-wrap { padding: var(--sp-4); max-width: 900px; }
@@ -17101,7 +17101,7 @@ geen layout shift */
 .dy-adm-fout { padding: var(--sp-3); color: #c0392b; font-size: var(--t-sm); }
 
 /* ════════════════════════════════════════════════════════════════
-   v270 — FEEDBACK MODULE
+   v270 - FEEDBACK MODULE
    ════════════════════════════════════════════════════════════════ */
 
 .dy-kai-feedback-module {
@@ -17241,7 +17241,7 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v271 — SHARE MODAL + FALLBACK UI
+   v271 - SHARE MODAL + FALLBACK UI
    ════════════════════════════════════════════════════════════════ */
 
 /* Handmatige copy modal */
@@ -17311,7 +17311,7 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v272 — DESKTOP FIXES
+   v272 - DESKTOP FIXES
    ════════════════════════════════════════════════════════════════ */
 
 /* Witte balk fix: home pagina achtergrond = donker ipv cream */
@@ -17393,7 +17393,7 @@ geen layout shift */
 
 /* ════════════════════════════════════════════════════════════════
    Samenwerkingen overlay (v60.1.12)
-   Hergebruikt dy-bpos-* layouttaal — pure additieve stijl.
+   Hergebruikt dy-bpos-* layouttaal - pure additieve stijl.
    ════════════════════════════════════════════════════════════════ */
 .dy-sw-sheet {
   max-width: 720px;
@@ -17490,7 +17490,7 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v273 — HEADER CONSISTENCY FIX
+   v273 - HEADER CONSISTENCY FIX
    Vergelijk outfit + Berichten gebruiken nu .dy-vr-header
    ════════════════════════════════════════════════════════════════ */
 
@@ -17519,7 +17519,7 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v273 HEADER FIX — pseudo-element background
+   v273 HEADER FIX - pseudo-element background
    De dy-vr-header staat buiten dy-kai-wrap maar heeft dezelfde
    breedte als dy-main. Op desktop kan dy-main groter zijn dan
    dy-kai-wrap door box-shadow offset. Fix: header absolute breedte.
@@ -17538,13 +17538,13 @@ geen layout shift */
     width: 100%;
     max-width: none;
   }
-  /* kai-wrap vult dy-main volledig — max-width is al op dy-main gezet */
+  /* kai-wrap vult dy-main volledig - max-width is al op dy-main gezet */
   .dy-kai-page > .dy-kai-wrap,
   
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v274 FIX — kai-tabs sticky correct
+   v274 FIX - kai-tabs sticky correct
    De vr-header staat NU buiten dy-kai-wrap (als sibling in dy-main).
    De tabs zijn de EERSTE child van dy-kai-wrap.
    Sticky werkt tov viewport. top = hoogte van alle sticky elementen erboven.
@@ -17556,7 +17556,7 @@ geen layout shift */
 .dy-kai-page 
 
 /* ════════════════════════════════════════════════════════════════
-   v275 FINAL — .dy-kai-header identiek aan .dy-vr-header
+   v275 FINAL - .dy-kai-header identiek aan .dy-vr-header
    Header zit IN dy-kai-wrap (stabiel, upload card werkt).
    Stijl is identiek aan Vrienden/Winkel header.
    Full-bleed via negatieve marges zodat header de volle dy-main breedte vult.
@@ -17624,7 +17624,7 @@ geen layout shift */
 
 
 /* ════════════════════════════════════════════════════════════════
-   v276 FIX — dy-kai-header FULL WIDTH gegarandeerd
+   v276 FIX - dy-kai-header FULL WIDTH gegarandeerd
    Gebruik left/right: 0 met position sticky zodat de header
    altijd de volle breedte van dy-main vult, ongeacht de kai-wrap.
    ════════════════════════════════════════════════════════════════ */
@@ -17638,7 +17638,7 @@ geen layout shift */
   }
 }
 
-/* ── legal terms link — desktop only ────────────────────────── */
+/* ── legal terms link - desktop only ────────────────────────── */
 .dy-profiel-legal-desktop {
   display: none; /* verborgen op mobiel + tablet */
 }
@@ -17665,7 +17665,7 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v279 — OUTFIT VOORSPELLER + WHY IT WORKS + A/B TESTER
+   v279 - OUTFIT VOORSPELLER + WHY IT WORKS + A/B TESTER
    ════════════════════════════════════════════════════════════════ */
 
 /* ── Outfit Voorspeller ─────────────────────────────────────── */
@@ -17873,7 +17873,7 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v280 — STYLE PROFILE + MATCH BANNER + IMPROVEMENT ENGINE
+   v280 - STYLE PROFILE + MATCH BANNER + IMPROVEMENT ENGINE
    ════════════════════════════════════════════════════════════════ */
 
 /* ── Match Banner ─────────────────────────────────────────────── */
@@ -17970,7 +17970,7 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   v282 — WOULD YOU WEAR THIS — JA/NEE UX FLOW
+   v282 - WOULD YOU WEAR THIS - JA/NEE UX FLOW
    ════════════════════════════════════════════════════════════════ */
 
 /* ── Poll bevestiging ─────────────────────────────────────────── */
@@ -18136,11 +18136,11 @@ geen layout shift */
 .dy-kai-why-uitleg { word-break: break-word; }
 
 /* ════════════════════════════════════════════════════════════════
-   PREMIUM INPUT CLUSTER — Vergelijk Mijn Outfit
+   PREMIUM INPUT CLUSTER - Vergelijk Mijn Outfit
    Apple-level clean · AI fashion feel · mobile-first
    ════════════════════════════════════════════════════════════════ */
 
-/* ── Cluster wrapper — één samenhangend blok ─────────────────── */
+/* ── Cluster wrapper - één samenhangend blok ─────────────────── */
 .dy-kai-input-cluster {
   display: flex;
   flex-direction: row;
@@ -18151,7 +18151,7 @@ geen layout shift */
   box-sizing: border-box;
 }
 
-/* ── Base knop — gedeelde stijl ─────────────────────────────── */
+/* ── Base knop - gedeelde stijl ─────────────────────────────── */
 .dy-kai-input-btn {
   display: flex;
   flex-direction: column;
@@ -18209,7 +18209,7 @@ geen layout shift */
   line-height: 1;
 }
 
-/* ── PRIMARY — Galerij (goud gradient) ──────────────────────── */
+/* ── PRIMARY - Galerij (goud gradient) ──────────────────────── */
 .dy-kai-input-btn--primary {
   background: linear-gradient(145deg, #d4890a 0%, #b36b04 55%, #9a5c03 100%);
   color: #fff;
@@ -18241,7 +18241,7 @@ geen layout shift */
     inset 0 1px 0 rgba(255,255,255,0.10);
 }
 
-/* ── SECONDARY — Camera + Verhaal (glas/cream) ──────────────── */
+/* ── SECONDARY - Camera + Verhaal (glas/cream) ──────────────── */
 .dy-kai-input-btn--secondary {
   background: rgba(254,252,245,0.92);
   color: var(--ink, #1e1a0f);
@@ -18316,7 +18316,7 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   PREMIUM UPLOAD KNOPPEN — overschrijft alle vorige definities
+   PREMIUM UPLOAD KNOPPEN - overschrijft alle vorige definities
    Werkt met bestaande klasse namen → cache-safe
    ════════════════════════════════════════════════════════════════ */
 
@@ -18429,10 +18429,10 @@ geen layout shift */
 }
 
 /* ════════════════════════════════════════════════════════════════
-   PREMIUM OUTFIT A / B SLOTS — consistent met upload cluster
+   PREMIUM OUTFIT A / B SLOTS - consistent met upload cluster
    ════════════════════════════════════════════════════════════════ */
 
-/* ── Slot card — premium cream/glass stijl ──────────────────── */
+/* ── Slot card - premium cream/glass stijl ──────────────────── */
 .dy-kai-verg-slot {
   border: 1.5px solid rgba(198,125,6,0.20) !important;
   border-radius: 18px !important;
@@ -18509,7 +18509,7 @@ geen layout shift */
   padding: 0 4px !important;
 }
 
-/* ── Opt knoppen — premium klein ─────────────────────────────── */
+/* ── Opt knoppen - premium klein ─────────────────────────────── */
 .dy-kai-verg-opt {
   display: flex !important;
   align-items: center !important;
@@ -18567,7 +18567,7 @@ geen layout shift */
 }
 
 /* ══════════════════════════════════════════════════════════════
-   POST VAN DE WEEK — v293
+   POST VAN DE WEEK - v293
    ══════════════════════════════════════════════════════════════ */
 
 /* Recente posts header */
@@ -18690,7 +18690,7 @@ geen layout shift */
 }
 
 /* ══════════════════════════════════════════════════════════════
-   AI STYLIST CONTEXT — v301
+   AI STYLIST CONTEXT - v301
    ══════════════════════════════════════════════════════════════ */
 
 .dy-kai-ctx-wrap {
@@ -18796,7 +18796,7 @@ geen layout shift */
 }
 
 /* ══════════════════════════════════════════════════════════════
-   OUTFIT VERGELIJKER — context dropdowns + gate — v302
+   OUTFIT VERGELIJKER - context dropdowns + gate - v302
    ══════════════════════════════════════════════════════════════ */
 
 .dy-kai-ctx-grid {
@@ -18883,7 +18883,7 @@ geen layout shift */
 .dy-kai-verg-gate p { margin: 0; max-width: 260px; }
 
 /* ══════════════════════════════════════════════════════════════
-   CONTEXT VELDEN — AUTH GATING — v305-p1
+   CONTEXT VELDEN - AUTH GATING - v305-p1
    ══════════════════════════════════════════════════════════════ */
 .dy-kai-ctx-locked {
   opacity: 0.45;
@@ -18900,7 +18900,7 @@ select.dy-kai-ctx-locked {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   CUSTOM DROPDOWN — Premium v307
+   CUSTOM DROPDOWN - Premium v307
    ══════════════════════════════════════════════════════════════ */
 
 .dy-ctx-dd {
@@ -18992,7 +18992,7 @@ select.dy-kai-ctx-locked {
 .dy-ctx-dd-panel::-webkit-scrollbar-track { background: transparent; }
 .dy-ctx-dd-panel::-webkit-scrollbar-thumb { background: rgba(198,125,6,0.25); border-radius: 4px; }
 
-/* Opties — desktop */
+/* Opties - desktop */
 .dy-ctx-dd-opt {
   display: flex;
   align-items: center;
@@ -19062,7 +19062,7 @@ select.dy-kai-ctx-locked {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   VERBETERKNOPPEN — v311-uitbreiding
+   VERBETERKNOPPEN - v311-uitbreiding
    ══════════════════════════════════════════════════════════════ */
 
 .dy-kai-vb-wrap { margin-top: var(--sp-2); }
@@ -19180,7 +19180,7 @@ select.dy-kai-ctx-locked {
 .dy-kai-vb-fout { font-size: var(--t-sm); color: rgba(253,248,240,0.45); text-align: center; padding: var(--sp-3); }
 
 /* ══════════════════════════════════════════════════════════════
-   AI STYLIST CHAT — v311-uitbreiding
+   AI STYLIST CHAT - v311-uitbreiding
    ══════════════════════════════════════════════════════════════ */
 
 .dy-kai-chat-wrap { margin-top: var(--sp-2); }
@@ -19310,7 +19310,7 @@ select.dy-kai-ctx-locked {
 .dy-kai-chat-send:active { transform: scale(0.93); }
 
 /* ══════════════════════════════════════════════════════════════
-   KIES OUTFIT MODAL — Premium v318
+   KIES OUTFIT MODAL - Premium v318
    ══════════════════════════════════════════════════════════════ */
 
 .dy-kv-modal {
@@ -19524,7 +19524,7 @@ select.dy-kai-ctx-locked {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   UPLOAD KAARTEN GRID — Premium v322
+   UPLOAD KAARTEN GRID - Premium v322
    ══════════════════════════════════════════════════════════════ */
 
 /* Upload card: ruimer voor kaarten grid */
@@ -19610,7 +19610,7 @@ select.dy-kai-ctx-locked {
   transition-duration: 0.08s;
 }
 
-/* Galerij kaart — goud */
+/* Galerij kaart - goud */
 .dy-kai-up-kaart--goud {
   background: linear-gradient(135deg, var(--clay) 0%, #b86d04 100%);
   border-color: transparent;
@@ -19627,7 +19627,7 @@ select.dy-kai-ctx-locked {
 .dy-kai-up-kaart--goud .dy-kai-up-kaart-desc  { color: rgba(255,255,255,0.75); }
 .dy-kai-up-kaart--goud .dy-kai-up-kaart-pijl  { color: rgba(255,255,255,0.6); }
 
-/* Camera kaart — donker/ink */
+/* Camera kaart - donker/ink */
 .dy-kai-up-kaart--donker {
   background: var(--ink);
   border-color: transparent;
@@ -19644,7 +19644,7 @@ select.dy-kai-ctx-locked {
 .dy-kai-up-kaart--donker .dy-kai-up-kaart-desc  { color: rgba(252,248,239,0.55); }
 .dy-kai-up-kaart--donker .dy-kai-up-kaart-pijl  { color: rgba(252,248,239,0.4); }
 
-/* Verhaal kaart — dark variant (was licht/cream) */
+/* Verhaal kaart - dark variant (was licht/cream) */
 .dy-kai-up-kaart--licht {
   background: rgba(50,40,16,0.95);
   border-color: rgba(198,125,6,0.30);
@@ -19754,7 +19754,7 @@ select.dy-kai-ctx-locked {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   VERGELIJK SLOTS — Premium kaarten v323
+   VERGELIJK SLOTS - Premium kaarten v323
    ══════════════════════════════════════════════════════════════ */
 
 /* Slot container: geen vaste hoogte als leeg, aspect-ratio als foto geladen */
@@ -19861,7 +19861,7 @@ select.dy-kai-ctx-locked {
   flex: 1;
 }
 
-/* Slot A — goud als primair */
+/* Slot A - goud als primair */
 .dy-kai-verg-kaart--goud {
   background: linear-gradient(135deg, var(--clay) 0%, #b86d04 100%);
   color: #fff;
@@ -19875,7 +19875,7 @@ select.dy-kai-ctx-locked {
 }
 .dy-kai-verg-kaart--goud .dy-kai-verg-kaart-label { color: #fff; }
 
-/* Slot B — donker als primair */
+/* Slot B - donker als primair */
 .dy-kai-verg-kaart--donker {
   background: var(--ink);
   color: var(--cream);
@@ -19889,7 +19889,7 @@ select.dy-kai-ctx-locked {
 }
 .dy-kai-verg-kaart--donker .dy-kai-verg-kaart-label { color: var(--cream); }
 
-/* Camera — neutraal */
+/* Camera - neutraal */
 .dy-kai-verg-kaart--neutraal {
   background: var(--white);
   border-color: var(--border);
@@ -19905,7 +19905,7 @@ select.dy-kai-ctx-locked {
 }
 .dy-kai-verg-kaart--neutraal .dy-kai-verg-kaart-label { color: var(--ink); }
 
-/* Verhaal — licht */
+/* Verhaal - licht */
 .dy-kai-verg-kaart--licht {
   background: rgba(50,40,16,0.95);
   border-color: rgba(198,125,6,0.28);
@@ -19938,10 +19938,10 @@ select.dy-kai-ctx-locked {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   VERGELIJK SLOT KNOPPEN — Herontwerp v324b
+   VERGELIJK SLOT KNOPPEN - Herontwerp v324b
    ══════════════════════════════════════════════════════════════ */
 
-/* Slot: geen vaste hoogte — groeit mee met inhoud */
+/* Slot: geen vaste hoogte - groeit mee met inhoud */
 .dy-kai-verg-slot {
   min-height: 0 !important;
   max-height: none !important;
@@ -20073,7 +20073,7 @@ select.dy-kai-ctx-locked {
 }
 .dy-kvs-knop:hover .dy-kvs-pijl { transform: translateX(2px); opacity: 0.7; }
 
-/* Primair — Galerij, goud */
+/* Primair - Galerij, goud */
 .dy-kvs-knop--primair {
   background: linear-gradient(135deg, var(--clay) 0%, #b06205 100%);
   color: #fff;
@@ -20084,7 +20084,7 @@ select.dy-kai-ctx-locked {
 .dy-kvs-knop--primair .dy-kvs-knop-sub   { color: rgba(255,255,255,0.85); }
 .dy-kvs-knop--primair .dy-kvs-pijl       { color: rgba(255,255,255,0.6); }
 
-/* Secundair — Camera, neutraal */
+/* Secundair - Camera, neutraal */
 .dy-kvs-knop--sec {
   background: rgba(50,40,16,1.0) !important;
   border-color: rgba(198,125,6,0.35) !important;
@@ -20095,7 +20095,7 @@ select.dy-kai-ctx-locked {
 .dy-kvs-knop--sec .dy-kvs-knop-label { color: rgba(253,248,240,0.95) !important; }
 .dy-kvs-knop--sec .dy-kvs-knop-sub   { color: rgba(253,248,240,0.80) !important; }
 
-/* Tertiair — Verhaal, licht */
+/* Tertiair - Verhaal, licht */
 .dy-kvs-knop--ter {
   background: rgba(50,40,16,1.0) !important;
   border-color: rgba(198,125,6,0.35) !important;
@@ -20133,10 +20133,10 @@ select.dy-kai-ctx-locked {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   VERGELIJK SLOT — Wis knop + foto display v327b
+   VERGELIJK SLOT - Wis knop + foto display v327b
    ══════════════════════════════════════════════════════════════ */
 
-/* Wis knop — altijd zichtbaar op foto */
+/* Wis knop - altijd zichtbaar op foto */
 .dy-kvs-wis-knop {
   position: absolute;
   top: 8px;
@@ -20172,7 +20172,7 @@ select.dy-kai-ctx-locked {
 
 
 /* ══════════════════════════════════════════════════════════════
-   DESKTOP FEED REEL-ITEM — Definitieve hoogte fix
+   DESKTOP FEED REEL-ITEM - Definitieve hoogte fix
    Gemeten: stories=107px, filters=47px, totaal boven reel=154px
    ══════════════════════════════════════════════════════════════ */
 @media (min-width: 1024px) {
@@ -20194,7 +20194,7 @@ select.dy-kai-ctx-locked {
 
 
 /* ══════════════════════════════════════════════════════════════════
-   SPRINT 1 — FEED CARD & AI SOCIAL LAYER UPGRADE (v331)
+   SPRINT 1 - FEED CARD & AI SOCIAL LAYER UPGRADE (v331)
    Community Score, AI Analyse, Bookmark Systeem
    ══════════════════════════════════════════════════════════════════ */
 
@@ -20310,7 +20310,7 @@ select.dy-kai-ctx-locked {
   pointer-events: all;
 }
 .dy-reel-item .dy-score-header {
-  display: none; /* score header verborgen in reel — te druk, zie popup */
+  display: none; /* score header verborgen in reel - te druk, zie popup */
 }
 .dy-reel-item .dy-score-reactie-btn {
   background: rgba(252,248,239,0.08);
@@ -20331,7 +20331,7 @@ select.dy-kai-ctx-locked {
   background: rgba(198,125,6,0.35);
 }
 
-/* ── BOOKMARK KNOP — detail popup ──────────────────────────────── */
+/* ── BOOKMARK KNOP - detail popup ──────────────────────────────── */
 
 .dy-sd-actie-btn.dy-bookmark-btn.saved {
   color: var(--clay);
@@ -20541,7 +20541,7 @@ select.dy-kai-ctx-locked {
   border-radius: 0 0 var(--r-md) var(--r-md);
 }
 .dy-ai-panel.open {
-  /* Geen vaste max-height — inhoud bepaalt de hoogte op alle schermformaten */
+  /* Geen vaste max-height - inhoud bepaalt de hoogte op alle schermformaten */
   max-height: none;
   opacity: 1;
   border-top: 1px solid rgba(198,125,6,0.18);
@@ -20597,7 +20597,7 @@ select.dy-kai-ctx-locked {
   50%       { opacity: 0.7; transform: scale(1.06); border-color: rgba(198,125,6,0.60); }
 }
 .dy-ai-w-letter {
-  /* Geen extra stijl nodig — erft van parent */
+  /* Geen extra stijl nodig - erft van parent */
   line-height: 1;
   display: block;
 }
@@ -20777,19 +20777,19 @@ select.dy-kai-ctx-locked {
 
 
 /* ══════════════════════════════════════════════════════════════════
-   v363 — OPGESLAGEN OUTFITS TAB + STEM FIXES
+   v363 - OPGESLAGEN OUTFITS TAB + STEM FIXES
    ══════════════════════════════════════════════════════════════════ */
 
 /* ── Opgeslagen outfits sectie in profiel ─────────────────────── */
 
-/* ── Opgeslagen sectie — accordion wrapper (zelfde structuur als .dy-ps-dd-wrap) ─ */
+/* ── Opgeslagen sectie - accordion wrapper (zelfde structuur als .dy-ps-dd-wrap) ─ */
 
 .dy-opgeslagen-sectie {
-  /* Erft .dy-ps-dd-wrap stijlen — border-bottom, overflow:hidden, background:white */
+  /* Erft .dy-ps-dd-wrap stijlen - border-bottom, overflow:hidden, background:white */
   margin-top: 8px;
 }
 
-/* Body — ingeklist by default, identiek aan dy-ps-dd-body animatie */
+/* Body - ingeklist by default, identiek aan dy-ps-dd-body animatie */
 .dy-opg-body {
   border-top: 1px solid rgba(198,125,6,0.08);
 }
@@ -20849,19 +20849,19 @@ select.dy-kai-ctx-locked {
 .dy-opg-kaart:active { opacity: 0.88; }
 .dy-opg-kaart:focus-visible { outline: 2px solid var(--clay); outline-offset: 2px; }
 
-/* Foto wrapper — GEEN overflow:hidden, GEEN vaste hoogte die afkapt */
+/* Foto wrapper - GEEN overflow:hidden, GEEN vaste hoogte die afkapt */
 .dy-opg-foto-wrap {
   width: 100%;
   background: var(--warm);
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Aspect ratio als container — foto past hier BINNEN */
+  /* Aspect ratio als container - foto past hier BINNEN */
   aspect-ratio: 3/4;
   position: relative;
 }
 
-/* Foto — volledig zichtbaar, geen afkapping */
+/* Foto - volledig zichtbaar, geen afkapping */
 .dy-opg-foto {
   /* object-fit: contain = volledige outfit zichtbaar, nooit afgesneden */
   width: 100%;
@@ -20869,7 +20869,7 @@ select.dy-kai-ctx-locked {
   object-fit: contain;
   object-position: center center;
   display: block;
-  /* Geen transform op hover — voorkomt scale-afkap effect */
+  /* Geen transform op hover - voorkomt scale-afkap effect */
 }
 
 /* Placeholder bij ontbrekende foto */
@@ -20950,7 +20950,7 @@ select.dy-kai-ctx-locked {
 }
 
 /* ── v374c: AI palet kleurstalen ────────────────────────────────── */
-/* dy-ai-palet: story card kleurstalen — zelfde systeem als dy-kai */
+/* dy-ai-palet: story card kleurstalen - zelfde systeem als dy-kai */
 .dy-ai-palet {
   display: flex;
   flex-wrap: wrap;
@@ -21269,7 +21269,7 @@ select.dy-kai-ctx-locked {
   letter-spacing: 0.02em;
 }
 
-/* Vrienden gast-state: geen witte balk — directe child selector, werkt op alle browsers */
+/* Vrienden gast-state: geen witte balk - directe child selector, werkt op alle browsers */
 /* Mobiel: position fixed dekt volledige viewport, bypassed alle height/padding problemen */
 @media (max-width: 1023px) {
   .dy-main > .dy-postuur-locked {
@@ -21312,12 +21312,12 @@ select.dy-kai-ctx-locked {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   OUTFIT REVIEW — VERBETER JOUW OUTFIT — RESPONSIVE
+   OUTFIT REVIEW - VERBETER JOUW OUTFIT - RESPONSIVE
    Alleen responsive correcties voor de verbeter-sectie binnen
    dy-ai-panel. Desktop-weergave ongewijzigd.
    ══════════════════════════════════════════════════════════════════ */
 
-/* Basisfix: verbeter-wrap heeft negatieve marge t.o.v. panel-padding —
+/* Basisfix: verbeter-wrap heeft negatieve marge t.o.v. panel-padding -
    compenseer zodat het niet buiten de panelrand uitsteekt */
 .dy-ai-panel .dy-kai-vb-wrap,
 .dy-ai-panel .dy-or-verbeter-wrap {
@@ -21437,7 +21437,7 @@ select.dy-kai-ctx-locked {
   .dy-ai-panel .dy-kai-vb-label { font-size: 0.72rem; }
 }
 
-/* ── Tablets landscape + desktop (≥768px) — desktop ongewijzigd ─── */
+/* ── Tablets landscape + desktop (≥768px) - desktop ongewijzigd ─── */
 @media (min-width: 768px) {
   .dy-ai-panel .dy-kai-vb-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -21449,7 +21449,7 @@ select.dy-kai-ctx-locked {
   }
 }
 
-/* ── Ultrawide (≥1200px) — layout begrensd door max-width panel ─── */
+/* ── Ultrawide (≥1200px) - layout begrensd door max-width panel ─── */
 @media (min-width: 1200px) {
   .dy-ai-panel .dy-kai-vb-grid {
     grid-template-columns: repeat(6, 1fr);
@@ -21475,7 +21475,7 @@ select.dy-kai-ctx-locked {
 
 
 /* ══════════════════════════════════════════════════════════════════
-   STORY VIEWERS — v393
+   STORY VIEWERS - v393
    ══════════════════════════════════════════════════════════════════ */
 
 /* ── Viewers-knop in de acties-balk ─────────────────────────── */
@@ -22097,7 +22097,7 @@ select.dy-kai-ctx-locked {
 
 
 /* ═══════════════════════════════════════════════════════════════════
-   OUTFIT CHALLENGES — UITBREIDING STIJLEN
+   OUTFIT CHALLENGES - UITBREIDING STIJLEN
    ═══════════════════════════════════════════════════════════════════ */
 
 /* Challenge detail pagina */
@@ -22205,7 +22205,7 @@ select.dy-kai-ctx-locked {
 
 
 /* ═══════════════════════════════════════════════════════════════════
-   CHALLENGE KAARTEN — VOLLEDIG HERSCHREVEN PREMIUM DARK DESIGN
+   CHALLENGE KAARTEN - VOLLEDIG HERSCHREVEN PREMIUM DARK DESIGN
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ── Standaard challenge kaart ──────────────────────────────────── */
@@ -22418,7 +22418,7 @@ select.dy-kai-ctx-locked {
 
 
 
-/* ── Unified composer overrides — teksten zichtbaar op donkere achtergrond ── */
+/* ── Unified composer overrides - teksten zichtbaar op donkere achtergrond ── */
 .dy-composer-wrap .dy-label,
 .dy-composer-wrap .dy-fc-maat-label,
 .dy-composer-wrap label {
@@ -22488,7 +22488,7 @@ select.dy-kai-ctx-locked {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   MOBILE PARITY — Dark design system enforcement alle devices
+   MOBILE PARITY - Dark design system enforcement alle devices
    ══════════════════════════════════════════════════════════════ */
 @media (max-width: 600px) {
   /* Zeker stellen dat dark surfaces ook op mobiel gelden */
@@ -22547,7 +22547,7 @@ select.dy-kai-ctx-locked {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   VERHAAL POPUP (dy-vp-sheet) — VOLLEDIG DARK DESIGN SYSTEEM
+   VERHAAL POPUP (dy-vp-sheet) - VOLLEDIG DARK DESIGN SYSTEEM
    ══════════════════════════════════════════════════════════════ */
 
 /* Sheet achtergrond */
@@ -22654,7 +22654,7 @@ select.dy-kai-ctx-locked {
 }
 
 
-/* ══ REVIEW POPUP — tekst altijd cream op dark achtergrond ══════ */
+/* ══ REVIEW POPUP - tekst altijd cream op dark achtergrond ══════ */
 .dy-rv-popup-sheet {
   color: rgba(253,248,240,0.92);
 }
@@ -22667,7 +22667,7 @@ select.dy-kai-ctx-locked {
 
 
 /* ════════════════════════════════════════════════════════════════
-   iOS FIXES — v138 (Januari 2026)
+   iOS FIXES - v138 (Januari 2026)
    Doel: layout identiek aan Android op iPhone Safari
    Oorzaak: iOS Safari schaalt tekst en berekent flex-breedtes net
    iets anders, waardoor labels wrappen en knoppen worden afgesneden

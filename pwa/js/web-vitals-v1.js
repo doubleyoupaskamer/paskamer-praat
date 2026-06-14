@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Web Vitals v1 (non-invasief)
+// Paskamer Praat - Web Vitals v1 (non-invasief)
 //
 // Captured Core Web Vitals via PerformanceObserver en logt batched
 // naar Firestore `kai_events`. Pure browser API's, geen externe lib.
@@ -73,7 +73,7 @@
   // ── CLS ──
   // Spec: alleen layout shifts zonder recent user input mogen
   // gecumuleerd worden in een 5s/1s session-window. Voor hier doen
-  // we de simpele cumulatieve variant — accuraat genoeg voor logging.
+  // we de simpele cumulatieve variant - accuraat genoeg voor logging.
   safeObserve('layout-shift', function(entries) {
     for (var i = 0; i < entries.length; i++) {
       var e = entries[i];
@@ -84,7 +84,7 @@
 
   // ── INP (max event duration) ──
   // Niet de officiële p98 implementatie van web-vitals lib, maar een
-  // pragmatische "max recent interaction" — onthult slechtste latency.
+  // pragmatische "max recent interaction" - onthult slechtste latency.
   var maxInp = 0;
   safeObserve('event', function(entries) {
     for (var i = 0; i < entries.length; i++) {

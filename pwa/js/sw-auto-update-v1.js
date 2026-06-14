@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Service Worker Auto-Update v1
+// Paskamer Praat - Service Worker Auto-Update v1
 // Non-invasief: detecteert nieuwe SW versie en activeert deze meteen
 // zodat gebruikers geen "oude versie cache" meer ervaren na een deploy.
 //
@@ -59,7 +59,7 @@
         try { window.location.reload(); } catch (e) {}
       };
       document.body.appendChild(t);
-      // Auto-hide na 8 sec (als gebruiker niet klikt — update gebeurt
+      // Auto-hide na 8 sec (als gebruiker niet klikt - update gebeurt
       // automatisch bij volgende navigatie/reload)
       setTimeout(function() {
         try { t.style.opacity = '0'; t.style.transition='opacity .4s'; } catch (e) {}
@@ -125,7 +125,7 @@
           }
         });
       })
-      .catch(function() { /* stille fail — bestaande SW blijft werken */ });
+      .catch(function() { /* stille fail - bestaande SW blijft werken */ });
   }
 
   // Start zodra DOM klaar is (defer maakt dit feitelijk overbodig, maar veilig)

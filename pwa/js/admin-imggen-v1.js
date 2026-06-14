@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════
-// PASKAMERPRAAT — Admin Image + Video Generator UI (v60.1.44)
+// PASKAMERPRAAT - Admin Image + Video Generator UI (v60.1.44)
 // Backend endpoints:
 //   POST /api/admin/generate-image  (Gemini Nano Banana)
 //   POST /api/admin/generate-video  (Sora 2 via Emergent LLM Key)
@@ -98,7 +98,7 @@
         '<div id="ig-pane-img">' +
           '<div class="bp-veld"><span>Voorbeeld-prompt (optioneel)</span>' +
             '<select id="ig-preset" style="width:100%;background:#1a1612;color:#fcf8ef;border:1px solid rgba(252,248,239,0.18);border-radius:10px;padding:10px">' +
-              '<option value="">— Kies een voorbeeld of typ zelf —</option>' + imgPresetOpts +
+              '<option value="">- Kies een voorbeeld of typ zelf -</option>' + imgPresetOpts +
             '</select></div>' +
           '<div class="bp-veld"><span>Prompt</span>' +
             '<textarea id="ig-prompt" rows="6" style="width:100%;background:#1a1612;color:#fcf8ef;border:1px solid rgba(252,248,239,0.18);border-radius:10px;padding:12px;font-size:0.92rem;line-height:1.5;resize:vertical"></textarea></div>' +
@@ -117,7 +117,7 @@
         '<div id="ig-pane-vid" style="display:none">' +
           '<div class="bp-veld"><span>Voorbeeld-prompt</span>' +
             '<select id="vg-preset" style="width:100%;background:#1a1612;color:#fcf8ef;border:1px solid rgba(252,248,239,0.18);border-radius:10px;padding:10px">' +
-              '<option value="">— Kies een voorbeeld of typ zelf —</option>' + vidPresetOpts +
+              '<option value="">- Kies een voorbeeld of typ zelf -</option>' + vidPresetOpts +
             '</select></div>' +
           '<div class="bp-veld"><span>Scene prompt</span>' +
             '<textarea id="vg-prompt" rows="6" placeholder="Beschrijf de scène, camerabeweging, belichting..." style="width:100%;background:#1a1612;color:#fcf8ef;border:1px solid rgba(252,248,239,0.18);border-radius:10px;padding:12px;font-size:0.92rem;line-height:1.5;resize:vertical"></textarea></div>' +

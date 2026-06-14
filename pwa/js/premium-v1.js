@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Premium Tier v55 (Stripe checkout error-handling fix)
+// Paskamer Praat - Premium Tier v55 (Stripe checkout error-handling fix)
 //
 // v55 changes (vs v54):
 //   • Robuuste apiBase() fallback (LIVE_BACKEND_FALLBACK als aiHealth nog niet geladen)
@@ -25,7 +25,7 @@
   var LS_USERKEY = 'dy_premium_userkey'; // anoniem fallback id
 
   // ─── Helpers ─────────────────────────────────────────────────────
-  // Hardcoded LIVE backend fallback — used als aiHealth nog niet geladen is
+  // Hardcoded LIVE backend fallback - used als aiHealth nog niet geladen is
   // bij vroege click (race condition op iOS PWA). Komt overeen met
   // LIVE_BACKEND in ai-health-v1.js.
   var LIVE_BACKEND_FALLBACK = 'https://paskamer-stability.preview.emergentagent.com';
@@ -236,7 +236,7 @@
         return;
       }
 
-      // Parse JSON defensively — backend kan 502 + JSON, 503 + JSON, of HTML-error retourneren
+      // Parse JSON defensively - backend kan 502 + JSON, 503 + JSON, of HTML-error retourneren
       var d = null;
       var rawText = '';
       try {
@@ -323,7 +323,7 @@
 
   // ─── Customer Portal (cancel/manage abonnement) ──────────────────
   // v60.1.59: vervangt vorige alert/portal-call door volwaardige in-app
-  // beheer-modal. Geen 501-alert meer — graceful fallback voor alle states.
+  // beheer-modal. Geen 501-alert meer - graceful fallback voor alle states.
   async function openCustomerPortal() {
     var modal = document.getElementById('dy-prem-manage-overlay');
     if (modal) { modal.remove(); }
@@ -410,10 +410,10 @@
         '<p class="dy-prem-sub">Je hebt op dit moment <strong>geen actief Premium abonnement</strong>. Ontgrendel onbeperkt try-on, AI Style Score &amp; meer.</p>' +
         '<div class="dy-prem-kv" data-testid="prem-status-block">' +
           '<dt>Status</dt><dd><span class="dy-prem-pill fail">Niet actief</span></dd>' +
-          '<dt>Account</dt><dd>' + _esc(emailNow || '—') + '</dd>' +
+          '<dt>Account</dt><dd>' + _esc(emailNow || ' - ') + '</dd>' +
         '</div>' +
         '<div class="dy-prem-actions">' +
-          '<button class="dy-prem-btn primary" data-testid="prem-cta-upgrade" onclick="document.getElementById(\'dy-prem-manage-overlay\').remove(); PP_Premium.openUpgrade();">Word Premium — €4,99/maand</button>' +
+          '<button class="dy-prem-btn primary" data-testid="prem-cta-upgrade" onclick="document.getElementById(\'dy-prem-manage-overlay\').remove(); PP_Premium.openUpgrade();">Word Premium - €4,99/maand</button>' +
           '<button class="dy-prem-btn ghost" onclick="document.getElementById(\'dy-prem-manage-overlay\').remove()">Sluiten</button>' +
         '</div>';
       return;
@@ -426,11 +426,11 @@
     if (plan === 'premium_monthly') {
       // Stripe-paid user: support email-based cancel until Customer Portal live
       var mailto = 'mailto:support@paskamerpraat.nl?subject=' +
-        encodeURIComponent('Opzeggen Premium — ' + (emailNow || '')) +
+        encodeURIComponent('Opzeggen Premium - ' + (emailNow || '')) +
         '&body=' + encodeURIComponent('Hoi, ik wil mijn Premium abonnement opzeggen.\nE-mail: ' + (emailNow || ''));
       manageBtns =
         '<a class="dy-prem-btn ghost" href="' + mailto + '" data-testid="prem-mailto-cancel">Opzeggen via e-mail</a>' +
-        '<button class="dy-prem-btn danger" data-testid="prem-info-portal" onclick="alert(\'De Stripe Customer Portal wordt binnenkort beschikbaar. Voor nu kun je opzeggen via e-mail — verwerking binnen 24u.\')">Annuleren via Stripe (binnenkort)</button>';
+        '<button class="dy-prem-btn danger" data-testid="prem-info-portal" onclick="alert(\'De Stripe Customer Portal wordt binnenkort beschikbaar. Voor nu kun je opzeggen via e-mail - verwerking binnen 24u.\')">Annuleren via Stripe (binnenkort)</button>';
     } else if (plan === 'premium_admin') {
       manageBtns = '<p class="dy-prem-sub" style="margin:0">Deze toegang is verleend via admin-override. Beheer via Admin → Premium.</p>';
     } else {
@@ -444,10 +444,10 @@
       '<p class="dy-prem-sub">Bedankt dat je Premium gebruikt. Hier zie je je status, vervaldatum en beheeropties.</p>' +
       '<div class="dy-prem-kv" data-testid="prem-status-block">' +
         '<dt>Status</dt><dd><span class="dy-prem-pill ' + pillClass + '">' + pillLabel + '</span></dd>' +
-        '<dt>Plan</dt><dd>' + _esc(src || '—') + '</dd>' +
+        '<dt>Plan</dt><dd>' + _esc(src || ' - ') + '</dd>' +
         (activated ? '<dt>Sinds</dt><dd>' + _esc(activated) + '</dd>' : '') +
         (expires   ? '<dt>Vervalt op</dt><dd>' + _esc(expires) + '</dd>' : '') +
-        '<dt>Account</dt><dd>' + _esc(emailNow || '—') + '</dd>' +
+        '<dt>Account</dt><dd>' + _esc(emailNow || ' - ') + '</dd>' +
       '</div>' +
       '<ul class="dy-prem-feat" data-testid="prem-feat-list">' +
         '<li>Virtual Try-on</li>' +
@@ -466,7 +466,7 @@
 
   // ─── Card-hub menu integratie (vervangt vorige floating pill) ────
   // Voegt "👑 Upgrade naar Premium" dynamisch toe aan de bestaande
-  // drie-puntjes hub popover (extra-menu-v3.js) — zodat geen overlap
+  // drie-puntjes hub popover (extra-menu-v3.js) - zodat geen overlap
   // met tabs of bottom-nav meer optreedt.
   function injectIntoCardHub() {
     var POP_ID = 'dy-card-hub-pop';
@@ -586,7 +586,7 @@
       '#dy-premium-modal .dy-prem-pay:disabled{opacity:.7;cursor:not-allowed;transform:none}' +
       '#dy-premium-modal .dy-prem-fineprint{margin:10px 0 0;text-align:center;font-size:12px;color:#4a3208}' +
       '#dy-premium-modal .dy-prem-error{color:#7a1818;font-size:13px;margin-top:8px;min-height:18px;text-align:center;font-weight:600}' +
-      // Card-hub menu item (Premium upgrade entry — vervangt floating pill)
+      // Card-hub menu item (Premium upgrade entry - vervangt floating pill)
       '.dy-card-hub-item--premium{border-top:1px solid rgba(120,70,4,.18);border-bottom:1px solid rgba(120,70,4,.18);margin-bottom:6px;color:#241a08 !important;background:linear-gradient(90deg,rgba(255,243,210,.95),rgba(253,242,216,.85)) !important;font-weight:700 !important}' +
       '.dy-card-hub-item--premium:hover,.dy-card-hub-item--premium:focus-visible{background:linear-gradient(90deg,rgba(255,233,170,.98),rgba(248,221,160,.92)) !important;outline:none}' +
       '.dy-card-hub-item--premium .dy-card-hub-item-icon{color:#7a4d04}' +
@@ -626,7 +626,7 @@
     openPortal: openCustomerPortal,
     getUserKey: getUserKey,
   };
-  // v60.1.59 alias — gebruikt in inline onclick van manage-modal
+  // v60.1.59 alias - gebruikt in inline onclick van manage-modal
   window.PP_Premium = window.DY.premium;
 
   // ─── Init ────────────────────────────────────────────────────────

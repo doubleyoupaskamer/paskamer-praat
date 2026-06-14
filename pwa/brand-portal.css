@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   BRAND PORTAL v1 — geïsoleerde stijlen onder de bp- prefix
+   BRAND PORTAL v1 - geïsoleerde stijlen onder de bp- prefix
    Geen overrides van bestaande Paskamer Praat classes.
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -475,7 +475,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   v60.1.43 — Merkprofiel page + mobile clipping fixes
+   v60.1.43 - Merkprofiel page + mobile clipping fixes
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Logo-upload blok op merkprofiel */
@@ -496,7 +496,7 @@
   display: flex; flex-direction: column; gap: 6px; min-width: 0;
 }
 
-/* Mobile clipping fixes — alleen op smalle breakpoints, desktop ongewijzigd */
+/* Mobile clipping fixes - alleen op smalle breakpoints, desktop ongewijzigd */
 @media (max-width: 600px) {
   /* Dashboard header: voorkom horizontal overflow van logo + tekst */
   .bp-dash-header {
@@ -535,7 +535,7 @@
 .bp-page h1, .bp-page h2 { word-break: break-word; overflow-wrap: anywhere; }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   v60.1.44 — Live campagne feed op /merken + profiel-acties
+   v60.1.44 - Live campagne feed op /merken + profiel-acties
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Profiel form: submit + "Bekijk als klant" naast elkaar */

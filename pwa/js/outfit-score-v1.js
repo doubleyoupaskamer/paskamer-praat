@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — AI Outfit Score v1
+// Paskamer Praat - AI Outfit Score v1
 //
 // Voegt een compacte "Style Score" pill toe aan elke feed-card met een
 // foto. Klik → backend /api/outfit-score (Gemini Vision) → score 0-100
@@ -285,7 +285,7 @@
       // v59 guard: kaart kan recycled zijn voordat response binnen is
       var nowInfo = getPostInfo(card);
       if (nowInfo.imgUrl !== info.imgUrl) {
-        console.warn('[outfit-score] card recycled mid-fetch — discarding result', {
+        console.warn('[outfit-score] card recycled mid-fetch - discarding result', {
           was: imgHash(info.imgUrl), now: imgHash(nowInfo.imgUrl)
         });
         loadingHost.remove();
@@ -326,7 +326,7 @@
         // v59 guard: card recycled tijdens fetch?
         var nowInfo = getPostInfo(card);
         if (nowInfo.imgUrl && nowInfo.imgUrl !== imgUrl) {
-          console.warn('[outfit-score] manual: card recycled — discard', {
+          console.warn('[outfit-score] manual: card recycled - discard', {
             was: imgHash(imgUrl), now: imgHash(nowInfo.imgUrl)
           });
           host.remove();
@@ -340,7 +340,7 @@
       } catch (e) {
         btn.disabled = false;
         btn.classList.remove('loading');
-        btn.innerHTML = '<span class="num">!</span><span class="lbl">Fout — opnieuw</span>';
+        btn.innerHTML = '<span class="num">!</span><span class="lbl">Fout - opnieuw</span>';
       }
     });
     host.appendChild(btn);
@@ -440,7 +440,7 @@
     clear:   function(pid) { try { localStorage.removeItem(LS_PREFIX + pid); } catch (e) { /* noop */ } },
     autoOn:  function() { window.DY.outfitScoreAuto = true; scanFeed(); },
     autoOff: function() { window.DY.outfitScoreAuto = false; },
-    // v50 — Public force-rescore voor card-actions hub menu
+    // v50 - Public force-rescore voor card-actions hub menu
     scoreCard: function(card, opts) {
       if (!card) return;
       opts = opts || {};

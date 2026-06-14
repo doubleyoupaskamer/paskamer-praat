@@ -158,7 +158,7 @@ function _data(online) {
   };
 }
 
-// ── Schrijf naar Firestore — alleen als auth klaar is ───────────
+// ── Schrijf naar Firestore - alleen als auth klaar is ───────────
 function _write(online) {
   var db = _db();
   if (!db || !_firebaseUid) return;
@@ -203,13 +203,13 @@ function _write(online) {
   op.catch(function(e) {
     if (e.code === 'not-found') { _firstWrite = true; _write(online); return; }
     if (e.code === 'permission-denied') {
-      // Anonieme user heeft geen toegang meer — reset en probeer opnieuw na auth
+      // Anonieme user heeft geen toegang meer - reset en probeer opnieuw na auth
       _firstWrite = true;
     }
   });
 }
 
-// ── Heartbeat — stopt automatisch bij _firebaseUid = null ───────
+// ── Heartbeat - stopt automatisch bij _firebaseUid = null ───────
 function _startHeartbeat() {
   if (_heartTimer) clearInterval(_heartTimer);
   _heartTimer = setInterval(function() {
@@ -221,7 +221,7 @@ function _stopHeartbeat() {
   if (_heartTimer) { clearInterval(_heartTimer); _heartTimer = null; }
 }
 
-// ── Route tracking — maar GEEN DY.navigeer override ────────────
+// ── Route tracking - maar GEEN DY.navigeer override ────────────
 // dy-tracking.js doet dit al. Wij luisteren alleen via DY._onNavigeer hook.
 // Dit voorkomt dubbele wrapper-chain breuk.
 window.DY = window.DY || {};
@@ -248,12 +248,12 @@ window.addEventListener('offline', function() { if (_firebaseUid) _write(false);
 function _anonSignIn() {
   // v60.1.11 AUTH FIX: dubbele check vlak voordat we signInAnonymously
   // aanroepen. Als er ondertussen een echte (non-anon) user is verschenen,
-  // mogen we NIET anon inloggen — dat zou de echte user wegtrappen.
+  // mogen we NIET anon inloggen - dat zou de echte user wegtrappen.
   try {
     var aCheck = _auth();
     var cu = aCheck && aCheck.currentUser;
     if (cu && !cu.isAnonymous) {
-      // Echte user al ingelogd — abort.
+      // Echte user al ingelogd - abort.
       return;
     }
   } catch (e) {}
@@ -269,7 +269,7 @@ function _anonSignIn() {
       _presRef     = null;
       _firstWrite  = true;
       _currentRoute = (window.DY && DY.pagina) || 'home';
-      // Delay geo fetch tot na eerste render — niet blokkeren bij startup
+      // Delay geo fetch tot na eerste render - niet blokkeren bij startup
       setTimeout(function() { _fetchGeo(function() { _write(true); }); }, 500);
       _startHeartbeat();
     })
@@ -277,7 +277,7 @@ function _anonSignIn() {
     });
 }
 
-// ── Hoofd init — wacht op Firebase SDK via polling ───────────────
+// ── Hoofd init - wacht op Firebase SDK via polling ───────────────
 function _initWithAuth() {
   var a = _auth();
   var db = _db();
@@ -314,7 +314,7 @@ function _initWithAuth() {
       _fetchGeo(function() { _write(true); });
       _startHeartbeat();
     } else {
-      // Geen user — start anonieme sessie voor guest tracking
+      // Geen user - start anonieme sessie voor guest tracking
       _firebaseUid = null;
       _anonSignInTimer = setTimeout(_anonSignIn, 500);
     }

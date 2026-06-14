@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Admin Server Errors v1 (v60)
+// Paskamer Praat - Admin Server Errors v1 (v60)
 //
 // Niet-invasieve companion voor admin.html:
 //   • Voegt een tweede panel toe in tab "Errors" met server-side
@@ -37,7 +37,7 @@
     try { return Number(n||0).toLocaleString('nl-NL'); } catch (e) { return String(n||0); }
   }
   function tijd(ts) {
-    if (!ts) return '—';
+    if (!ts) return '-';
     try { return new Date(ts).toLocaleString('nl-NL', { hour12:false }); }
     catch (e) { return String(ts).slice(0,19); }
   }
@@ -47,7 +47,7 @@
     else if (k === 'unhandled-rejection') cls = 'b-amber';
     else if (k === 'console-error') cls = 'b-blue';
     else if (k === 'resource-error') cls = 'b-amber';
-    return '<span class="badge ' + cls + '" style="font-size:9px">' + esc(k || '—') + '</span>';
+    return '<span class="badge ' + cls + '" style="font-size:9px">' + esc(k || '-') + '</span>';
   }
 
   // ── 3) State ────────────────────────────────────────────────────
@@ -145,7 +145,7 @@
       var src = '';
       if (r.url) src += '<div class="mono muted" style="font-size:10px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.url) + '</div>';
       if (r.lineno) src += '<div class="muted" style="font-size:10px">L' + esc(r.lineno) + (r.colno ? ':'+esc(r.colno) : '') + '</div>';
-      if (!src) src = '<span class="muted" style="font-size:10px">—</span>';
+      if (!src) src = '<span class="muted" style="font-size:10px">-</span>';
 
       var ua = (r.ua || '').slice(0, 60);
       var msg = esc(String(r.message || '').slice(0, 240));

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat — Legal Footer Injector (v1.0.0)
+ * PaskamerPraat - Legal Footer Injector (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  * Voegt op iedere pagina een discrete voorwaarden-footer toe en bewaakt
  * dat ingelogde merken hun acceptatie-versie hebben geregistreerd.
@@ -52,7 +52,7 @@
       '<a href="/voorwaarden/#av" data-testid="footer-av">Algemene Voorwaarden</a>' +
       '<span class="pp-legal-sep">·</span>' +
       '<a href="/voorwaarden/#campagnes" data-testid="footer-campagnes">Campagnevoorwaarden</a>' +
-      '<div style="margin-top:8px;opacity:.6">© 2026 Doubleyou Tailored for Tall & Plus Size — Paskamer Praat v60.1.72</div>';
+      '<div style="margin-top:8px;opacity:.6">© 2026 Doubleyou Tailored for Tall & Plus Size - Paskamer Praat v60.1.72</div>';
     // Append aan body, niet aan dy-main, om scroll-snap conflicten te vermijden
     document.body.appendChild(f);
   }
@@ -75,7 +75,7 @@
     b.setAttribute('role', 'alertdialog');
     b.setAttribute('data-testid', 'pp-legal-banner');
     b.innerHTML =
-      '<div class="pp-lb-title">Voorwaarden update — v' + TOS_VERSION + '</div>' +
+      '<div class="pp-lb-title">Voorwaarden update - v' + TOS_VERSION + '</div>' +
       '<p>Onze voorwaarden zijn bijgewerkt. Lees en accepteer om campagnes en producten te beheren.</p>' +
       '<div class="pp-lb-actions">' +
         '<a class="pp-lb-read" href="/voorwaarden/" data-testid="banner-read">Lezen</a>' +
@@ -101,7 +101,7 @@
     } catch (e) { console.warn('[pp-legal] tos accept faalde:', e); }
     var b = document.getElementById('pp-legal-banner');
     if (b) b.remove();
-    if (window.DY && DY.toast) DY.toast('Bedankt — voorwaarden geaccepteerd');
+    if (window.DY && DY.toast) DY.toast('Bedankt - voorwaarden geaccepteerd');
   }
 
   function init() {

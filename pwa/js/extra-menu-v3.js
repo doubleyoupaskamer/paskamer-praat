@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Extra Hub Menu v2
+// Paskamer Praat - Extra Hub Menu v2
 // Drie-punten hamburger menu BINNEN elke feed-card, vlak boven de avatar.
 // Verbergt de oude losse FAB's (Vraag AI / Meldingen) volledig.
 //
@@ -45,7 +45,7 @@
     }
     nukeOnce();
     // Loop alleen tijdens initiële boot-window (10s). Daarna handelt
-    // de CSS killstyles in <head> het permanent af — geen permanente
+    // de CSS killstyles in <head> het permanent af - geen permanente
     // setInterval meer (bespaart CPU/battery op mobile).
     var iv = setInterval(nukeOnce, 1500);
     setTimeout(function() { try { clearInterval(iv); } catch (e) { /* noop */ } }, 10000);
@@ -109,7 +109,7 @@
       if (!auteur) return;
 
       // Maak auteur tot positioneringsanker zodat de hub-knop er absolute
-      // bovenop kan zweven — werkt identiek op desktop en mobiel, ongeacht
+      // bovenop kan zweven - werkt identiek op desktop en mobiel, ongeacht
       // flex / max-height / overflow regels van .dy-reel-content.
       if (getComputedStyle(auteur).position === 'static') {
         auteur.style.position = 'relative';
@@ -282,7 +282,7 @@
     s.id = 'dy-card-hub-styles';
     s.textContent = `
 /* Drie-puntjes knop GEABSOLUTEERD boven de avatar in .dy-reel-auteur.
-   Werkt identiek op desktop, tablet, Android, iPhone en PWA — onafhankelijk
+   Werkt identiek op desktop, tablet, Android, iPhone en PWA - onafhankelijk
    van flex layout, max-height of overflow regels van .dy-reel-content. */
 .${BTN_CLASS} {
   position: absolute !important;
@@ -363,7 +363,7 @@
   .dy-card-hub-crown { animation: none !important; }
 }
 
-/* Popover — subtiel premium gradient dat aansluit op de huisstijl:
+/* Popover - subtiel premium gradient dat aansluit op de huisstijl:
    cream → warm → soft clay accent. Geen vlakke cream meer. */
 #${POP_ID} {
   position: fixed;
@@ -415,7 +415,7 @@
     rgba(254,237,182,0.10) 100%);
 }
 .dy-card-hub-item:active { transform: scale(0.985); }
-/* WCAG 2.4.7 — focus indicator voor keyboard nav (crown popover) */
+/* WCAG 2.4.7 - focus indicator voor keyboard nav (crown popover) */
 .dy-card-hub-item:focus-visible {
   outline: 2px solid var(--clay, #c67d06);
   outline-offset: -2px;

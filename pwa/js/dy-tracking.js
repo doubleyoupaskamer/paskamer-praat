@@ -99,7 +99,7 @@ DY.trackEvent = function(opts) {
   if (kritiek.indexOf(opts.type) !== -1) {
     _flushNow();
   } else if (_authReady) {
-    // Alleen flushen als auth klaar is — voorkomt premature writes
+    // Alleen flushen als auth klaar is - voorkomt premature writes
     _scheduleFlush();
   }
   // Vóór auth: events stapelen in _queue, flush zodra auth klaar is
@@ -117,7 +117,7 @@ function _flushNow() {
   if (_flushing || _queue.length === 0) return;
   if (!window.firebase || !DY.db) return;
 
-  // Controleer auth — schrijf alleen als er een Firebase user is (anoniem of echt)
+  // Controleer auth - schrijf alleen als er een Firebase user is (anoniem of echt)
   var currentUser = null;
   try { currentUser = firebase.auth && firebase.auth().currentUser; } catch(e) {}
   if (!currentUser) { _scheduleFlush(); return; }
@@ -140,7 +140,7 @@ function _flushNow() {
     });
 }
 
-// ── DY.navigeer hook — eenmalig, triggert ook presence ─────────
+// ── DY.navigeer hook - eenmalig, triggert ook presence ─────────
 var _navigeerHooked = false;
 function _hookNavigeer() {
   if (_navigeerHooked || !DY.navigeer) return;
@@ -230,7 +230,7 @@ function _hookEventFunctions() {
     DY.geefPunten._tracked = true;
   }
 
-  // Navigeer hook — nu pas, nadat DY.navigeer zeker beschikbaar is
+  // Navigeer hook - nu pas, nadat DY.navigeer zeker beschikbaar is
   _hookNavigeer();
 }
 
@@ -259,7 +259,7 @@ DY.onAuthReady = function(user) {
   _authReady = true;
 
   if (user && !user.isAnonymous) {
-    // app_open nu tracken — auth is klaar, write zal slagen
+    // app_open nu tracken - auth is klaar, write zal slagen
     DY.trackEvent({
       type: 'app_open', category: 'sessie',
       metadata: { referrer: document.referrer || 'direct', uid: user.uid },

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — Composer Auto-save v1
+// Paskamer Praat - Composer Auto-save v1
 // Slaat conceptversie automatisch op elke 3s in localStorage
 // Herstelt bij volgende bezoek (per composer-type, per user)
 //
@@ -12,7 +12,7 @@
 //  - input/change events → debounce 3s → schrijft naar localStorage
 //  - Bij re-render: herstelt waarden + toont kleine "Concept hersteld" bar
 //  - Bij succesvol plaatsen (textarea leeg + media weg): wist concept
-//  - Non-invasief — bestaande compose-flow blijft 100% werken
+//  - Non-invasief - bestaande compose-flow blijft 100% werken
 // ═══════════════════════════════════════════════════════════════════
 (function() {
   'use strict';
@@ -124,7 +124,7 @@
     });
 
     // Detecteer succesvol plaatsen: wanneer textarea verdwijnt uit DOM
-    // of geleegd is na een "plaatsen" actie — gebruik observer op parent
+    // of geleegd is na een "plaatsen" actie - gebruik observer op parent
   }
 
   // ─── LOOK composer ──────────────────────────────────────────────

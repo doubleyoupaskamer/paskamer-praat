@@ -1,6 +1,6 @@
 
 
-// ── CACHE BUST — forceert altijd de nieuwste versie ─────────────
+// ── CACHE BUST - forceert altijd de nieuwste versie ─────────────
 (function() {
   if (!('serviceWorker' in navigator)) return;
   // 1. Update de SW direct
@@ -15,7 +15,7 @@
   });
 })();
 
-// Force SW update: reeds gedaan in IIFE hierboven (lines 4-16) — duplicate reg.update() verwijderd
+// Force SW update: reeds gedaan in IIFE hierboven (lines 4-16) - duplicate reg.update() verwijderd
 // om dubbele controllerchange events en onbedoelde reloads te voorkomen. v60.1 stability fix.
 // Wis alle stale client-side opslag bij elke sessie
 try {
@@ -25,15 +25,15 @@ try {
   sessionStorage.clear();
   if (_pg) sessionStorage.setItem('_dy_actieve_pagina', _pg);
 } catch(e) {}
-// ── Globale error afhandeling — vang onbehandelde promises op
+// ── Globale error afhandeling - vang onbehandelde promises op
 window.addEventListener('unhandledrejection', function(event) {
   // Verberg technische errors voor de gebruiker
   event.preventDefault();
 });
 
-//// DoubleYou PWA — Hoofd applicatie — build v81
+//// DoubleYou PWA - Hoofd applicatie - build v81
 window.DY = window.DY || {};
-// Analyse proxy (niet meer in gebruik — direct Anthropic via Firestore)
+// Analyse proxy (niet meer in gebruik - direct Anthropic via Firestore)
 // Voorbeeld: 'https://kleuren-ai.jouwaccount.workers.dev'
 // Laat null voor automatische Render server fallback
 // Analyse gaat direct naar Anthropic API (via Firestore key)
@@ -58,7 +58,7 @@ DY._dyGetUserNaam = function() {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// VIDEO TRANSCODING — converteert HEVC/MOV naar H.264 MP4
+// VIDEO TRANSCODING - converteert HEVC/MOV naar H.264 MP4
 // via de Render.com server zodat alle browsers video kunnen afspelen
 // ══════════════════════════════════════════════════════════════════
 DY.transcodeVideo = async function(file, onProgress) {
@@ -67,9 +67,9 @@ DY.transcodeVideo = async function(file, onProgress) {
   // Alleen transcoden als het een video is
   if (!file.type.startsWith('video/')) return file;
 
-  // H.264 MP4 hoeft niet getranscodeerd — direct terugsturen
+  // H.264 MP4 hoeft niet getranscodeerd - direct terugsturen
   if (file.type === 'video/mp4') {
-    // Check of browser H.265 ondersteunt — zo ja, ook MP4 is OK
+    // Check of browser H.265 ondersteunt - zo ja, ook MP4 is OK
     var testVid = document.createElement('video');
     var h264ok = testVid.canPlayType('video/mp4; codecs="avc1.42E01E"') !== '';
     // Als het een MP4 is maar misschien HEVC erin, toch transcoden
@@ -91,7 +91,7 @@ DY.transcodeVideo = async function(file, onProgress) {
     });
 
     if (!res.ok) {
-      // Server niet bereikbaar of fout — origineel bestand gebruiken
+      // Server niet bereikbaar of fout - origineel bestand gebruiken
       return file;
     }
 
@@ -104,7 +104,7 @@ DY.transcodeVideo = async function(file, onProgress) {
     return mp4File;
 
   } catch (e) {
-    // Netwerk fout of server offline — origineel bestand gebruiken als fallback
+    // Netwerk fout of server offline - origineel bestand gebruiken als fallback
     return file;
   }
 };
@@ -146,18 +146,18 @@ DY._VERSION = 'v1779170400-seo-v358';
 
 // ── SEO: Dynamische meta-tags per pagina ─────────────────────────
 DY._seoMetaConfig = {
-  feed:             { title: 'Community Feed | Pasvorm Ervaringen & Fitchecks — Paskamer Praat', desc: 'Bekijk de nieuwste pasvorm ervaringen, fitchecks en outfit verhalen van tall (1.85m+) en plus size (XL–5XL) fashion fans in Nederland. Gratis community.' },
-  lookbook:         { title: 'Outfit Inspiratie Tall & Plus Size | Lookbook — Paskamer Praat', desc: 'Outfit inspiratie van echte mensen, gefilterd op jouw lengte (1.85m–2.00m+) en maat (XL–5XL). Zie hoe kleding écht staat op een lichaam als het jouwe.' },
-  reviews:          { title: 'Pasvorm Reviews | Kleding voor Lange & Plus Size Mensen — Paskamer Praat', desc: 'Eerlijke pasvorm reviews van kledingmerken voor tall (1.85m+) en plus size (XL–5XL). Ontdek welke merken goed passen bij jouw lengte en bouw.' },
-  winkel:           { title: 'DoubleYou Winkel | Kleding voor Tall & Plus Size — Paskamer Praat', desc: 'Kleding gemaakt voor tall mensen (1.85m+) en plus size mensen (XL–5XL). Nederlandse ateliers, eerlijke pasvorm. Ontdek de DoubleYou collectie.' },
-  challenges:       { title: 'Fashion Challenges voor Tall & Plus Size | Win DSP Punten — Paskamer Praat', desc: 'Doe mee aan wekelijkse fashion challenges voor tall en plus size mensen. Verdien DSP punten, stijg in rang en win community erkenning.' },
-  ovdw:             { title: 'Post van de Week | Beste Pasvorm Bijdrage — Paskamer Praat', desc: 'De best beoordeelde community bijdrage van afgelopen week. Elke week kiezen Paskamer Praat leden de mooiste fitcheck of pasvorm review.' },
-  kleuren_ai:       { title: 'AI Outfit Vergelijker | Stijladvies voor Tall & Plus Size — Paskamer Praat', desc: 'Vergelijk outfits met AI en ontvang persoonlijk stijladvies op basis van jouw lengte, maat en lichaamsprofiel. Gratis AI stylist voor tall en plus size mensen.' },
-  voorwaarden:      { title: 'Algemene Voorwaarden — Paskamer Praat | DoubleYou', desc: 'Lees de gebruiksvoorwaarden van Paskamer Praat, de tall en plus size fashion community van DoubleYou Fashion Nederland.' },
-  privacy:          { title: 'Privacybeleid — Paskamer Praat | DoubleYou', desc: 'Hoe Paskamer Praat omgaat met jouw persoonsgegevens. AVG-conform privacybeleid van de tall en plus size fashion community.' },
-  community_regels: { title: 'Community Regels — Paskamer Praat | Veilige Modeomgeving', desc: 'De gedragsregels van Paskamer Praat: respectvol, inclusief en veilig voor alle tall en plus size fashion liefhebbers in Nederland.' },
-  beta_pagina:      { title: 'Beta | Nieuwe Features — Paskamer Praat', desc: 'Paskamer Praat is in beta. Ontdek de nieuwste features voor de tall en plus size fashion community van DoubleYou.' },
-  home:             { title: 'Paskamer Praat | Tall & Plus Size Fashion Community Nederland — Pasvorm Ervaringen & Outfit Inspiratie', desc: 'De gratis community voor tall fashion (1.85m+) en plus size mode (XL–5XL) in Nederland. Eerlijke pasvorm reviews, outfit inspiratie en AI stijladvies. Een initiatief van DoubleYou Fashion.' }
+  feed:             { title: 'Community Feed | Pasvorm Ervaringen & Fitchecks - Paskamer Praat', desc: 'Bekijk de nieuwste pasvorm ervaringen, fitchecks en outfit verhalen van tall (1.85m+) en plus size (XL–5XL) fashion fans in Nederland. Gratis community.' },
+  lookbook:         { title: 'Outfit Inspiratie Tall & Plus Size | Lookbook - Paskamer Praat', desc: 'Outfit inspiratie van echte mensen, gefilterd op jouw lengte (1.85m–2.00m+) en maat (XL–5XL). Zie hoe kleding écht staat op een lichaam als het jouwe.' },
+  reviews:          { title: 'Pasvorm Reviews | Kleding voor Lange & Plus Size Mensen - Paskamer Praat', desc: 'Eerlijke pasvorm reviews van kledingmerken voor tall (1.85m+) en plus size (XL–5XL). Ontdek welke merken goed passen bij jouw lengte en bouw.' },
+  winkel:           { title: 'DoubleYou Winkel | Kleding voor Tall & Plus Size - Paskamer Praat', desc: 'Kleding gemaakt voor tall mensen (1.85m+) en plus size mensen (XL–5XL). Nederlandse ateliers, eerlijke pasvorm. Ontdek de DoubleYou collectie.' },
+  challenges:       { title: 'Fashion Challenges voor Tall & Plus Size | Win DSP Punten - Paskamer Praat', desc: 'Doe mee aan wekelijkse fashion challenges voor tall en plus size mensen. Verdien DSP punten, stijg in rang en win community erkenning.' },
+  ovdw:             { title: 'Post van de Week | Beste Pasvorm Bijdrage - Paskamer Praat', desc: 'De best beoordeelde community bijdrage van afgelopen week. Elke week kiezen Paskamer Praat leden de mooiste fitcheck of pasvorm review.' },
+  kleuren_ai:       { title: 'AI Outfit Vergelijker | Stijladvies voor Tall & Plus Size - Paskamer Praat', desc: 'Vergelijk outfits met AI en ontvang persoonlijk stijladvies op basis van jouw lengte, maat en lichaamsprofiel. Gratis AI stylist voor tall en plus size mensen.' },
+  voorwaarden:      { title: 'Algemene Voorwaarden - Paskamer Praat | DoubleYou', desc: 'Lees de gebruiksvoorwaarden van Paskamer Praat, de tall en plus size fashion community van DoubleYou Fashion Nederland.' },
+  privacy:          { title: 'Privacybeleid - Paskamer Praat | DoubleYou', desc: 'Hoe Paskamer Praat omgaat met jouw persoonsgegevens. AVG-conform privacybeleid van de tall en plus size fashion community.' },
+  community_regels: { title: 'Community Regels - Paskamer Praat | Veilige Modeomgeving', desc: 'De gedragsregels van Paskamer Praat: respectvol, inclusief en veilig voor alle tall en plus size fashion liefhebbers in Nederland.' },
+  beta_pagina:      { title: 'Beta | Nieuwe Features - Paskamer Praat', desc: 'Paskamer Praat is in beta. Ontdek de nieuwste features voor de tall en plus size fashion community van DoubleYou.' },
+  home:             { title: 'Paskamer Praat | Tall & Plus Size Fashion Community Nederland - Pasvorm Ervaringen & Outfit Inspiratie', desc: 'De gratis community voor tall fashion (1.85m+) en plus size mode (XL–5XL) in Nederland. Eerlijke pasvorm reviews, outfit inspiratie en AI stijladvies. Een initiatief van DoubleYou Fashion.' }
 };
 
 DY._updateSEOMeta = function(pagina) {
@@ -214,7 +214,7 @@ DY._updateSEOMeta = function(pagina) {
 };
 
 
-// ── BOUW NORMALISATIE — render-laag backward compatibility ──────
+// ── BOUW NORMALISATIE - render-laag backward compatibility ──────
 // Converteert legacy bouw-waarden naar nieuwe XL–5XL standaard
 DY._normBouw = function(bouw) {
   if (!bouw) return bouw;
@@ -387,7 +387,7 @@ DY._flushTrackBatch = function() {
   batch.forEach(function(ev) {
     fb.set(DY.db.collection('activity_logs').doc(), ev);
   });
-  fb.commit().catch(function() {}); // Stille fail — tracking mag app niet breken
+  fb.commit().catch(function() {}); // Stille fail - tracking mag app niet breken
 };
 
 // Track kritieke acties automatisch
@@ -419,7 +419,7 @@ var _isDesktop = window.innerWidth >= 768;
 var _urlStartPagina = window._dy_start_pagina || null;
 // Publieke pagina's die zonder auth geladen mogen worden
 var _publiekeUrlPaginas = ['feed','lookbook','reviews','winkel','challenges','ovdw','kleuren_ai','voorwaarden','privacy','community_regels','beta_pagina'];
-// Herstel vorige pagina op alle devices — desktop én mobiel
+// Herstel vorige pagina op alle devices - desktop én mobiel
 // URL-pad wint van sessionStorage ALLEEN voor publieke pagina's
 // (voorkomt race condition waarbij DY.user nog null is bij auth-vereiste pagina's)
 var _urlPaginaVeilig = (_urlStartPagina && _publiekeUrlPaginas.indexOf(_urlStartPagina) >= 0) ? _urlStartPagina : null;
@@ -489,13 +489,13 @@ DY.onAuthReady = function(user) {
     // "dubbele onboarding" en stale state bugs).
     var _huidigeUid = (user && user.uid) || null;
     if (DY.authKlaar && DY._laatsteAuthUid === _huidigeUid) {
-      // Zelfde gebruiker (incl. allebei gast/null) — geen volledige re-init.
+      // Zelfde gebruiker (incl. allebei gast/null) - geen volledige re-init.
       // Update wel het user-object zelf zodat token refreshes wel werken.
       if (user) DY.user = user;
       return;
     }
     DY._laatsteAuthUid = _huidigeUid;
-    // Auth-state is daadwerkelijk veranderd — invalideer de render-guard
+    // Auth-state is daadwerkelijk veranderd - invalideer de render-guard
     // zodat de pagina nu wel opnieuw gerendered wordt met juiste user-context.
     DY._laatstGerenderd = null;
     // ─────────────────────────────────────────────────────────────────────
@@ -506,7 +506,7 @@ DY.onAuthReady = function(user) {
     var _genNow = (DY._authGeneratie = (DY._authGeneratie || 0) + 1);
     var _myGen  = _genNow;
   // Bij elke auth-state change: wis tab DOM cache zodat nooit stale content zichtbaar is
-  DY._tabDOM       = {}; // Altijd leeg starten — geen stale DOM
+  DY._tabDOM       = {}; // Altijd leeg starten - geen stale DOM
   DY._tabScrollY   = {};
   DY._tabGeneratie = DY._tabGeneratie || {};
   // Wis alle user-gerelateerde caches bij auth change
@@ -515,7 +515,7 @@ DY.onAuthReady = function(user) {
   DY._alleReviews    = null;
   DY._gebruikerCache = {};
   DY._matchCacheGewist = {};
-  // Reset feed intelligence sessie bij auth-change — nieuwe gebruiker = verse volgorde
+  // Reset feed intelligence sessie bij auth-change - nieuwe gebruiker = verse volgorde
   if (typeof DY._resetFeedSessie === 'function') DY._resetFeedSessie();
   // Wis tab DOM voor user-specifieke tabs
   ['profiel', 'reviews', 'vrienden', 'kleuren_ai', 'feed'].forEach(function(tab) {
@@ -527,11 +527,11 @@ DY.onAuthReady = function(user) {
     DY.user = null;
     DY.profile = null;
     DY._volgers = {};
-    // Onboarding status check — veilig via try/catch
+    // Onboarding status check - veilig via try/catch
     var onboardingKlaar = false;
     try { onboardingKlaar = !!sessionStorage.getItem('dy_overlay_gezien'); } catch(e) {}
     DY.isEersteBezoek = !onboardingKlaar;
-    // Na logout altijd naar feed — niet naar een user-specifieke pagina
+    // Na logout altijd naar feed - niet naar een user-specifieke pagina
     var _userPages = ['profiel','profiel_bewerken','berichten','meldingen',
                       'dsp','configurator','privacy_center','account_verwijder','community_regels','beta_pagina'];
     // SEO: directe URL (bijv. /feed) wordt gerespecteerd voor terugkerende bezoekers
@@ -560,7 +560,7 @@ DY.onAuthReady = function(user) {
       // Generatie check: negeer als er een nieuwere auth state is
       if (DY._authGeneratie && DY._authGeneratie !== _myGen) return;
       _paginaGestart = true;
-    // Markeer eerste sessie voltooid — activeert PWA install banner
+    // Markeer eerste sessie voltooid - activeert PWA install banner
     try {
       if (!localStorage.getItem('dy_first_session_done')) {
         localStorage.setItem('dy_first_session_done', '1');
@@ -609,7 +609,7 @@ DY.onAuthReady = function(user) {
         // Normaliseer legacy bouw-waarden naar nieuwe XL–5XL standaard
         if (_profileData && _profileData.bouw) _profileData.bouw = DY._normBouw(_profileData.bouw);
         DY.profile = _profileData;
-        // Laad volgend — ondersteun zowel { uid: true } als { uid: { naam: ... } }
+        // Laad volgend - ondersteun zowel { uid: true } als { uid: { naam: ... } }
         var volgendRaw = DY.profile.volgend || {};
         DY._volgers = {};
         Object.keys(volgendRaw).forEach(function(k) {
@@ -658,7 +658,7 @@ window.addEventListener('error', function(e) {
   var main = document.getElementById('dy-main');
   if (main && (!main.innerHTML || main.innerHTML.trim().length < 50)) {
     window._dyCrashRecoveryCount = (window._dyCrashRecoveryCount || 0) + 1;
-    // Stop na 3 attempts — toon statische fallback i.p.v. herhaalde navigatie
+    // Stop na 3 attempts - toon statische fallback i.p.v. herhaalde navigatie
     if (window._dyCrashRecoveryCount > 3) {
       try {
         main.innerHTML =
@@ -774,7 +774,7 @@ DY.navigeer = function(pagina) {
   DY.updateNav();
 };
 
-// ── CENTRALE UITLOG — wist alle app-state correct ─────────────────
+// ── CENTRALE UITLOG - wist alle app-state correct ─────────────────
 DY.uitloggen = async function() {
   try {
     // 1. Stop alle lopende async operaties
@@ -893,7 +893,7 @@ DY.updateNav = function() {
     var nm = (DY.profile && DY.profile.displayName) || DY.user.displayName || DY.user.email || '?';
     sbAvatar.innerHTML = '<span style="font-weight:700;font-size:0.75rem;color:var(--clay)">' + nm.slice(0,2).toUpperCase() + '</span>';
   } else if (sbAvatar) {
-    // v60.1.61 fix: GAST-state — wis oude avatar/initialen, toon generic person icon
+    // v60.1.61 fix: GAST-state - wis oude avatar/initialen, toon generic person icon
     sbAvatar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:60%;height:60%;color:var(--clay);opacity:.85"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
   }
   // Sidebar notificatie badge synchroniseren met topbar badge
@@ -1084,7 +1084,7 @@ DY.toonPagina = function(pagina) {
     if (!DY._tabGeneratie) DY._tabGeneratie = {};
     DY._tabGeneratie[pagina] = (DY._tabGeneratie[pagina] || 0) + 1;
 
-    // Herstel gecachte DOM direct — geen Firestore, geen animatie
+    // Herstel gecachte DOM direct - geen Firestore, geen animatie
     main.className = 'dy-main';
     main.innerHTML = DY._tabDOM[pagina];
 
@@ -1133,9 +1133,9 @@ DY.toonPagina = function(pagina) {
     // en gebruiken renderGeneratie om concurrent navigatie te respecteren.
     var _renderGen = renderGen;
     setTimeout(function() {
-      // Andere render heeft inmiddels overgenomen — niets doen
+      // Andere render heeft inmiddels overgenomen - niets doen
       if (DY._renderGeneratie !== _renderGen) return;
-      // Andere pagina actief — niets doen
+      // Andere pagina actief - niets doen
       if (DY.pagina !== pagina) return;
       var m = document.getElementById('dy-main');
       if (!m) return;
@@ -1161,7 +1161,7 @@ DY.toonPagina = function(pagina) {
 // Bewaar DOM van huidige tab na laden
 // Gebruikt een generatie-teller om verouderde timeouts te negeren
 DY._slaTabDOMOp = function(pagina) {
-  // Verhoog generatie — elke nieuwe render invalideert vorige timeouts
+  // Verhoog generatie - elke nieuwe render invalideert vorige timeouts
   if (!DY._tabGeneratie) DY._tabGeneratie = {};
   var gen = (DY._tabGeneratie[pagina] || 0) + 1;
   DY._tabGeneratie[pagina] = gen;
@@ -1184,7 +1184,7 @@ DY._slaTabDOMOp = function(pagina) {
     if (pagina === 'feed') {
       var heeftVerhalen = main.querySelector('.dy-kaart');
       if (!heeftVerhalen) return; // Wacht tot verhalen geladen zijn
-      // Kloon main zonder stories-row — stories worden altijd live herladen
+      // Kloon main zonder stories-row - stories worden altijd live herladen
       var clone = main.cloneNode(true);
       var storiesRowClone = clone.querySelector('#dy-stories-row');
       if (storiesRowClone) storiesRowClone.innerHTML = '';
@@ -1254,7 +1254,7 @@ DY._herstelTabListeners = function(pagina) {
 
   // Herstel accordion event listeners op profielpagina na tab-cache restore
   // (innerHTML restore verwijdert alle addEventListener bindings)
-  // Inline onclick (DY._opgeslaanToggle / DY._opgeslaanFilterTab) survives — geen actie nodig.
+  // Inline onclick (DY._opgeslaanToggle / DY._opgeslaanFilterTab) survives - geen actie nodig.
   // Enige herstel die nodig is: chevron staat correct via aria-expanded in HTML.
   if (pagina === 'profiel') {
     // Zeker stellen dat de opgeslagen sectie er is als user ingelogd is
@@ -1336,11 +1336,11 @@ DY.toggleVolgen = async function(btn) {
     const andereRef = DY.db.collection('users').doc(uid);
     
     if (volgtAl) {
-      // Ontvolgen — verwijder het veld
+      // Ontvolgen - verwijder het veld
       batch.update(mijnRef, { ['volgend.' + uid]: firebase.firestore.FieldValue.delete() });
       batch.update(andereRef, { ['volgers.' + DY.user.uid]: firebase.firestore.FieldValue.delete() });
     } else {
-      // Volgen — gebruik set+merge zodat het veld altijd aangemaakt wordt
+      // Volgen - gebruik set+merge zodat het veld altijd aangemaakt wordt
       // ook als het volgend/volgers object nog niet bestaat in Firestore
       batch.set(mijnRef, { volgend: { [uid]: true } }, { merge: true });
       batch.set(andereRef, { volgers: { [DY.user.uid]: true } }, { merge: true });
@@ -1381,7 +1381,7 @@ DY._updateVolgBtns = function(uid, volgend) {
 
 
 // ══════════════════════════════════════════════════════════════════
-// FIT IDENTITY PRIVACY — zichtbaarheidslaag
+// FIT IDENTITY PRIVACY - zichtbaarheidslaag
 // fitPrivacy: 'openbaar' (default) | 'privé'
 // ══════════════════════════════════════════════════════════════════
 
@@ -1397,7 +1397,7 @@ DY.fitLabelZichtbaar = function(dataUid, dataObj) {
   if (DY._privacyCache && DY._privacyCache[dataUid] !== undefined) {
     return DY._privacyCache[dataUid] !== 'privé';
   }
-  // Geen cache — conservatief: verberg als profielZichtbaarheid onbekend is
+  // Geen cache - conservatief: verberg als profielZichtbaarheid onbekend is
   // maar toon als de uid leeg is (anonymous content)
   if (!dataUid) return true;
   return true; // default: openbaar (om UX niet te breken voor public accounts)
@@ -1406,7 +1406,7 @@ DY.fitLabelZichtbaar = function(dataUid, dataObj) {
 // Filtert body-labels uit een tags-array als privacy = privé
 DY.filterFitLabels = function(tags, dataUid) {
   if (DY.fitLabelZichtbaar(dataUid)) return tags;
-  // Verberg lengte, maat en bouw labels — maar behoud andere tags
+  // Verberg lengte, maat en bouw labels - maar behoud andere tags
   return tags.filter(function(tag) {
     // Verberg: Xcm (lengte), maatlabels, bouw-labels
     if (/^\d+cm$/i.test(tag)) return false;
@@ -1663,7 +1663,7 @@ DY.renderVindMensen = async function() {
       '</div>' +
     '</div>';
 
-  // Scroll naar top na renderen — delay zodat DOM volledig is opgebouwd
+  // Scroll naar top na renderen - delay zodat DOM volledig is opgebouwd
   setTimeout(function() {
     try {
       document.getElementById('dy-main').scrollTop = 0;
@@ -1710,7 +1710,7 @@ DY.renderVindMensen = async function() {
         var naam = v.authorName || 'Community lid';
         if (naam !== 'Community lid') {
           gezienUids[uid] = true;
-          // posterData: gebruiker heeft dit bewust gedeeld — tonen is OK
+          // posterData: gebruiker heeft dit bewust gedeeld - tonen is OK
           // maar we slaan geen fitPrivacy op (onbekend vanuit story doc)
           gebruikers.push({
             uid: uid, naam: naam,
@@ -1873,7 +1873,7 @@ DY.renderVindMensen = async function() {
   };
 
   // ── Event listeners ───────────────────────────────────────────────
-  // Naam zoekbalk — debounced
+  // Naam zoekbalk - debounced
   var zoekTimer = null;
   var naamInput = document.getElementById('dy-oc-naam-input');
   if (naamInput) {
@@ -1919,7 +1919,7 @@ DY.renderLogin = function() {
   const main = document.getElementById('dy-main');
   if (!main) return;
   // v60.1.11 FULL-FLOW: als gebruiker al ingelogd is, niet de login-form
-  // tonen — direct doorsturen naar de feed (voorkomt verwarring + double-login).
+  // tonen - direct doorsturen naar de feed (voorkomt verwarring + double-login).
   if (DY.user && DY.user.uid) {
     try { DY.navigeer('feed'); } catch(e) {}
     return;
@@ -2060,7 +2060,7 @@ DY.renderRegister = function() {
     const err      = document.getElementById('dy-auth-err');
     const btn      = document.getElementById('btn-reg');
 
-    // Validatie — volgorde: velden → leeftijd → akkoord
+    // Validatie - volgorde: velden → leeftijd → akkoord
     if (!naam || !email || !pw) {
       err.textContent = 'Vul alle velden in.'; err.style.display = 'block'; return;
     }
@@ -2076,7 +2076,7 @@ DY.renderRegister = function() {
       err.style.display = 'block'; return;
     }
 
-    // Sla akkoord-tijdstip op — loadProfile leest dit uit window._dyRegAkkoord
+    // Sla akkoord-tijdstip op - loadProfile leest dit uit window._dyRegAkkoord
     var _regTs = Date.now();
     window._dyRegAkkoord = { acceptedTerms: true, acceptedTermsAt: _regTs, ageConfirmed: true, ageConfirmedAt: _regTs };
 
@@ -2499,7 +2499,7 @@ DY.renderPrivacyBeleid = function() {
     '</div>';
 };
 
-// ── PRIVACY CENTER — volledige settings ─────────────────────────
+// ── PRIVACY CENTER - volledige settings ─────────────────────────
 DY.renderPrivacyCenter = function() {
   var main = document.getElementById('dy-main');
   if (!main) return;
@@ -2820,7 +2820,7 @@ DY.renderAccountVerwijder = function() {
         if (authUser) {
           try { await authUser.delete(); }
           catch(authErr) {
-            // Herauth vereist — log uit en informeer gebruiker
+            // Herauth vereist - log uit en informeer gebruiker
             await firebase.auth().signOut();
             DY.toast('Account verwijderd. Log opnieuw in om auth te verwijderen.', '');
             setTimeout(function() { window.location.replace('/'); }, 2000);
@@ -2926,14 +2926,14 @@ DY.renderFeed = function() {
   var main = document.getElementById('dy-main');
   main.classList.add('dy-feed-actief');
 
-  // Gebruik bekende hoogtes direct — geen forced layout flush
+  // Gebruik bekende hoogtes direct - geen forced layout flush
   var navH    = 64;
   var topbarH = 56;
   document.documentElement.style.setProperty('--nav-h',    navH    + 'px');
   document.documentElement.style.setProperty('--topbar-h', topbarH + 'px');
 
 
-  // Feed-structuur — banner/fit-prompt NIET in innerHTML:
+  // Feed-structuur - banner/fit-prompt NIET in innerHTML:
   // ze worden apart als absolute overlay toegevoegd zodat ze
   // de flex-hoogte van dy-verhalen NIET verkleinen.
   // Gast en ingelogde gebruiker krijgen zo IDENTIEKE reel-item hoogte.
@@ -2953,7 +2953,7 @@ DY.renderFeed = function() {
       '</div>' +
     '</div>';
 
-  // Fit-profiel banner (ingelogd, geen lengte) — absoluut overlay op feed
+  // Fit-profiel banner (ingelogd, geen lengte) - absoluut overlay op feed
   if (DY.user && DY.profile && !DY.profile.lengte) {
     var fitPrompt = document.createElement('div');
     fitPrompt.className = 'dy-fit-prompt';
@@ -2972,7 +2972,7 @@ DY.renderFeed = function() {
         '</div>' +
       '</div>';
     main.appendChild(fitPrompt);
-    // Auto-fade na 4s — niet permanent in de weg
+    // Auto-fade na 4s - niet permanent in de weg
     setTimeout(function() {
       if (!fitPrompt.parentNode) return;
       fitPrompt.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
@@ -2986,11 +2986,11 @@ DY.renderFeed = function() {
 
   // Stel --reel-h in op basis van beschikbare hoogte
   // Gebruik window.innerHeight als betrouwbare basis voor desktop EN mobiel
-  // Stel --reel-h NIET in via JS — laat CSS fallback werken
+  // Stel --reel-h NIET in via JS - laat CSS fallback werken
   // De CSS fallback: calc(100dvh - topbar - nav - 160px) is accurater
   // dan window.innerHeight op desktop (DevTools viewport issues)
   DY.laadVerhalen('recent');
-  // Safety microcopy — 1x per sessie, 6s zichtbaar
+  // Safety microcopy - 1x per sessie, 6s zichtbaar
   if (!sessionStorage.getItem('dy_safety_shown')) {
     sessionStorage.setItem('dy_safety_shown', '1');
     requestAnimationFrame(function() {
@@ -3007,7 +3007,7 @@ DY.renderFeed = function() {
   DY._storiesCache = null;
   DY.laadStories();
 
-  // Pull-to-refresh — identiek voor gast en ingelogd
+  // Pull-to-refresh - identiek voor gast en ingelogd
   setTimeout(function() {
     var reelEl = document.getElementById('dy-verhalen');
     if (!reelEl || reelEl._refreshBound) return;
@@ -3062,12 +3062,12 @@ DY.renderFeed = function() {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// ONBOARDING OVERLAY — premium immersive sheet voor gasten
+// ONBOARDING OVERLAY - premium immersive sheet voor gasten
 // Feed blijft zichtbaar op achtergrond
 // ══════════════════════════════════════════════════════════════════
 
 // ══════════════════════════════════════════════════════════════════
-// BODY POSITIVITY OVERLAY — toon na aanmelden/registreren
+// BODY POSITIVITY OVERLAY - toon na aanmelden/registreren
 // ══════════════════════════════════════════════════════════════════
 DY.toonBodyPositivityOverlay = function() {
   if (document.getElementById('dy-bpos-overlay')) return;
@@ -3097,7 +3097,7 @@ DY.toonBodyPositivityOverlay = function() {
         '</div>' +
         '<p class="dy-bpos-akkoord">Door Paskamer Praat te gebruiken ga je akkoord met dit reglement en draag je bij aan een veilige, inspirerende community voor iedereen. 🤎</p>' +
       '</div>' +
-      '<button class="dy-bpos-cta" id="dy-bpos-akkoord">Ik ga akkoord — naar de community</button>' +
+      '<button class="dy-bpos-cta" id="dy-bpos-akkoord">Ik ga akkoord - naar de community</button>' +
     '</div>';
 
   document.body.appendChild(overlay);
@@ -3193,7 +3193,7 @@ DY.toonOnboardingOverlay = function() {
     
         try {
           if (!localStorage.getItem('dy_first_session_done')) { localStorage.setItem('dy_first_session_done', '1'); window.dispatchEvent(new Event('dy:first-session-done')); }
-          // Onthoud sluiten 30 dagen — voorkom dat de overlay bij elke visit terugkomt
+          // Onthoud sluiten 30 dagen - voorkom dat de overlay bij elke visit terugkomt
           localStorage.setItem('dy_overlay_dismissed_until', String(Date.now() + 30 * 24 * 60 * 60 * 1000));
         } catch(e) {}
         DY.sluitOnboardingOverlay(function() { DY.navigeer('home'); });
@@ -3223,13 +3223,13 @@ DY.sluitOnboardingOverlay = function(callback) {
 
 
 DY._storiesCache = null;  // { ts, snap_docs[] }
-DY._storiesCacheTTL = 30000; // 30 seconden — sneller vers gevoel
+DY._storiesCacheTTL = 30000; // 30 seconden - sneller vers gevoel
 
 DY.laadStories = async function() {
   var row = document.getElementById('dy-stories-row');
   if (!row) return;
 
-  // ALTIJD wissen voor we renderen — voorkomt dubbele items bij refresh
+  // ALTIJD wissen voor we renderen - voorkomt dubbele items bij refresh
   row.innerHTML = '';
 
   var nu = new Date();
@@ -3279,7 +3279,7 @@ DY.laadStories = async function() {
       } catch(e) {}
     }
 
-    // Haal alle dy_stories op — met cache (90s TTL)
+    // Haal alle dy_stories op - met cache (90s TTL)
     var snap;
     var nuMs = Date.now();
     var storiesCacheGeldig = DY._storiesCache &&
@@ -3384,7 +3384,7 @@ DY.laadStories = async function() {
 
     // Onbekeken eerst, dan meest recent
     // Hybride story ranking: unseen first, dan dynamische mix van recency + willekeur
-    // Willekeur varieert per sessie via feed seed — andere volgorde bij elke refresh
+    // Willekeur varieert per sessie via feed seed - andere volgorde bij elke refresh
     var storySeed = DY._feedSessie ? DY._feedSessie.seed : Math.random();
     var storyRonde = DY._feedSessie ? DY._feedSessie.ronde : 0;
 
@@ -3412,7 +3412,7 @@ DY.laadStories = async function() {
       _st = Math.imul(_st ^ (_st >>> 15), _st | 1) & 0xFFFFFFFF;
       _st = (_st ^ (_st + (Math.imul(_st ^ (_st >>> 7), _st | 61) & 0xFFFFFFFF))) & 0xFFFFFFFF;
       var storyRand = ((_st ^ (_st >>> 14)) >>> 0) / 0xFFFFFFFF;
-      s += storyRand * 30 - 15;  // ±15 punten — agressieve variatie
+      s += storyRand * 30 - 15;  // ±15 punten - agressieve variatie
       return s;
     }
 
@@ -3447,7 +3447,7 @@ DY.laadStories = async function() {
       item.className = 'dy-story';
       item.setAttribute('data-uid', uid);
 
-      // Gasten zien alle stories — browse-first aanpak
+      // Gasten zien alle stories - browse-first aanpak
       var gastGeblurd = false;
 
       item.innerHTML =
@@ -3462,7 +3462,7 @@ DY.laadStories = async function() {
       if (gastGeblurd) {
         item.onclick = function() { DY.navigeer('register'); };
       } else if (isGast) {
-        // Eerste 2 stories zichtbaar voor gast — viewer openen, dan login-prompt na sluiten
+        // Eerste 2 stories zichtbaar voor gast - viewer openen, dan login-prompt na sluiten
         item.onclick = (function(uidKey) {
           return function() {
             var allUsers = uids.map(function(k) { return perUser[k]; });
@@ -3570,7 +3570,7 @@ DY.setFilter = function(filter, btn) {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// PASKAMER PRAAT — FEED INTELLIGENCE ENGINE v3
+// PASKAMER PRAAT - FEED INTELLIGENCE ENGINE v3
 // ─────────────────────────────────────────────────────────────────
 // Volledig herschreven. Werkt identiek voor guests en ingelogde
 // gebruikers. Dynamisch, deterministisch-willekeurig, corruptie-vrij.
@@ -3609,7 +3609,7 @@ DY._feedSignalen = {
   gepasseerd: {},   // docId → teller
 };
 
-// Registreer signalen — auth-agnostisch
+// Registreer signalen - auth-agnostisch
 DY.registreerSignaal = function(type, docId) {
   if (!docId) return;
   var uid = DY.user ? DY.user.uid : '_gast';
@@ -3707,7 +3707,7 @@ DY._relevantiScore = function(v, profiel, idx, ronde) {
   var gepasseerd = DY._feedSignalen.gepasseerd[docId] || 0;
   if (gepasseerd > 0) score -= gepasseerd * 10;
 
-  // Seeded willekeur: Mulberry32 PRNG — stabiel per (docId + seed + ronde)
+  // Seeded willekeur: Mulberry32 PRNG - stabiel per (docId + seed + ronde)
   // Verandert aantoonbaar bij elke refresh door nieuwe seed
   // Werkt correct met Firestore docIds (lange strings)
   var _dh = 0;
@@ -3722,12 +3722,12 @@ DY._relevantiScore = function(v, profiel, idx, ronde) {
   _t = Math.imul(_t ^ (_t >>> 15), _t | 1) & 0xFFFFFFFF;
   _t = (_t ^ (_t + (Math.imul(_t ^ (_t >>> 7), _t | 61) & 0xFFFFFFFF))) & 0xFFFFFFFF;
   var rand = ((_t ^ (_t >>> 14)) >>> 0) / 0xFFFFFFFF;
-  score += rand * 80 - 40;  // ±40pt — meer variatie per refresh
+  score += rand * 80 - 40;  // ±40pt - meer variatie per refresh
 
   return score;
 };
 
-// ── Hoofd ranking functie — hybride compositie ───────────────────
+// ── Hoofd ranking functie - hybride compositie ───────────────────
 DY.rankFeed = function(verhalen, profiel) {
   if (!verhalen || verhalen.length === 0) return verhalen;
   var sess = DY._feedSessie;
@@ -3752,7 +3752,7 @@ DY.rankFeed = function(verhalen, profiel) {
     return x.v._docId || x.v.id || '';
   }));
 
-  // ── 3. Discovery bucket (12% — ANDERE creators dan trending) ─
+  // ── 3. Discovery bucket (12% - ANDERE creators dan trending) ─
   var discoveryN = Math.max(3, Math.min(7, Math.floor(n * 0.18)));  // 18% discovery voor meer variatie
   var trendingUids = new Set(trendingBucket.map(function(x) {
     return x.v.userId || x.v.uid || x.v.authorId || '';
@@ -3760,7 +3760,7 @@ DY.rankFeed = function(verhalen, profiel) {
   var gastUid2 = DY.user ? DY.user.uid : '_gast';
   var gezienSet2 = DY._feedSignalen.gezien[gastUid2] || new Set();
 
-  // Kandidaten: niet in trending, niet al gezien — shuffle voor variatie
+  // Kandidaten: niet in trending, niet al gezien - shuffle voor variatie
   var discKandidaten = gescoord
     .filter(function(x) {
       var docId = x.v._docId || x.v.id || '';
@@ -3776,7 +3776,7 @@ DY.rankFeed = function(verhalen, profiel) {
     return x.v._docId || x.v.id || '';
   }));
 
-  // ── 4. Relevante bucket (rest — op relevantie gesorteerd) ────
+  // ── 4. Relevante bucket (rest - op relevantie gesorteerd) ────
   var relevantBucket = gescoord
     .filter(function(x) {
       var docId = x.v._docId || x.v.id || '';
@@ -3799,7 +3799,7 @@ DY.rankFeed = function(verhalen, profiel) {
   relevantBucket.forEach(function(x) {
     var uid = x.v.userId || x.v.uid || x.v.authorId || 'anon';
     if (uid !== prevUid) {
-      // Nieuwe creator — herstel 1 wachtende als die er is
+      // Nieuwe creator - herstel 1 wachtende als die er is
       if (wacht.length > 0) gespreid.push(wacht.shift());
       gespreid.push(x);
       prevUid = uid;
@@ -4013,7 +4013,7 @@ DY.laadVerhalen = async function(filter = 'recent') {
   if (!DY.verhalenState) {
     DY.verhalenState = { filter: 'recent', alle: [], getoond: 0, batch: 3, batchScroll: 8 };
   }
-  // Generation guard — voorkomt race conditions bij snelle filter-switches
+  // Generation guard - voorkomt race conditions bij snelle filter-switches
   if (!DY._laadGen) DY._laadGen = 0;
   const mijnGen = ++DY._laadGen;
   DY.verhalenState.filter = filter;
@@ -4046,7 +4046,7 @@ DY.laadVerhalen = async function(filter = 'recent') {
         const snap = await DY.db.collection('stories').limit(100).get();
         snap.forEach(doc => verhalen.push({ _docId: doc.id, ...doc.data() }));
       }
-      // Sla schone kopie op in cache — zonder ranking-metadata zodat
+      // Sla schone kopie op in cache - zonder ranking-metadata zodat
       // volgende ranking ronde een onbesmet uitgangspunt heeft
       DY._verhalenCache = { ts: nu, verhalen: verhalen.map(function(v) { return Object.assign({}, v); }) };
     }
@@ -4105,7 +4105,7 @@ DY.laadVerhalen = async function(filter = 'recent') {
         verhalen.sort((a, b) => toDate(b) - toDate(a));
       }
     }
-    // 'recent' filter: geen pre-sort — rankFeed bepaalt de volgorde
+    // 'recent' filter: geen pre-sort - rankFeed bepaalt de volgorde
     // (pre-sort overschrijft rankFeed willekeur en maakt feed statisch)
 
     // ── Optimistic prepend: eigen nieuw verhaal direct zichtbaar voor Firestore propagation ──
@@ -4114,7 +4114,7 @@ DY.laadVerhalen = async function(filter = 'recent') {
       if (!alInLijst) {
         verhalen.unshift(DY._optimisticVerhaal);
       } else {
-        // Doc is in Firestore — optimistic object niet meer nodig
+        // Doc is in Firestore - optimistic object niet meer nodig
         DY._optimisticVerhaal = null;
       }
     }
@@ -4147,7 +4147,7 @@ DY.laadVerhalen = async function(filter = 'recent') {
     DY.verhalenState.getoond = 0;
     DY.verhalenState.bezig   = false;
 
-    // Race-condition guard — vóór container wissen zodat oudere runs
+    // Race-condition guard - vóór container wissen zodat oudere runs
     // niet de items van een nieuwere run overschrijven
     if (mijnGen !== DY._laadGen) return;
 
@@ -4204,7 +4204,7 @@ DY.laadVerhalen = async function(filter = 'recent') {
 };
 
 DY.toonVolgendeBatch = function(container) {
-  // Hoogte wordt bepaald door CSS calc() — geen JS correctie nodig
+  // Hoogte wordt bepaald door CSS calc() - geen JS correctie nodig
   var state = DY.verhalenState;
   if (!state.alle || state.alle.length === 0) return;
 
@@ -4224,7 +4224,7 @@ DY.toonVolgendeBatch = function(container) {
     container.appendChild(sep);
   }
 
-  // Pak de volgende slice — met wrap-around als slice over het einde gaat
+  // Pak de volgende slice - met wrap-around als slice over het einde gaat
   var volgende = [];
   var totaal = state.alle.length;
   for (var i = 0; i < pakAantal; i++) {
@@ -4237,7 +4237,7 @@ DY.toonVolgendeBatch = function(container) {
   volgende.forEach(function(data) {
     var kaart = DY.verhaalKaart(data);
     kaart.style.height = '';
-    // Geen inline opacity/transform — CSS animation (reelItemIn) regelt dit
+    // Geen inline opacity/transform - CSS animation (reelItemIn) regelt dit
     // Inline styles blokkeren soms setTimeout op achtergrondtabbladen
     _frag.appendChild(kaart);
   });
@@ -4266,7 +4266,7 @@ DY.toonVolgendeBatch = function(container) {
     });
   }
 
-  // Prefetch media van de volgende batch — verborgen in de achtergrond
+  // Prefetch media van de volgende batch - verborgen in de achtergrond
   // Voorkomt laad-vertraging bij scrollen naar volgende items
   var prefetchStart = state.getoond;
   var prefetchAantal = Math.min(3, totaal - prefetchStart);
@@ -4285,7 +4285,7 @@ DY.toonVolgendeBatch = function(container) {
     }
   }
 
-  // Hoogte via CSS — geen JS correctie nodig
+  // Hoogte via CSS - geen JS correctie nodig
 
   // Indicator toont lopende positie in de cyclus
   var positieInCyclus = state.getoond % totaal;
@@ -4310,7 +4310,7 @@ DY._verbergScrollIndicator = function() {
 };
 
 DY._pasFeedHoogteAan = function() {
-  // Hoogte via CSS calc() — geen JS correctie nodig
+  // Hoogte via CSS calc() - geen JS correctie nodig
 };
 
 DY.startInfiniteScroll = function() {
@@ -4364,7 +4364,7 @@ DY.startInfiniteScroll = function() {
 
   // ── Desktop wheel dampening: premium kaart-naar-kaart scrollervaring ──
   // Werkt samen met CSS scroll-snap:proximity voor een gecontroleerde flow
-  // Alleen op desktop (768px+) — mobiel gebruikt native touch scroll
+  // Alleen op desktop (768px+) - mobiel gebruikt native touch scroll
   if (window.innerWidth >= 768 && reel && !reel._wheelBound) {
     reel._wheelBound = true;
 
@@ -4386,7 +4386,7 @@ DY.startInfiniteScroll = function() {
       if (_raf) cancelAnimationFrame(_raf);
       var start    = reel.scrollTop;
       var delta    = doel - start;
-      var duur     = 380; // ms — langzamer = premiumder
+      var duur     = 380; // ms - langzamer = premiumder
       var startMs  = null;
 
       // Ease-out cubic: snel starten, rustig landen
@@ -4403,7 +4403,7 @@ DY.startInfiniteScroll = function() {
         } else {
           reel.scrollTop = doel;
           _raf = null;
-          // Ontgrendel na animatie — kleine buffer voor trackpad
+          // Ontgrendel na animatie - kleine buffer voor trackpad
           _wheelTimer = setTimeout(function() {
             _wheelLocked = false;
           }, 120);
@@ -4518,7 +4518,7 @@ DY.laadAvatarsVoorBatch = async function(container, verhalen) {
 
   await Promise.allSettled(userIds.map(async uid => {
     try {
-      // Gebruik gecachte avatar — sla Firestore call over als al bekend
+      // Gebruik gecachte avatar - sla Firestore call over als al bekend
       let url = DY._avatarCache[uid];
       if (url === undefined) {
         const doc = await DY.db.collection('users').doc(uid).get();
@@ -4809,7 +4809,7 @@ window.addEventListener('resize', function() {
   }
 }, { passive: true });
 
-// ── Centrale reageer-klik helper — auth guard voor alle reageer-knoppen
+// ── Centrale reageer-klik helper - auth guard voor alle reageer-knoppen
 // Gebruik overal ipv directe document.getElementById().focus() aanroep
 DY._reageerKlik = function(inputId) {
   if (!DY.user) {
@@ -4938,7 +4938,7 @@ DY.renderNieuwVerhaal = function() {
         </button>
       </div>
 
-      <!-- Community norm — subtiel, niet opdringerig -->
+      <!-- Community norm - subtiel, niet opdringerig -->
       <div class="dy-community-norm">
         <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" style="color:var(--clay);flex-shrink:0"><path d="M8 14.5s-6-3.8-6-8a4.5 4.5 0 0 1 6-4.2A4.5 4.5 0 0 1 14 6.5c0 4.2-6 8-6 8z"/></svg>
         <span>Paskamer Praat is een respectvolle, niet-oordelende ruimte. Deel wat jij wil en behandel anderen zoals jij behandeld wil worden.</span>
@@ -5142,9 +5142,9 @@ DY.renderNieuwVerhaal = function() {
 // Vanuit andere pagina's: standaard navigatie (ongewijzigd)
 
 // ══════════════════════════════════════════════════════════════════
-// VERHAAL POPUP — unified "lees meer" popup voor feed preview + overlay
+// VERHAAL POPUP - unified "lees meer" popup voor feed preview + overlay
 // Toont volledige story content inclusief alle interacties
-// Verandert DY.pagina NIET — behoud van feed/overlay state
+// Verandert DY.pagina NIET - behoud van feed/overlay state
 // ══════════════════════════════════════════════════════════════════
 DY._verhaalPopupOpen = false;
 DY._verhaalPopupId   = null;
@@ -5153,7 +5153,7 @@ DY._verhaalPopupToken = 0; // FIX 6: cancellation token
 DY.toonVerhaalPopup = async function(id) {
   if (!id) return;
 
-  // FIX 6: bump token — lopende async laad wordt genegeerd
+  // FIX 6: bump token - lopende async laad wordt genegeerd
   var myToken = ++DY._verhaalPopupToken;
 
   // Verwijder bestaande popup
@@ -5208,7 +5208,7 @@ DY.toonVerhaalPopup = async function(id) {
   DY._vpKeyHandler = function(e) { if (e.key === 'Escape') DY.sluitVerhaalPopup(); };
   document.addEventListener('keydown', DY._vpKeyHandler);
 
-  // FIX 2: 1 rAF volstaat — dubbele rAF voegt 1 frame (~16ms) onnodige delay toe
+  // FIX 2: 1 rAF volstaat - dubbele rAF voegt 1 frame (~16ms) onnodige delay toe
   requestAnimationFrame(function() { popup.classList.add('dy-vp-in'); });
 
   // Laad data
@@ -5337,7 +5337,7 @@ DY.toonVerhaalPopup = async function(id) {
           : '<p style="padding:12px 16px;font-size:0.8rem;color:rgba(253,248,240,0.55)"><button onclick="DY.navigeer(\'login\')" style="color:var(--clay);background:none;border:none;cursor:pointer;font-weight:600">Log in</button> om te reageren</p>') +
       '</div>';
 
-    // Topnav acties: v60.1.41 — Delen-knop verwijderd. Alleen verwijder-knop
+    // Topnav acties: v60.1.41 - Delen-knop verwijderd. Alleen verwijder-knop
     // voor eigen verhaal blijft. Delen blijft beschikbaar via card-hub popover.
     var topnavActies = document.getElementById('dy-vp-topnav-acties');
     if (topnavActies) {
@@ -5435,7 +5435,7 @@ DY.openDetail = function(id, vanFeed) {
   DY.navigeer('detail');
 };
 
-// ── Fullscreen detail overlay — TikTok/Reels stijl ─────────────────
+// ── Fullscreen detail overlay - TikTok/Reels stijl ─────────────────
 DY._detailOverlayOpen = false;
 DY._detailOverlayToken = 0;   // FIX 2: cancellation token voor async laad
 DY._detailOverlayCloseTimer = null; // FIX 1: bijhouden van sluit-setTimeout
@@ -5465,7 +5465,7 @@ DY._openDetailOverlay = async function(startId) {
   var feedReel = document.getElementById('dy-verhalen');
   DY._feedScrollBefore = feedReel ? feedReel.scrollTop : window.scrollY;
 
-  // Bouw overlay — position:fixed, inset:0, z-index:999 (boven alles)
+  // Bouw overlay - position:fixed, inset:0, z-index:999 (boven alles)
   var overlay = document.createElement('div');
   overlay.id = 'dy-detail-overlay';
   overlay.className = 'dy-detail-overlay';
@@ -5483,7 +5483,7 @@ DY._openDetailOverlay = async function(startId) {
       '</div>' +
     '</div>';
 
-  // FIX 4: overflow vóór append — geen forced reflow
+  // FIX 4: overflow vóór append - geen forced reflow
   document.body.style.overflowY = 'hidden';
   document.body.appendChild(overlay);
 
@@ -5511,7 +5511,7 @@ DY._openDetailOverlay = async function(startId) {
     }, { passive: true, signal: DY._detailOverlayScrollAC.signal });
   });
 
-  // Swipe-down sluiten (mobiel) — native app gevoel
+  // Swipe-down sluiten (mobiel) - native app gevoel
   // Alleen als bovenste kaart zichtbaar is (scrollTop ≈ 0)
   var _swipeStartY = 0;
   var _swipeStartX = 0;
@@ -5530,13 +5530,13 @@ DY._openDetailOverlay = async function(startId) {
     }
   }, { passive: true });
 
-  // FIX 2: check token voor de await — als token veranderd is, is overlay al gesloten
+  // FIX 2: check token voor de await - als token veranderd is, is overlay al gesloten
   var tokenVoorLaad = myToken;
   try {
     await DY._laadDetailOverlayContent(startId);
     // Na de await: controleer of deze instantie nog geldig is
     if (DY._detailOverlayToken !== tokenVoorLaad || !DY._detailOverlayOpen) {
-      // Overlay is gesloten terwijl we aan het laden waren — opruimen
+      // Overlay is gesloten terwijl we aan het laden waren - opruimen
       var stale2 = document.getElementById('dy-detail-overlay');
       if (stale2 && stale2.parentNode) stale2.parentNode.removeChild(stale2);
       return;
@@ -5575,7 +5575,7 @@ DY._laadDetailOverlayContent = async function(startDocId) {
       geordend.push(allePosts[(startIdx + i) % allePosts.length]);
     }
 
-    // Render met dezelfde verhaalKaart() als de feed — identieke kaarten
+    // Render met dezelfde verhaalKaart() als de feed - identieke kaarten
     scroller.innerHTML = '';
     var frag = document.createDocumentFragment();
     geordend.forEach(function(v) {
@@ -5587,7 +5587,7 @@ DY._laadDetailOverlayContent = async function(startDocId) {
     // Scroll direct naar het begin (geklikte post staat eerste)
     scroller.scrollTop = 0;
 
-    // Start aparte video observer voor de overlay — root = overlay scroller
+    // Start aparte video observer voor de overlay - root = overlay scroller
     // De feed observer heeft root=feedScroller en werkt NIET voor overlay items
     if (DY._overlayVideoObserver) {
       DY._overlayVideoObserver.disconnect();
@@ -5909,7 +5909,7 @@ DY._openDMDrawer = function(docId, naam, ontvangerUid) {
 
   var displayNaam = (naam && naam !== 'undefined') ? naam : 'gebruiker';
 
-  // Altijd op body mounten — werkt in feed én in overlay
+  // Altijd op body mounten - werkt in feed én in overlay
   var overlay = document.createElement('div');
   overlay.id = 'dy-dm-overlay';
   overlay.className = 'dy-dm-overlay';
@@ -6183,7 +6183,7 @@ DY._sluitDetailOverlay = function() {
 
   var overlay = document.getElementById('dy-detail-overlay');
   if (!overlay) {
-    // DOM al weg maar flag nog aan — reset alleen de flag
+    // DOM al weg maar flag nog aan - reset alleen de flag
     DY._detailOverlayOpen = false;
     document.body.style.overflowY = '';
     return;
@@ -6451,7 +6451,7 @@ DY.sdToggleLike = async function(docId, btn) {
 };
 
 // ════════════════════════════════════════════════════════════════
-// UITBREIDINGEN — reacties, profiel, looks, reviews, winkel, etc.
+// UITBREIDINGEN - reacties, profiel, looks, reviews, winkel, etc.
 // ════════════════════════════════════════════════════════════════
 
 DY.laadReacties = async function(verhaalId) {
@@ -6586,7 +6586,7 @@ DY.plaatsReactie = async function(verhaalId) {
     // Push notificatie naar auteur
     try {
       // v60.1.35 STABILITY FIX: vorige regel had `(yield).data()` (typo) waardoor
-      // de push notificatie naar de auteur nooit verstuurd werd — silent fail in try/catch.
+      // de push notificatie naar de auteur nooit verstuurd werd - silent fail in try/catch.
       const _snap = await DY.db.collection('stories').doc(verhaalId).get();
       const _data = _snap.exists ? _snap.data() : null;
       const auteurId = _data && _data.userId;
@@ -6624,7 +6624,7 @@ DY.plaatsReactie = async function(verhaalId) {
           }
         }
       }
-    } catch(e) { /* Notificatie mislukt — geen impact op UX */ }
+    } catch(e) { /* Notificatie mislukt - geen impact op UX */ }
     document.getElementById('reactie-tekst').value = '';
     if (fotoInput) fotoInput.value = '';
     const naamEl = document.getElementById('reactie-foto-naam');
@@ -6847,7 +6847,7 @@ DY.renderProfiel = async function() {
           : '<p class="dy-niveau-next">Je hebt het hoogste niveau bereikt. 🏆</p>'}
       </div>
 
-      <!-- ── SEIZOEN TIER — inklapbaar ── -->
+      <!-- ── SEIZOEN TIER - inklapbaar ── -->
       <div class="dy-collapse-sectie" id="col-seizoen">
         <button class="dy-collapse-header" onclick="DY.toggleCollapse('col-seizoen')" aria-expanded="false">
           <span class="dy-collapse-label">
@@ -6885,7 +6885,7 @@ DY.renderProfiel = async function() {
         </div><!-- /.dy-collapse-body -->
       </div><!-- /#col-seizoen -->
 
-      <!-- ── ALLE NIVEAUS — inklapbaar ── -->
+      <!-- ── ALLE NIVEAUS - inklapbaar ── -->
       <div class="dy-collapse-sectie" id="col-niveaus">
         <button class="dy-collapse-header" onclick="DY.toggleCollapse('col-niveaus')" aria-expanded="false">
           <span class="dy-collapse-label">
@@ -6907,7 +6907,7 @@ DY.renderProfiel = async function() {
         </div><!-- /.dy-collapse-body -->
       </div><!-- /#col-niveaus -->
 
-      <!-- ── DSP REGLEMENT — inklapbaar ── -->
+      <!-- ── DSP REGLEMENT - inklapbaar ── -->
       <div class="dy-collapse-sectie" id="col-dsp">
         <button class="dy-collapse-header" onclick="DY.toggleCollapse('col-dsp')" aria-expanded="false">
           <span class="dy-collapse-label">
@@ -6948,7 +6948,7 @@ DY.renderProfiel = async function() {
         </div>
       </div>
 
-      <!-- ── DSP ACTIVITEIT LOG — inklapbaar ── -->
+      <!-- ── DSP ACTIVITEIT LOG - inklapbaar ── -->
       <div class="dy-collapse-sectie" id="col-activiteit">
         <button class="dy-collapse-header" onclick="DY.toggleCollapse('col-activiteit')" aria-expanded="false">
           <span class="dy-collapse-label">
@@ -6986,7 +6986,7 @@ DY.renderProfiel = async function() {
         </button>
       </div>
 
-      <!-- legal terms — desktop only -->
+      <!-- legal terms - desktop only -->
       <div class="dy-profiel-legal-desktop">
         <button class="dy-profiel-legal-link" onclick="DY.navigeer('voorwaarden')">legal terms</button>
       </div>
@@ -7059,7 +7059,7 @@ DY.renderProfiel = async function() {
 
   // DSP activiteitslog laden
   try {
-    // Maandelijkse reset check (UI-only — Firestore data blijft intact)
+    // Maandelijkse reset check (UI-only - Firestore data blijft intact)
     var _huidigeMaand = new Date().toISOString().slice(0, 7); // YYYY-MM
     var _opgeslagenMaand = null;
     try { _opgeslagenMaand = localStorage.getItem('dy_activiteit_maand_' + DY.user.uid); } catch(e) {}
@@ -7074,7 +7074,7 @@ DY.renderProfiel = async function() {
 
     // Bij maandwissel: toon reset-melding in UI
     if (_nieuweMapand && _opgeslagenMaand !== null) {
-      logEl.innerHTML = '<p class="dy-leeg-tekst" style="font-size:0.78rem;color:var(--ink-muted);padding:12px 0">✨ Nieuwe maand, nieuw begin — activiteiten worden maandelijks gereset.</p>';
+      logEl.innerHTML = '<p class="dy-leeg-tekst" style="font-size:0.78rem;color:var(--ink-muted);padding:12px 0">✨ Nieuwe maand, nieuw begin - activiteiten worden maandelijks gereset.</p>';
       return;
     }
 
@@ -7182,7 +7182,7 @@ DY.psToggle = function(tab) {
     if (chevron) chevron.style.transform = 'rotate(180deg)';
     if (dd) dd.classList.add('actief');
 
-    // Animeer open — gebruik vaste max-height zodat animatie werkt ook als inhoud nog laadt
+    // Animeer open - gebruik vaste max-height zodat animatie werkt ook als inhoud nog laadt
     requestAnimationFrame(function() {
       body.style.transition = 'max-height 0.32s var(--ease-out, ease), opacity 0.2s ease';
       body.style.maxHeight = '520px';
@@ -7252,7 +7252,7 @@ DY.toggleCollapse = function(id) {
 
     requestAnimationFrame(function() {
       body.style.transition = 'max-height 0.30s ease, opacity 0.2s ease';
-      // Gebruik ruime vaste max-height — body.scrollHeight kan 0 zijn
+      // Gebruik ruime vaste max-height - body.scrollHeight kan 0 zijn
       // als content asynchroon laadt of body nog verborgen was
       body.style.maxHeight  = '800px';
       body.style.opacity    = '1';
@@ -7703,7 +7703,7 @@ DY.initPush = async function() {
     const reg = await navigator.serviceWorker.ready;
     const bestaand = await reg.pushManager.getSubscription();
     if (bestaand) {
-      // Al ingeschreven — sla op voor zekerheid
+      // Al ingeschreven - sla op voor zekerheid
       await DY.slaSubscriptionOp(bestaand);
       return;
     }
@@ -7928,7 +7928,7 @@ DY.renderOnboarding = function() {
   };
 
   DY.onboardingKlaar = function() {
-    // onboarding flag niet opslaan — nieuwe bezoekers zien altijd fresh content
+    // onboarding flag niet opslaan - nieuwe bezoekers zien altijd fresh content
     DY.navigeer('feed');
   };
 
@@ -8019,7 +8019,7 @@ DY.toonLoginPrompt = function(reden, opties) {
   var bestaand = document.getElementById('dy-login-sheet');
   if (bestaand) bestaand.remove();
 
-  // Maak bottom sheet — content blijft zichtbaar eronder
+  // Maak bottom sheet - content blijft zichtbaar eronder
   var overlay = document.createElement('div');
   overlay.id = 'dy-login-sheet';
   overlay.className = 'dy-login-sheet-overlay';
@@ -8263,7 +8263,7 @@ DY.uploadProfielfoto = async function(input) {
   }
 };
 
-// Avatar HTML helper — toont foto of initialen
+// Avatar HTML helper - toont foto of initialen
 DY.avatarHTML = function(naam, avatarUrl, klasse) {
   klasse = klasse || 'dy-avatar';
   const initials = (naam || '??').slice(0, 2).toUpperCase();
@@ -8303,7 +8303,7 @@ DY.toggleLike = async function(verhaalId, btn) {
     const likesObj = (data.likes && typeof data.likes === 'object') ? data.likes : {};
     const liked = likesObj[uid] === true;
 
-    // Update alleen het likes veld — geen userId check nodig in de rule
+    // Update alleen het likes veld - geen userId check nodig in de rule
     window.dispatchEvent(new Event('dy_positieve_actie'));
   const updateData = {};
     updateData[`likes.${uid}`] = liked ? firebase.firestore.FieldValue.delete() : true;
@@ -8314,12 +8314,12 @@ DY.toggleLike = async function(verhaalId, btn) {
     const span = btn.querySelector('span');
 
     if (!liked) {
-      // Like toegevoegd — punten geven bij mijlpalen + auteur ontvangt punt
+      // Like toegevoegd - punten geven bij mijlpalen + auteur ontvangt punt
       if (nieuweCount === 5) await DY.geefPunten('likes_5', { verhaal_id: verhaalId });
       if (nieuweCount === 20) await DY.geefPunten('likes_20', { verhaal_id: verhaalId });
       DY.geefPunten && DY.geefPunten('like_ontvangen_story', verhaalId).catch(function(){});
     } else {
-      // Like verwijderd — punten terughalen
+      // Like verwijderd - punten terughalen
       if (nieuweCount === 4) await DY.ontneemPunten('likes_5', { verhaal_id: verhaalId });
       if (nieuweCount === 19) await DY.ontneemPunten('likes_20', { verhaal_id: verhaalId });
       DY.ontneemPunten && DY.ontneemPunten('like_ontvangen_story', verhaalId).catch(function(){});
@@ -8528,7 +8528,7 @@ DY.fitConfidenceHTML = function(score, aantalReviews, badges) {
 
 
 // ══════════════════════════════════════════════════════════════════════
-// MAAT MATCHER ENGINE — v1.0
+// MAAT MATCHER ENGINE - v1.0
 // Berekent relevantie-score (0–100) tussen jouw profiel en content
 // ══════════════════════════════════════════════════════════════════════
 
@@ -8553,7 +8553,7 @@ DY.maatMatchScore = function(mijnProfiel, andereData) {
   var anderBouw    = (andereData.bouw   || '').toLowerCase();
   var anderFit     = (andereData.fitvoorkeur || '').toLowerCase();
 
-  // ── 1. LENGTE (40 punten — meest bepalend voor tall/plus size)
+  // ── 1. LENGTE (40 punten - meest bepalend voor tall/plus size)
   if (mijnLengte && anderLengte) {
     maxScore += 40;
     var lDiff = Math.abs(mijnLengte - anderLengte);
@@ -8592,7 +8592,7 @@ DY.maatMatchScore = function(mijnProfiel, andereData) {
     }
   }
 
-  // ── 3. BORSTOMTREK / GEWICHT (20 punten — proporties)
+  // ── 3. BORSTOMTREK / GEWICHT (20 punten - proporties)
   if (mijnBorst && anderBorst) {
     maxScore += 20;
     var bDiff = Math.abs(mijnBorst - anderBorst);
@@ -8726,7 +8726,7 @@ DY.pasPostuurAanOpProfiel = function() {
 
 
 // ══════════════════════════════════════════════════════════════════
-// MAAT MATCHER ENRICHMENT — vult ontbrekende maatdata in van
+// MAAT MATCHER ENRICHMENT - vult ontbrekende maatdata in van
 // bestaande content door de auteur's profiel op te zoeken
 // ══════════════════════════════════════════════════════════════════
 
@@ -8881,7 +8881,7 @@ DY._voegToeAanWishlist = async function(productSlug, btn) {
   var bestaand = await wlRef.get();
 
   if (bestaand.exists) {
-    // Al in verlanglijst — toggle uit
+    // Al in verlanglijst - toggle uit
     await wlRef.delete();
     if (btn) {
       btn.classList.remove('active');
@@ -8907,7 +8907,7 @@ DY._voegToeAanWishlist = async function(productSlug, btn) {
 
 
 // ══════════════════════════════════════════════════════════════════
-// KLEUR STEM MODULE — compact, premium, realtime
+// KLEUR STEM MODULE - compact, premium, realtime
 // ══════════════════════════════════════════════════════════════════
 
 DY.KLEUR_PALET = [
@@ -8937,7 +8937,7 @@ DY._checkKleurStem = async function() {
       .where('guestId', '==', guestId).limit(1).get();
     return snap.empty ? null : snap.docs[0].data();
   } catch(e) {
-    // Firestore niet beschikbaar — check alleen localStorage
+    // Firestore niet beschikbaar - check alleen localStorage
     var localStem = localStorage.getItem('dy_item_poll_stem');
     return localStem ? { kleur: localStem, _local: true } : null;
   }
@@ -8973,7 +8973,7 @@ DY._renderKleurPanel = async function() {
   }
 };
 
-// ── Stem grid — compact card ─────────────────────────────────────
+// ── Stem grid - compact card ─────────────────────────────────────
 DY._renderKleurGrid = function(container) {
   var boluHTML = DY.KLEUR_PALET.map(function(k) {
     return '<button class="dy-ks-kaart" data-kleur="' + DY.escapeHtml(k.naam) + '" ' +
@@ -9026,7 +9026,7 @@ DY._renderKleurGrid = function(container) {
         'onclick="DY._submitKleurCompact()" disabled type="button">Stem</button>' +
     '</div>';
 
-  // Event delegation — één listener, geen inline onclick op elke knop
+  // Event delegation - één listener, geen inline onclick op elke knop
   requestAnimationFrame(function() {
     var grid = document.getElementById('dy-ks-grid');
     if (grid) grid.addEventListener('click', DY._ksGridClick);
@@ -9057,13 +9057,13 @@ DY._ksGridClick = function(e) {
   }
 };
 DY._selectKleur = function(naam, btn) {
-  // Backwards compat — niet meer direct gebruikt
+  // Backwards compat - niet meer direct gebruikt
   if (btn) DY._ksGridClick({ target: btn });
 };
 
 // ── Stem opslaan ─────────────────────────────────────────────────
 DY._submitKleurCompact = async function() {
-  // Gasten mogen ook stemmen — geen login vereist
+  // Gasten mogen ook stemmen - geen login vereist
   var gekozen = document.querySelector('.dy-ks-kaart.dy-ks-gekozen');
   if (!gekozen) return;
   var kleur = gekozen.getAttribute('aria-label');
@@ -9126,13 +9126,13 @@ DY._submitKleurCompact = async function() {
     if (DY.user && !DY.user.isAnonymous) {
       DY.geefPunten && DY.geefPunten('stem_kleur').catch(function(){});
     }
-    DY._toonToastBericht(kleur + ' — stem opgeslagen ✓');
+    DY._toonToastBericht(kleur + ' - stem opgeslagen ✓');
 
     var stats = await DY._getKleurStemTotalen();
     var container = document.getElementById('dy-kleur-panel');
     if (container) DY._renderKleurResultaat(container, payload, stats);
   } catch(e) {
-    DY._toonToastBericht('Opslaan mislukt — probeer opnieuw.');
+    DY._toonToastBericht('Opslaan mislukt - probeer opnieuw.');
     if (btn) { btn.disabled = false; btn.textContent = 'Stem'; }
   }
 };
@@ -9215,7 +9215,7 @@ DY.renderWinkel = function() {
 
           <div class="dy-wk-product-kaart" onclick="DY.openWebshop('https://doubleyoufashion.nl/collections/doubleyou-1')">
             <div class="dy-wk-product-media">
-              <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20400%22%20width%3D%22300%22%20height%3D%22400%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g1%22%20cx%3D%2250%25%22%20cy%3D%2240%25%22%20r%3D%2265%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%232e2410%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230d0b07%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22glow1%22%20cx%3D%2250%25%22%20cy%3D%2238%25%22%20r%3D%2240%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23c67d06%22%20stop-opacity%3D%220.18%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23c67d06%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3Cfilter%20id%3D%22blur1x%22%3E%3CfeGaussianBlur%20stdDeviation%3D%2218%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Crect%20width%3D%22300%22%20height%3D%22400%22%20fill%3D%22url%28%23g1%29%22%2F%3E%3Cellipse%20cx%3D%22150%22%20cy%3D%22155%22%20rx%3D%2290%22%20ry%3D%2270%22%20fill%3D%22url%28%23glow1%29%22%20filter%3D%22url%28%23blur1x%29%22%2F%3E%3Cpath%20d%3D%22M150%2072%20C150%2072%20150%2060%20162%2057%20C174%2054%20178%2065%20170%2072%22%20fill%3D%22none%22%20stroke%3D%22%23c67d06%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20opacity%3D%220.85%22%2F%3E%3Cpath%20d%3D%22M150%2072%20C150%2072%20150%2082%20150%2090%20C150%2090%20108%20118%2088%20132%20C76%20140%2074%20152%2080%20158%20C86%20164%2096%20162%20100%20158%20L200%20158%20C204%20162%20214%20164%20220%20158%20C226%20152%20224%20140%20212%20132%20C192%20118%20150%2090%20150%2090%22%20fill%3D%22none%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.65%29%22%20stroke-width%3D%222.0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2280%22%20y1%3D%22158%22%20x2%3D%22220%22%20y2%3D%22158%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.65%29%22%20stroke-width%3D%222.0%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M100%20168%20L74%20210%20L96%20218%20L96%20300%20L204%20300%20L204%20218%20L226%20210%20L200%20168%20C200%20168%20186%20180%20150%20180%20C114%20180%20100%20168%20100%20168%20Z%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.06%29%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.22%29%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M126%20265%20Q150%20258%20174%20265%20L174%20285%20Q150%20292%20126%20285%20Z%22%20fill%3D%22none%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.14%29%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M140%20183%20L138%20196%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.18%29%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M160%20183%20L162%20196%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.18%29%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2260%22%20y1%3D%22328%22%20x2%3D%22240%22%20y2%3D%22328%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.20%29%22%20stroke-width%3D%220.8%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22350%22%20text-anchor%3D%22middle%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2211%22%20font-style%3D%22italic%22%20letter-spacing%3D%220.5%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.75%29%22%3EBinnenkort%20beschikbaar%3C%2Ftext%3E%3Ctext%20x%3D%22150%22%20y%3D%22368%22%20text-anchor%3D%22middle%22%20font-family%3D%22-apple-system%2Csans-serif%22%20font-size%3D%228.5%22%20letter-spacing%3D%222.5%22%20font-weight%3D%22600%22%20fill%3D%22rgba%28253%2C248%2C240%2C0.28%29%22%3E1.85M%20EN%20LANGER%3C%2Ftext%3E%3C%2Fsvg%3E" alt="Binnenkort beschikbaar — Tall collectie" class="dy-wk-product-img" width="300" height="400" decoding="async" style="image-rendering:auto">
+              <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20400%22%20width%3D%22300%22%20height%3D%22400%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g1%22%20cx%3D%2250%25%22%20cy%3D%2240%25%22%20r%3D%2265%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%232e2410%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230d0b07%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22glow1%22%20cx%3D%2250%25%22%20cy%3D%2238%25%22%20r%3D%2240%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23c67d06%22%20stop-opacity%3D%220.18%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23c67d06%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3Cfilter%20id%3D%22blur1x%22%3E%3CfeGaussianBlur%20stdDeviation%3D%2218%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Crect%20width%3D%22300%22%20height%3D%22400%22%20fill%3D%22url%28%23g1%29%22%2F%3E%3Cellipse%20cx%3D%22150%22%20cy%3D%22155%22%20rx%3D%2290%22%20ry%3D%2270%22%20fill%3D%22url%28%23glow1%29%22%20filter%3D%22url%28%23blur1x%29%22%2F%3E%3Cpath%20d%3D%22M150%2072%20C150%2072%20150%2060%20162%2057%20C174%2054%20178%2065%20170%2072%22%20fill%3D%22none%22%20stroke%3D%22%23c67d06%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20opacity%3D%220.85%22%2F%3E%3Cpath%20d%3D%22M150%2072%20C150%2072%20150%2082%20150%2090%20C150%2090%20108%20118%2088%20132%20C76%20140%2074%20152%2080%20158%20C86%20164%2096%20162%20100%20158%20L200%20158%20C204%20162%20214%20164%20220%20158%20C226%20152%20224%20140%20212%20132%20C192%20118%20150%2090%20150%2090%22%20fill%3D%22none%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.65%29%22%20stroke-width%3D%222.0%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2280%22%20y1%3D%22158%22%20x2%3D%22220%22%20y2%3D%22158%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.65%29%22%20stroke-width%3D%222.0%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M100%20168%20L74%20210%20L96%20218%20L96%20300%20L204%20300%20L204%20218%20L226%20210%20L200%20168%20C200%20168%20186%20180%20150%20180%20C114%20180%20100%20168%20100%20168%20Z%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.06%29%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.22%29%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M126%20265%20Q150%20258%20174%20265%20L174%20285%20Q150%20292%20126%20285%20Z%22%20fill%3D%22none%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.14%29%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M140%20183%20L138%20196%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.18%29%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M160%20183%20L162%20196%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.18%29%22%20stroke-width%3D%221.2%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%2260%22%20y1%3D%22328%22%20x2%3D%22240%22%20y2%3D%22328%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.20%29%22%20stroke-width%3D%220.8%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22350%22%20text-anchor%3D%22middle%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2211%22%20font-style%3D%22italic%22%20letter-spacing%3D%220.5%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.75%29%22%3EBinnenkort%20beschikbaar%3C%2Ftext%3E%3Ctext%20x%3D%22150%22%20y%3D%22368%22%20text-anchor%3D%22middle%22%20font-family%3D%22-apple-system%2Csans-serif%22%20font-size%3D%228.5%22%20letter-spacing%3D%222.5%22%20font-weight%3D%22600%22%20fill%3D%22rgba%28253%2C248%2C240%2C0.28%29%22%3E1.85M%20EN%20LANGER%3C%2Ftext%3E%3C%2Fsvg%3E" alt="Binnenkort beschikbaar - Tall collectie" class="dy-wk-product-img" width="300" height="400" decoding="async" style="image-rendering:auto">
               <span class="dy-wk-product-label">Tall</span>
             </div>
             <div class="dy-wk-product-info">
@@ -9234,7 +9234,7 @@ DY.renderWinkel = function() {
 
           <div class="dy-wk-product-kaart" onclick="DY.openWebshop('https://doubleyoufashion.nl/collections/doubleyou-1')">
             <div class="dy-wk-product-media">
-              <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20400%22%20width%3D%22300%22%20height%3D%22400%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g2%22%20cx%3D%2250%25%22%20cy%3D%2245%25%22%20r%3D%2265%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23261e0c%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230a0806%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22glow2%22%20cx%3D%2250%25%22%20cy%3D%2242%25%22%20r%3D%2238%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23c67d06%22%20stop-opacity%3D%220.16%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23c67d06%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3Cfilter%20id%3D%22blr1x%22%3E%3CfeGaussianBlur%20stdDeviation%3D%2220%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Crect%20width%3D%22300%22%20height%3D%22400%22%20fill%3D%22url%28%23g2%29%22%2F%3E%3Cellipse%20cx%3D%22150%22%20cy%3D%22168%22%20rx%3D%2285%22%20ry%3D%2265%22%20fill%3D%22url%28%23glow2%29%22%20filter%3D%22url%28%23blr1x%29%22%2F%3E%3Cpath%20d%3D%22M118%2095%20L118%2095%20Q118%2080%20133%2080%20L167%2080%20Q182%2080%20182%2095%20L182%20210%20Q182%20222%20174%20228%20L154%20248%20Q150%20252%20146%20248%20L126%20228%20Q118%20222%20118%20210%20Z%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.07%29%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.28%29%22%20stroke-width%3D%221.8%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%22150%22%20cy%3D%2288%22%20r%3D%225.5%22%20fill%3D%22none%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.45%29%22%20stroke-width%3D%221.8%22%2F%3E%3Cpath%20d%3D%22M150%2083%20C150%2083%20150%2070%20142%2062%20C138%2058%20136%2052%20140%2048%22%20fill%3D%22none%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.30%29%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%22132%22%20y1%3D%22118%22%20x2%3D%22168%22%20y2%3D%22118%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.18%29%22%20stroke-width%3D%221.0%22%20stroke-linecap%3D%22round%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22143%22%20text-anchor%3D%22middle%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2222%22%20font-weight%3D%22bold%22%20font-style%3D%22italic%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.35%29%22%20letter-spacing%3D%22-0.5%22%3EDY%3C%2Ftext%3E%3Cline%20x1%3D%22132%22%20y1%3D%22162%22%20x2%3D%22168%22%20y2%3D%22162%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.12%29%22%20stroke-width%3D%220.8%22%20stroke-linecap%3D%22round%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22185%22%20text-anchor%3D%22middle%22%20font-family%3D%22-apple-system%2Csans-serif%22%20font-size%3D%229%22%20font-weight%3D%22700%22%20letter-spacing%3D%222%22%20fill%3D%22rgba%28253%2C248%2C240%2C0.22%29%22%3EXL%20%E2%80%94%205XL%3C%2Ftext%3E%3Cpath%20d%3D%22M96%20272%20L76%20308%20L100%20316%20L100%20360%20L200%20360%20L200%20316%20L224%20308%20L204%20272%20C204%20272%20190%20282%20150%20282%20C110%20282%2096%20272%2096%20272%20Z%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.055%29%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.18%29%22%20stroke-width%3D%221.4%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2255%22%20y1%3D%22388%22%20x2%3D%22245%22%20y2%3D%22388%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.18%29%22%20stroke-width%3D%220.8%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22394%22%20text-anchor%3D%22middle%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2210.5%22%20font-style%3D%22italic%22%20letter-spacing%3D%220.5%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.70%29%22%3EBinnenkort%20beschikbaar%3C%2Ftext%3E%3C%2Fsvg%3E" alt="Binnenkort beschikbaar — Plus Size collectie" class="dy-wk-product-img" width="300" height="400" decoding="async" style="image-rendering:auto">
+              <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20400%22%20width%3D%22300%22%20height%3D%22400%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g2%22%20cx%3D%2250%25%22%20cy%3D%2245%25%22%20r%3D%2265%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23261e0c%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230a0806%22%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%22glow2%22%20cx%3D%2250%25%22%20cy%3D%2242%25%22%20r%3D%2238%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23c67d06%22%20stop-opacity%3D%220.16%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23c67d06%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3Cfilter%20id%3D%22blr1x%22%3E%3CfeGaussianBlur%20stdDeviation%3D%2220%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Crect%20width%3D%22300%22%20height%3D%22400%22%20fill%3D%22url%28%23g2%29%22%2F%3E%3Cellipse%20cx%3D%22150%22%20cy%3D%22168%22%20rx%3D%2285%22%20ry%3D%2265%22%20fill%3D%22url%28%23glow2%29%22%20filter%3D%22url%28%23blr1x%29%22%2F%3E%3Cpath%20d%3D%22M118%2095%20L118%2095%20Q118%2080%20133%2080%20L167%2080%20Q182%2080%20182%2095%20L182%20210%20Q182%20222%20174%20228%20L154%20248%20Q150%20252%20146%20248%20L126%20228%20Q118%20222%20118%20210%20Z%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.07%29%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.28%29%22%20stroke-width%3D%221.8%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%22150%22%20cy%3D%2288%22%20r%3D%225.5%22%20fill%3D%22none%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.45%29%22%20stroke-width%3D%221.8%22%2F%3E%3Cpath%20d%3D%22M150%2083%20C150%2083%20150%2070%20142%2062%20C138%2058%20136%2052%20140%2048%22%20fill%3D%22none%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.30%29%22%20stroke-width%3D%221.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Cline%20x1%3D%22132%22%20y1%3D%22118%22%20x2%3D%22168%22%20y2%3D%22118%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.18%29%22%20stroke-width%3D%221.0%22%20stroke-linecap%3D%22round%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22143%22%20text-anchor%3D%22middle%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2222%22%20font-weight%3D%22bold%22%20font-style%3D%22italic%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.35%29%22%20letter-spacing%3D%22-0.5%22%3EDY%3C%2Ftext%3E%3Cline%20x1%3D%22132%22%20y1%3D%22162%22%20x2%3D%22168%22%20y2%3D%22162%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.12%29%22%20stroke-width%3D%220.8%22%20stroke-linecap%3D%22round%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22185%22%20text-anchor%3D%22middle%22%20font-family%3D%22-apple-system%2Csans-serif%22%20font-size%3D%229%22%20font-weight%3D%22700%22%20letter-spacing%3D%222%22%20fill%3D%22rgba%28253%2C248%2C240%2C0.22%29%22%3EXL%20%E2%80%94%205XL%3C%2Ftext%3E%3Cpath%20d%3D%22M96%20272%20L76%20308%20L100%20316%20L100%20360%20L200%20360%20L200%20316%20L224%20308%20L204%20272%20C204%20272%20190%20282%20150%20282%20C110%20282%2096%20272%2096%20272%20Z%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.055%29%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.18%29%22%20stroke-width%3D%221.4%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cline%20x1%3D%2255%22%20y1%3D%22388%22%20x2%3D%22245%22%20y2%3D%22388%22%20stroke%3D%22rgba%28198%2C125%2C6%2C0.18%29%22%20stroke-width%3D%220.8%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22394%22%20text-anchor%3D%22middle%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2210.5%22%20font-style%3D%22italic%22%20letter-spacing%3D%220.5%22%20fill%3D%22rgba%28198%2C125%2C6%2C0.70%29%22%3EBinnenkort%20beschikbaar%3C%2Ftext%3E%3C%2Fsvg%3E" alt="Binnenkort beschikbaar - Plus Size collectie" class="dy-wk-product-img" width="300" height="400" decoding="async" style="image-rendering:auto">
               <span class="dy-wk-product-label">Plus Size</span>
             </div>
             <div class="dy-wk-product-info">
@@ -9592,7 +9592,7 @@ DY.renderGebruikersProfiel = async function() {
         ' onerror="this.style.display=\x27none\x27">';
     }
 
-    // Volgknop — alleen voor anderen
+    // Volgknop - alleen voor anderen
     await DY.laadVolgStatus();
     var volgWrap = document.getElementById('gu-volg-wrap');
     if (volgWrap && DY.user && uid !== DY.user.uid) {
@@ -9627,11 +9627,11 @@ DY.renderGebruikersProfiel = async function() {
     var badgesArr = p.badges || [];
 
     // Verhalen laden
-    // Haal verhalen op — probeer meerdere methoden zodat ontbrekende indexes geen probleem zijn
+    // Haal verhalen op - probeer meerdere methoden zodat ontbrekende indexes geen probleem zijn
     var verhalen = [];
     var gezieneIds = {};
 
-    // Methode 1: orderBy ts (vereist index) — meest recent
+    // Methode 1: orderBy ts (vereist index) - meest recent
     try {
       var snap1 = await DY.db.collection('stories')
         .where('userId', '==', uid)
@@ -9642,7 +9642,7 @@ DY.renderGebruikersProfiel = async function() {
         if (!gezieneIds[d.id]) { gezieneIds[d.id] = true; var v = d.data(); v._id = d.id; v._docId = d.id; verhalen.push(v); }
       });
     } catch(e) {
-      // Index ontbreekt — haal alle recente stories op en filter client-side
+      // Index ontbreekt - haal alle recente stories op en filter client-side
       try {
         var snap2 = await DY.db.collection('stories')
           .orderBy('ts', 'desc')
@@ -9816,7 +9816,7 @@ DY.controleerMeldingen = function() {
     window._meldingenUnsub = null;
   }
   try {
-    // Realtime onSnapshot — badge update direct bij wijziging
+    // Realtime onSnapshot - badge update direct bij wijziging
     window._meldingenUnsub = DY.db.collection('meldingen')
       .where('userId', '==', DY.user.uid)
       .where('gelezen', '==', false)
@@ -10026,7 +10026,7 @@ DY._laadOutfitStems = async function(challengeId) {
       .where('challengeId', '==', challengeId)
       .orderBy('stems', 'desc').limit(3).get();
     if (snap.empty) {
-      grid.innerHTML = '<p style="font-size:0.82rem;color:rgba(252,248,239,0.4);text-align:center;padding:12px 0">Nog geen inzendingen — wees de eerste.</p>';
+      grid.innerHTML = '<p style="font-size:0.82rem;color:rgba(252,248,239,0.4);text-align:center;padding:12px 0">Nog geen inzendingen - wees de eerste.</p>';
       return;
     }
     var mijnStem = false;
@@ -10146,7 +10146,7 @@ DY.doeChallenge = function(actie, challengeId) {
 };
 
 
-// ── OUTFIT VAN DE WEEK — Eigen feed ────────────────────────────────────────
+// ── OUTFIT VAN DE WEEK - Eigen feed ────────────────────────────────────────
 DY.renderOvdwFeed = async function() {
   var main = document.getElementById('dy-main');
   if (!main) return;
@@ -10189,7 +10189,7 @@ DY.renderOvdwFeed = async function() {
 };
 
 DY._ovdwSetSort = function(sort, btn) {
-  // Bewaard voor backwards compat — sort toolbar is verwijderd
+  // Bewaard voor backwards compat - sort toolbar is verwijderd
   DY._ovdwSort = sort;
   DY._ovdwLaad();
 };
@@ -10380,7 +10380,7 @@ DY._esc = DY._esc || function(s) {
 
 
 // ══════════════════════════════════════════════════════════════════
-// POST VAN DE WEEK — CLIENT RULE ENGINE + WINNAAR UI
+// POST VAN DE WEEK - CLIENT RULE ENGINE + WINNAAR UI
 // ══════════════════════════════════════════════════════════════════
 
 // Bereken ISO weeknummer (ma=dag 1)
@@ -10394,7 +10394,7 @@ DY._pvdwWeekNummer = function(datum) {
 
 // Bepaal weekStart (maandag 00:00 Amsterdam) en weekEnd (zondag 23:59:59) voor een datum
 DY._pvdwWeekBereik = function(datum) {
-  // Werk altijd in locale tijdzone — Cloudflare Worker doet dit TZ=Europe/Amsterdam
+  // Werk altijd in locale tijdzone - Cloudflare Worker doet dit TZ=Europe/Amsterdam
   var d = new Date(datum);
   var dag = d.getDay(); // 0=zondag
   var dagNaMa = (dag === 0) ? 6 : dag - 1; // dagen na maandag
@@ -10627,7 +10627,7 @@ DY.terug = function() {
     try { DY._berichtListener(); } catch(e) {}
     DY._berichtListener = null;
   }
-  // Veilige back navigatie — nooit leeg scherm
+  // Veilige back navigatie - nooit leeg scherm
   try {
     if (!DY._history) DY._history = [];
     var vorige = DY._history[DY._history.length - 1]; // peek zonder pop
@@ -10646,7 +10646,7 @@ DY.terug = function() {
     // Fallback: bepaal veilige landing op auth status
     var landing = DY.user ? 'feed' : 'home';
 
-    // Probeer navigeer eerst — reset DY.pagina om dedup guard te omzeilen
+    // Probeer navigeer eerst - reset DY.pagina om dedup guard te omzeilen
     try {
       DY.pagina = null; // reset zodat guard niet blokkeert
       DY.navigeer(landing); return;
@@ -10761,7 +10761,7 @@ DY.terug = function() {
 DY._subNavTabs = ['feed','vrienden','kleuren_ai','winkel','reviews','profiel','home','login','register','deel','challenges','leaderboard','dsp','meldingen'];
 
 DY.toonSubNav = function() {
-  // Subnav verwijderd — alle pagina's hebben eigen navigatie in hun header
+  // Subnav verwijderd - alle pagina's hebben eigen navigatie in hun header
   var bestaand = document.getElementById('dy-subnav');
   if (bestaand) bestaand.remove();
 };
@@ -10853,7 +10853,7 @@ DY.badgesHTML = function(badges) {
 
 
 // ══════════════════════════════════════════════════════════════════
-// REVIEW POPUP — volledige review tekst in bottom sheet
+// REVIEW POPUP - volledige review tekst in bottom sheet
 // ══════════════════════════════════════════════════════════════════
 DY.toonReviewPopup = function(reviewId) {
   var bestaand = document.getElementById('dy-rv-popup');
@@ -10911,7 +10911,7 @@ DY.toonReviewPopup = function(reviewId) {
       }).join('') + '</div>'
     : '';
 
-  // Foto HTML — onclick via dataset om quote-escaping te vermijden
+  // Foto HTML - onclick via dataset om quote-escaping te vermijden
   var fotoHTML = '';
   if (r.foto) {
     fotoHTML = '<div style="margin-bottom:14px;border-radius:var(--r-md);overflow:hidden">' +
@@ -10963,7 +10963,7 @@ DY.toonReviewPopup = function(reviewId) {
   // Sluit knop
   document.getElementById('dy-rv-popup-sluit-btn').addEventListener('click', DY.sluitReviewPopup);
 
-  // Avatar klik in review popup — event delegatie
+  // Avatar klik in review popup - event delegatie
   popup.addEventListener('click', function(e) {
     var avatarEl = e.target.closest('.dy-rv-avatar[data-uid]');
     if (avatarEl && avatarEl.dataset.uid) {
@@ -11262,7 +11262,7 @@ DY.rvToonLijst = function(docs) {
           '<span class="dy-rv-datum">' + datum + '</span>' +
         '</div>' +
       '</div>' +
-      // ── Body: strikt beperkt — max 2 regels tekst + 1 badge ──
+      // ── Body: strikt beperkt - max 2 regels tekst + 1 badge ──
       '<div class="dy-rv-kaart-body">' +
         eersteBadge +
         '<p class="dy-rv-kaart-tekst">' + (r.tekst || '') + '</p>' +
@@ -11651,7 +11651,7 @@ DY.plaatsReview = async function() {
   }
 };
 
-// Oud helper — keep voor backwards compat
+// Oud helper - keep voor backwards compat
 DY.voorbeeldReviewFoto = function(input) { DY.rvFotoPreview(input); };
 
 DY._lookFilter = 'recent';
@@ -11799,7 +11799,7 @@ DY.laadLooks = async function(filter) {
     var nuMs2 = Date.now();
     var looksCacheGeldig = DY._looksCache && (nuMs2 - DY._looksCache.ts) < DY._looksCacheTTL;
 
-    // Cache niet gebruiken voor mijnbouw filter — matching is profiel-afhankelijk
+    // Cache niet gebruiken voor mijnbouw filter - matching is profiel-afhankelijk
     var gebruikCache = looksCacheGeldig && filter !== 'mijnbouw';
     if (gebruikCache) {
       looks = DY._looksCache.looks.slice();
@@ -11819,7 +11819,7 @@ DY.laadLooks = async function(filter) {
           return tb - ta;
         });
       }
-      // Filter OvdW items uit lookbook — die horen in hun eigen feed
+      // Filter OvdW items uit lookbook - die horen in hun eigen feed
       looks = looks.filter(function(l) { return l.challengeType !== 'outfit_week'; });
       DY._looksCache = { ts: nuMs2, looks: looks.slice() };
     }
@@ -11937,7 +11937,7 @@ DY.maakMatenBadgesHTML = function(d) {
     '</div>';
 };
 
-// Spotlight kaart — featured, breed over 2 kolommen
+// Spotlight kaart - featured, breed over 2 kolommen
 DY.maakSpotlightKaart = function(d) {
   var el = document.createElement('div');
   el.className = 'dy-look-spotlight dy-fade-in';
@@ -11976,7 +11976,7 @@ DY.maakSpotlightKaart = function(d) {
   return el;
 };
 
-// Reguliere look tile — compact, Pinterest-stijl
+// Reguliere look tile - compact, Pinterest-stijl
 DY.maakLookKaart = function(d) {
   var el = document.createElement('div');
   el.className = 'dy-look-tile dy-fade-in';
@@ -12008,7 +12008,7 @@ DY.maakLookKaart = function(d) {
     ? DY.maatMatchScore(DY.profile, _dVerrijkt) : 0;
   var isMatch = _matchScore >= 35;
   var _matchLabel = _matchScore >= 35 ? DY.maatMatchLabel(_matchScore) : null;
-  // Omschrijving als overlay op foto (Pinterest/Instagram stijl) — footer altijd gelijke hoogte
+  // Omschrijving als overlay op foto (Pinterest/Instagram stijl) - footer altijd gelijke hoogte
   var heeftOmschr = d.omschrijving && d.omschrijving.trim().length > 0;
   var omschrOverlay = heeftOmschr
     ? '<div class="dy-look-tile-omschr-overlay">' +
@@ -12026,7 +12026,7 @@ DY.maakLookKaart = function(d) {
       omschrOverlay +
       // Maatbadge linksonder op foto
       (maatBadge ? '<div class="dy-look-tile-maatbadge">' + maatBadge + '</div>' : '') +
-      // Match badge linksboven — alleen bij echte profielmatch%
+      // Match badge linksboven - alleen bij echte profielmatch%
       (_matchLabel
         ? '<div class="dy-look-tile-match">' + _matchLabel.pct + '% match</div>'
         : '') +
@@ -12044,7 +12044,7 @@ DY.maakLookKaart = function(d) {
           '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
         '</button>' : '') +
     '</div>' +
-// Footer: altijd identiek — alleen auteur, nooit variabele tekst
+// Footer: altijd identiek - alleen auteur, nooit variabele tekst
     '<div class="dy-look-tile-footer" onclick="DY.openLookDetail(\'' + d._id + '\')">' +
       '<div class="dy-look-tile-auteur">' +
         '<div class="dy-look-avatar-sm">' + initials + '</div>' +
@@ -12093,7 +12093,7 @@ DY.renderLookDetail = async function() {
     const avatar   = d.authorAvatar || d.authorPhoto || null;
     const heeftMedia = !!(d.foto || d.video);
 
-    // Tags uit maten — respecteer fitPrivacy van de auteur
+    // Tags uit maten - respecteer fitPrivacy van de auteur
     const tags = [];
     const _lookAuteurUid = d.userId || d.uid || d.authorId || '';
     const _lookFitOk = DY.fitLabelZichtbaar ? DY.fitLabelZichtbaar(_lookAuteurUid) : true;
@@ -12151,7 +12151,7 @@ DY.renderLookDetail = async function() {
         <div class="dy-sd-body">
           ${d.omschrijving ? `<p class="dy-sd-para" style="margin-bottom:0">${DY.escapeHtml(d.omschrijving)}</p>` : ''}
 
-          <!-- Maten detail — alleen tonen als fitPrivacy openbaar is -->
+          <!-- Maten detail - alleen tonen als fitPrivacy openbaar is -->
           ${(() => { const _ldFitOk = DY.fitLabelZichtbaar ? DY.fitLabelZichtbaar(d.userId || d.uid || '') : (d.fitPrivacy !== 'privé'); return _ldFitOk; })() && (d.lengte || d.maat || d.gewicht || d.borstomvang || d.taille || d.heupen) ? `
           <div class="dy-ld-maten-grid">
             ${d.lengte      ? `<div class="dy-ld-maat-item"><span class="dy-ld-maat-lbl">Lengte</span><span class="dy-ld-maat-val">${d.lengte} cm</span></div>` : ''}
@@ -12295,7 +12295,7 @@ DY.renderNieuwLook = function() {
         <button class="dy-btn dy-composer-plaatsen-top" id="btn-look-plaatsen" onclick="DY.plaatsLook()" disabled>Plaatsen</button>
       </div>
 
-      <!-- Foto upload zone — prominent bovenin -->
+      <!-- Foto upload zone - prominent bovenin -->
       <div class="dy-fc-media-zone" id="look-upload-wrap" onclick="document.getElementById('look-foto-input').click()">
         <input type="file" id="look-foto-input" accept="image/*,video/*" style="display:none" onchange="DY.voorbeeldLookFoto(this)">
         <div class="dy-fc-media-leeg" id="dy-fc-leeg">
@@ -12341,7 +12341,7 @@ DY.renderNieuwLook = function() {
           style="min-height:80px"></textarea>
       </div>
 
-      <!-- Maten sectie — compact en elegant -->
+      <!-- Maten sectie - compact en elegant -->
       <div class="dy-fc-maten-sectie">
         <div class="dy-fc-maten-header">
           <span class="dy-fc-maten-titel">Jouw maten</span>
@@ -13194,7 +13194,7 @@ DY.CFG_SHOPIFY_TOKEN = ''; // Wordt ingevuld na token aanmaken
 DY.cfgLaadShopifyProducten = async function() {
   const el = document.getElementById('dy-cfg-shopify-grid');
   if (!el) return;
-  // Winkel nog niet open — verberg sectie
+  // Winkel nog niet open - verberg sectie
   const sectie = el.closest('.dy-cfg-shopify-sectie');
   if (sectie) sectie.style.display = 'none';
   if (!DY.CFG_SHOPIFY_TOKEN) {
@@ -13593,7 +13593,7 @@ DY.berekenPatroon = function(kledingstuk, m) {
     delen.push(d3); x += d3.breedte + 20;
 
   } else {
-    // Badmode — eenvoudig
+    // Badmode - eenvoudig
     var bdB = ((B/2 + 4) / 2 + naad) * sc;
     var bdL = (L * 0.28) * sc;
     var bdPath = '<path d="M0,' + bdL + ' Q0,0 ' + bdB + ',0 L' + bdB + ',' + bdL + ' Z"' +
@@ -13787,7 +13787,7 @@ DY.cfgGenereerModel = async function() {
     ', white studio background, full body, professional photography, photorealistic'
   );
 
-  // Gebruik Pollinations.ai — gratis, geen token, werkt direct in browser
+  // Gebruik Pollinations.ai - gratis, geen token, werkt direct in browser
   const seed = Math.floor(Math.random() * 999999);
   const url = 'https://image.pollinations.ai/prompt/' + prompt +
     '?width=512&height=768&seed=' + seed + '&model=flux&nologo=true';
@@ -14471,7 +14471,7 @@ DY.pkBepaalLichaamstype = function(borst,taille,heup,gender) {
   // Eerste ping na 30 seconden (pagina is dan geladen)
   setTimeout(ping, 30000);
 
-  // Daarna elke 10 minuten — gecaptured voor cleanup
+  // Daarna elke 10 minuten - gecaptured voor cleanup
   DY._pingInterval = setInterval(ping, INTERVAL);
 })();
 
@@ -15410,7 +15410,7 @@ DY.verstuurMedia = async function(input) {
 
 // LOOKBOOK
 // ══════════════════════════════════════════════════════════════════
-// STORY SYSTEEM v2 — Viewer, poster, 24h expiry, bekeken tracking
+// STORY SYSTEEM v2 - Viewer, poster, 24h expiry, bekeken tracking
 // ══════════════════════════════════════════════════════════════════
 
 // ── STATE ────────────────────────────────────────────────────────
@@ -15419,8 +15419,8 @@ DY._sv = {
   userIdx: 0,      // welke gebruiker bekijken we
   storyIdx: 0,     // welke story van die gebruiker
   timer: null,     // voortgangstimer
-  duur: 9000,      // ms per story (tekst) — max 9 sec
-  mediaDuur: 9000, // ms voor foto stories — max 9 sec
+  duur: 9000,      // ms per story (tekst) - max 9 sec
+  mediaDuur: 9000, // ms voor foto stories - max 9 sec
   videoMax: 9000,  // video altijd gekapt op 9 sec
   paused: false,
   startTs: 0,
@@ -15439,7 +15439,7 @@ DY.openStoryViewer = function(users, userIdx) {
   var viewer = document.getElementById('dy-story-viewer');
   viewer.style.display = 'flex';
   viewer.style.flexDirection = 'column';
-  // FIX 4: overflowY ipv overflow shorthand — bewaart overflow-x:clip
+  // FIX 4: overflowY ipv overflow shorthand - bewaart overflow-x:clip
   document.body.style.overflowY = 'hidden';
 
   // Touch handlers + tap zone onclick (gezet in svInitTouchHandlers)
@@ -15633,7 +15633,7 @@ DY.svToggleLike = async function() {
     s.likes[DY.user.uid] = true;
   }
 
-  // Firestore update — gebruik set+merge zodat dit werkt ook als 'likes' veld nog niet bestaat
+  // Firestore update - gebruik set+merge zodat dit werkt ook als 'likes' veld nog niet bestaat
   // en ook als de update-rules nog niet gedeployed zijn
   try {
     var docId = s.id;
@@ -15669,7 +15669,7 @@ DY.svToggleLike = async function() {
   }
 };
 
-// ── STORY REACTIE — verstuurt reactie als DM naar inbox poster ──
+// ── STORY REACTIE - verstuurt reactie als DM naar inbox poster ──
 
 DY.svReplyFocus = function() {
   // Pauzeer story tijdens typen
@@ -15717,7 +15717,7 @@ DY.svVerstuurReactie = async function() {
     return;
   }
 
-  // Blur eerst, dan reset — zo triggert svReplyBlur niet met lege waarde
+  // Blur eerst, dan reset - zo triggert svReplyBlur niet met lege waarde
   // (svReplyBlur checkt of input leeg is voor hervat, we willen dat NIET hier)
   input.blur();
   input.value = '';
@@ -15727,7 +15727,7 @@ DY.svVerstuurReactie = async function() {
   var gesprekId = [DY.user.uid, ontvangerUid].sort().join('_');
   var displayName = (DY.profile && DY.profile.displayName) || ((DY.user && DY.user.email) || '').split('@')[0];
 
-  // Prefix reactie met story-context — gebruik correcte veldnamen
+  // Prefix reactie met story-context - gebruik correcte veldnamen
   var _storyId  = s ? (s._docId || s.id || s._id || '') : '';
   var _mediaTyp = s && (s.photo || s.video || s.mediaType);
   var _storyTxt = s ? (s.tekst || s.caption || s.body || s.title || '') : '';
@@ -15750,7 +15750,7 @@ DY.svVerstuurReactie = async function() {
     gespreksDoc['ongelezen.' + ontvangerUid] = firebase.firestore.FieldValue.increment(1);
     gespreksDoc['ongelezen.' + DY.user.uid] = 0;
 
-    // Check eerst of gesprek al bestaat — zo weten we create vs update
+    // Check eerst of gesprek al bestaat - zo weten we create vs update
     var _gesprekRef = DY.db.collection('berichten').doc(gesprekId);
     await _gesprekRef.set(gespreksDoc, { merge: true });
 
@@ -15839,7 +15839,7 @@ DY.geefPuntenAanGebruiker = async function(ontvangerUid, punten, actie, refId) {
       uid: DY.user.uid,
       ontvangerUid: ontvangerUid,
       actie: actie,
-      pts: 0, // gever krijgt 0 pts voor deze actie — het zijn punten voor de ontvanger
+      pts: 0, // gever krijgt 0 pts voor deze actie - het zijn punten voor de ontvanger
       label: 'Like gegeven',
       ref_id: refId || null,
       ts: firebase.firestore.FieldValue.serverTimestamp()
@@ -15855,7 +15855,7 @@ DY.geefPuntenAanGebruiker = async function(ontvangerUid, punten, actie, refId) {
       dsp_seizoen: firebase.firestore.FieldValue.increment(punten)
     }, { merge: true });
   } catch(e) {
-    // Stille fout — like zelf werkt altijd, punten zijn bonus
+    // Stille fout - like zelf werkt altijd, punten zijn bonus
   }
 };
 
@@ -16080,7 +16080,7 @@ DY.svInitTouchHandlers = function() {
     // Korte tap zonder drag: tap-zones handelen navigatie af via onclick
   }, { passive: true });
 
-  // ── Keyboard navigatie — bind eenmalig, verwijder bij sluiten ──
+  // ── Keyboard navigatie - bind eenmalig, verwijder bij sluiten ──
   // Verwijder eventuele eerdere listener om dubbele bindings te voorkomen
   if (DY._svKeyHandler) {
     document.removeEventListener('keydown', DY._svKeyHandler);
@@ -16089,7 +16089,7 @@ DY.svInitTouchHandlers = function() {
   DY._svKeyHandler = function(e) {
     var viewer = document.getElementById('dy-story-viewer');
     if (!viewer || viewer.style.display === 'none') {
-      // Viewer gesloten — ruim zichzelf op
+      // Viewer gesloten - ruim zichzelf op
       document.removeEventListener('keydown', DY._svKeyHandler);
       DY._svKeyHandler = null;
       return;
@@ -16118,7 +16118,7 @@ DY.svMarkeerBekeken = async function(uid) {
 // ══════════════════════════════════════════════════════════════════
 
 // ══════════════════════════════════════════════════════════════════
-// STORY VIEWERS — wie heeft mijn story bekeken
+// STORY VIEWERS - wie heeft mijn story bekeken
 // ══════════════════════════════════════════════════════════════════
 
 DY.svRegistreerView = async function(ownerUid, storyId) {
@@ -16168,7 +16168,7 @@ DY.svToonViewers = function(e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   if (!DY.user) return;
 
-  // Lees ownerUid uit button.dataset (meest betrouwbaar — onafhankelijk van _sv timing)
+  // Lees ownerUid uit button.dataset (meest betrouwbaar - onafhankelijk van _sv timing)
   var btn = document.getElementById('dy-sv-viewers-btn');
   var ownerUid = (btn && btn.dataset.ownerUid) || null;
 
@@ -16283,7 +16283,7 @@ DY._svLaadViewersLijst = async function(ownerUid) {
     for (var i = 0; i < viewers.length; i++) {
       lijst.appendChild(DY._svBouwViewerRij(viewers[i], ownerUid));
     }
-    // Event delegatie op de lijst — geen IIFE closures nodig
+    // Event delegatie op de lijst - geen IIFE closures nodig
     lijst.onclick = function(ev) {
       var rij = ev.target.closest('.dy-sv-viewers-rij[data-uid]');
       if (rij && rij.dataset.uid) {
@@ -16372,7 +16372,7 @@ DY.renderStoryPoster = function() {
         <button class="dy-btn dy-composer-plaatsen-top" id="story-plaatsen-btn" disabled>Plaatsen</button>
       </div>
 
-      <!-- Grote media upload zone — 9:16 portret, Instagram story formaat -->
+      <!-- Grote media upload zone - 9:16 portret, Instagram story formaat -->
       <div class="dy-story-composer-zone" id="story-preview-wrap" onclick="document.getElementById('story-media-input').click()">
         <input type="file" id="story-media-input" accept="image/*,video/*" style="display:none">
 
@@ -16495,7 +16495,7 @@ DY.renderStoryPoster = function() {
     try {
       var mediaType = _mediaFile.type.startsWith('video/') ? 'video' : 'foto';
       var ext = _mediaFile.name.split('.').pop().toLowerCase();
-      // Gebruik verhalen/ pad — dat staat in de Storage rules
+      // Gebruik verhalen/ pad - dat staat in de Storage rules
       var pad = 'verhalen/' + DY.user.uid + '/story_' + Date.now() + '.' + ext;
       var storageRef = firebase.storage().ref(pad);
       var uploadTask = storageRef.put(_mediaFile);
@@ -16566,12 +16566,12 @@ DY.renderStoryPoster = function() {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// ZOEKFUNCTIE — zoekt in verhalen, looks, gebruikers en reviews
+// ZOEKFUNCTIE - zoekt in verhalen, looks, gebruikers en reviews
 // ══════════════════════════════════════════════════════════════════
 
 
 // ══════════════════════════════════════════════════════════════════
-// HEADER ZOEK FILTERS — lengte + bouw filtering
+// HEADER ZOEK FILTERS - lengte + bouw filtering
 // ══════════════════════════════════════════════════════════════════
 
 DY._zoekFilters = { lengte: 'alle', bouw: 'alle' };
@@ -16748,7 +16748,7 @@ DY.voerZoekUit = async function(q) {
       return normBouw.toLowerCase() === filters.bouw.toLowerCase();
     }
 
-    // Haal alles op — client-side filteren (zelfde patroon als rest van de app)
+    // Haal alles op - client-side filteren (zelfde patroon als rest van de app)
     var [verhalenSnap, looksSnap, usersSnap, reviewsSnap] = await Promise.all([
       DY.db.collection('stories').limit(200).get().catch(function() { return { docs: [] }; }),
       DY.db.collection('lookbook').limit(100).get().catch(function() { return { docs: [] }; }),
@@ -16822,7 +16822,7 @@ DY.voerZoekUit = async function(q) {
       var v = d.data();
       var uLen = v.lengte;
       var uMaat = (v.maat || '').toString();
-      // Matching gebruikt ALTIJD lengte/maat (ook als privé) — alleen UI output verbergt het
+      // Matching gebruikt ALTIJD lengte/maat (ook als privé) - alleen UI output verbergt het
       var tekst = ((v.displayName || '') + ' ' + (v.email || '') + ' ' + (v.bio || '') + ' ' + (uLen ? uLen + 'cm ' + uLen : '') + ' ' + uMaat).toLowerCase();
       if (isLengteZoek) {
         if (!uLen || Math.abs(parseInt(uLen) - qNum) > 8) return;
@@ -16939,7 +16939,7 @@ DY.escapeHtml = function(str) {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// SUCCES SCHERMEN — na verhaal en story plaatsen
+// SUCCES SCHERMEN - na verhaal en story plaatsen
 // ══════════════════════════════════════════════════════════════════
 
 DY._toonVerhaalSucces = function(docId, totalPts, heeftMedia) {
@@ -17041,7 +17041,7 @@ DY._toonGastStoryTeasers = function(row) {
 // ══════════════════════════════════════════════════════════════════
 // SHOPIFY KLANT SYNC
 // Maakt automatisch een Shopify klantaccount aan bij app-registratie.
-// Gebruikt Storefront API customerCreate — geen Admin credentials nodig.
+// Gebruikt Storefront API customerCreate - geen Admin credentials nodig.
 // Vereist: Storefront Access Token in DY.CFG_SHOPIFY_TOKEN (lees-/schrijftoegang).
 //
 // INSTELLEN: ga in Shopify naar
@@ -17052,7 +17052,7 @@ DY._toonGastStoryTeasers = function(row) {
 
 DY.registreerShopifyKlant = async function(naam, email) {
   try {
-    // Roep de Cloudflare Worker aan — die heeft de Admin API token als secret.
+    // Roep de Cloudflare Worker aan - die heeft de Admin API token als secret.
     // Directe Shopify API calls vanuit de browser werken niet (CORS + token exposure).
     try {
       var res = await fetch(WORKER_URL + '/shopify-klant', {
@@ -17073,7 +17073,7 @@ DY.registreerShopifyKlant = async function(naam, email) {
         await DY.slaShopifySyncOp(naam, email, 'worker_fout: ' + (data.error || 'onbekend'));
       }
     } catch(e) {
-      // Worker niet bereikbaar — sla op voor handmatige sync
+      // Worker niet bereikbaar - sla op voor handmatige sync
       await DY.slaShopifySyncOp(naam, email, 'worker_unreachable');
     }
 
@@ -17102,7 +17102,7 @@ DY.slaShopifySyncOp = async function(naam, email, status, shopifyId) {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// DEEL HUB — premium keuze-scherm
+// DEEL HUB - premium keuze-scherm
 // ══════════════════════════════════════════════════════════════════
 DY.renderDeelHub = function() {
   if (!DY.user) {
@@ -17436,7 +17436,7 @@ DY._toonMeldModal = function(content) {
     previewHTML += '<div class="dy-meld-preview-placeholder" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>';
   }
 
-  // Sla content op als module variabele — geen JSON in onclick attrs
+  // Sla content op als module variabele - geen JSON in onclick attrs
   DY._meldContent = content;
 
   modalEl.innerHTML =
@@ -17589,8 +17589,8 @@ DY._verstuurMelding = function(content) {
     'Ticketnummer: ' + ticket + '\n' +
     'Tijdstip: ' + ts.toLocaleString('nl-NL') + '\n\n' +
     'INHOUD\n' +
-    'Content ID: ' + (content.id   || '—') + '\n' +
-    'Auteur:     ' + (content.naam || '—') + '\n\n' +
+    'Content ID: ' + (content.id   || '-') + '\n' +
+    'Auteur:     ' + (content.naam || '-') + '\n\n' +
     'REDENEN\n' +
     checked.map(function(r){ return '  • ' + r; }).join('\n') + '\n\n' +
     'Ernst: ' + (ernst || 'Niet opgegeven') + '\n\n' +
@@ -17610,7 +17610,7 @@ DY._verstuurMelding = function(content) {
   var okDiv     = document.getElementById('dy-meld-bevestiging');
   var okTekst   = document.getElementById('dy-meld-ok-tekst');
   if (submitBtn) { submitBtn.disabled = true; submitBtn.style.display = 'none'; }
-  if (okTekst)   { okTekst.textContent = ticket + ' — Bedankt voor je melding.'; }
+  if (okTekst)   { okTekst.textContent = ticket + ' - Bedankt voor je melding.'; }
   if (okDiv)     { okDiv.style.display = 'flex'; }
 
   // Sluit modal na 2.5s
@@ -17622,7 +17622,7 @@ DY._verstuurMelding = function(content) {
 
 
 // ══════════════════════════════════════════════════════════════════
-// ADMIN PANEL — Paskamer Praat
+// ADMIN PANEL - Paskamer Praat
 // Toegang: alleen admin gebruikers
 // ══════════════════════════════════════════════════════════════════
 
@@ -17643,7 +17643,7 @@ DY._stopAdminListeners = function() {
 
 // ── Admin renderer ───────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════
-// KAI ACTIVITY LOGGER — async, non-blocking, fire-and-forget
+// KAI ACTIVITY LOGGER - async, non-blocking, fire-and-forget
 // Alle outfit events worden gelogd naar Firestore kai_events collection
 // Structuur: { userId, ts, eventType, payload }
 // ══════════════════════════════════════════════════════════════════
@@ -17953,7 +17953,7 @@ DY._adminTabGebruikers = function(el) {
       '</tr></thead><tbody>';
       (snap && snap.docs ? snap.docs : []).forEach(function(doc) {
         var d = doc.data();
-        // v60.1.37: fallback chain voor naam — nooit UID-code tonen
+        // v60.1.37: fallback chain voor naam - nooit UID-code tonen
         var naamRaw = d.displayName
           || (d.email ? d.email.split('@')[0] : null)
           || (d.naam || null)
@@ -18113,7 +18113,7 @@ DY.debounce = function(fn, ms) {
 
 // ═══════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════
-// VERGELIJK OUTFIT MODULE — v256 schone rebuild
+// VERGELIJK OUTFIT MODULE - v256 schone rebuild
 // ════════════════════════════════════════════════════════
 
 DY._kleurenAI = {
@@ -18144,11 +18144,11 @@ DY._kleurenAISlaOp = function(analyse) {
   } catch(e) {}
 };
 
-// Canvas kleurextractie — werkt volledig client-side, geen upload nodig
-// ── Kleurextractie — werkt voor File, Blob URL en externe URLs ────
+// Canvas kleurextractie - werkt volledig client-side, geen upload nodig
+// ── Kleurextractie - werkt voor File, Blob URL en externe URLs ────
 // Root cause fix: Firebase Storage URLs geven tainted canvas bij directe img.src
 // Oplossing: haal externe URLs op via fetch() → blob URL → canvas vrij van CORS
-// ── Kleurextractie — robuust voor File, blob URL en Firebase Storage URLs ────
+// ── Kleurextractie - robuust voor File, blob URL en Firebase Storage URLs ────
 DY._kleurenExtraheer = function(input) {
   return new Promise(function(resolve) {
     var isURL = typeof input === 'string';
@@ -18239,7 +18239,7 @@ DY._kleurenVanURL = function(url, callback) {
       // Verticaal: sla onderste 15% over (vloer) en bovenste 10% (plafond)
       if (cx > 0.80) continue; // randen links/rechts skippen
       if (cy > 0.85 || cy < -0.80) continue; // boven/onder skippen
-      // Centrum (binnenste 50%) weegt 4x — kleding zit centraal in beeld
+      // Centrum (binnenste 50%) weegt 4x - kleding zit centraal in beeld
       var posWeight = cx < 0.5 && cy < 0.5 ? 4 : (cx < 0.7 && cy < 0.7 ? 2 : 1);
 
       // Bereken saturatie voor kleurweging
@@ -18399,10 +18399,10 @@ DY._kleurNaam = function(h, s, l) {
 };
 
 // Analyseer met Claude API
-// Analyse proxy URL — wordt ingesteld door DY._kleurenInitProxy()
+// Analyse proxy URL - wordt ingesteld door DY._kleurenInitProxy()
 // Gebruik Cloudflare Worker (snel, gratis) of Render server als fallback
 DY._kleurenInitProxy = function() {
-  // Cloudflare Worker URL — William vult dit in na Worker aanmaken
+  // Cloudflare Worker URL - William vult dit in na Worker aanmaken
   // Formaat: https://kleuren-ai.JOUWACCOUNT.workers.dev
   var CF_WORKER = DY._CF_ANALYSE_URL || null;
   // Render server als fallback
@@ -18440,7 +18440,7 @@ DY._kleurenAnalyseerMet = async function(kleurenData, fotoBase64, fotoUrl) {
           (k.l < 25 ? '-donker' : k.l > 75 ? '-licht' : '') +
         ')';
       }).join('\n')
-    : '(kleuren konden niet automatisch worden gedetecteerd — analyseer de outfit visueel op basis van de foto)';
+    : '(kleuren konden niet automatisch worden gedetecteerd - analyseer de outfit visueel op basis van de foto)';
 
   var heeftFoto = !!(fotoBase64 && fotoBase64.length > 100);
 
@@ -18473,14 +18473,14 @@ var messages;
       { type: 'text', text: prompt }
     ]}];
   } else if (fotoUrl && fotoUrl.indexOf('http') === 0) {
-    // Fallback: URL-type — Anthropic fetcht de foto server-side (geen CORS probleem)
+    // Fallback: URL-type - Anthropic fetcht de foto server-side (geen CORS probleem)
     // Werkt voor publieke Firebase Storage URLs met ?alt=media&token=...
     messages = [{ role: 'user', content: [
       { type: 'image', source: { type: 'url', url: fotoUrl } },
       { type: 'text', text: prompt }
     ]}];
   } else {
-    // Geen foto beschikbaar — tekstuele analyse
+    // Geen foto beschikbaar - tekstuele analyse
     messages = [{ role: 'user', content: prompt + ' (Analyseer de outfit op basis van de beschikbare kleurinformatie.)' }];
   }
 
@@ -18504,7 +18504,7 @@ var messages;
         'Je schrijft in gewoon Nederlands, alsof je met een vriend praat die verstand heeft van mode. ' +
         'KRITISCH: analyseer UITSLUITEND de kledingstukken en accessoires die de persoon draagt. ' +
         'Negeer VOLLEDIG: achtergrond, muren, vloer, meubels, decor, verlichting, omgeving en alles wat niet op het lichaam gedragen wordt. ' +
-        'De achtergrondkleur is NOOIT onderdeel van de outfit — noem hem niet. ' +
+        'De achtergrondkleur is NOOIT onderdeel van de outfit - noem hem niet. ' +
         'Je beschrijft alleen kleding: jassen, broeken, jurken, shirts, schoenen, tassen, sieraden. ' +
         'Voor outfit_kleuren: noem ALLEEN de kleuren van de kledingstukken zelf. Geef bij elke kleur een geschat percentage (pct) van hoe dominant die kleur is in de outfit. ' +
         'Geef voor elke kleur de exacte hex-code die overeenkomt met de werkelijke kleur van het kledingstuk. ' +
@@ -18540,7 +18540,7 @@ var messages;
   var text = (data.content && data.content[0] && data.content[0].text || '').trim();
   if (!text) throw new Error('Er ging iets mis. Probeer het opnieuw.');
 
-  // Extraheer JSON uit de response — ook uit markdown code blocks
+  // Extraheer JSON uit de response - ook uit markdown code blocks
   var jsonText = null;
   // Probeer ```json ... ``` blokken
   var cbMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -18630,7 +18630,7 @@ DY.renderKleurenAI = function() {
 
   main.style.background = '#0a0806';
   main.innerHTML =
-    // Wrapper identiek aan dy-vr-wrap (Vrienden/Winkel) — geen max-width → altijd 100% dy-main
+    // Wrapper identiek aan dy-vr-wrap (Vrienden/Winkel) - geen max-width → altijd 100% dy-main
     '<div class="dy-vr-wrap">' +
       '<div class="dy-vr-header">' +
         '<div class="dy-vr-header-inner">' +
@@ -18719,10 +18719,10 @@ DY._kaiTab = function(btn, tab) {
   }
 };
 
-// ── Outfit Voorspeller — score preview vóór upload ────────────────
+// ── Outfit Voorspeller - score preview vóór upload ────────────────
 // Leest opgeslagen outfits en stijlprofiel om een voorspelling te tonen
 // ══════════════════════════════════════════════════════════════════
-// AI STYLE PROFILE — centrale user intelligence
+// AI STYLE PROFILE - centrale user intelligence
 // Bouwt style DNA per user op basis van analyse history + gedrag
 // Opgeslagen in Firestore: users/{uid}/ai_style_profile
 // ══════════════════════════════════════════════════════════════════
@@ -18792,7 +18792,7 @@ DY._styleProfileUpdate = function(analyse) {
 };
 
 // ── Bereken match% tussen analyse en style profile ───────────────
-// Geen extra API call — regel-gebaseerde berekening
+// Geen extra API call - regel-gebaseerde berekening
 DY._styleProfileMatchScore = function(analyse) {
   if (!DY._styleProfile || !analyse) return null;
 
@@ -18956,8 +18956,8 @@ DY._kaiAnalysePanel = function() {
   '<div id="kai-analyse-resultaat"></div>';
 };
 
-// ── Stijladvies panel — uitgebreide outfit breakdown ─────────────
-// ── Why It Works — uitleg per outfit dimensie ────────────────────
+// ── Stijladvies panel - uitgebreide outfit breakdown ─────────────
+// ── Why It Works - uitleg per outfit dimensie ────────────────────
 // ══════════════════════════════════════════════════════════════════
 // INSTANT IMPROVEMENT ENGINE
 // Één Haiku call na analyse → 2 concrete verbeteringen
@@ -18996,7 +18996,7 @@ DY._kaiImprovementEngine = async function(analyse) {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 400,
-        system: 'Je bent een persoonlijke stylist. Je analyseert UITSLUITEND kleding en accessoires die de persoon draagt. Negeer achtergrond en omgeving volledig. Je schrijft uitsluitend in gewoon Nederlands. Je gebruikt NOOIT em-dashes (—), en-dashes (–) of dubbele koppeltekens (--). Reageer ALTIJD en UITSLUITEND met een geldig JSON-object of JSON-array zonder markdown.',
+        system: 'Je bent een persoonlijke stylist. Je analyseert UITSLUITEND kleding en accessoires die de persoon draagt. Negeer achtergrond en omgeving volledig. Je schrijft uitsluitend in gewoon Nederlands. Je gebruikt NOOIT em-dashes (-), en-dashes (–) of dubbele koppeltekens (--). Reageer ALTIJD en UITSLUITEND met een geldig JSON-object of JSON-array zonder markdown.',
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -19042,7 +19042,7 @@ DY._kaiWhyItWorksHTML = function(a) {
       uitleg: a.harmonie_type
         ? 'Het kleurschema is <strong>' + a.harmonie_type + '</strong>. ' +
           (a.harmonie_score >= 75
-            ? 'De kleuren versterken elkaar — dat geeft de outfit samenhang.'
+            ? 'De kleuren versterken elkaar - dat geeft de outfit samenhang.'
             : a.harmonie_score >= 55
             ? 'Er is een goed kleurritme, met ruimte voor meer contrast.'
             : 'De kleuren werken nog niet optimaal samen.')
@@ -19053,10 +19053,10 @@ DY._kaiWhyItWorksHTML = function(a) {
       titel: 'Balans',
       score: a.balans_score || 0,
       uitleg: a.balans_score >= 75
-        ? 'De verdeling van lichte en donkere tinten is evenwichtig — geen enkel deel domineert te veel.'
+        ? 'De verdeling van lichte en donkere tinten is evenwichtig - geen enkel deel domineert te veel.'
         : a.balans_score >= 55
         ? 'De outfit heeft een redelijke balans. Iets meer aandacht voor proportie kan het verbeteren.'
-        : 'De balans verdient aandacht — één kleur of stuk domineert nu te sterk.'
+        : 'De balans verdient aandacht - één kleur of stuk domineert nu te sterk.'
     },
     {
       icoon: '✂️',
@@ -19072,10 +19072,10 @@ DY._kaiWhyItWorksHTML = function(a) {
       titel: 'Contrast',
       score: a.contrast_score || 0,
       uitleg: a.contrast_score >= 75
-        ? 'Het contrast trekt de aandacht op de juiste manier — je outfit valt op zonder te schreeuwen.'
+        ? 'Het contrast trekt de aandacht op de juiste manier - je outfit valt op zonder te schreeuwen.'
         : a.contrast_score >= 55
         ? 'Het contrast is subtiel. Iets meer verschil tussen donker en licht kan de outfit scherper maken.'
-        : 'Weinig contrast — de outfit kan daardoor vlak overkomen. Probeer een accentkleur toe te voegen.'
+        : 'Weinig contrast - de outfit kan daardoor vlak overkomen. Probeer een accentkleur toe te voegen.'
     }
   ];
 
@@ -19135,12 +19135,12 @@ DY._kaiStijladviesPanel = function() {
 
   // Harmonie type toelichting
   var harmonieUitleg = {
-    'sterk contrast': 'Je kleuren staan ver van elkaar — dit trekt meteen de aandacht.',
-    'vergelijkbare tinten': 'Je kleuren liggen dicht bij elkaar — dat oogt rustig en samenhangend.',
-    'drie kleuren': 'Drie goed verdeelde kleuren — klassiek en uitgebalanceerd.',
-    'een kleur': 'Één toon doorgetrokken — strak en effectief.',
-    'zachte tegenstelling': 'Subtiel contrast — chic en verfijnd.',
-    'accentkleur': 'Een kleur springt eruit — geeft karakter aan je look.'
+    'sterk contrast': 'Je kleuren staan ver van elkaar - dit trekt meteen de aandacht.',
+    'vergelijkbare tinten': 'Je kleuren liggen dicht bij elkaar - dat oogt rustig en samenhangend.',
+    'drie kleuren': 'Drie goed verdeelde kleuren - klassiek en uitgebalanceerd.',
+    'een kleur': 'Één toon doorgetrokken - strak en effectief.',
+    'zachte tegenstelling': 'Subtiel contrast - chic en verfijnd.',
+    'accentkleur': 'Een kleur springt eruit - geeft karakter aan je look.'
   };
   var harmonieType = a.harmonie_type || '';
   var harmonieUitlegTekst = harmonieUitleg[harmonieType] || '';
@@ -19150,7 +19150,7 @@ DY._kaiStijladviesPanel = function() {
     casual:          ['Voeg een statement accessoire toe voor meer karakter', 'Een laag extra (vest of overshirt) verhoogt de look'],
     zakelijk:        ['Zorg dat de schoenen matchen met je riem of tas', 'Een strak gestreken overhemd maakt het af'],
     sportief:        ['Kies schoenen die functioneel én stijlvol zijn', 'Monochroom sportief oogt altijd goed'],
-    elegant:         ['Minder is meer — kies één statement stuk', 'Zorg voor een goede pasvorm, dat is het fundament'],
+    elegant:         ['Minder is meer - kies één statement stuk', 'Zorg voor een goede pasvorm, dat is het fundament'],
     streetwear:      ['Oversized pieces werken het best als de rest fitted is', 'Sneakers maken of breken een streetwear look'],
     bohemian:        ['Lagen en texturen geven bohemian diepte', 'Accessoires in aardetinten completeren de look'],
     minimalistisch:  ['Focus op kwaliteit van stoffen, niet op prints', 'Neutrale basiskleuren zijn je beste investering']
@@ -19160,7 +19160,7 @@ DY._kaiStijladviesPanel = function() {
     return '<div class="dy-kai-sa-tip"><span class="dy-kai-sa-tip-icoon">💡</span>' + DY._esc(tip) + '</div>';
   }).join('');
 
-  // Poll sectie — was orphaned, nu correct geïntegreerd
+  // Poll sectie - was orphaned, nu correct geïntegreerd
   var heeftPollGespeeld = DY._kleurenAI._pollGespeeld;
   var pollHTML = heeftPollGespeeld
     ? '<p class="dy-kai-sa-poll-klaar">Je hebt al gestemd. Bedankt!</p>'
@@ -19199,7 +19199,7 @@ DY._kaiStijladviesPanel = function() {
       '<div class="dy-kai-sa-tips">' + tipsHTML + '</div>' +
     '</div>' +
 
-    // Why It Works — gedetailleerde uitleg per dimensie
+    // Why It Works - gedetailleerde uitleg per dimensie
     '<div class="dy-kai-sa-sectie">' +
       '<h3 class="dy-kai-sectie-titel">Waarom dit werkt</h3>' +
       '<div class="dy-kai-why-grid">' +
@@ -19356,7 +19356,7 @@ DY._kaiStemPollSA = function(keuze) {
   if (!DY._kleurenAI) DY._kleurenAI = {};
   DY._kleurenAI._pollGespeeld = true;
 
-  // Debounce — voorkom dubbele klik
+  // Debounce - voorkom dubbele klik
   if (DY._kaiStemPollSA._bezig) return;
   DY._kaiStemPollSA._bezig = true;
   setTimeout(function() { DY._kaiStemPollSA._bezig = false; }, 400);
@@ -19373,7 +19373,7 @@ DY._kaiStemPollSA = function(keuze) {
 
   // ── JA: bedankt popup + positief signal ────────────────────────
   if (keuze === 'Ja') {
-    // Update style profile — positief signal
+    // Update style profile - positief signal
     DY._styleProfileFeedback('ja', null, analyse);
     // Toon bedankt popup
     DY._kaiDankjewelPopup();
@@ -19431,7 +19431,7 @@ DY._kaiNeeChip = function(chip) {
   }
 };
 
-// ── Input validatie — submit alleen actief als er tekst is ─────────
+// ── Input validatie - submit alleen actief als er tekst is ─────────
 DY._kaiNeeInputCheck = function() {
   var input = document.getElementById('kai-nee-tekst');
   var submit = document.getElementById('kai-nee-submit');
@@ -19470,7 +19470,7 @@ DY._kaiNeeSubmit = function() {
     }
   });
 
-  // Update style profile — negatief signal
+  // Update style profile - negatief signal
   DY._styleProfileFeedback('nee', reden, analyse);
 
   // Vervang formulier met bevestiging
@@ -19733,12 +19733,12 @@ DY._kaiOpgeslagenPanel = function() {
   return '<div id="kai-opgeslagen-lijst" style="padding:var(--sp-3) var(--sp-3) var(--sp-8)"></div>';
 };
 
-// Foto gekozen — start analyse
+// Foto gekozen - start analyse
 DY._kaiFilterTekst = function(tekst) {
   if (!tekst) return tekst;
   // Verwijder hex codes (#rrggbb of #rgb)
   tekst = tekst.replace(/#[0-9a-fA-F]{3,6}\b/g, '');
-  // Verwijder em-dashes, en-dashes en streepjes permanent — vervang door komma of spatie
+  // Verwijder em-dashes, en-dashes en streepjes permanent - vervang door komma of spatie
   tekst = tekst.replace(/\s*[\u2014\u2013\u2012\u2011]\s*/g, ', ');
   // Verwijder ook literal --- en -- constructies
   tekst = tekst.replace(/\s*---?\s*/g, ', ');
@@ -19753,7 +19753,7 @@ DY._kaiFilterTekst = function(tekst) {
 // Methode 1: fetch met Firebase ID token (lost Firebase Storage CORS op)
 // Methode 2: fetch zonder token
 // Methode 3: geeft null terug (caller gebruikt img.src als fallback)
-// ── Analyse URL cache — voorkomt dubbele AI calls ──────────────
+// ── Analyse URL cache - voorkomt dubbele AI calls ──────────────
 // Cache: url → { analyse, kleurenData, ts }
 // TTL: 10 minuten
 DY._kaiCache = DY._kaiCache || {};
@@ -19868,7 +19868,7 @@ DY._kaiAnalyseerURL = async function(photoUrl) {
   var _selfAbort = new AbortController();
   DY._kaiAnalyseAbort = _selfAbort;
 
-  // ── STAP A: Instant — preview + skeleton (<50ms) ─────────────
+  // ── STAP A: Instant - preview + skeleton (<50ms) ─────────────
   var inner = document.getElementById('kai-upload-inner');
   if (inner) inner.innerHTML =
     '<div class="dy-kai-preview-wrap">' +
@@ -19903,7 +19903,7 @@ DY._kaiAnalyseerURL = async function(photoUrl) {
     return;
   }
 
-  // ── STAP B: Parallel — blob + kleuren (~300-600ms) ───────────
+  // ── STAP B: Parallel - blob + kleuren (~300-600ms) ───────────
   var kleurenData = null;
   var base64      = null;
 
@@ -20082,7 +20082,7 @@ DY._kaiVergFotoURL = async function(slot, photoUrl) {
   }
 
   var heeftKleuren = kleurenData && kleurenData.kleuren && kleurenData.kleuren.length > 0;
-  // Altijd doorgaan — ook zonder kleurendata
+  // Altijd doorgaan - ook zonder kleurendata
   if (!heeftKleuren) kleurenData = { kleuren: [], totaal: 0 };
 
   DY._kaiCacheSet(photoUrl, { kleurenData: kleurenData, _vergelijkCache: true }, kleurenData);
@@ -20091,10 +20091,10 @@ DY._kaiVergFotoURL = async function(slot, photoUrl) {
   if (DY._kaiVergData.a && DY._kaiVergData.b) {
     var _ctx2 = DY._kaiVergContext || {};
     if (_ctx2.occasion && _ctx2.style && _ctx2.priority) {
-      // Context al gevuld — direct starten
+      // Context al gevuld - direct starten
       DY._kaiVoerVergelijkingUit();
     } else {
-      // Context nog niet gevuld — toon start knop
+      // Context nog niet gevuld - toon start knop
       if (res) res.innerHTML =
         '<div class="dy-kai-verg-gate">' +
           '<span class="dy-kai-verg-gate-icon">\u2713</span>' +
@@ -20403,7 +20403,7 @@ DY._kaiWisAnalyse = function() {
 };
 
 
-// ── Centrale W-spinner builder — inline DOM, cache-onafhankelijk ─────
+// ── Centrale W-spinner builder - inline DOM, cache-onafhankelijk ─────
 // Gebruik overal ipv dots-animatie voor branded loading experience
 DY._bouwWSpinner = function(tekst) {
   tekst = tekst || 'Even geduld…';
@@ -20465,7 +20465,7 @@ DY._kaiLoadingSkeleton = function(tekst) { tekst = tekst || 'Kleuren analyseren'
 };
 
 // ══════════════════════════════════════════════════════════════════
-// CENTRALE RESULTAAT RENDERER — single source of truth
+// CENTRALE RESULTAAT RENDERER - single source of truth
 // Altijd: style profile match + resultaat + improvement engine
 // Gebruik ALLEEN deze functie om analyse resultaten te tonen
 // ══════════════════════════════════════════════════════════════════
@@ -20498,7 +20498,7 @@ DY._kaiToonResultaat = function(analyse) {
   // Update style profile in Firestore (non-blocking)
   DY._styleProfileUpdate(analyse);
 
-  // Improvement engine — async, injecteert na render
+  // Improvement engine - async, injecteert na render
   DY._kaiImprovementEngine(analyse).then(function(verbeteringen) {
     if (!verbeteringen || !verbeteringen.length) {
       // Fallback: genereer altijd 2 verbeteringen op basis van scores
@@ -20527,7 +20527,7 @@ DY._kaiToonResultaat = function(analyse) {
   });
 };
 
-// ── Fallback verbeteringen — altijd 2, geen API call nodig ────────
+// ── Fallback verbeteringen - altijd 2, geen API call nodig ────────
 DY._kaiFallbackVerbeteringen = function(analyse) {
   var verbeteringen = [];
   var scores = [
@@ -20579,7 +20579,7 @@ DY._kaiResultaatHTML = function(a) {
     }
     top5 = outfitKleuren.slice(0, 6);
   }
-  // Geen fallback op seizoenskleuren — die zijn generiek en misleidend
+  // Geen fallback op seizoenskleuren - die zijn generiek en misleidend
 
   // Palette HTML
   var paletteHTML = top5.map(function(k) {
@@ -20722,7 +20722,7 @@ DY._kaiFout = function(tekst) {
 
 DY._kaiOpnieuw = function() {
   DY._kaiWisAnalyse();
-  // Terug naar upload staat — geen automatische galerij openen
+  // Terug naar upload staat - geen automatische galerij openen
 };
 
 // ── Laad een gedeelde analyse op basis van share ID ──────────────
@@ -20826,13 +20826,13 @@ DY._kaiDeel = async function() {
       var doc = await DY.db.collection('gedeelde_analyses').add(snap);
       shareUrl = 'https://paskamerpraat.nl/?kleuranalyse=' + doc.id;
     }
-  } catch(e) { /* Firestore niet beschikbaar — gebruik fallback URL */ }
+  } catch(e) { /* Firestore niet beschikbaar - gebruik fallback URL */ }
 
   // ── Laag 2: navigator.share (werkt op mobiel iOS + Android) ────
   if (navigator.share) {
     try {
       await navigator.share({
-        title: 'Mijn kleuranalyse — Paskamer Praat',
+        title: 'Mijn kleuranalyse - Paskamer Praat',
         text:  tekst,
         url:   shareUrl
       });
@@ -20883,7 +20883,7 @@ DY._kaiDeelToast = function(url) {
 };
 
 
-// ── Vergelijk slot klik — auth guard vóór file picker ────────────
+// ── Vergelijk slot klik - auth guard vóór file picker ────────────
 DY._kaiVergSlotKlik = function(slot) {
   if (!DY.profile) {
     DY.toonLoginPrompt('Inloggen om outfits te vergelijken.');
@@ -20998,7 +20998,7 @@ DY._kaiVoerVergelijkingUit = async function() {
   var res = document.getElementById('kai-vergelijk-resultaat');
   if (!res) return;
   if (!DY.profile) { DY.toonLoginPrompt('Inloggen om outfits te vergelijken.'); return; }
-  // Debounce — voorkom dubbele vergelijking
+  // Debounce - voorkom dubbele vergelijking
   if (DY._kaiVoerVergelijkingUit._bezig) return;
   if (!DY._kaiVergData.a || !DY._kaiVergData.b) {
     res.innerHTML = '<div class="dy-kai-verg-gate"><span class="dy-kai-verg-gate-icon">&#128247;</span><p>Upload beide outfits om de vergelijking te starten.</p></div>';
@@ -21028,7 +21028,7 @@ DY._kaiVoerVergelijkingUit = async function() {
   res.appendChild(DY._bouwWSpinner('Outfits worden vergeleken…'));
 
   var analyseA, analyseB, stylistAdvies;
-  // Analyses PARALLEL — bespaart 2-4 seconden vs serieel
+  // Analyses PARALLEL - bespaart 2-4 seconden vs serieel
   var resultaten = await Promise.all([
     DY._kleurenAnalyseerMet(DY._kaiVergData.a.kleurenData, DY._kaiVergData.a.base64)
       .catch(function() { return DY._kaiDefaultAnalyse('A'); }),
@@ -21453,7 +21453,7 @@ DY._kaiVerhaalGekozen = async function(photoUrl, doel) {
   }
 
   try {
-    // Gebruik de URL direct — geen fetch/File nodig
+    // Gebruik de URL direct - geen fetch/File nodig
     // Hiermee omzeilen we alle CORS en size-check problemen
     if (doel === 'analyse') {
       await DY._kaiAnalyseerURL(photoUrl);
@@ -21633,7 +21633,7 @@ DY._kaiSlaVergelijkOp = function() {
           _retries++;
           setTimeout(schrijfNaarFirestore, 1500);
         } else {
-          // Lokaal al opgeslagen — toon bevestiging toch
+          // Lokaal al opgeslagen - toon bevestiging toch
           DY._kaiFout('\u2713 Vergelijking opgeslagen (lokaal).');
           console.error('[pvdw] Firestore write mislukt na 3 pogingen:', err.message);
         }
@@ -21671,10 +21671,10 @@ DY._kaiNieuweVergelijking = function() {
 // PATCH v307-p1: Custom dropdown implementatie
 // ══════════════════════════════════════════════════════════════════
 
-// [dropdown toggle — zie definitie verderop in dit bestand]
+// [dropdown toggle - zie definitie verderop in dit bestand]
 
-// [dropdown kies — zie definitie verderop in dit bestand]
-DY._kaiCtxDdKies = function(el) { /* placeholder — overschreven verderop */ 
+// [dropdown kies - zie definitie verderop in dit bestand]
+DY._kaiCtxDdKies = function(el) { /* placeholder - overschreven verderop */ 
 };
 
 // ══════════════════════════════════════════════════════════════════
@@ -21682,7 +21682,7 @@ DY._kaiCtxDdKies = function(el) { /* placeholder — overschreven verderop */
 // ══════════════════════════════════════════════════════════════════
 
 // Overschrijf _kaiCtxDdToggle met backdrop + bottom sheet support
-// ── Custom dropdown — éénduidige implementatie voor alle devices ──
+// ── Custom dropdown - éénduidige implementatie voor alle devices ──
 DY._kaiCtxDdToggle = function(id) {
   var dd    = document.getElementById('dy-ctx-dd-' + id);
   var panel = document.getElementById('dy-ctx-dd-panel-' + id);
@@ -21712,9 +21712,9 @@ DY._kaiCtxDdToggle = function(id) {
   panel.setAttribute('aria-hidden', 'false');
   if (btn) btn.setAttribute('aria-expanded', 'true');
 
-  // Sluit bij klik buiten — bubble fase zodat optie onclick eerst vuurt
+  // Sluit bij klik buiten - bubble fase zodat optie onclick eerst vuurt
   function sluiten(e) {
-    // Negeer kliks op opties zelf — die sluiten via _kaiCtxDdKies
+    // Negeer kliks op opties zelf - die sluiten via _kaiCtxDdKies
     if (e.target && e.target.closest && e.target.closest('.dy-ctx-dd-opt')) return;
     if (!dd.contains(e.target)) {
       DY._kaiDdSluit(dd, panel, btn);
@@ -21783,7 +21783,7 @@ DY._kaiCtxDdKies = function(el) {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// KAI UITBREIDING — Verbeterknoppen + AI Stylist Chat + Stijlprofiel
+// KAI UITBREIDING - Verbeterknoppen + AI Stylist Chat + Stijlprofiel
 // Build: v311-uitbreiding-1
 // ══════════════════════════════════════════════════════════════════
 
@@ -21827,7 +21827,7 @@ DY._kaiVerbeter = async function(deel) {
     b.classList.toggle('dy-kai-vb-knop--actief', b.dataset.deel === deel);
   });
 
-  // Gebruik bestaande analysecontext — geen nieuwe beeldanalyse
+  // Gebruik bestaande analysecontext - geen nieuwe beeldanalyse
   var analyse = DY._kleurenAI && DY._kleurenAI.analyseResultaat;
   if (!analyse) {
     resEl.innerHTML = '<p class="dy-kai-vb-fout">Analyseer eerst een outfit.</p>';
@@ -22193,7 +22193,7 @@ DY._kaiImprovementEngine = async function(analyse) {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// PATCH v314-p1: Admin sync — volledige event logging
+// PATCH v314-p1: Admin sync - volledige event logging
 // ══════════════════════════════════════════════════════════════════
 
 // Intercept upload start
@@ -22275,9 +22275,9 @@ if (typeof _origKaiSlaOp === 'function') {
 
 
 // ══════════════════════════════════════════════════════════════════
-// SPRINT 1 — FEED CARD & AI SOCIAL LAYER UPGRADE (v359)
+// SPRINT 1 - FEED CARD & AI SOCIAL LAYER UPGRADE (v359)
 // Features: Community Score, AI Kleuranalyse, Bookmark Systeem
-// Volledig additioneel — geen bestaande functies gewijzigd
+// Volledig additioneel - geen bestaande functies gewijzigd
 // ══════════════════════════════════════════════════════════════════
 
 // ── CENTRALE POST STATE ─────────────────────────────────────────────
@@ -22301,7 +22301,7 @@ DY._getPostState = function(docId) {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// FEATURE 1.3 — BOOKMARK SYSTEEM (geen Firestore lees-dependency
+// FEATURE 1.3 - BOOKMARK SYSTEEM (geen Firestore lees-dependency
 // bij initieel laden → kan eerder gebouwd worden dan score)
 // ══════════════════════════════════════════════════════════════════
 
@@ -22321,7 +22321,7 @@ DY._bookmarkQueueDrain = function() {
   var queue = [];
   try { queue = JSON.parse(raw); } catch(e) { return; }
   if (!queue.length) return;
-  // Verwerk via users/{uid} document — altijd toegestaan
+  // Verwerk via users/{uid} document - altijd toegestaan
   var promises = queue.map(function(item) {
     var upd = {};
     if (item.action === 'add') {
@@ -22357,7 +22357,7 @@ DY.laadBookmarkStatus = async function(docId) {
   if (state.bookmarkLoaded) return state;
   if (!DY.user) { state.bookmarkLoaded = true; return state; }
   try {
-    // Lees uit users/{uid}.savedPosts.{docId} — altijd toegestaan
+    // Lees uit users/{uid}.savedPosts.{docId} - altijd toegestaan
     // Gebruik gecacht profiel als dat al beschikbaar is (geen extra Firestore read)
     var savedPosts = null;
     if (DY.profile && DY.profile.savedPosts !== undefined) {
@@ -22552,10 +22552,10 @@ DY._bookmarkBtnDetailHTML = function(docId, bookmarked) {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// FEATURE 1.1 — COMMUNITY SCORE MODULE
+// FEATURE 1.1 - COMMUNITY SCORE MODULE
 // ══════════════════════════════════════════════════════════════════
 
-// Bouw score-HTML — puur functie, geen DOM side-effects
+// Bouw score-HTML - puur functie, geen DOM side-effects
 DY._bouwScoreHTML = function(docId, scoreData) {
   var avg       = (scoreData && scoreData.avg)           ? scoreData.avg           : 0;
   var totaal    = (scoreData && scoreData.totaal)        ? scoreData.totaal        : 0;
@@ -22571,7 +22571,7 @@ DY._bouwScoreHTML = function(docId, scoreData) {
   return '<div class="dy-score-module" data-doc="' + docId + '">' +
     '<div class="dy-score-header">' +
       '<span class="dy-score-sterren">' + sterrenHTML + '</span>' +
-      '<span class="dy-score-gem">' + (avg > 0 ? avg.toFixed(1) : '—') + '</span>' +
+      '<span class="dy-score-gem">' + (avg > 0 ? avg.toFixed(1) : '-') + '</span>' +
       (totaal > 0 ? '<span class="dy-score-totaal">(' + totaal + ')</span>' : '') +
     '</div>' +
     '<div class="dy-score-reacties">' +
@@ -22593,7 +22593,7 @@ DY._updateScoreModules = function(docId) {
   var state = DY._getPostState(docId);
   document.querySelectorAll('.dy-score-module[data-doc="' + docId + '"]').forEach(function(el) {
     el.outerHTML = DY._bouwScoreHTML(docId, state.scoreData);
-    // outerHTML vervangt het element — de querySelectorAll loop loopt al door dus dit is veilig
+    // outerHTML vervangt het element - de querySelectorAll loop loopt al door dus dit is veilig
   });
   // Herlaad ook user-stem-markering
   DY._markeerUserStem(docId);
@@ -22632,7 +22632,7 @@ DY.laadScoreVoorPost = async function(docId) {
   }
 
   // Laad user eigen stem uit stories/{docId}._votes.{uid}
-  // (zelfde document dat al opgehaald wordt voor scoreData — geen extra read)
+  // (zelfde document dat al opgehaald wordt voor scoreData - geen extra read)
   if (DY.user) {
     try {
       var userVotes = (snap.exists && snap.data()._votes && snap.data()._votes[DY.user.uid]) || {};
@@ -22690,7 +22690,7 @@ DY.stemOpOutfit = async function(docId, type, btn) {
   var state = DY._getPostState(docId);
   var uid = DY.user.uid;
 
-  // Schrijft naar stories/{docId} — zelfde collectie als likes (werkt gegarandeerd)
+  // Schrijft naar stories/{docId} - zelfde collectie als likes (werkt gegarandeerd)
   // Veldpad: _votes.{uid}.{type} voor eigen stem
   //          _ratings.{type} voor geaggregeerde teller (atomic increment)
   var storyRef = DY.db.collection('stories').doc(docId);
@@ -22712,7 +22712,7 @@ DY.stemOpOutfit = async function(docId, type, btn) {
   DY._updateStemTellers(docId, state);
 
   try {
-    // Bouw update object — beide velden in één write (atomisch)
+    // Bouw update object - beide velden in één write (atomisch)
     var update = {};
     // Eigen stem opslaan als nested veld op het story document
     update['_votes.' + uid + '.' + type] = nieuweWaarde
@@ -22773,7 +22773,7 @@ DY._updateStemTellers = function(docId, state) {
       }
       headerEl.innerHTML =
         '<span class="dy-score-sterren">' + sterrenHTML + '</span>' +
-        '<span class="dy-score-gem">' + (avg > 0 ? avg.toFixed(1) : '—') + '</span>' +
+        '<span class="dy-score-gem">' + (avg > 0 ? avg.toFixed(1) : '-') + '</span>' +
         (totaal > 0 ? '<span class="dy-score-totaal">(' + totaal + ')</span>' : '');
     }
     moduleEl.querySelectorAll('.dy-stem-btn').forEach(function(b) {
@@ -22798,14 +22798,14 @@ DY._updateStemTellers = function(docId, state) {
 
 
 // ══════════════════════════════════════════════════════════════════
-// FEATURE 1.2 — AI KLEURANALYSE
+// FEATURE 1.2 - AI KLEURANALYSE
 // ══════════════════════════════════════════════════════════════════
 
 DY._aiAnalyseCache = {};  // { [docId]: { ts, result } }
 DY._AI_ANALYSE_TTL = 24 * 60 * 60 * 1000; // 24 uur
 
 // ══════════════════════════════════════════════════════════════════
-// OUTFIT REVIEW — VERBETER JOUW OUTFIT
+// OUTFIT REVIEW - VERBETER JOUW OUTFIT
 // Uitbreiding: voegt de "Verbeter jouw outfit" sectie toe aan de
 // Outfit Review analyse. Hergebruikt exact dezelfde logica als
 // Vergelijk Mijn Outfit (_kaiVerbeter), aangepast op de
@@ -22854,7 +22854,7 @@ DY._orVerbeter = async function(docId, deel) {
     return;
   }
 
-  // Laadstatus tonen — identiek aan _kaiVerbeter
+  // Laadstatus tonen - identiek aan _kaiVerbeter
   resEl.innerHTML = '<div class="dy-kai-vb-laden">' +
     '<div class="dy-kai-loading-dots"><span></span><span></span><span></span></div>' +
     '<p class="dy-kai-loading-tekst">Verbeteradvies laden\u2026</p>' +
@@ -22929,7 +22929,7 @@ DY._orVerbeter = async function(docId, deel) {
     }
   } catch(err) { clearTimeout(t); }
 
-  // Fallback — hergebruik exact dezelfde fallback als _kaiVerbeter
+  // Fallback - hergebruik exact dezelfde fallback als _kaiVerbeter
   resEl.innerHTML = DY._kaiVbFallback(deel, analyse);
   DY._kaiVbLogActie(deel);
 };
@@ -22937,7 +22937,7 @@ DY._orVerbeter = async function(docId, deel) {
 // Verbeter-injectie verplaatst naar directe call-sites in toonAIAnalyse
 
 // ══════════════════════════════════════════════════════════════════
-// EINDE OUTFIT REVIEW — VERBETER JOUW OUTFIT
+// EINDE OUTFIT REVIEW - VERBETER JOUW OUTFIT
 // ══════════════════════════════════════════════════════════════════
 
 DY.toonAIAnalyse = async function(docId, foto, panelEl) {
@@ -22977,7 +22977,7 @@ DY.toonAIAnalyse = async function(docId, foto, panelEl) {
     return;
   }
 
-  // W-spinner via DOM (inline styles — cache-onafhankelijk, werkt op alle devices)
+  // W-spinner via DOM (inline styles - cache-onafhankelijk, werkt op alle devices)
   (function() {
     var wrapper = document.createElement('div');
     wrapper.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:28px 16px';
@@ -23069,7 +23069,7 @@ DY.toonAIAnalyse = async function(docId, foto, panelEl) {
     var analyse = null;
     var lastErr  = null;
 
-    // Twee pogingen — zelfde retry patroon als _kaiAnalyseerURL
+    // Twee pogingen - zelfde retry patroon als _kaiAnalyseerURL
     for (var poging = 0; poging < 2; poging++) {
       try {
         analyse = await DY._kleurenAnalyseerMet(kleurenData, base64, foto);
@@ -23150,11 +23150,11 @@ DY._vervangHexInTekst = function(tekst) {
     var licht = (0.299*r + 0.587*g + 0.114*b) > 128;
     return '<span class="dy-ai-inline-chip" style="background:' + vollHex + ';color:' + (licht ? '#1e1a0f' : '#fdf8f0') + '" aria-label="kleurbol"></span>';
   }
-  // Stap 1: (#RRGGBB) of (#RGB) met haakjes — verwijder haakjes + code, vervang door chip
+  // Stap 1: (#RRGGBB) of (#RGB) met haakjes - verwijder haakjes + code, vervang door chip
   tekst = tekst.replace(/\s*\(#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})\)/g, function(m, hex) {
     return ' ' + chipVoor(hex);
   });
-  // Stap 2: bare #RRGGBB of #RGB zonder haakjes — vervang door chip
+  // Stap 2: bare #RRGGBB of #RGB zonder haakjes - vervang door chip
   tekst = tekst.replace(/#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})\b/g, function(m, hex) {
     return chipVoor(hex);
   });
@@ -23178,7 +23178,7 @@ DY._renderAIAnalyse = function(panelEl, result) {
   var alternatieven  = Array.isArray(result.alternatieven)  ? result.alternatieven  : [];
   var samenvatting   = result.samenvatting  || '';
 
-  // Kleurprioriteit: 1. AI outfit_kleuren (AI ziet de foto direct — altijd accuraat)
+  // Kleurprioriteit: 1. AI outfit_kleuren (AI ziet de foto direct - altijd accuraat)
   //                  2. canvas-gedetecteerde kleuren (lokale extractie)
   //                  3. leeg (geen stalen tonen)
   var aiKleuren = Array.isArray(result.outfit_kleuren) && result.outfit_kleuren.length > 0
@@ -23193,7 +23193,7 @@ DY._renderAIAnalyse = function(panelEl, result) {
   var canvasKleuren = (result.kleurenData && result.kleurenData.kleuren && result.kleurenData.kleuren.length > 0)
     ? result.kleurenData.kleuren
     : [];
-  // AI kleuren zijn leidend — die zien de foto direct zonder CORS beperkingen
+  // AI kleuren zijn leidend - die zien de foto direct zonder CORS beperkingen
   var displayKleuren = aiKleuren.length > 0 ? aiKleuren : canvasKleuren;
 
   function scoreKleur(n) {
@@ -23211,17 +23211,17 @@ DY._renderAIAnalyse = function(panelEl, result) {
     '</div>';
   }
 
-  // Positieve punten HTML — hex codes vervangen door kleurstalen
+  // Positieve punten HTML - hex codes vervangen door kleurstalen
   var positiefHTML = positief.slice(0, 4).map(function(p) {
     return '<li class="dy-ai-lijst-item">✦ ' + DY._vervangHexInTekst(DY.escapeHtml(p)) + '</li>';
   }).join('');
 
-  // Verbeterpunten HTML — hex codes vervangen door kleurstalen
+  // Verbeterpunten HTML - hex codes vervangen door kleurstalen
   var verbHTML = verbeterpunten.slice(0, 4).map(function(v) {
     return '<li class="dy-ai-lijst-item">→ ' + DY._vervangHexInTekst(DY.escapeHtml(v)) + '</li>';
   }).join('');
 
-  // Alternatieven HTML — objecten met kleur+hex+reden, of strings
+  // Alternatieven HTML - objecten met kleur+hex+reden, of strings
   var altHTML = alternatieven.slice(0, 3).map(function(a) {
     if (typeof a === 'object' && a !== null) {
       var chip = a.hex
@@ -23335,7 +23335,7 @@ DY._renderAIAnalyse = function(panelEl, result) {
 
 
 // ══════════════════════════════════════════════════════════════════
-// INJECTIE IN BESTAANDE CARD BUILDERS — via monkey patching
+// INJECTIE IN BESTAANDE CARD BUILDERS - via monkey patching
 // De originele functies worden NIET gewijzigd in de broncode.
 // We wrappen _compactKaart en verhaalKaart na definitie.
 // ══════════════════════════════════════════════════════════════════
@@ -23343,7 +23343,7 @@ DY._renderAIAnalyse = function(panelEl, result) {
 // ── PATCH _compactKaart: voeg score + bookmark toe aan footer
 var _orig_compactKaart = DY._compactKaart;
 DY._compactKaart = function(data, el) {
-  // Roep originele functie aan — bouwt innerHTML volledig op
+  // Roep originele functie aan - bouwt innerHTML volledig op
   var result = _orig_compactKaart.call(DY, data, el);
   var docId = data._docId || data.id || '';
   if (!docId) return result;
@@ -23390,7 +23390,7 @@ DY._compactKaart = function(data, el) {
 };
 
 // ── PATCH verhaalKaart: voeg bookmark toe aan dy-reel-actions sidebar
-// ── Feed Outfit Review handler — debounced, hergebruikt bestaande pipeline ──
+// ── Feed Outfit Review handler - debounced, hergebruikt bestaande pipeline ──
 DY._feedOutfitReview = function(docId, fotoUrl) {
   if (!docId) return;
   // Debounce: voorkom dubbele triggers
@@ -23407,7 +23407,7 @@ DY._feedOutfitReview = function(docId, fotoUrl) {
   // Wacht tot popup gerenderd is, zoek dan het AI panel en trigger het
   // v60.1.41: triggerBtn is verwijderd uit overlay UI, dus we wachten alleen
   // op panelEl (de container waarin het analyse-resultaat rendert).
-  // v60.1.43: extra fallback — als fotoUrl null is, probeer het opnieuw te lezen
+  // v60.1.43: extra fallback - als fotoUrl null is, probeer het opnieuw te lezen
   // uit de inmiddels geladen popup-hero-media zodat we niet onterecht
   // de "Voeg een foto toe" fallback tonen.
   var pogingen = 0;
@@ -23450,7 +23450,7 @@ DY.verhaalKaart = function(data, opties) {
   // Opslaan/Bewaar functie blijft beschikbaar via card-hub popover (Bewaar item).
   // Handler DY._feedOutfitReview en bookmark-handlers blijven actief voor menu.
 
-  // Laad bookmark status async (na render) — voor synchronisatie met popover Bewaar-state
+  // Laad bookmark status async (na render) - voor synchronisatie met popover Bewaar-state
   if (DY.user) {
     DY.laadBookmarkStatus(docId).catch(function(){}).then(function() {
       DY._updateBookmarkBtns(docId);
@@ -23464,11 +23464,11 @@ DY.verhaalKaart = function(data, opties) {
 // We wrappen de functie zodat na het renderen van contentHTML twee features worden toegevoegd
 var _orig_toonVerhaalPopup = DY.toonVerhaalPopup;
 DY.toonVerhaalPopup = async function(id) {
-  // Roep origineel aan — dit bouwt de popup en laadt data
+  // Roep origineel aan - dit bouwt de popup en laadt data
   try {
     await _orig_toonVerhaalPopup.call(DY, id);
   } catch(e) {
-    // Originele popup heeft zijn eigen error handling — dit voorkomt een unhandled rejection
+    // Originele popup heeft zijn eigen error handling - dit voorkomt een unhandled rejection
     return;
   }
 
@@ -23575,7 +23575,7 @@ DY.toonVerhaalPopup = async function(id) {
 // ══════════════════════════════════════════════════════════════════
 
 // ══════════════════════════════════════════════════════════════════
-// v361 — SPRINT 1 FEATURES IN DETAIL PAGINA (renderDetail fix)
+// v361 - SPRINT 1 FEATURES IN DETAIL PAGINA (renderDetail fix)
 // Centrale injectie-functie die werkt in ALLE detail contexten:
 //   - renderDetail (desktop/mobile losse pagina)
 //   - toonVerhaalPopup (bottom sheet overlay) → patch al actief
@@ -23686,13 +23686,13 @@ DY._injecteerSprint1InDetail = function(docId, foto, containerEl) {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// v361 — PATCH toonVerhaalPopup: gebruik centrale injectie-functie
+// v361 - PATCH toonVerhaalPopup: gebruik centrale injectie-functie
 // Vervang de bestaande patch volledig zodat er geen code-duplicatie is
 // ══════════════════════════════════════════════════════════════════
 
 // De bestaande _orig_toonVerhaalPopup patch (toegevoegd in Sprint 1) deed de injectie
 // inline. Nu delegeren we naar _injecteerSprint1InDetail voor consistentie.
-// We wrappen opnieuw — de vorige wrap zit al in de chain als _orig_toonVerhaalPopup.
+// We wrappen opnieuw - de vorige wrap zit al in de chain als _orig_toonVerhaalPopup.
 // Dus: huidige DY.toonVerhaalPopup = Sprint1Patch(origineel)
 // Nu: DY.toonVerhaalPopup = v361Patch(Sprint1Patch(origineel))
 // Maar dat leidt tot dubbele injectie. Beter: de Sprint1 popup-patch al bevat de logica,
@@ -23713,7 +23713,7 @@ if (typeof _origLaadDetailOverlayContent === 'function') {
     // (reel items hebben geen dy-sd-body, die hebben de reel card layout)
     // De verhaalKaart patch handelt bookmark toe al.
     // Score en AI zitten alleen in de popup (toonVerhaalPopup) en detail pagina.
-    // In de fullscreen overlay zijn dit reel cards — score/AI niet van toepassing op reel.
+    // In de fullscreen overlay zijn dit reel cards - score/AI niet van toepassing op reel.
   };
 }
 
@@ -23723,7 +23723,7 @@ if (typeof _origLaadDetailOverlayContent === 'function') {
 
 
 // ══════════════════════════════════════════════════════════════════
-// v363 — OPGESLAGEN OUTFITS TAB IN PROFIEL + FIXES
+// v363 - OPGESLAGEN OUTFITS TAB IN PROFIEL + FIXES
 // ══════════════════════════════════════════════════════════════════
 
 // Voeg "Opgeslagen" tab toe onderaan de profielpagina
@@ -23741,7 +23741,7 @@ DY._opgeslaanToggle = function() {
   var isOpen = body.style.display !== 'none';
 
   if (isOpen) {
-    // Sluiten — exact psToggle patroon
+    // Sluiten - exact psToggle patroon
     body.style.maxHeight = body.scrollHeight + 'px';
     requestAnimationFrame(function() {
       body.style.transition = 'max-height 0.28s ease, opacity 0.2s ease';
@@ -23757,7 +23757,7 @@ DY._opgeslaanToggle = function() {
     if (btn)     btn.setAttribute('aria-expanded', 'false');
     if (chevron) chevron.style.transform = '';
   } else {
-    // Openen — exact psToggle patroon
+    // Openen - exact psToggle patroon
     body.style.display   = 'block';
     body.style.overflow  = 'hidden';
     body.style.maxHeight = '0';
@@ -23849,7 +23849,7 @@ DY._injecteerOpgeslagenTab = function(containerEl) {
   }
 };
 
-// Tab filter — ook globale functie zodat inline onclick werkt na tab-cache restore
+// Tab filter - ook globale functie zodat inline onclick werkt na tab-cache restore
 DY._opgeslaanFilterTab = function(btn, collectie) {
   document.querySelectorAll('#dy-opg-tabs .dy-opg-tab').forEach(function(t) {
     t.classList.remove('active');
@@ -23866,7 +23866,7 @@ DY._laadOpgeslagenGrid = async function(collectie) {
   grid.innerHTML = '<div class="dy-opg-loading"><div class="dy-spinner"></div></div>';
 
   try {
-    // Gebruik profiel cache als beschikbaar — voorkom onnodige Firestore read
+    // Gebruik profiel cache als beschikbaar - voorkom onnodige Firestore read
     var savedPosts;
     if (DY.profile && DY.profile.savedPosts !== undefined) {
       savedPosts = DY.profile.savedPosts;
@@ -23951,7 +23951,7 @@ DY._laadOpgeslagenGrid = async function(collectie) {
           (colLabels ? '<span class="dy-opg-col">' + DY.escapeHtml(colLabels) + '</span>' : '') +
         '</div>';
 
-      // Klik navigatie — gebruik openDetail voor correcte overlay-routing
+      // Klik navigatie - gebruik openDetail voor correcte overlay-routing
       // openDetail behoudt feed context en gebruikt de juiste stacking order
       el.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -24020,7 +24020,7 @@ DY._enrichBookmarkData = function(docId, collections) {
   };
 };
 
-// Monkey-patch de opslaanBtn click handler — we doen dit door _bookmarkQueueDrain
+// Monkey-patch de opslaanBtn click handler - we doen dit door _bookmarkQueueDrain
 // uit te breiden zodat queued items ook foto/titel meesturen.
 // De echte write zit in de sheet's opslaanBtn listener die niet eenvoudig te patchen is
 // zonder de hele sheet te herschrijven. Eenvoudigste fix: override laadBookmarkStatus
@@ -24036,7 +24036,7 @@ DY._enrichBookmarkData = function(docId, collections) {
 
 // Complete herschrijving van _toonBookmarkSheet met extra metadata en correcte tab refresh
 DY._toonBookmarkSheet = function(docId, triggerBtn) {
-  // Auth guard — zelfde patroon als alle andere beveiligde acties
+  // Auth guard - zelfde patroon als alle andere beveiligde acties
   if (!DY.user) {
     DY.toonLoginPrompt('Maak een gratis account aan om outfits op te slaan in je collectie.');
     return;
@@ -24136,7 +24136,7 @@ DY._toonBookmarkSheet = function(docId, triggerBtn) {
         }).join(', '));
 
         if (DY.user) {
-          // Schrijf naar users/{uid} document — gegarandeerd toegestaan (zelfde als profielupdate)
+          // Schrijf naar users/{uid} document - gegarandeerd toegestaan (zelfde als profielupdate)
           // savedPosts.{docId} als geneste map op het user document
           var saveUpdate = {};
           saveUpdate['savedPosts.' + docId] = {
@@ -24193,7 +24193,7 @@ DY._toonBookmarkSheet = function(docId, triggerBtn) {
 
 
 // ══════════════════════════════════════════════════════════════════
-// STORY SHARE — v400
+// STORY SHARE - v400
 // ══════════════════════════════════════════════════════════════════
 
 DY.svDeel = function(e) {
@@ -24353,7 +24353,7 @@ DY._svNaDeelRegistreer = function(storyId) {
   try { DY.geefPunten && DY.geefPunten('verhaal_delen', { verhaal_id: storyId }); } catch(e) {}
 };
 
-// Story delen via intern DM — prefill de deeplink in het berichtveld
+// Story delen via intern DM - prefill de deeplink in het berichtveld
 DY._svDeelViaDM = function(ontvangerUid, ontvangerNaam, url, tekst) {
   if (!DY.user) { DY.toonLoginPrompt && DY.toonLoginPrompt('Log in om berichten te sturen.'); return; }
   if (!ontvangerUid || ontvangerUid === DY.user.uid) return;
@@ -24415,7 +24415,7 @@ DY._verwerkStoryDeeplink = async function() {
 
 
 // ══════════════════════════════════════════════════════════════════
-// STORY OUTFIT REVIEW — v406
+// STORY OUTFIT REVIEW - v406
 // ══════════════════════════════════════════════════════════════════
 
 // Bepaal of de huidige story een foto heeft en toon/verberg de review-knop
@@ -24498,7 +24498,7 @@ DY.svOutfitReview = function(e) {
 
 DY._svAnalyseerOutfit = async function(foto, storyId, containerEl) {
   var cacheKey = 'sv_rv_' + storyId;
-  // Cache per storyId — voorkomt dubbele API calls bij heropenen
+  // Cache per storyId - voorkomt dubbele API calls bij heropenen
   if (!DY._svReviewCache) DY._svReviewCache = {};
   var cached = DY._svReviewCache[cacheKey];
 
@@ -24508,7 +24508,7 @@ DY._svAnalyseerOutfit = async function(foto, storyId, containerEl) {
       analyse = cached;
     } else {
       // PERFORMANCE: gebruik _kaiAnalyseerURL die al blob-fetch + canvas parallel doet
-      // en een abort-controller heeft — hergebruikt de geoptimaliseerde bestaande pipeline
+      // en een abort-controller heeft - hergebruikt de geoptimaliseerde bestaande pipeline
       var kleurenData = { kleuren: [], totaal: 0 };
       var base64 = null;
       try {
@@ -24528,7 +24528,7 @@ DY._svAnalyseerOutfit = async function(foto, storyId, containerEl) {
             ctx2d.drawImage(img, 0, 0, c.width, c.height);
             var b64 = null;
             try { b64 = c.toDataURL('image/jpeg', 0.65).split(',')[1] || null; } catch(e) {}
-            // Kleurenextractie direct op dezelfde canvas — geen tweede img.onload
+            // Kleurenextractie direct op dezelfde canvas - geen tweede img.onload
             var pixelData = null;
             try { pixelData = ctx2d.getImageData(0, 0, c.width, c.height).data; } catch(e) {}
             resolve({ base64: b64, pixelData: pixelData, W: c.width, H: c.height });
@@ -24611,7 +24611,7 @@ DY._svAnalyseerOutfit = async function(foto, storyId, containerEl) {
     if (actiesEl) {
       actiesEl.innerHTML = '';
 
-      // "Stijladvies bekijken" — scrollt naar de stijladvies-sectie in de overlay
+      // "Stijladvies bekijken" - scrollt naar de stijladvies-sectie in de overlay
       var saBtn = document.createElement('button');
       saBtn.className = 'dy-kai-btn dy-kai-btn--goud';
       saBtn.type = 'button';
@@ -24629,7 +24629,7 @@ DY._svAnalyseerOutfit = async function(foto, storyId, containerEl) {
       });
       actiesEl.appendChild(saBtn);
 
-      // "Opnieuw" — wis cache en heranalyse
+      // "Opnieuw" - wis cache en heranalyse
       var opnieuwBtn = document.createElement('button');
       opnieuwBtn.className = 'dy-kai-btn dy-kai-btn--secundair';
       opnieuwBtn.type = 'button';
@@ -24650,7 +24650,7 @@ DY._svAnalyseerOutfit = async function(foto, storyId, containerEl) {
       actiesEl.appendChild(opnieuwBtn);
     }
 
-    // ── Verbeter jouw outfit grid — identiek aan vergelijker ────────
+    // ── Verbeter jouw outfit grid - identiek aan vergelijker ────────
     // Sla analyse op voor gebruik door _svVerbeter handler
     var _svRvId = 'sv_rv_' + (storyId || Date.now());
     if (!DY._svRvAnalyses) DY._svRvAnalyses = {};
@@ -24676,7 +24676,7 @@ DY._svAnalyseerOutfit = async function(foto, storyId, containerEl) {
     var vbNode = vbDiv.firstChild || vbDiv;
     containerEl.appendChild(vbNode);
 
-    // Event delegatie op grid — vermijdt inline onclick quoting problemen
+    // Event delegatie op grid - vermijdt inline onclick quoting problemen
     var vbGrid = vbNode.querySelector && vbNode.querySelector('.dy-kai-vb-grid');
     if (vbGrid) {
       vbGrid.addEventListener('click', function(e) {
@@ -24814,7 +24814,7 @@ DY._svReviewInitSwipe = function() {
 })();
 
 // ═══════════════════════════════════════════════════════════════════
-// OUTFIT CHALLENGES — UITBREIDING v1
+// OUTFIT CHALLENGES - UITBREIDING v1
 // ═══════════════════════════════════════════════════════════════════
 
 // ── Challenge detail pagina ──────────────────────────────────────
@@ -25142,7 +25142,7 @@ DY.renderChallenges = async function() {
 };
 
 // ── Patch challengeKaartHTML voor detail link ────────────────────
-// challengeKaartHTML ondersteunt nu toonDetailLink direct — geen patch nodig
+// challengeKaartHTML ondersteunt nu toonDetailLink direct - geen patch nodig
 
 // ── Routing voor challenge detail ────────────────────────────────
 var _origToonPagina = DY.toonPagina;

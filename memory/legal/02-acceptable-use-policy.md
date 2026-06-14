@@ -1,9 +1,9 @@
-# Acceptable Use Policy (AUP) — Paskamer Praat Merkenportaal
+# Acceptable Use Policy (AUP) - Paskamer Praat Merkenportaal
 
-**Versie 1.0 — 14 februari 2026**
+**Versie 1.0 - 14 februari 2026**
 **Onderdeel van het Gebruikersreglement**
 
-> ⚠️ Concept — juridische review aanbevolen.
+> ⚠️ Concept - juridische review aanbevolen.
 
 ---
 
@@ -103,7 +103,7 @@ Het is uitdrukkelijk verboden om het Platform te gebruiken voor:
 1. **Detectie**: automatische monitoring + meldingen door gebruikers
 2. **Beoordeling**: door moderatieteam binnen 72 uur
 3. **Maatregel**: waarschuwing, content-verwijdering, opschorting of
-   beëindiging — afhankelijk van ernst
+   beëindiging - afhankelijk van ernst
 4. **Beroep**: binnen 14 dagen via support@paskamerpraat.nl
 
 ### Escalatieladder
@@ -121,7 +121,7 @@ Het is uitdrukkelijk verboden om het Platform te gebruiken voor:
 
 Vermoedt u een overtreding door een ander Merk of gebruiker?
 - E-mail: support@paskamerpraat.nl
-- Onderwerp: "AUP-melding — [URL of accountnaam]"
+- Onderwerp: "AUP-melding - [URL of accountnaam]"
 - Vermeld: aard van de overtreding, bewijslast (screenshots, URL's),
   uw eigen contactgegevens
 

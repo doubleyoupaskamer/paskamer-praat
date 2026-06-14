@@ -72,7 +72,7 @@ auth.onAuthStateChanged(async user => {
 
 // ── Tab navigatie ─────────────────────────────────────────────
 const TAB_TITLES = {
-  kai:'Outfit AI — Vergelijk & Opgeslagen',
+  kai:'Outfit AI - Vergelijk & Opgeslagen',
   dash:'Dashboard',live:'Live feed',users:'Gebruikers',online:'Online nu',polls:'Poll resultaten',
   analytics:'Analytics',dsp:'DSP & Streaks',content:'Content',
   berichten:'Berichten',meldingen:'Meldingen',mod:'Moderatie',errors:'Errors',sys:'Systeem',
@@ -136,13 +136,13 @@ function reload() {
 const show = id => { const el = document.getElementById(id); if(el) el.style.display = el.tagName === 'DIV' ? 'flex' : 'block'; };
 const hide = id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; };
 const set  = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
-const fmt  = n => n == null ? '—' : Number(n).toLocaleString('nl-NL');
+const fmt  = n => n == null ? '-' : Number(n).toLocaleString('nl-NL');
 const esc  = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 function ts(t) {
-  if (!t) return '—';
+  if (!t) return '-';
   const d = t?.toDate ? t.toDate() : new Date(typeof t === 'number' ? t : t);
-  if (isNaN(d)) return '—';
+  if (isNaN(d)) return '-';
   const diff = (Date.now() - d) / 1000;
   if (diff < 60)   return Math.round(diff) + 's';
   if (diff < 3600) return Math.round(diff/60) + 'm';
@@ -189,7 +189,7 @@ async function logAction(actie, meta) {
 function bootDashboard() {
   stopAll();
 
-  // ── Proactieve user cache warmer — vóór alle renders ──────────
+  // ── Proactieve user cache warmer - vóór alle renders ──────────
   // Laadt top 200 users in _userCache zodat uid→naam altijd beschikbaar is
   window._userCache = window._userCache || {};
   (function _warmUserCache() {
@@ -206,7 +206,7 @@ function bootDashboard() {
               };
             }
           });
-          // Cache warm — geen console.log in productie
+          // Cache warm - geen console.log in productie
         }).catch(function(e) {
           // Fallback: probeer zonder orderBy
           db.collection('users').limit(200).get()
@@ -222,7 +222,7 @@ function bootDashboard() {
     } catch(e) {}
   })();
 
-  // Globale runtime error vanger — voorkomt stille crashes
+  // Globale runtime error vanger - voorkomt stille crashes
   window.onerror = function(msg, src, line, col, err) {
     console.error('[Admin Crash]', msg, 'regel:', line, err);
     var bar = document.getElementById('admin-err-bar');
@@ -254,7 +254,7 @@ function bootDashboard() {
     }, err => { console.warn('[Admin] activity_logs fout:', err.code); });
 
   // 2. Online users → realtime
-  // Centrale presence state — plain objects, gedeeld door alle tabs
+  // Centrale presence state - plain objects, gedeeld door alle tabs
   window._presenceDocs = [];
   const u2 = db.collection('realtime_status')
     .onSnapshot(function(snap) {
@@ -279,7 +279,7 @@ function bootDashboard() {
       // Unieke landen
       var countries = new Set(_presenceDocs.map(function(u){return u.country||u.lang||'';}).filter(Boolean));
       var countEl = document.getElementById('d-countries');
-      if (countEl) countEl.textContent = countries.size || '—';
+      if (countEl) countEl.textContent = countries.size || '-';
       var cnt = document.getElementById('on-cnt');
       if (cnt) cnt.textContent = tot;
 
@@ -304,7 +304,7 @@ function bootDashboard() {
     }, ()=>{});
   _unsubs = [u1, u2, u3, u4];
 
-  // Live timestamp tick — update tijden in feed elke 30s zonder nieuwe Firestore read
+  // Live timestamp tick - update tijden in feed elke 30s zonder nieuwe Firestore read
   setInterval(function() {
     if (_evs.length > 0) { renderFeed(); renderDashFeed(); }
   }, 30000);
@@ -325,7 +325,7 @@ function renderFeed() {
   set('ev-cnt', list.length + ' events');
   const now = Date.now();
   const html = list.map(e => {
-    // Timestamp: gebruik e.timestamp (Number) — altijd actueel
+    // Timestamp: gebruik e.timestamp (Number) - altijd actueel
     const evTs = e.timestamp || now;
     const t = new Date(evTs);
     const tsStr = t.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -362,7 +362,7 @@ function renderFeed() {
         }
       }
     }
-    const metaStr = esc(naam) + ' · ' + esc(e.route||'—') + ' · ' + esc(e.category||'');
+    const metaStr = esc(naam) + ' · ' + esc(e.route||'-') + ' · ' + esc(e.category||'');
     var clickable = e.userId ? ' style="cursor:pointer" onclick="goToUser(\'' + e.userId + '\')"' : '';
     return '<div class="ev"' + clickable + '>' +
       '<div class="ev-ic">' + evIco(e.type) + '</div>' +
@@ -380,7 +380,7 @@ function renderFeed() {
   });
 }
 
-function renderDashFeed() { /* delegeert naar renderFeed — no-op */ }
+function renderDashFeed() { /* delegeert naar renderFeed - no-op */ }
 
 // ── Dashboard KPIs ─────────────────────────────────────────────
 let _allUsers = [];
@@ -430,10 +430,10 @@ async function loadDash() {
         <tr>
           <td>${i+1}</td>
           <td><div class="urow">${uav(u.displayName||u.naam)}
-            <div><div class="uname">${esc(u.displayName||u.naam||'—')}</div>
+            <div><div class="uname">${esc(u.displayName||u.naam||'-')}</div>
             <div class="uuid">${u.uid.slice(0,12)}…</div></div>
           </div></td>
-          <td><span class="badge b-gold">${esc(u.niveau||'—')}</span></td>
+          <td><span class="badge b-gold">${esc(u.niveau||'-')}</span></td>
           <td style="color:var(--gold);font-weight:600">${fmt(u.dsp_lifetime)}</td>
         </tr>`).join('');
     }
@@ -484,11 +484,11 @@ function renderUsers() {
         <div><div class="uname">${esc(u.displayName||u.naam||'Onbekend')}</div>
         <div class="uuid">${u.uid}</div></div>
       </div></td>
-      <td><span class="badge b-gold">${esc(u.niveau||'—')}</span></td>
+      <td><span class="badge b-gold">${esc(u.niveau||'-')}</span></td>
       <td style="color:var(--gold)">${fmt(u.dsp_lifetime)}</td>
       <td>🔥 ${u.streak_huidig||0}</td>
       <td class="muted">${u.lengte?u.lengte+'cm':''} ${u.maat?'· '+u.maat:''}</td>
-      <td><span class="${u.online?'dot-on':'dot-off'}"></span> ${u.online?'Online':'—'}</td>
+      <td><span class="${u.online?'dot-on':'dot-off'}"></span> ${u.online?'Online':'-'}</td>
       <td><button class="btn btn-sm" onclick="openUser('${u.uid}')">Detail</button></td>
     </tr>`).join('') || '<tr><td colspan="7" class="empty">Geen gebruikers.</td></tr>';
 }
@@ -510,7 +510,7 @@ async function openUser(uid) {
   if (profielPane) profielPane.style.display = 'grid';
 
   // Header
-  const naam = u.displayName || u.naam || '—';
+  const naam = u.displayName || u.naam || '-';
   const ini  = naam.slice(0,2).toUpperCase();
   const avEl = document.getElementById('ud-avatar');
   if (avEl) avEl.textContent = ini;
@@ -527,13 +527,13 @@ async function openUser(uid) {
   const pwaEl    = document.getElementById('ud-pwa-badge');
   if (pres) {
     if (onlineEl) { onlineEl.textContent = '● Online'; onlineEl.className = 'badge b-green'; }
-    set('ud-live-route', pres.route || '—');
+    set('ud-live-route', pres.route || '-');
     var sm = pres.sessionMs || 0;
     set('ud-live-sess', sm < 60000 ? Math.round(sm/1000)+'s' : Math.round(sm/60000)+'m');
     if (pwaEl) pwaEl.style.display = pres.pwa ? 'inline-flex' : 'none';
   } else {
     if (onlineEl) { onlineEl.textContent = 'Offline'; onlineEl.className = 'badge b-gray'; }
-    set('ud-live-route', '—'); set('ud-live-sess', '—');
+    set('ud-live-route', '-'); set('ud-live-sess', '-');
     if (pwaEl) pwaEl.style.display = 'none';
   }
 
@@ -549,7 +549,7 @@ async function openUser(uid) {
       '<span style="text-align:right;'+kleur+'">'+val+'</span></div>';
   }
   function udChip(val) {
-    if (!val || val === '—') return '<span style="color:var(--text3);font-size:11px">—</span>';
+    if (!val || val === '-') return '<span style="color:var(--text3);font-size:11px">-</span>';
     return '<span style="display:inline-block;background:var(--bg4);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--text)">'+esc(val)+'</span>';
   }
   function udSection(title) {
@@ -568,11 +568,11 @@ async function openUser(uid) {
     // ── Account ──────────────────────────────────────────────
     udSection('Account') +
     udStatRow('UID', '<span class="mono" style="font-size:10px">'+uid+'</span>') +
-    udStatRow('Push notificaties', u.pushSubscribed ? '✓ Aan' : '— Uit') +
+    udStatRow('Push notificaties', u.pushSubscribed ? '✓ Aan' : '- Uit') +
     udStatRow('Mod status', u.modStatus ? '<span class="badge b-red">'+esc(u.modStatus)+'</span>' : '<span class="badge b-green">OK</span>') +
     udStatRow('DSP seizoen', fmt(u.dsp_seizoen)) +
     udStatRow('Streak max', (u.streak_langste||0)+' dagen') +
-    udStatRow('Laatste dag', u.streak_laatste_dag||'—') +
+    udStatRow('Laatste dag', u.streak_laatste_dag||'-') +
 
     // ── Fit Identity volledigheid ─────────────────────────────
     udSection('Fit Identity') +
@@ -593,12 +593,12 @@ async function openUser(uid) {
 
     // ── Maten ─────────────────────────────────────────────────
     udSection('Maten') +
-    udStatRow('Lengte', u.lengte ? '<strong>'+u.lengte+' cm</strong>' : '—', !!u.lengte) +
-    udStatRow('Gewicht', u.gewicht ? u.gewicht+' kg' : '—') +
-    udStatRow('Borstomtrek', u.borst ? u.borst+' cm' : '—') +
-    udStatRow('Taille', u.taille ? u.taille+' cm' : '—') +
-    udStatRow('Confectiemaat', u.maat ? '<strong>'+esc(u.maat)+'</strong>' : '—', !!u.maat) +
-    udStatRow('Schoenmaat', u.schoen ? 'EU '+u.schoen : '—') +
+    udStatRow('Lengte', u.lengte ? '<strong>'+u.lengte+' cm</strong>' : '-', !!u.lengte) +
+    udStatRow('Gewicht', u.gewicht ? u.gewicht+' kg' : '-') +
+    udStatRow('Borstomtrek', u.borst ? u.borst+' cm' : '-') +
+    udStatRow('Taille', u.taille ? u.taille+' cm' : '-') +
+    udStatRow('Confectiemaat', u.maat ? '<strong>'+esc(u.maat)+'</strong>' : '-', !!u.maat) +
+    udStatRow('Schoenmaat', u.schoen ? 'EU '+u.schoen : '-') +
 
     // ── Lichaamsbouw ──────────────────────────────────────────
     udSection('Lichaamsbouw') +
@@ -668,12 +668,12 @@ async function openUser(uid) {
       udTl.innerHTML = evs.slice(0,50).map(function(e){
         var dInfo = e.deviceInfo || {};
         var dIco  = dInfo.type==='mobile' ? '📲' : '🖥️';
-        var meta  = e.metadata ? JSON.stringify(e.metadata).slice(0,50) : '—';
+        var meta  = e.metadata ? JSON.stringify(e.metadata).slice(0,50) : '-';
         return '<tr>' +
           '<td class="mono" style="font-size:10px;white-space:nowrap">'+new Date(e.timestamp||0).toLocaleString('nl-NL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</td>' +
           '<td>'+evIco(e.type)+' '+esc(e.type)+'</td>' +
-          '<td><span class="badge b-blue">'+esc(e.route||'—')+'</span></td>' +
-          '<td>'+dIco+' '+esc(dInfo.browser||'—')+'</td>' +
+          '<td><span class="badge b-blue">'+esc(e.route||'-')+'</span></td>' +
+          '<td>'+dIco+' '+esc(dInfo.browser||'-')+'</td>' +
           '<td class="muted truncate" style="max-width:140px">'+esc(meta)+'</td>' +
           '</tr>';
       }).join('');
@@ -682,22 +682,22 @@ async function openUser(uid) {
 
   // Device tab
   var presData = presSnap && presSnap.exists ? presSnap.data() : null;
-  var devSrc   = presData || (evs.length ? { device:evs[0].deviceInfo&&evs[0].deviceInfo.type, browser:evs[0].deviceInfo&&evs[0].deviceInfo.browser, os:evs[0].deviceInfo&&evs[0].deviceInfo.os, pwa:false, screen:'—' } : null);
+  var devSrc   = presData || (evs.length ? { device:evs[0].deviceInfo&&evs[0].deviceInfo.type, browser:evs[0].deviceInfo&&evs[0].deviceInfo.browser, os:evs[0].deviceInfo&&evs[0].deviceInfo.os, pwa:false, screen:'-' } : null);
   var dcEl = document.getElementById('ud-device-current');
   if (dcEl && devSrc) {
     dcEl.innerHTML = [
-      ['Type',     devSrc.device||'—'],
-      ['Browser',  devSrc.browser||'—'],
-      ['OS',       devSrc.os||'—'],
+      ['Type',     devSrc.device||'-'],
+      ['Browser',  devSrc.browser||'-'],
+      ['OS',       devSrc.os||'-'],
       ['PWA',      devSrc.pwa ? '✓ Ja' : 'Nee'],
-      ['Scherm',   devSrc.screen||'—'],
+      ['Scherm',   devSrc.screen||'-'],
       ['Stad',     devSrc.city || (devSrc.country ? '(onbekend in '+devSrc.country+')' : 'Nog niet geladen')],
-      ['Regio',    devSrc.region||'—'],
-      ['Land',     devSrc.country_name||devSrc.country||'—'],
-      ['Tijdzone', devSrc.timezone||'—'],
-      ['Provider', devSrc.org||'—'],
-      ['Taal',     devSrc.lang||'—'],
-      ['Ping',     devSrc.lastSeenMs ? ts({toDate:function(){return new Date(devSrc.lastSeenMs);}}) : '—'],
+      ['Regio',    devSrc.region||'-'],
+      ['Land',     devSrc.country_name||devSrc.country||'-'],
+      ['Tijdzone', devSrc.timezone||'-'],
+      ['Provider', devSrc.org||'-'],
+      ['Taal',     devSrc.lang||'-'],
+      ['Ping',     devSrc.lastSeenMs ? ts({toDate:function(){return new Date(devSrc.lastSeenMs);}}) : '-'],
     ].map(function(row){
       return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px">' +
         '<span style="color:var(--text3)">'+row[0]+'</span><span>'+esc(String(row[1]))+'</span></div>';
@@ -809,7 +809,7 @@ async function loadOnline() {
   renderOnline(docs);
 }
 
-// Directe Firestore read — negeert de cached _presenceDocs state
+// Directe Firestore read - negeert de cached _presenceDocs state
 async function refreshOnlineNu() {
   var btn = event && event.target;
   if (btn) btn.textContent = '↻ Laden…';
@@ -824,7 +824,7 @@ async function refreshOnlineNu() {
       var ls = u.lastSeenMs || (u.lastSeen && u.lastSeen.toDate ? u.lastSeen.toDate().getTime() : 0);
       return (now - ls) < 180000;
     });
-    // Offline: recent offline (< 15 min) — ook meenemen voor offline blok
+    // Offline: recent offline (< 15 min) - ook meenemen voor offline blok
     var recentOffline = alle.filter(function(u){
       if (u.online) return false;
       var ls = u.lastSeenMs || (u.lastSeen && u.lastSeen.toDate ? u.lastSeen.toDate().getTime() : 0);
@@ -872,7 +872,7 @@ async function refreshOnlineNu() {
     if (luEl) luEl.textContent = 'gelezen: ' + alle.length + ' docs, actief: ' + actief.length;
   } catch(e) {
     console.error('[Admin] refreshOnlineNu fout:', e.code, e.message);
-    alert('Fout bij lezen: ' + e.code + ' — zijn de Firestore rules gedeployed?');
+    alert('Fout bij lezen: ' + e.code + ' - zijn de Firestore rules gedeployed?');
   }
   if (btn) btn.textContent = '↻ Nu vernieuwen';
 }
@@ -974,8 +974,8 @@ function renderOnline(allDocs) {
         var icon    = u.pwa ? '📱' : u.device === 'mobile' ? '📲' : '🖥️';
         var ab      = '<span class="badge '+(u.isAnonymous?'b-gray':'b-green')+'" style="font-size:9px">'+(u.isAnonymous?'Gast':'Auth')+'</span>';
         var pb      = u.pwa ? '<span class="badge b-amber" style="font-size:9px">PWA</span>' : '';
-        var loc     = [u.city, u.region, u.country].filter(Boolean).join(', ') || '—';
-        var browser = (u.browser||'—').split('/')[0];
+        var loc     = [u.city, u.region, u.country].filter(Boolean).join(', ') || '-';
+        var browser = (u.browser||'-').split('/')[0];
         var acts    = u.activityCount || 0;
         var onClickAttr = (!u.isAnonymous && u.uid) ? ' data-uid="' + u.uid + '" style="cursor:pointer" onclick="goToUser(this.dataset.uid)"' : '';
         var stale   = lastMs && (now - lastMs) > 45000;
@@ -983,9 +983,9 @@ function renderOnline(allDocs) {
         return '<tr'+onClickAttr+'>' +
           '<td><div class="urow">'+ab+'<span style="font-size:12px">'+esc(naam)+'</span>'+pb+'</div></td>' +
           '<td>'+pingBadge+'</td>' +
-          '<td><span class="badge b-blue">'+esc(u.route||'—')+'</span></td>' +
+          '<td><span class="badge b-blue">'+esc(u.route||'-')+'</span></td>' +
           '<td class="muted" style="font-size:11px">'+esc(loc)+'</td>' +
-          '<td>'+icon+' '+esc(u.device||'—')+'</td>' +
+          '<td>'+icon+' '+esc(u.device||'-')+'</td>' +
           '<td class="muted" style="font-size:11px">'+esc(browser)+'</td>' +
           '<td class="muted">'+sessStr+'</td>' +
           '<td class="muted" style="font-size:11px">'+acts+'</td>' +
@@ -1008,18 +1008,18 @@ function renderOnline(allDocs) {
         var _ce = !u.isAnonymous && window._userCache && u.uid ? window._userCache[u.uid] : null;
         var naam = u.displayName || (_ce ? (typeof _ce === 'object' ? _ce.naam : _ce) : null) || (u.isAnonymous ? '👤 Gast' : 'Onbekend');
         var sessMs  = u.sessionMs || 0;
-        var sessStr = !sessMs ? '—' : sessMs < 60000 ? Math.round(sessMs/1000)+'s' : sessMs < 3600000 ? Math.round(sessMs/60000)+'m' : Math.round(sessMs/3600000)+'u';
+        var sessStr = !sessMs ? '-' : sessMs < 60000 ? Math.round(sessMs/1000)+'s' : sessMs < 3600000 ? Math.round(sessMs/60000)+'m' : Math.round(sessMs/3600000)+'u';
         var lastMs  = u.lastSeenMs || 0;
         var agoMs   = now - lastMs;
         var agoStr  = agoMs < 60000 ? Math.round(agoMs/1000)+'s geleden' : agoMs < 3600000 ? Math.round(agoMs/60000)+'m geleden' : Math.round(agoMs/3600000)+'u geleden';
         var icon    = u.pwa ? '📱' : u.device === 'mobile' ? '📲' : '🖥️';
-        var loc     = [u.city, u.country].filter(Boolean).join(', ') || '—';
+        var loc     = [u.city, u.country].filter(Boolean).join(', ') || '-';
         var onClickAttr = (!u.isAnonymous && u.uid) ? ' data-uid="' + u.uid + '" style="cursor:pointer" onclick="goToUser(this.dataset.uid)"' : '';
         return '<tr'+onClickAttr+'>' +
           '<td><span style="font-size:12px;opacity:0.7">'+esc(naam)+'</span></td>' +
-          '<td><span class="badge b-gray">'+esc(u.route||'—')+'</span></td>' +
+          '<td><span class="badge b-gray">'+esc(u.route||'-')+'</span></td>' +
           '<td class="muted" style="font-size:11px">'+esc(loc)+'</td>' +
-          '<td>'+icon+' '+esc(u.device||'—')+'</td>' +
+          '<td>'+icon+' '+esc(u.device||'-')+'</td>' +
           '<td class="muted">'+sessStr+'</td>' +
           '<td class="muted" style="color:var(--red)">'+agoStr+'</td>' +
           '</tr>';
@@ -1055,8 +1055,8 @@ function exportPresence() {
     var naam = u.displayName || (_ce ? (typeof _ce === 'object' ? _ce.naam : _ce) : null) || (u.isAnonymous ? 'Gast' : '?');
     var sessS = Math.round((u.sessionMs||0)/1000);
     var lastMs = u.lastSeenMs || 0;
-    var connStr = u.connectedAt ? new Date(u.connectedAt).toLocaleString('nl-NL') : '—';
-    var pingStr = lastMs ? new Date(lastMs).toLocaleString('nl-NL') : '—';
+    var connStr = u.connectedAt ? new Date(u.connectedAt).toLocaleString('nl-NL') : '-';
+    var pingStr = lastMs ? new Date(lastMs).toLocaleString('nl-NL') : '-';
     rows.push([naam, u.online?'Online':'Offline', u.uid||'anoniem', u.route||'', u.country||'', u.city||'', u.device||'', (u.browser||'').split('/')[0], u.pwa?'ja':'nee', sessS, u.activityCount||0, pingStr, connStr]);
   });
   var csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
@@ -1086,7 +1086,7 @@ function uNaam(uid, fb) {
   if (!uid) return fb || 'Gast';
   const c = window._userCache && window._userCache[uid];
   if (c) return (typeof c === 'object') ? (c.naam || c.displayName || fb || 'Gast') : c;
-  return fb || 'Gast'; // NOOIT uid tonen — altijd Gast als fallback
+  return fb || 'Gast'; // NOOIT uid tonen - altijd Gast als fallback
 }
 // Trigger async profile lookup zodat bij re-render de naam er wél is
 function uNaamAsync(uid, fb, onResolved) {
@@ -1264,7 +1264,7 @@ async function _doLoadAnalytics() {
   const byU = {};
   evs.forEach(function(e){
     const key = e.userId || ('anon_'+(e.sessionId||''));
-    if(!byU[key]) byU[key]={uid:e.userId,ev:0,lk:0,po:0,dsp:0,device:(e.deviceInfo&&e.deviceInfo.type)||'—',anon:!e.userId};
+    if(!byU[key]) byU[key]={uid:e.userId,ev:0,lk:0,po:0,dsp:0,device:(e.deviceInfo&&e.deviceInfo.type)||'-',anon:!e.userId};
     byU[key].ev++;
     if(e.type==='like') byU[key].lk++;
     if(e.type==='verhaal_plaatsen'||e.type==='look_plaatsen') byU[key].po++;
@@ -1295,12 +1295,12 @@ async function _doLoadAnalytics() {
   if (storiesSnap) storiesSnap.docs.forEach(function(d){
     const data = d.data();
     const lks = typeof data.likes==='object' ? Object.keys(data.likes||{}).length : (data.likes||0);
-    trending.push({type:'Story', auteur:data.authorName||uNaam(data.userId,'—'), likes:lks, reacties:data.reactieCount||0});
+    trending.push({type:'Story', auteur:data.authorName||uNaam(data.userId,'-'), likes:lks, reacties:data.reactieCount||0});
   });
   if (looksSnap) looksSnap.docs.forEach(function(d){
     const data = d.data();
     const lks = typeof data.likes==='object' ? Object.keys(data.likes||{}).length : (data.likes||0);
-    trending.push({type:'Look', auteur:uNaam(data.userId,'—'), likes:lks, reacties:data.reactieCount||0});
+    trending.push({type:'Look', auteur:uNaam(data.userId,'-'), likes:lks, reacties:data.reactieCount||0});
   });
   trending.sort(function(a,b){return (b.likes+b.reacties*2)-(a.likes+a.reacties*2);});
   const anTr = document.getElementById('an-trending');
@@ -1360,11 +1360,11 @@ async function _doLoadAnalytics() {
     const anWl = document.getElementById('an-wl');
     if (anWl) anWl.innerHTML = wlSnap.docs.map(function(d){
       const w = d.data();
-      return '<tr><td>'+esc(uNaam(w.uid,'Onbekend'))+'</td><td>'+esc(w.product||'—')+'</td><td class="muted">'+ts(w.ts)+'</td></tr>';
+      return '<tr><td>'+esc(uNaam(w.uid,'Onbekend'))+'</td><td>'+esc(w.product||'-')+'</td><td class="muted">'+ts(w.ts)+'</td></tr>';
     }).join('') || '<tr><td colspan="3" class="empty">Geen wishlist activiteit.</td></tr>';
   }
 
-  // 14. Geografische verdeling — aggregeert uit ALLE bronnen
+  // 14. Geografische verdeling - aggregeert uit ALLE bronnen
   var geoC = {}, geoR = {}, geoCity = {};
   var geoTotal = 0;
 
@@ -1422,7 +1422,7 @@ async function _doLoadAnalytics() {
     bars(geoEntries.slice(0,8), 'an-geo-country', 'green');
   } else {
     var elC = document.getElementById('an-geo-country');
-    if(elC) elC.innerHTML='<div style="padding:10px;font-size:11px;color:var(--text3)">Geen data — geo actief voor nieuwe sessies (ipapi.co)</div>';
+    if(elC) elC.innerHTML='<div style="padding:10px;font-size:11px;color:var(--text3)">Geen data - geo actief voor nieuwe sessies (ipapi.co)</div>';
   }
   if (regEntries.length > 0) {
     bars(regEntries.slice(0,8), 'an-geo-region');
@@ -1437,7 +1437,7 @@ async function _doLoadAnalytics() {
     if(elCity) elCity.innerHTML='<div style="padding:10px;font-size:11px;color:var(--text3)">Wacht op sessie-data</div>';
   }
 
-  // 15. Body & maat analytics — volledige pipeline
+  // 15. Body & maat analytics - volledige pipeline
   (function() {
     // Combineer users uit snap + user cache (admin heeft users geladen)
     var userDocs = [];
@@ -1445,7 +1445,7 @@ async function _doLoadAnalytics() {
       usersSnap.docs.forEach(function(d){ userDocs.push(d.data()); });
     }
     // Aanvullen vanuit _userCache (heeft ook body data als compleet profiel)
-    // (cache bevat alleen naam/niveau — body data zit uitsluitend in usersSnap)
+    // (cache bevat alleen naam/niveau - body data zit uitsluitend in usersSnap)
 
     var byLengte = {}, byBouw = {}, byMaat = {}, byFit = {}, bySchoen = {};
     var metLengte = 0, metBouw = 0, metMaat = 0;
@@ -1471,7 +1471,7 @@ async function _doLoadAnalytics() {
       }
       // Bouw
       if (u.bouw) { byBouw[u.bouw] = (byBouw[u.bouw]||0)+1; metBouw++; }
-      // Maat — normaliseer naar uppercase
+      // Maat - normaliseer naar uppercase
       if (u.maat) {
         var m = String(u.maat).toUpperCase().trim();
         byMaat[m] = (byMaat[m]||0)+1;
@@ -1505,7 +1505,7 @@ async function _doLoadAnalytics() {
       else elB.innerHTML='<div style="padding:10px;font-size:11px;color:var(--text3)">Geen lichaamsbouw ingevuld</div>';
     }
 
-    // Render maat — sorteer op confectiemaat volgorde, daarna op frequentie
+    // Render maat - sorteer op confectiemaat volgorde, daarna op frequentie
     var maatSorted = Object.entries(byMaat).sort(function(a,b){
       var ai = maatOrder.indexOf(a[0]), bi = maatOrder.indexOf(b[0]);
       if (ai >= 0 && bi >= 0) return ai - bi;
@@ -1567,12 +1567,12 @@ async function loadDSP() {
           if (_currentTab === 'dsp') loadDSP();
         });
       }
-      if (!rNaam) rNaam = '—';
+      if (!rNaam) rNaam = '-';
       const dspClick = recv ? ' style="cursor:pointer" onclick="goToUser(\'' + recv.replace(/'/g,'') + '\')"' : '';
       return '<tr' + dspClick + '>' +
         '<td class="muted">' + ts(e.ts) + '</td>' +
         '<td class="uname">' + esc(rNaam) + '</td>' +
-        '<td><span class="badge b-gold">' + esc(e.actie||'—') + '</span></td>' +
+        '<td><span class="badge b-gold">' + esc(e.actie||'-') + '</span></td>' +
         '<td style="color:var(--green);font-weight:600">+' + (e.pts||0) + '</td>' +
         '</tr>';
     }).join('');;
@@ -1586,8 +1586,8 @@ async function loadDSP() {
       document.getElementById('dsp-top').innerHTML = us.map((u,i) => `
         <tr>
           <td><strong>${i+1}</strong></td>
-          <td class="uname">${esc(u.displayName||u.naam||'—')}</td>
-          <td><span class="badge b-gold">${esc(u.niveau||'—')}</span></td>
+          <td class="uname">${esc(u.displayName||u.naam||'-')}</td>
+          <td><span class="badge b-gold">${esc(u.niveau||'-')}</span></td>
           <td style="color:var(--gold);font-weight:600">${fmt(u.dsp_lifetime)}</td>
           <td>🔥 ${u.streak_huidig||0}</td>
         </tr>`).join('');
@@ -1596,12 +1596,12 @@ async function loadDSP() {
       const withStreak = us.filter(u=>(u.streak_huidig||0)>0).sort((a,b)=>(b.streak_huidig||0)-(a.streak_huidig||0));
       document.getElementById('dsp-streaks').innerHTML = withStreak.map(u => {
         const s = u.streak_huidig||0;
-        const mil = s>=30?'🏆 30 dagen':s>=7?'⭐ 7 dagen':s>=3?'🔥 3 dagen':'—';
+        const mil = s>=30?'🏆 30 dagen':s>=7?'⭐ 7 dagen':s>=3?'🔥 3 dagen':'-';
         return `<tr>
           <td class="uname">${esc(u.displayName||u.naam||'Gast')}</td>
           <td style="color:var(--amber);font-weight:600">🔥 ${s}</td>
           <td>${u.streak_langste||0}</td>
-          <td class="muted">${u.streak_laatste_dag||'—'}</td>
+          <td class="muted">${u.streak_laatste_dag||'-'}</td>
           <td>${mil}</td>
         </tr>`;
       }).join('') || '<tr><td colspan="5" class="empty">Geen actieve streaks.</td></tr>';
@@ -1631,8 +1631,8 @@ async function loadContent() {
     document.getElementById('ct-tbody').innerHTML = snap.docs.map(d => {
       const e = d.data();
       const likes = typeof e.likes === 'object' ? Object.keys(e.likes||{}).length : (e.likes||0);
-      const auteur = esc(e.authorName||e.displayName||'—');
-      const inhoud = esc((e.title||e.body||e.tekst||'—').slice(0,60));
+      const auteur = esc(e.authorName||e.displayName||'-');
+      const inhoud = esc((e.title||e.body||e.tekst||'-').slice(0,60));
       return `<tr>
         <td>${auteur}</td>
         <td class="truncate">${inhoud}</td>
@@ -1731,7 +1731,7 @@ async function loadBerichten() {
         set('dm-g', fmt(_dmGesprekken.length));
         set('dm-a', fmt(actief));
         // Sample bericht count
-        set('dm-m', '—');
+        set('dm-m', '-');
         dmRenderLijst();
       }, function(err) {
         console.warn('[DM] onSnapshot fout:', err.code);
@@ -1783,7 +1783,7 @@ function dmRenderLijst() {
     return;
   }
 
-  // Gebruik event delegation — één listener op container
+  // Gebruik event delegation - één listener op container
   listEl.innerHTML = '';
   var fragment = document.createDocumentFragment();
 
@@ -1792,7 +1792,7 @@ function dmRenderLijst() {
     if (!namen.length && g.deelnemers) {
       namen = (g.deelnemers||[]).map(function(uid){ return uNaam(uid,'Gast'); });
     }
-    var namenStr = namen.join(', ') || '—';
+    var namenStr = namen.join(', ') || '-';
     var ongelezen = Object.values(g.ongelezen||{}).reduce(function(s,v){ return s+(v||0); }, 0);
     var actief = g._id === _dmActiefId;
     var initials = namen.slice(0,2).map(function(n){ return dmAv(n, 28); }).join('');
@@ -1816,7 +1816,7 @@ function dmRenderLijst() {
       '<div style="display:flex;gap:4px;flex-shrink:0">'+initials+'</div>' +
       '<div style="flex:1;min-width:0">' +
         '<div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(namenStr)+'</div>' +
-        '<div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">'+esc(g.laatste_bericht||'—')+'</div>' +
+        '<div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">'+esc(g.laatste_bericht||'-')+'</div>' +
       '</div>' +
       '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">' +
         (ongelezen > 0 ? '<span class="badge b-amber" style="font-size:10px">'+ongelezen+'</span>' : '') +
@@ -1872,7 +1872,7 @@ function dmOpenGesprek(gesprekId) {
   var nameEl = document.getElementById('dm-ch-namen');
   var metaEl = document.getElementById('dm-ch-meta');
   var avEl   = document.getElementById('dm-ch-avatars');
-  if (nameEl) nameEl.textContent = namen.join(' ↔ ') || '—';
+  if (nameEl) nameEl.textContent = namen.join(' ↔ ') || '-';
   if (metaEl) metaEl.textContent = deelnemerUids.length + ' deelnemers · gesprek ' + gesprekId.slice(0,12) + '…';
   if (avEl)   avEl.innerHTML = namen.slice(0,3).map(function(n){ return dmAv(n, 34); }).join('');
 
@@ -1933,7 +1933,7 @@ function dmRenderChat(snap, gesprek) {
 
     // Timestamp
     var tsVal = msg.ts && msg.ts.toDate ? msg.ts.toDate() : (msg.createdAt ? new Date(msg.createdAt) : null);
-    var tsStr = tsVal ? tsVal.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}) : '—';
+    var tsStr = tsVal ? tsVal.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}) : '-';
     var dateStr = tsVal ? tsVal.toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'}) : null;
 
     // Datumscheider
@@ -1976,7 +1976,7 @@ function dmFlagGesprek() {
   if (!confirm('Gesprek markeren voor moderatie?')) return;
   db.collection('admin_log').add({
     actie: 'flag_gesprek',
-    adminEmail: auth.currentUser ? auth.currentUser.email : '—',
+    adminEmail: auth.currentUser ? auth.currentUser.email : '-',
     meta: { gesprekId: _dmActiefId },
     ts: firebase.firestore.FieldValue.serverTimestamp()
   }).then(function(){ alert('Gesprek gemarkeerd.'); })
@@ -1999,10 +1999,10 @@ async function loadMod() {
     document.getElementById('mod-log').innerHTML = logs.slice(0,30).map(e => `
       <tr>
         <td class="muted">${ts(e.ts)}</td>
-        <td class="mono">${esc(e.adminEmail||'—')}</td>
-        <td><span class="badge b-red">${esc(e.actie||'—')}</span></td>
-        <td class="mono">${(function(){ var tuid=e.meta?.uid||''; return tuid ? esc(uNaam(tuid, tuid.slice(0,12))) : esc((e.meta?.docId||'').slice(0,16)||'—'); })()}</td>
-        <td class="muted truncate">${esc(e.meta?.reason||e.meta?.bericht||'—')}</td>
+        <td class="mono">${esc(e.adminEmail||'-')}</td>
+        <td><span class="badge b-red">${esc(e.actie||'-')}</span></td>
+        <td class="mono">${(function(){ var tuid=e.meta?.uid||''; return tuid ? esc(uNaam(tuid, tuid.slice(0,12))) : esc((e.meta?.docId||'').slice(0,16)||'-'); })()}</td>
+        <td class="muted truncate">${esc(e.meta?.reason||e.meta?.bericht||'-')}</td>
       </tr>`).join('') || '<tr><td colspan="5" class="empty">Geen acties.</td></tr>';
   } catch(err) {
     console.error('[Admin] loadMod crash:', err.message || err);
@@ -2071,7 +2071,7 @@ async function loadErrors() {
       .where('category','==','systeem').limit(300)
       .get().catch(function(err) { console.warn('[Admin] errors snap:', err.code); return null; });
 
-    if (!snap) { set('er-n','—'); return; }
+    if (!snap) { set('er-n','-'); return; }
 
     const all = snap.docs.map(function(d) { return d.data(); })
       .filter(function(e) { return (e.timestamp||0) >= since7d; })
@@ -2086,7 +2086,7 @@ async function loadErrors() {
     // Dedupliceer: groepeer op message+type
     var grouped = {};
     all.forEach(function(e) {
-      var msg = (e.metadata && (e.metadata.message || e.metadata.reason)) || '—';
+      var msg = (e.metadata && (e.metadata.message || e.metadata.reason)) || '-';
       var key = (e.type||'') + '|' + msg.slice(0,80);
       if (!grouped[key]) {
         grouped[key] = { first: e, count: 0, lastTs: 0, uids: new Set() };
@@ -2110,10 +2110,10 @@ async function loadErrors() {
 
     document.getElementById('er-tbody').innerHTML = rows.map(function(g) {
       var e   = g.first;
-      var msg = (e.metadata && (e.metadata.message || e.metadata.reason)) || '—';
+      var msg = (e.metadata && (e.metadata.message || e.metadata.reason)) || '-';
       var sev = severity(e, g.count);
       var isRecent = g.lastTs >= since24;
-      var typeLabel = (e.type||'—').replace('_',' ');
+      var typeLabel = (e.type||'-').replace('_',' ');
 
       return '<tr>' +
         '<td class="mono muted" style="white-space:nowrap;font-size:10px">' + new Date(g.lastTs).toLocaleString('nl-NL') + '</td>' +
@@ -2121,7 +2121,7 @@ async function loadErrors() {
         '<td><span class="badge b-red" style="font-size:9px">' + esc(typeLabel) + '</span>' +
           (g.count > 1 ? ' <span style="font-size:9px;color:var(--text3)">×' + g.count + '</span>' : '') + '</td>' +
         '<td class="muted truncate" style="max-width:220px;font-size:11px">' + esc(msg.slice(0,120)) + '</td>' +
-        '<td><span class="badge b-blue" style="font-size:9px">' + esc(e.route||'—') + '</span></td>' +
+        '<td><span class="badge b-blue" style="font-size:9px">' + esc(e.route||'-') + '</span></td>' +
         '<td class="mono" style="font-size:10px">' + uNaam(e.userId,'Gast') + '</td>' +
         '</tr>';
     }).join('') || '<tr><td colspan="6" class="empty">Geen errors in de afgelopen 7 dagen.</td></tr>';
@@ -2148,7 +2148,7 @@ async function loadAdminList() {
   document.getElementById('adm-list').innerHTML = all.map(a => `
     <div class="flex" style="padding:6px 0;border-bottom:1px solid var(--border)">
       <span class="badge b-gold">Admin</span>
-      <span style="font-size:12px;font-weight:500">${esc(a.label||'—')}</span>
+      <span style="font-size:12px;font-weight:500">${esc(a.label||'-')}</span>
       <span class="mono" style="font-size:11px;color:var(--text3)">${a.uid}</span>
       ${a.permanent ? '' : `<button class="btn btn-sm btn-red" style="margin-left:auto" onclick="removeAdmin('${a.uid}')">Verwijderen</button>`}
     </div>`).join('') || '<div class="empty">Geen extra admins.</div>';
@@ -2264,10 +2264,10 @@ async function loadSysLog() {
     logEl.innerHTML = snap.docs.map(function(d) {
       var data = d.data();
       var t = data.ts && data.ts.toDate ? data.ts.toDate() : new Date(data.ts||0);
-      var meta = data.meta ? JSON.stringify(data.meta).slice(0,60) : '—';
+      var meta = data.meta ? JSON.stringify(data.meta).slice(0,60) : '-';
       return '<tr>' +
         '<td class="mono muted" style="font-size:10px;white-space:nowrap">' + t.toLocaleString('nl-NL') + '</td>' +
-        '<td><span class="badge b-blue" style="font-size:9px">' + esc(data.actie||'—') + '</span></td>' +
+        '<td><span class="badge b-blue" style="font-size:9px">' + esc(data.actie||'-') + '</span></td>' +
         '<td style="font-size:11px">' + esc(data.adminEmail||uNaam(data.admin,'Admin')) + '</td>' +
         '<td class="muted" style="font-size:10px;max-width:160px;overflow:hidden;text-overflow:ellipsis">' + esc(meta) + '</td>' +
         '</tr>';
@@ -2417,18 +2417,18 @@ function renderPolls() {
   }
   tbody.innerHTML = docs.map(function(d) {
     var naam = d.displayName || (d.isAnonymous ? '👤 Gast' : (d.uid ? d.uid.slice(0,8)+'…' : '?'));
-    var geo  = d.geo ? (d.geo.city||'') + ' ' + (d.geo.country||'') : '—';
-    var tsStr = d.ts && d.ts.toDate ? d.ts.toDate().toLocaleString('nl-NL') : '—';
+    var geo  = d.geo ? (d.geo.city||'') + ' ' + (d.geo.country||'') : '-';
+    var tsStr = d.ts && d.ts.toDate ? d.ts.toDate().toLocaleString('nl-NL') : '-';
     var ab   = '<span class="badge '+(d.isAnonymous?'b-gray':'b-green')+'" style="font-size:9px">'+(d.isAnonymous?'Gast':'Auth')+'</span>';
     var onClickAttr = (!d.isAnonymous && d.uid) ? ' style="cursor:pointer" data-uid="'+d.uid+'" onclick="goToUser(this.dataset.uid)"' : '';
     return '<tr'+onClickAttr+'>' +
       '<td><div class="urow">'+ab+'<span style="font-size:12px">'+esc(naam)+'</span></div></td>' +
-      '<td><span class="badge b-gold" style="font-size:11px">'+esc(d.kleur||'—')+'</span></td>' +
-      '<td class="muted">'+esc(d.bouw||'—')+'</td>' +
-      '<td class="muted">'+esc(d.lengte||'—')+'</td>' +
-      '<td class="muted">'+esc(d.leeftijd||'—')+'</td>' +
-      '<td class="muted">'+esc(d.device||'—')+'</td>' +
-      '<td class="muted">'+esc(geo.trim()||'—')+'</td>' +
+      '<td><span class="badge b-gold" style="font-size:11px">'+esc(d.kleur||'-')+'</span></td>' +
+      '<td class="muted">'+esc(d.bouw||'-')+'</td>' +
+      '<td class="muted">'+esc(d.lengte||'-')+'</td>' +
+      '<td class="muted">'+esc(d.leeftijd||'-')+'</td>' +
+      '<td class="muted">'+esc(d.device||'-')+'</td>' +
+      '<td class="muted">'+esc(geo.trim()||'-')+'</td>' +
       '<td class="muted" style="font-size:11px">'+tsStr+'</td>' +
     '</tr>';
   }).join('');
@@ -2493,7 +2493,7 @@ function _renderMeldingen(snap, statusFilter, ernstFilter) {
     tab.style.cssText = 'display:flex !important;flex-direction:column;gap:14px;min-width:0;max-width:100%';
   }
 
-  // Haal mel-lijst op — als null, maak het zelf aan in de tab
+  // Haal mel-lijst op - als null, maak het zelf aan in de tab
   var lijst = document.getElementById('mel-lijst');
   if (!lijst && tab) {
     lijst = document.createElement('div');
@@ -2623,7 +2623,7 @@ function _renderMeldingen(snap, statusFilter, ernstFilter) {
 
 
 function melAfhandelen(id) {
-  db.collection('meldingen').doc(id).update({status:'afgehandeld',afgehandeldOp:new Date().toISOString(),afgehandeldDoor:auth.currentUser?auth.currentUser.email:'—'})
+  db.collection('meldingen').doc(id).update({status:'afgehandeld',afgehandeldOp:new Date().toISOString(),afgehandeldDoor:auth.currentUser?auth.currentUser.email:'-'})
     .then(function(){ melToast('✓ Afgehandeld'); })
     .catch(function(e){ melToast('Fout: '+e.message, true); });
 }
@@ -2643,7 +2643,7 @@ function melVerbergen(id, contentId) {
       try { batch.update(db.collection(col).doc(contentId), {verborgen:true,verborgenOp:new Date().toISOString()}); } catch(e){}
     });
   }
-  batch.set(db.collection('admin_log').doc(), {actie:'hide_content',adminEmail:auth.currentUser?auth.currentUser.email:'—',meta:{docId:contentId,meldingId:id},ts:firebase.firestore.FieldValue.serverTimestamp()});
+  batch.set(db.collection('admin_log').doc(), {actie:'hide_content',adminEmail:auth.currentUser?auth.currentUser.email:'-',meta:{docId:contentId,meldingId:id},ts:firebase.firestore.FieldValue.serverTimestamp()});
   batch.commit().then(function(){ loadMeldingen(); melToast('Content verborgen'); }).catch(function(e){ melToast('Fout: '+e.message, true); });
 }
 
@@ -2676,14 +2676,14 @@ function _initMelBadge() {
   }, function(){});
 }
 // ══════════════════════════════════════════════════════════════════
-// KAI MONITORING — Vergelijk & Opgeslagen outfits (Realtime)
+// KAI MONITORING - Vergelijk & Opgeslagen outfits (Realtime)
 // ══════════════════════════════════════════════════════════════════
 
 let _kaiEvs = [];          // in-memory buffer
 let _kaiUnsub = null;      // Firestore unsubscribe handle
 
 function kaiTs(ms) {
-  if (!ms) return '—';
+  if (!ms) return '-';
   const d = new Date(ms);
   const nu = new Date();
   const isVandaag = d.toDateString() === nu.toDateString();
@@ -2693,7 +2693,7 @@ function kaiTs(ms) {
 }
 
 function kaiShortUid(uid) {
-  if (!uid) return '—';
+  if (!uid) return '-';
   return uid.substring(0, 8) + '…';
 }
 
@@ -2808,11 +2808,11 @@ function kaiRenderVergTabel() {
     const p = e.payload || {};
     return `<tr>
       <td>${e.userName || '<code style="font-size:10px">' + kaiShortUid(e.userId) + '</code>'}</td>
-      <td>${p.stijlA||'—'}</td>
-      <td>${p.stijlB||'—'}</td>
+      <td>${p.stijlA||'-'}</td>
+      <td>${p.stijlB||'-'}</td>
       <td><span style="color:var(--gold)">${p.scoreA||0}</span></td>
       <td><span style="color:var(--blue)">${p.scoreB||0}</span></td>
-      <td>${p.winnaar ? '🏆 ' + p.winnaar : '—'}</td>
+      <td>${p.winnaar ? '🏆 ' + p.winnaar : '-'}</td>
       <td style="color:var(--text3);white-space:nowrap">${kaiTs(e.ts)}</td>
     </tr>`;
   }).join('');
@@ -2828,8 +2828,8 @@ function kaiRenderSavedTabel() {
     const gem = Math.round(((p.harmonie||0)+(p.contrast||0)+(p.balans||0))/3);
     return `<tr>
       <td>${e.userName || '<code style="font-size:10px">' + kaiShortUid(e.userId) + '</code>'}</td>
-      <td>${p.stijl||'—'}</td>
-      <td>${p.seizoen||'—'}</td>
+      <td>${p.stijl||'-'}</td>
+      <td>${p.seizoen||'-'}</td>
       <td><span style="color:${gem>=75?'var(--green)':gem>=55?'var(--gold)':'var(--red)'}">${gem}</span></td>
       <td style="color:var(--text3);white-space:nowrap">${kaiTs(e.ts)}</td>
     </tr>`;
@@ -2877,7 +2877,7 @@ function loadKai() {
 
 
 // ══════════════════════════════════════════════════════════════════
-// POST VAN DE WEEK — Admin logic v177
+// POST VAN DE WEEK - Admin logic v177
 // ══════════════════════════════════════════════════════════════════
 
 async function loadPvdw() {
@@ -2895,7 +2895,7 @@ async function loadPvdw() {
 
     // Stats cards
     var wekenMet = 0;
-    var huidigWinnaar = '—';
+    var huidigWinnaar = '-';
 
     if (snap.empty) {
       tbody.innerHTML = '<tr><td colspan="7" class="empty">Geen weekrankings gevonden. Worker nog niet uitgevoerd.</td></tr>';
@@ -2910,14 +2910,14 @@ async function loadPvdw() {
 
       tbody.innerHTML = rows.map(function(r) {
         var statusKleur = r.status === 'selected' ? '#c67d06' : r.status === 'geen_winnaar' ? '#888' : r.status === 'pending' ? '#4a9eff' : '#e55';
-        var selectedAt = r.selectedAt ? new Date(r.selectedAt).toLocaleString('nl-NL') : '—';
-        var eligibleCount = (r.eligiblePosts && Array.isArray(r.eligiblePosts)) ? r.eligiblePosts.length : '—';
+        var selectedAt = r.selectedAt ? new Date(r.selectedAt).toLocaleString('nl-NL') : '-';
+        var eligibleCount = (r.eligiblePosts && Array.isArray(r.eligiblePosts)) ? r.eligiblePosts.length : '-';
         return '<tr>' +
-          '<td class="mono">' + (r.weekId || '—') + '</td>' +
-          '<td class="mono" style="font-size:10px">' + (r.postId || '—') + '</td>' +
-          '<td>' + (r.authorName || '—') + '</td>' +
-          '<td>' + (r.likesCount !== undefined ? r.likesCount : '—') + '</td>' +
-          '<td><span style="color:' + statusKleur + ';font-weight:700">' + (r.status || '—') + '</span></td>' +
+          '<td class="mono">' + (r.weekId || '-') + '</td>' +
+          '<td class="mono" style="font-size:10px">' + (r.postId || '-') + '</td>' +
+          '<td>' + (r.authorName || '-') + '</td>' +
+          '<td>' + (r.likesCount !== undefined ? r.likesCount : '-') + '</td>' +
+          '<td><span style="color:' + statusKleur + ';font-weight:700">' + (r.status || '-') + '</span></td>' +
           '<td style="font-size:11px">' + selectedAt + '</td>' +
           '<td>' + eligibleCount + '</td>' +
           '</tr>';
@@ -2951,7 +2951,7 @@ async function loadPvdwAuditLog() {
     if (snap.empty) {
       tbody.innerHTML = '<tr><td colspan="5" class="empty">Geen audit logs. Worker nog niet uitgevoerd.</td></tr>';
       set('pvdw-laatste-run', 'Nooit');
-      set('pvdw-run-status', '—');
+      set('pvdw-run-status', '-');
       return;
     }
 
@@ -2959,18 +2959,18 @@ async function loadPvdwAuditLog() {
     rows.sort(function(a, b) { return (b.runAt || '').localeCompare(a.runAt || ''); });
 
     var laatste = rows[0];
-    set('pvdw-laatste-run', laatste.runAt ? new Date(laatste.runAt).toLocaleString('nl-NL') : '—');
+    set('pvdw-laatste-run', laatste.runAt ? new Date(laatste.runAt).toLocaleString('nl-NL') : '-');
     var statusKleur = laatste.status === 'ok' ? '#4db34d' : laatste.status === 'skipped' ? '#888' : '#e55';
-    set('pvdw-run-status', '<span style="color:' + statusKleur + '">' + (laatste.status || '—') + '</span>');
+    set('pvdw-run-status', '<span style="color:' + statusKleur + '">' + (laatste.status || '-') + '</span>');
 
     tbody.innerHTML = rows.map(function(r) {
       var statusKleur2 = r.status === 'ok' ? '#4db34d' : r.status === 'skipped' ? '#888' : '#e55';
       return '<tr>' +
-        '<td class="mono">' + (r.weekId || '—') + '</td>' +
-        '<td style="font-size:11px">' + (r.runAt ? new Date(r.runAt).toLocaleString('nl-NL') : '—') + '</td>' +
-        '<td>' + (r.duurMs !== undefined ? r.duurMs + ' ms' : '—') + '</td>' +
-        '<td><span style="color:' + statusKleur2 + ';font-weight:700">' + (r.status || '—') + '</span></td>' +
-        '<td style="font-size:11px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (r.bericht || '—') + '</td>' +
+        '<td class="mono">' + (r.weekId || '-') + '</td>' +
+        '<td style="font-size:11px">' + (r.runAt ? new Date(r.runAt).toLocaleString('nl-NL') : '-') + '</td>' +
+        '<td>' + (r.duurMs !== undefined ? r.duurMs + ' ms' : '-') + '</td>' +
+        '<td><span style="color:' + statusKleur2 + ';font-weight:700">' + (r.status || '-') + '</span></td>' +
+        '<td style="font-size:11px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (r.bericht || '-') + '</td>' +
         '</tr>';
     }).join('');
 
@@ -3026,7 +3026,7 @@ async function loadPvdwEligible() {
     }
 
     tbody.innerHTML = eligible.map(function(p, i) {
-      var ts = p.createdAt ? new Date(p.createdAt).toLocaleDateString('nl-NL') : '—';
+      var ts = p.createdAt ? new Date(p.createdAt).toLocaleDateString('nl-NL') : '-';
       return '<tr' + (i === 0 ? ' style="background:rgba(198,125,6,0.08)"' : '') + '>' +
         '<td class="mono" style="font-size:10px">' + p._id + (i === 0 ? ' 👑' : '') + '</td>' +
         '<td>' + p.authorName + '</td>' +
@@ -3041,7 +3041,7 @@ async function loadPvdwEligible() {
 }
 
 function pvdwHandmatigRun() {
-  if (!confirm('Worker handmatig uitvoeren? Dit verwerkt de vorige week opnieuw (idempotent — bestaande winnaar wordt niet overschreven).')) return;
+  if (!confirm('Worker handmatig uitvoeren? Dit verwerkt de vorige week opnieuw (idempotent - bestaande winnaar wordt niet overschreven).')) return;
   alert('Handmatige trigger: stuur een POST naar je Cloudflare Worker /run endpoint met Authorization: Bearer <WORKER_SECRET>.\n\nDe worker verwerkt de vorige week automatisch en is idempotent.');
 }
 
@@ -3058,7 +3058,7 @@ function pvdwHandmatigRun() {
 
 
 // ══════════════════════════════════════════════════════════════════
-// VERGELIJKINGEN — Admin panel v177-p1
+// VERGELIJKINGEN - Admin panel v177-p1
 // ══════════════════════════════════════════════════════════════════
 async function loadVergelijkingen() {
   if (!db) return;
@@ -3079,17 +3079,17 @@ async function loadVergelijkingen() {
 
     var rows = snap.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
     tbody.innerHTML = rows.map(function(r) {
-      var datum = r.createdAt ? new Date(r.createdAt).toLocaleString('nl-NL') : (r.ts ? new Date(r.ts).toLocaleString('nl-NL') : '—');
+      var datum = r.createdAt ? new Date(r.createdAt).toLocaleString('nl-NL') : (r.ts ? new Date(r.ts).toLocaleString('nl-NL') : '-');
       var scores = 'A:' + (r.scoreA||'?') + ' / B:' + (r.scoreB||'?');
-      var focus = Array.isArray(r.focusAreas) ? r.focusAreas.join(', ') : '—';
+      var focus = Array.isArray(r.focusAreas) ? r.focusAreas.join(', ') : '-';
       return '<tr>' +
         '<td style="font-size:11px">' + datum + '</td>' +
-        '<td>' + (r.authorName || r.userId || '—') + '</td>' +
-        '<td>' + (r.occasion || '—') + '</td>' +
-        '<td>' + (r.desiredStyle || '—') + '</td>' +
+        '<td>' + (r.authorName || r.userId || '-') + '</td>' +
+        '<td>' + (r.occasion || '-') + '</td>' +
+        '<td>' + (r.desiredStyle || '-') + '</td>' +
         '<td>' + scores + '</td>' +
         '<td style="font-size:11px">' + focus + '</td>' +
-        '<td class="mono" style="font-size:9px">' + (r.sessionId || '—').slice(0,16) + '</td>' +
+        '<td class="mono" style="font-size:9px">' + (r.sessionId || '-').slice(0,16) + '</td>' +
         '</tr>';
     }).join('');
 
@@ -3159,10 +3159,10 @@ async function kaiLaadVerbeteracties() {
     }
     tbody.innerHTML = snap.docs.map(function(d) {
       var r = d.data(); var p = r.payload || {};
-      var ts = r.ts ? new Date(r.ts).toLocaleString('nl-NL') : '—';
-      return '<tr><td style="font-size:11px">' + (r.userName || r.userId || '—').slice(0,20) + '</td>' +
-        '<td><strong>' + (p.deel || '—') + '</strong></td>' +
-        '<td>' + (p.stijl || '—') + '</td>' +
+      var ts = r.ts ? new Date(r.ts).toLocaleString('nl-NL') : '-';
+      return '<tr><td style="font-size:11px">' + (r.userName || r.userId || '-').slice(0,20) + '</td>' +
+        '<td><strong>' + (p.deel || '-') + '</strong></td>' +
+        '<td>' + (p.stijl || '-') + '</td>' +
         '<td style="font-size:11px">' + ts + '</td></tr>';
     }).join('');
     // Update KPI
@@ -3191,10 +3191,10 @@ async function kaiLaadChatLogs() {
     }
     tbody.innerHTML = snap.docs.map(function(d) {
       var r = d.data(); var p = r.payload || {};
-      var ts = r.ts ? new Date(r.ts).toLocaleString('nl-NL') : '—';
-      return '<tr><td style="font-size:11px">' + (r.userName || r.userId || '—').slice(0,20) + '</td>' +
-        '<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (p.vraag || '—') + '</td>' +
-        '<td style="font-size:10px;color:#888">' + (p.sessieId || '—').slice(0,12) + '</td>' +
+      var ts = r.ts ? new Date(r.ts).toLocaleString('nl-NL') : '-';
+      return '<tr><td style="font-size:11px">' + (r.userName || r.userId || '-').slice(0,20) + '</td>' +
+        '<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (p.vraag || '-') + '</td>' +
+        '<td style="font-size:10px;color:#888">' + (p.sessieId || '-').slice(0,12) + '</td>' +
         '<td style="font-size:11px">' + ts + '</td></tr>';
     }).join('');
     var el = document.getElementById('kai-chat-totaal');
@@ -3241,7 +3241,7 @@ window._kaiEventLabels = {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// GEBRUIKERSNAMEN CACHE — realtime lookup uit Firestore users doc
+// GEBRUIKERSNAMEN CACHE - realtime lookup uit Firestore users doc
 // ══════════════════════════════════════════════════════════════════
 
 var _userNaamCache = {}; // uid → naam
@@ -3249,13 +3249,13 @@ var _userNaamPending = {}; // uid → true (voorkomt dubbele fetches)
 
 // Haal naam op uit cache of Firestore
 function getUserNaam(uid) {
-  if (!uid) return '—';
+  if (!uid) return '-';
   if (_userNaamCache[uid]) return _userNaamCache[uid];
   // Niet gecached: haal op (async, render opnieuw na ophalen)
   if (!_userNaamPending[uid] && db) {
     _userNaamPending[uid] = true;
     db.collection('users').doc(uid).get().then(function(doc) {
-      var naam = '—';
+      var naam = '-';
       if (doc.exists) {
         var d = doc.data();
         naam = d.naam || d.displayName || d.name || d.authorName ||
@@ -3304,7 +3304,7 @@ function prelaadUserNamen() {
   setTimeout(function() { kaiRenderFeed(); }, 1500);
 }
 
-// Hook op kaiRenderFeed — prelaad namen na elke render
+// Hook op kaiRenderFeed - prelaad namen na elke render
 var _origKaiRF2 = window.kaiRenderFeed;
 window.kaiRenderFeed = function() {
   if (typeof _origKaiRF2 === 'function') _origKaiRF2();
@@ -3338,14 +3338,14 @@ window.kaiRenderFeed = function() {
       // Primaire bron: users collectie (altijd toegankelijk voor admins)
       var usersSnap = await db.collection('users').limit(2000).get();
 
-      // Secundaire bron: mailing_list opt-outs (optioneel — faalt stil als rules ontbreken)
+      // Secundaire bron: mailing_list opt-outs (optioneel - faalt stil als rules ontbreken)
       var optOutMap = {};
       try {
         var mlSnap = await db.collection('mailing_list').limit(2000).get();
         mlSnap.docs.forEach(function(d) {
           if (d.data().optOut) optOutMap[d.id] = true;
         });
-      } catch(e) { /* mailing_list nog niet toegankelijk — opt-outs worden genegeerd */ }
+      } catch(e) { /* mailing_list nog niet toegankelijk - opt-outs worden genegeerd */ }
 
       _mlAlles = usersSnap.docs
         .filter(function(d) { return !!d.data().email; })
@@ -3441,7 +3441,7 @@ window.kaiRenderFeed = function() {
     }
 
     tbody.innerHTML = pageDocs.map(function(d) {
-      var datum = '—';
+      var datum = '-';
       try {
         var ts = d.aangemaaktOp && d.aangemaaktOp.toDate ? d.aangemaaktOp.toDate() : (d.aangemaaktOp ? new Date(d.aangemaaktOp) : null);
         if (ts) datum = ts.toLocaleDateString('nl-NL', { day:'2-digit', month:'2-digit', year:'numeric' });
@@ -3452,8 +3452,8 @@ window.kaiRenderFeed = function() {
       var isChecked = _mlGeselecteerd[d.uid] ? 'checked' : '';
       return '<tr style="' + (d.optOut ? 'opacity:.45' : '') + '">' +
         '<td><input type="checkbox" aria-label="Selecteer ' + _esc(d.email || d.uid) + '" data-uid="' + _esc(d.uid) + '" data-email="' + _esc(d.email) + '" ' + isChecked + ' onchange="mlToggle(this)"></td>' +
-        '<td style="font-size:11px">' + _esc(d.email || '—') + '</td>' +
-        '<td style="font-size:11px">' + _esc(d.displayName || d.naam || '—') + '</td>' +
+        '<td style="font-size:11px">' + _esc(d.email || '-') + '</td>' +
+        '<td style="font-size:11px">' + _esc(d.displayName || d.naam || '-') + '</td>' +
         '<td style="font-size:10px;color:var(--text3)">' + datum + '</td>' +
         '<td>' + statusLabel + '</td>' +
         '<td>' + (!d.optOut
@@ -3686,7 +3686,7 @@ window.kaiRenderFeed = function() {
       }
       tbody.innerHTML = snap.docs.map(function(d) {
         var data = d.data();
-        var datum = '—';
+        var datum = '-';
         try {
           var ts = data.ts && data.ts.toDate ? data.ts.toDate() : new Date(data.ts);
           datum = ts.toLocaleDateString('nl-NL') + ' ' + ts.toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit' });
@@ -3697,7 +3697,7 @@ window.kaiRenderFeed = function() {
           : '<span class="badge b-amber" style="font-size:9px">' + data.mislukt + ' mislukt</span>';
         return '<tr>' +
           '<td style="font-size:10px;color:var(--text3)">' + datum + '</td>' +
-          '<td style="font-size:11px">' + _esc(data.onderwerp || '—') + '</td>' +
+          '<td style="font-size:11px">' + _esc(data.onderwerp || '-') + '</td>' +
           '<td style="font-size:11px">' + (data.verzonden || 0) + ' / ' + (data.ontvangers || 0) + '</td>' +
           '<td>' + statusBadge + '</td></tr>';
       }).join('');
@@ -3770,10 +3770,10 @@ async function chLaadLijst() {
       var actief = d.actief !== false;
       return '<div class="ch-lijst-item">' +
         '<div class="ch-lijst-meta">' +
-          '<div class="ch-lijst-titel">' + (d.icon || '🎯') + ' ' + (d.titel || '—') +
+          '<div class="ch-lijst-titel">' + (d.icon || '🎯') + ' ' + (d.titel || '-') +
             '<span class="ch-badge' + (actief ? '' : ' inactief') + '">' + (actief ? 'Actief' : 'Inactief') + '</span>' +
           '</div>' +
-          '<div class="ch-lijst-sub">Bonus: ' + (d.bonus || 0) + ' DSP · Einde: ' + (d.einddatum ? new Date(d.einddatum).toLocaleDateString('nl-NL') : '—') + '</div>' +
+          '<div class="ch-lijst-sub">Bonus: ' + (d.bonus || 0) + ' DSP · Einde: ' + (d.einddatum ? new Date(d.einddatum).toLocaleDateString('nl-NL') : '-') + '</div>' +
         '</div>' +
         '<div class="ch-lijst-acties">' +
           '<button class="ch-admin-btn grijs" style="font-size:11px;padding:6px 10px" onclick="chBewerk(\'' + doc.id + '\')">✏️</button>' +

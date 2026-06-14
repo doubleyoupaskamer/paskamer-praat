@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat — Klant Wallet Module (v1.0.0)
+ * PaskamerPraat - Klant Wallet Module (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Toevoegingen ZONDER bestaande code te wijzigen:
@@ -96,7 +96,7 @@
           );
         });
       } catch(e) {
-        // Geen transacties of geen rechten — laat history leeg
+        // Geen transacties of geen rechten - laat history leeg
         try { console.warn('[wallet] payments query:', e.code); } catch(_){}
       }
 
@@ -221,7 +221,7 @@
       }
       return orig.apply(this, arguments);
     };
-    // v1.0.6: Fix bootstrap race — als URL al deze route bevat, force-render
+    // v1.0.6: Fix bootstrap race - als URL al deze route bevat, force-render
     try {
       var qs = new URLSearchParams(window.location.search);
       if (qs.get('pagina') === 'wallet') {
@@ -230,9 +230,9 @@
     } catch(e) {}
   }
 
-  // ── MENU INJECTIE — wallet alleen voor brand-users zichtbaar maken ─
+  // ── MENU INJECTIE - wallet alleen voor brand-users zichtbaar maken ─
   function injectMenuLink() {
-    // Hamburger menu — alleen tonen als user een brand-doc heeft
+    // Hamburger menu - alleen tonen als user een brand-doc heeft
     var menu = document.querySelector('#extra-menu-list, .extra-menu-list, [data-testid="extra-menu"]');
     if (menu && !menu.querySelector('[data-testid="menu-wallet"]') && isLogged()) {
       // Lazy check: alleen tonen voor brands

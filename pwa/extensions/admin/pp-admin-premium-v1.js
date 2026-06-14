@@ -1,19 +1,19 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat — Admin Premium Management (v1.0.0)
+ * PaskamerPraat - Admin Premium Management (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  * Route: admin_premium  →  /#admin_premium  (alleen DY._isAdmin())
  *
  * Tabs:
- *   1. Stripe Status     — keys (masked), config, webhook URL, packages
- *   2. Checkout Debug    — test-knop, raw response, redirect URL, errors
- *   3. Users             — premium_users tabel + grant/revoke
- *   4. Transactions      — payment_transactions log
- *   5. Webhooks          — stripe_events monitor
- *   6. Entitlements      — feature-toegang per email
+ *   1. Stripe Status     - keys (masked), config, webhook URL, packages
+ *   2. Checkout Debug    - test-knop, raw response, redirect URL, errors
+ *   3. Users             - premium_users tabel + grant/revoke
+ *   4. Transactions      - payment_transactions log
+ *   5. Webhooks          - stripe_events monitor
+ *   6. Entitlements      - feature-toegang per email
  *
  * Admin-auth: X-Admin-Secret + X-User-Email headers (zelfde als image-gen).
  *
- * NON-BREAKING: voegt alleen toe — geen wijziging in legacy/bestaande UI.
+ * NON-BREAKING: voegt alleen toe - geen wijziging in legacy/bestaande UI.
  * ═══════════════════════════════════════════════════════════════════════ */
 (function() {
   'use strict';
@@ -193,9 +193,9 @@
           ' <span class="ppap-pill ' + (s.stripe_key_type === 'live' ? 'ok' : 'test') + '">' + esc(s.stripe_key_type || '?') + '</span>',
         '</h3>',
         '<dl class="ppap-kv">',
-          '<dt>API key</dt><dd>' + esc(s.stripe_api_key_masked || '—') + '</dd>',
-          '<dt>Environment</dt><dd>' + esc(s.environment || '—') + '</dd>',
-          '<dt>Webhook URL</dt><dd>' + esc(s.webhook_url || '—') + '</dd>',
+          '<dt>API key</dt><dd>' + esc(s.stripe_api_key_masked || '-') + '</dd>',
+          '<dt>Environment</dt><dd>' + esc(s.environment || '-') + '</dd>',
+          '<dt>Webhook URL</dt><dd>' + esc(s.webhook_url || '-') + '</dd>',
           '<dt>Admin overrides</dt><dd>' + (s.admin_premium_emails || []).map(esc).join(', ') + '</dd>',
         '</dl>',
       '</div>',
@@ -204,7 +204,7 @@
         '<dl class="ppap-kv">' +
           Object.keys(s.packages || {}).map(function(k) {
             var p = s.packages[k];
-            return '<dt>' + esc(k) + '</dt><dd>€ ' + (p.amount).toFixed(2) + ' / ' + esc(p.currency.toUpperCase()) + ' — ' + esc(p.label || '') + '</dd>';
+            return '<dt>' + esc(k) + '</dt><dd>€ ' + (p.amount).toFixed(2) + ' / ' + esc(p.currency.toUpperCase()) + ' - ' + esc(p.label || '') + '</dd>';
           }).join('') +
         '</dl>',
       '</div>',
@@ -239,7 +239,7 @@
         '<td>' + esc(u.email || u.user_key || '?') + '</td>' +
         '<td><span class="ppap-pill ' + pillCls + '">' + (u.is_premium ? 'premium' : 'expired') + '</span></td>' +
         '<td>' + esc(src) + '</td>' +
-        '<td>' + esc(u.plan || '—') + '</td>' +
+        '<td>' + esc(u.plan || '-') + '</td>' +
         '<td>' + esc((u.expires_at || u.activated_at || '').slice(0, 19)) + '</td>' +
         '<td class="act">' +
           (src === 'admin_override'
@@ -295,10 +295,10 @@
     var rows = (_state.events || []).map(function(e) {
       var pill = e.verified ? (e.payment_status === 'paid' ? 'ok' : 'warn') : 'fail';
       return '<tr>' +
-        '<td>' + esc(e.event_type || '—') + '</td>' +
+        '<td>' + esc(e.event_type || '-') + '</td>' +
         '<td><span class="ppap-pill ' + pill + '">' + (e.verified ? esc(e.payment_status || 'verified') : 'invalid') + '</span></td>' +
-        '<td>' + esc((e.session_id || '').slice(0, 22) || '—') + '</td>' +
-        '<td>' + esc((e.event_id || '').slice(0, 22) || '—') + '</td>' +
+        '<td>' + esc((e.session_id || '').slice(0, 22) || '-') + '</td>' +
+        '<td>' + esc((e.event_id || '').slice(0, 22) || '-') + '</td>' +
         '<td>' + esc((e.received_at || '').slice(0, 19)) + '</td>' +
         '<td><button class="ppap-btn ghost" onclick="PP_AdminPremium.viewEvent(' + JSON.stringify(esc(JSON.stringify(e))).replace(/"/g, '&quot;') + ')">Bekijk</button></td>' +
       '</tr>';
@@ -371,7 +371,7 @@
       '<div class="ppap" data-testid="ppap-root">' +
         '<button class="ppap-btn ghost" onclick="window.DY.navigeer(\'admin_brands\')" data-testid="ppap-back">← Admin</button>' +
         '<h1>Premium beheer</h1>' +
-        '<p class="ppap-sub">Stripe checkout, premium users, webhooks &amp; entitlements — alles in één plek.</p>' +
+        '<p class="ppap-sub">Stripe checkout, premium users, webhooks &amp; entitlements - alles in één plek.</p>' +
         '<div class="ppap-tabs" data-testid="ppap-tabs">' + topBar() + '</div>' +
         content +
       '</div>';

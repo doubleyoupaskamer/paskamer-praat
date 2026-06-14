@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// PaskamerPraat — BRAND PORTAL MVP v1
+// PaskamerPraat - BRAND PORTAL MVP v1
 // ─────────────────────────────────────────────────────────────────────────
 // Self-contained module: registreer routes, render pagina's, RBAC enforced.
 // GEEN bestaande code aangepast. GEEN bestaande user flows gebroken.
@@ -38,7 +38,7 @@
 (function() {
   'use strict';
 
-  // v60.1.5 — vroege marker zodat we in DevTools console kunnen zien dat
+  // v60.1.5 - vroege marker zodat we in DevTools console kunnen zien dat
   // het script daadwerkelijk geladen is. Als deze niet verschijnt is het
   // een cache/loading probleem en niet een logica-fout.
   try { console.log('[brand-portal] script geladen v60.1.10-separation-of-duties'); } catch(e) {}
@@ -129,11 +129,11 @@
         esc(labels[status] || status) + '</span>';
     }
     function fmtDatum(t) {
-      if (!t) return '—';
+      if (!t) return '-';
       try {
         var d = t.toDate ? t.toDate() : new Date(t);
         return d.toLocaleDateString('nl-NL', { day:'2-digit', month:'short', year:'numeric' });
-      } catch(e) { return '—'; }
+      } catch(e) { return '-'; }
     }
     function fmtNum(n) {
       n = +n || 0;
@@ -194,9 +194,9 @@
     DY.toonPagina = function(pagina) {
       // ── v60.1.4 FINAL: sticky deeplink + render-lock ────────────────────
       // Combinatie van 2 mechanismen die elkaar aanvullen:
-      //   1) Sticky deeplink (5s TTL) — hijack non-brand calls. NIET wissen
+      //   1) Sticky deeplink (5s TTL) - hijack non-brand calls. NIET wissen
       //      bij render-start, pas wissen wanneer URL verandert of TTL afloopt.
-      //   2) Render-lock (2s) — terwijl een brand-portal render bezig is,
+      //   2) Render-lock (2s) - terwijl een brand-portal render bezig is,
       //      worden concurrent non-brand toonPagina calls GENEGEERD (zodat
       //      onAuthReady tijdens een async await niet over ons render heen
       //      schrijft).
@@ -212,7 +212,7 @@
         if (BP._renderLock
             && (nu - (BP._renderLockAt || 0)) < 2000
             && !Object.prototype.hasOwnProperty.call(BP_PAGES, pagina)) {
-          return; // negeer — we zijn bezig
+          return; // negeer - we zijn bezig
         }
       } catch(e) {}
 
@@ -225,7 +225,7 @@
           BP._renderLockAt = Date.now();
           var fn = BP_PAGES[pagina] || BP[pagina];
           if (typeof fn !== 'function') {
-            // Functie nog niet aangemaakt (forward declaration) — lookup direct
+            // Functie nog niet aangemaakt (forward declaration) - lookup direct
             var directKey = {
               merken:'renderMerken', brand_register:'renderRegister', brand_login:'renderBrandLogin',
               brand_pending:'renderPending', brand_dashboard:'renderDashboard',
@@ -338,7 +338,7 @@
       } catch(e) { /* noop */ }
     }
 
-    // Mutation observer — minimaal, alleen op profile/voorwaarden render
+    // Mutation observer - minimaal, alleen op profile/voorwaarden render
     var _obsTimer = null;
     var _obs = new MutationObserver(function() {
       if (_obsTimer) return;
@@ -375,7 +375,7 @@
       // 3. Ingelogd: brand record bestaat?
       var brand = await BP.getBrand(true);
       if (!brand) {
-        // Bestaande user wil brand worden — toon registratie maar voorgevuld
+        // Bestaande user wil brand worden - toon registratie maar voorgevuld
         return DY.navigeer('brand_register');
       }
       if (brand.status === 'approved') return DY.navigeer('brand_dashboard');
@@ -384,7 +384,7 @@
     };
 
     // ════════════════════════════════════════════════════════════════════
-    // PUBLIEKE "MERKEN" TAB — gescheiden van organische feed
+    // PUBLIEKE "MERKEN" TAB - gescheiden van organische feed
     // ════════════════════════════════════════════════════════════════════
     BP.renderMerken = async function() {
       var main = document.getElementById('dy-main');
@@ -508,7 +508,7 @@
     };
 
     // ════════════════════════════════════════════════════════════════════
-    // v60.1.44 — LIVE CAMPAGNES IN MERKEN-TAB FEED
+    // v60.1.44 - LIVE CAMPAGNES IN MERKEN-TAB FEED
     // Toont actieve campagnes (status=='live' + plaatsingen.includes('feed'))
     // bovenaan de /merken pagina. Tracks impressions + clicks.
     // ════════════════════════════════════════════════════════════════════
@@ -526,11 +526,11 @@
         snap.forEach(function(d) {
           var c = d.data();
           var plaats = c.plaatsingen || [];
-          // v60.1.49: backward compat — legacy campagnes zonder plaatsingen-veld
+          // v60.1.49: backward compat - legacy campagnes zonder plaatsingen-veld
           // default naar 'feed' zodat ze niet onzichtbaar blijven na release.
           if (!plaats.length) plaats = ['feed'];
           if (plaats.indexOf('feed') === -1) return;
-          // Datum-window check (start <= nu <= eind) — alleen toepassen indien aanwezig
+          // Datum-window check (start <= nu <= eind) - alleen toepassen indien aanwezig
           var nuTs = Date.now();
           var startMs = (c.startDatum && c.startDatum.toMillis) ? c.startDatum.toMillis() : null;
           var eindMs  = (c.eindDatum  && c.eindDatum.toMillis)  ? c.eindDatum.toMillis()  : null;
@@ -656,14 +656,14 @@
       var foutBox = document.getElementById('bp-reg-fouten');
       var submitBtn = form.querySelector('button[type=submit]');
 
-      // v60.1.8: directe submitter — naast form.submit ook click op de knop.
+      // v60.1.8: directe submitter - naast form.submit ook click op de knop.
       // Dit voorkomt dat eventueel overlay-z-index op iOS de submit slikt.
       async function doeSubmit(ev) {
         if (ev) { try { ev.preventDefault(); ev.stopPropagation(); } catch(e){} }
         try { console.log('[brand-portal] submit gestart'); } catch(e){}
         foutBox.textContent = '';
         if (!rateLimitOK('brand_register', 8000)) {
-          foutBox.textContent = 'Even rustig — wacht een paar seconden voor je opnieuw verstuurt.';
+          foutBox.textContent = 'Even rustig - wacht een paar seconden voor je opnieuw verstuurt.';
           return;
         }
         var data = new FormData(form);
@@ -714,13 +714,13 @@
                 btn.disabled = false; btn.textContent = 'Aanvraag versturen'; return;
               }
             } catch(e) {
-              // Permission-denied bij ongeauthenticeerde query is OK — we gaan door.
+              // Permission-denied bij ongeauthenticeerde query is OK - we gaan door.
               try { console.warn('[brand-portal] dubbel-check niet beschikbaar (verwacht)', e && e.code); } catch(_){}
             }
             var cred = await firebase.auth().createUserWithEmailAndPassword(v.email, v.ww);
             fbUid = cred.user.uid;
             try { await cred.user.sendEmailVerification(); } catch(e) {}
-            // Maak users/{uid} entry (bestaande pattern — DY.profile struct)
+            // Maak users/{uid} entry (bestaande pattern - DY.profile struct)
             await DY.db.collection('users').doc(fbUid).set({
               displayName: v.naam,
               email: v.email,
@@ -807,7 +807,7 @@
     };
 
     // ── Helper: stuur registratiemails naar gebruiker + admin ───────────────
-    // v60.1.9: schrijft naar Firestore `mail` collection — compatibel met de
+    // v60.1.9: schrijft naar Firestore `mail` collection - compatibel met de
     // officiële Firebase "Trigger Email" Extension (firebase ext:install
     // firebase/firestore-send-email). Geen externe fetch meer → geen CORS.
     BP.stuurRegistratieMails = async function(v, brandId) {
@@ -826,8 +826,8 @@
                 'Bedankt voor je aanvraag om ' + (v.naam || 'je merk') + ' toe te voegen aan Paskamer Praat.\n\n' +
                 'We beoordelen je aanvraag binnen 2 werkdagen. Je ontvangt een mail zodra je merk is goedgekeurd of als we extra informatie nodig hebben.\n\n' +
                 'Aanvraag-ID: ' + brandId + '\n' +
-                'Categorie: ' + (v.categorie || '—') + '\n' +
-                'Website: ' + (v.website || '—') + '\n\n' +
+                'Categorie: ' + (v.categorie || '-') + '\n' +
+                'Website: ' + (v.website || '-') + '\n\n' +
                 'Met vriendelijke groet,\n' +
                 'Het Paskamer Praat team\n' +
                 'https://paskamerpraat.nl',
@@ -837,8 +837,8 @@
                 '<p>We beoordelen je aanvraag binnen <strong>2 werkdagen</strong>. Je ontvangt een mail zodra je merk is goedgekeurd of als we extra informatie nodig hebben.</p>' +
                 '<ul>' +
                   '<li>Aanvraag-ID: <code>' + esc(brandId) + '</code></li>' +
-                  '<li>Categorie: ' + esc(v.categorie || '—') + '</li>' +
-                  '<li>Website: ' + esc(v.website || '—') + '</li>' +
+                  '<li>Categorie: ' + esc(v.categorie || '-') + '</li>' +
+                  '<li>Website: ' + esc(v.website || '-') + '</li>' +
                 '</ul>' +
                 '<p>Met vriendelijke groet,<br>Het Paskamer Praat team<br>' +
                 '<a href="https://paskamerpraat.nl">paskamerpraat.nl</a></p>'
@@ -859,30 +859,30 @@
             subject: 'Nieuwe merkaanvraag: ' + (v.naam || 'onbekend'),
             text:
               'Er is een nieuwe merkaanvraag binnengekomen op Paskamer Praat.\n\n' +
-              'Bedrijfsnaam:   ' + (v.naam || '—') + '\n' +
-              'Contactpersoon: ' + (v.contact || '—') + '\n' +
-              'E-mail:         ' + (userEmail || '—') + '\n' +
-              'Categorie:      ' + (v.categorie || '—') + '\n' +
-              'Website:        ' + (v.website || '—') + '\n' +
-              'BTW:            ' + (v.btw || '—') + '\n' +
-              'Instagram:      ' + (v.instagram || '—') + '\n' +
-              'TikTok:         ' + (v.tiktok || '—') + '\n\n' +
-              'Omschrijving:\n' + (v.omschrijving || '—') + '\n\n' +
+              'Bedrijfsnaam:   ' + (v.naam || '-') + '\n' +
+              'Contactpersoon: ' + (v.contact || '-') + '\n' +
+              'E-mail:         ' + (userEmail || '-') + '\n' +
+              'Categorie:      ' + (v.categorie || '-') + '\n' +
+              'Website:        ' + (v.website || '-') + '\n' +
+              'BTW:            ' + (v.btw || '-') + '\n' +
+              'Instagram:      ' + (v.instagram || '-') + '\n' +
+              'TikTok:         ' + (v.tiktok || '-') + '\n\n' +
+              'Omschrijving:\n' + (v.omschrijving || '-') + '\n\n' +
               'Aanvraag-ID: ' + brandId + '\n\n' +
               'Modereer in het admin paneel: https://paskamerpraat.nl/?pagina=admin_brands',
             html:
               '<h2>Nieuwe merkaanvraag</h2>' +
               '<table style="border-collapse:collapse">' +
-                '<tr><td><strong>Bedrijfsnaam:</strong></td><td>' + esc(v.naam || '—') + '</td></tr>' +
-                '<tr><td><strong>Contactpersoon:</strong></td><td>' + esc(v.contact || '—') + '</td></tr>' +
-                '<tr><td><strong>E-mail:</strong></td><td>' + esc(userEmail || '—') + '</td></tr>' +
-                '<tr><td><strong>Categorie:</strong></td><td>' + esc(v.categorie || '—') + '</td></tr>' +
-                '<tr><td><strong>Website:</strong></td><td><a href="' + esc(v.website || '') + '">' + esc(v.website || '—') + '</a></td></tr>' +
-                '<tr><td><strong>BTW:</strong></td><td>' + esc(v.btw || '—') + '</td></tr>' +
-                '<tr><td><strong>Instagram:</strong></td><td>' + esc(v.instagram || '—') + '</td></tr>' +
-                '<tr><td><strong>TikTok:</strong></td><td>' + esc(v.tiktok || '—') + '</td></tr>' +
+                '<tr><td><strong>Bedrijfsnaam:</strong></td><td>' + esc(v.naam || '-') + '</td></tr>' +
+                '<tr><td><strong>Contactpersoon:</strong></td><td>' + esc(v.contact || '-') + '</td></tr>' +
+                '<tr><td><strong>E-mail:</strong></td><td>' + esc(userEmail || '-') + '</td></tr>' +
+                '<tr><td><strong>Categorie:</strong></td><td>' + esc(v.categorie || '-') + '</td></tr>' +
+                '<tr><td><strong>Website:</strong></td><td><a href="' + esc(v.website || '') + '">' + esc(v.website || '-') + '</a></td></tr>' +
+                '<tr><td><strong>BTW:</strong></td><td>' + esc(v.btw || '-') + '</td></tr>' +
+                '<tr><td><strong>Instagram:</strong></td><td>' + esc(v.instagram || '-') + '</td></tr>' +
+                '<tr><td><strong>TikTok:</strong></td><td>' + esc(v.tiktok || '-') + '</td></tr>' +
               '</table>' +
-              '<h3>Omschrijving</h3><p>' + esc(v.omschrijving || '—') + '</p>' +
+              '<h3>Omschrijving</h3><p>' + esc(v.omschrijving || '-') + '</p>' +
               '<p><strong>Aanvraag-ID:</strong> <code>' + esc(brandId) + '</code></p>' +
               '<p style="margin-top:24px;"><a href="https://paskamerpraat.nl/?pagina=admin_brands" ' +
                 'style="background:#c67d06;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;">' +
@@ -936,14 +936,14 @@
         statusBlok =
           '<div class="bp-status-card bp-status-pending">' +
             '<h2>Aanvraag in review</h2>' +
-            '<p>Bedankt voor je aanvraag — we beoordelen meestal binnen 2 werkdagen. Je ontvangt een mail zodra je merkaccount actief is.</p>' +
+            '<p>Bedankt voor je aanvraag - we beoordelen meestal binnen 2 werkdagen. Je ontvangt een mail zodra je merkaccount actief is.</p>' +
             '<p class="bp-mini">Aangevraagd op ' + fmtDatum(brand.aangemaakt) + '</p>' +
           '</div>';
       }
       main.innerHTML =
         '<div class="bp-page">' +
           '<button class="bp-back" onclick="DY.navigeer(\'profiel\')">&larr; Profiel</button>' +
-          '<h1>Merkenportaal — ' + esc(brand.naam) + '</h1>' +
+          '<h1>Merkenportaal - ' + esc(brand.naam) + '</h1>' +
           statusBlok +
         '</div>';
     };
@@ -974,7 +974,7 @@
         cAgg.forEach(function(d){ if ((d.data().status||'') === 'live') liveCount++; });
         cAgg.forEach(function(d){ impr += (d.data().impressies||0); clicks += (d.data().clicks||0); });
       } catch(e) {}
-      var ctr = impr > 0 ? ((clicks/impr)*100).toFixed(2) + '%' : '—';
+      var ctr = impr > 0 ? ((clicks/impr)*100).toFixed(2) + '%' : '-';
 
       main.innerHTML =
         '<div class="bp-page">' +
@@ -1014,7 +1014,7 @@
     };
 
     // ════════════════════════════════════════════════════════════════════
-    // MERKPROFIEL (v60.1.43) — bewerken van bestaande brand-data
+    // MERKPROFIEL (v60.1.43) - bewerken van bestaande brand-data
     // Geen wachtwoord, geen TC-acceptatie, geen account-aanmaak; alleen update.
     // ════════════════════════════════════════════════════════════════════
     BP.renderProfiel = async function() {
@@ -1145,7 +1145,7 @@
               logoUrl = await snap.ref.getDownloadURL();
             } catch(e) {
               try { console.warn('[brand-portal] logo upload mislukt', e); } catch(_){}
-              toast('Logo upload mislukt — overige gegevens worden wel opgeslagen.', true);
+              toast('Logo upload mislukt - overige gegevens worden wel opgeslagen.', true);
             }
           }
 
@@ -1414,7 +1414,7 @@
               '<div class="bp-list-info">' +
                 '<div class="bp-list-titel">' + esc(c.naam || 'Naamloos') + ' ' + badge(c.status||'draft') + '</div>' +
                 '<div class="bp-list-meta">' +
-                  fmtDatum(c.startDatum) + ' — ' + fmtDatum(c.eindDatum) + ' · ' +
+                  fmtDatum(c.startDatum) + ' - ' + fmtDatum(c.eindDatum) + ' · ' +
                   'Budget ' + fmtEuro(c.totaalBudget||0) + ' · ' +
                   fmtNum(c.impressies||0) + ' impressies · ' +
                   fmtNum(c.clicks||0) + ' clicks' +
@@ -1614,11 +1614,11 @@
             impressies:c.impressies||0, clicks:c.clicks||0,
             spend:c.spend||0,
             ctr: (c.impressies>0 ? ((c.clicks||0)/c.impressies*100).toFixed(2) : '0.00'),
-            roas: (c.spend>0 ? ((c.omzet||0)/c.spend).toFixed(2) : '—'),
+            roas: (c.spend>0 ? ((c.omzet||0)/c.spend).toFixed(2) : '-'),
             startDatum:c.startDatum, eindDatum:c.eindDatum
           });
         });
-        var ctrTot = totImp>0 ? ((totClk/totImp)*100).toFixed(2) + '%' : '—';
+        var ctrTot = totImp>0 ? ((totClk/totImp)*100).toFixed(2) + '%' : '-';
         main.innerHTML =
           '<div class="bp-page">' +
             '<button class="bp-back" onclick="DY.navigeer(\'brand_dashboard\')">&larr; Dashboard</button>' +
@@ -1645,7 +1645,7 @@
         '<thead><tr><th>Campagne</th><th>Status</th><th>Impressies</th><th>Clicks</th><th>CTR</th><th>Spend</th><th>ROAS</th></tr></thead>' +
         '<tbody>' + rows.map(function(r) {
           return '<tr>' +
-            '<td>' + esc(r.naam||'—') + '</td>' +
+            '<td>' + esc(r.naam||'-') + '</td>' +
             '<td>' + badge(r.status||'draft') + '</td>' +
             '<td>' + fmtNum(r.impressies) + '</td>' +
             '<td>' + fmtNum(r.clicks) + '</td>' +
@@ -1677,7 +1677,7 @@
     };
 
     // ════════════════════════════════════════════════════════════════════
-    // ADMIN — BRAND MANAGEMENT
+    // ADMIN - BRAND MANAGEMENT
     // ════════════════════════════════════════════════════════════════════
     BP.renderAdminBrands = async function() {
       var main = document.getElementById('dy-main');
@@ -1696,7 +1696,7 @@
         function rij(b) {
           var isEigenAanvraag = (b.id === uid());
           var eigenBadge = isEigenAanvraag
-            ? '<span class="bp-badge" style="background:#444;color:#fcf8ef;margin-left:6px" title="Een admin mag z\'n eigen aanvraag niet beoordelen — vraag een tweede admin om dit te modereren.">⚠ Eigen aanvraag — vereist tweede admin</span>'
+            ? '<span class="bp-badge" style="background:#444;color:#fcf8ef;margin-left:6px" title="Een admin mag z\'n eigen aanvraag niet beoordelen - vraag een tweede admin om dit te modereren.">⚠ Eigen aanvraag - vereist tweede admin</span>'
             : '';
           var goedkeurKnop = (!isEigenAanvraag && (b.status === 'pending' || b.status === 'rejected' || b.status === 'suspended'))
             ? '<button class="bp-btn-mini bp-btn-mini-groen" onclick="DY.brandPortal.adminBrand(\'approve\',\'' + esc(b.id) + '\')" data-testid="admin-brand-approve-' + esc(b.id) + '">Goedkeuren</button>' : '';
@@ -1725,7 +1725,7 @@
           '<div class="bp-page">' +
             '<button class="bp-back" onclick="DY.navigeer(\'admin\')">&larr; Admin</button>' +
             '<div class="bp-list-header">' +
-              '<h1>Merken — Admin</h1>' +
+              '<h1>Merken - Admin</h1>' +
               '<div class="bp-admin-tabs">' +
                 '<button class="bp-tab" onclick="DY.navigeer(\'admin_brands\')" data-testid="admin-tab-brands">Merken</button>' +
                 '<button class="bp-tab" onclick="DY.navigeer(\'admin_campagnes\')" data-testid="admin-tab-campagnes">Campagnes</button>' +
@@ -1750,7 +1750,7 @@
       // tweede admin nodig.
       if (brandId === uid()) {
         toast('Je mag je eigen merkaanvraag niet modereren. Vraag een tweede admin om dit te beoordelen.', true);
-        try { console.warn('[brand-portal] self-approval geblokkeerd (UI guard) — admin=', uid(), 'brand=', brandId); } catch(e){}
+        try { console.warn('[brand-portal] self-approval geblokkeerd (UI guard) - admin=', uid(), 'brand=', brandId); } catch(e){}
         return;
       }
       var reden = '';
@@ -1781,7 +1781,7 @@
     };
 
     // ════════════════════════════════════════════════════════════════════
-    // ADMIN — CAMPAIGN CONTROL
+    // ADMIN - CAMPAIGN CONTROL
     // ════════════════════════════════════════════════════════════════════
     BP.renderAdminCampagnes = async function() {
       var main = document.getElementById('dy-main');
@@ -1797,13 +1797,13 @@
           var c = d.data();
           var isEigen = (c.brandId === uid());
           var eigenBadge = isEigen
-            ? '<span class="bp-badge" style="background:#444;color:#fcf8ef;margin-left:6px">⚠ Eigen campagne — vereist tweede admin</span>'
+            ? '<span class="bp-badge" style="background:#444;color:#fcf8ef;margin-left:6px">⚠ Eigen campagne - vereist tweede admin</span>'
             : '';
           rows.push(
             '<div class="bp-list-rij" data-testid="admin-camp-rij-' + esc(d.id) + '">' +
               '<div class="bp-list-info">' +
-                '<div class="bp-list-titel">' + esc(c.naam||'—') + ' ' + badge(c.status||'draft') + eigenBadge + '</div>' +
-                '<div class="bp-list-meta">' + esc(c.brandNaam||'') + ' · ' + fmtDatum(c.startDatum) + ' — ' + fmtDatum(c.eindDatum) + ' · ' + fmtEuro(c.totaalBudget||0) + '</div>' +
+                '<div class="bp-list-titel">' + esc(c.naam||'-') + ' ' + badge(c.status||'draft') + eigenBadge + '</div>' +
+                '<div class="bp-list-meta">' + esc(c.brandNaam||'') + ' · ' + fmtDatum(c.startDatum) + ' - ' + fmtDatum(c.eindDatum) + ' · ' + fmtEuro(c.totaalBudget||0) + '</div>' +
                 '<div class="bp-list-meta">' + fmtNum(c.impressies||0) + ' impr · ' + fmtNum(c.clicks||0) + ' clk · spend ' + fmtEuro(c.spend||0) + '</div>' +
               '</div>' +
               '<div class="bp-list-acties">' +
@@ -1820,7 +1820,7 @@
           '<div class="bp-page">' +
             '<button class="bp-back" onclick="DY.navigeer(\'admin\')">&larr; Admin</button>' +
             '<div class="bp-list-header">' +
-              '<h1>Campagnes — Admin</h1>' +
+              '<h1>Campagnes - Admin</h1>' +
               '<div class="bp-admin-tabs">' +
                 '<button class="bp-tab" onclick="DY.navigeer(\'admin_brands\')">Merken</button>' +
                 '<button class="bp-tab bp-tab-active" onclick="DY.navigeer(\'admin_campagnes\')">Campagnes</button>' +
@@ -1839,7 +1839,7 @@
       var map = { approve:'live', pause:'paused', resume:'live', end:'completed' };
       var status = map[actie]; if (!status) return;
       try {
-        // v60.1.10: self-moderation guard — admin mag eigen campagne niet
+        // v60.1.10: self-moderation guard - admin mag eigen campagne niet
         // wijzigen (separation of duties).
         var docSnap = await DY.db.collection('campaigns').doc(id).get();
         if (docSnap.exists && docSnap.data().brandId === uid()) {
@@ -1855,7 +1855,7 @@
 
     BP.adminCampBudget = async function(id) {
       if (!isAdmin()) return;
-      var nieuw = prompt('Nieuw totaalbudget (€) — laat leeg om te annuleren:');
+      var nieuw = prompt('Nieuw totaalbudget (€) - laat leeg om te annuleren:');
       if (nieuw === null || nieuw === '') return;
       var n = +nieuw;
       if (!(n >= 0)) { toast('Ongeldig bedrag.', true); return; }
@@ -1873,7 +1873,7 @@
     };
 
     // ════════════════════════════════════════════════════════════════════
-    // ADMIN — REVENUE DASHBOARD
+    // ADMIN - REVENUE DASHBOARD
     // ════════════════════════════════════════════════════════════════════
     BP.renderAdminInkomsten = async function() {
       var main = document.getElementById('dy-main');
@@ -1958,7 +1958,7 @@
     // ── Init: probeer direct knop te injecteren als profile al rendert ──
     setTimeout(injecteerProfielKnop, 600);
 
-    // ── v60.1.5 FINAL FIX — polling-based force-render ──────────────────
+    // ── v60.1.5 FINAL FIX - polling-based force-render ──────────────────
     // Eerdere oplossingen leden aan async race conditions met onAuthReady.
     // Deze aanpak is brute-force maar bulletproof: elke 200ms voor 8 seconden
     // checken we of de URL nog een brand-portal pagina vraagt EN of #dy-main
@@ -1977,7 +1977,7 @@
         }
         if (!wanted || !Object.prototype.hasOwnProperty.call(BP_PAGES, wanted)) return;
 
-        console.log('[brand-portal] deep-link gedetecteerd:', wanted, '— start force-render poller');
+        console.log('[brand-portal] deep-link gedetecteerd:', wanted, '- start force-render poller');
         BP._deeplink = wanted;
         BP._deeplinkAt = Date.now();
 
@@ -1989,7 +1989,7 @@
           // Stop als gebruiker daadwerkelijk naar andere route is genavigeerd
           // (we tracken dit via DY.pagina; URL kan al herschreven zijn door pwa-v463)
           if (window.__bpUserNavigated) {
-            console.log('[brand-portal] user navigated weg — poller stopt');
+            console.log('[brand-portal] user navigated weg - poller stopt');
             clearInterval(iv);
             return;
           }
@@ -2003,7 +2003,7 @@
           }
 
           // Forceer re-render
-          console.log('[brand-portal] poging', attempts, '— force render:', wanted);
+          console.log('[brand-portal] poging', attempts, '- force render:', wanted);
           try {
             BP._deeplink = wanted;
             BP._deeplinkAt = Date.now();
@@ -2015,7 +2015,7 @@
           }
 
           if (attempts >= maxAttempts) {
-            console.warn('[brand-portal] poller gestopt na', attempts, 'pogingen — content niet zichtbaar');
+            console.warn('[brand-portal] poller gestopt na', attempts, 'pogingen - content niet zichtbaar');
             clearInterval(iv);
           }
         }, 200);

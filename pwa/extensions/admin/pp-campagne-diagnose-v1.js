@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat — Admin Campaign Diagnose Tool (v1.0.0)
+ * PaskamerPraat - Admin Campaign Diagnose Tool (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Doel: snel zien WAAROM campagnes wel/niet renderen op publieke views.
@@ -23,7 +23,7 @@
   function db() { return window.firebase.firestore(); }
 
   function fmtDate(ts) {
-    if (!ts) return '—';
+    if (!ts) return '-';
     if (ts.toDate) return ts.toDate().toLocaleString('nl-NL');
     return String(ts).slice(0,19);
   }
@@ -64,9 +64,9 @@
         rows.push(
           '<tr data-testid="diag-camp-' + esc(d.id) + '">' +
             '<td>' + esc(c.naam || c.brandNaam || d.id.slice(0,8)) + '</td>' +
-            '<td>' + esc(c.brandNaam || '—') + '</td>' +
+            '<td>' + esc(c.brandNaam || '-') + '</td>' +
             '<td><span class="bp-badge bp-badge-' + esc(c.status||'?') + '">' + esc(c.status||'?') + '</span></td>' +
-            '<td>' + esc(plaats.length ? plaats.join(',') : '— (legacy)') + '</td>' +
+            '<td>' + esc(plaats.length ? plaats.join(',') : '- (legacy)') + '</td>' +
             '<td>' + esc(fmtDate(c.startDatum)) + '</td>' +
             '<td>' + esc(fmtDate(c.eindDatum)) + '</td>' +
             '<td>' + (rendersInFeed ? '✅ ja' : '❌ nee') + '</td>' +
@@ -148,7 +148,7 @@
       }
       return orig.apply(this, arguments);
     };
-    // v1.0.6: Fix bootstrap race — als URL al deze route bevat, force-render
+    // v1.0.6: Fix bootstrap race - als URL al deze route bevat, force-render
     try {
       var qs = new URLSearchParams(window.location.search);
       if (qs.get('pagina') === 'admin_campagne_diagnose') {

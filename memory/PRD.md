@@ -230,4 +230,13 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 - Cache-bumping ALTIJD bij JS/CSS wijzigingen (index.html `?v=` + sw.js `VERSION`)
 
 ## Admin credentials
-- `williamdevriesis@gmail.com` — secret header `wivri` voor backend API
+- `williamdevriesis@gmail.com` - secret header `wivri` voor backend API
+
+## v60.1.73 (2026-02-14) - Em-dash cleanup definitief + cache bump
+- Volledige sweep: alle em-dashes (-) verwijderd uit ALLE productie bestanden
+  (HTML, JS, CSS). Vorige claim was foutief; er stonden er nog ~1.500.
+- Alle `?v=` querystrings in index.html en admin.html uniform gebumpt naar
+  `60.1.73-cleanup-emdash` (47 script/css tags).
+- Service Worker VERSION naar `v60.1.73-20260214-cleanup-emdash`.
+- ZIP herbouwd: `/app/01-paskamerpraat-pwa-cloudflare.zip` (2.5 MB, 156 files).
+- Syntax check: alle JS bestanden valid (`node -c` pass).

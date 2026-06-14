@@ -1,12 +1,12 @@
-# Deepdive & Juridische Analyse — Paskamer Praat Merkenportaal
+# Deepdive & Juridische Analyse - Paskamer Praat Merkenportaal
 
-> Gebaseerd op de werkelijke functionaliteit in de codebase (v60.1.70 — feb 2026).
+> Gebaseerd op de werkelijke functionaliteit in de codebase (v60.1.70 - feb 2026).
 > Bedoeld als basis voor: Gebruikersreglement, Algemene Voorwaarden Merken,
 > Campagnevoorwaarden, AUP, Privacybepalingen en Moderatiebeleid.
 
 ---
 
-## Fase 1 — Functionele inventarisatie per module
+## Fase 1 - Functionele inventarisatie per module
 
 ### 1. Account & toegang
 
@@ -33,7 +33,7 @@
 
 ---
 
-### 2. Content upload — Producten & Campagnes
+### 2. Content upload - Producten & Campagnes
 
 **Aanwezige functionaliteit:**
 - `brand_products` collection: titel, beschrijving, prijs, afbeeldingen[],
@@ -41,7 +41,7 @@
 - `campaigns` collection: naam, boodschap, doelgroep, plaatsingen[],
   startDatum, eindDatum, status (concept/live/eind), brandId, plaatsingen
 - Upload via Firebase Storage met composite path `brand_products/{uid}/{productId}/img_{ts}_{i}`
-- Status-gebaseerde Firestore rules — alleen `status==actief` zichtbaar publiekelijk
+- Status-gebaseerde Firestore rules - alleen `status==actief` zichtbaar publiekelijk
 
 **Juridische aandachtspunten:**
 - Eigendomsverklaring afbeeldingen vereist
@@ -109,7 +109,7 @@
 - BTW verlegd (B2B) of inclusief (B2C)?
 - Reflectierecht: B2C 14 dagen herroeping bij digitale diensten?
   → Vermijd door expliciete toestemming bij aankoop + leveringsstart
-- Automatische verlenging Stripe — wettelijke herinneringsplicht
+- Automatische verlenging Stripe - wettelijke herinneringsplicht
 - Restitutiebeleid bij technische storingen / niet-geleverde campagnes
 - Wallet-saldo niet uitbetaalbaar, alleen besteedbaar binnen platform
 
@@ -158,7 +158,7 @@
 - Image generation via admin (`/api/admin/generate-image`)
 
 **Juridische aandachtspunten:**
-- AI Act (EU) — geen autonome beslissingen over personen
+- AI Act (EU) - geen autonome beslissingen over personen
 - Output-disclaimer verplicht
 - Brongegevens van Emergent LLM Key: Anthropic/OpenAI/Google policies
 - Geen garantie op accuraatheid
@@ -253,7 +253,7 @@
 **Verwerkte data van merken:**
 - Bedrijfsgegevens (KvK, BTW, adres)
 - Inloggegevens (email, gehashed wachtwoord via Firebase)
-- Betalingsgegevens (via Stripe — Paskamer Praat krijgt alleen tokens)
+- Betalingsgegevens (via Stripe - Paskamer Praat krijgt alleen tokens)
 - IP-adressen + UA voor security logs
 - Campagne-prestatiedata
 - Communicatie met support
@@ -264,9 +264,9 @@
 - **Sub-verwerkers** moeten in privacyverklaring worden vermeld
 
 **Internationale doorgifte:**
-- Stripe (Ierland) — SCC's
-- Google Firebase (EU regio) — vereist EU-data-residency check
-- OpenAI/Anthropic via Emergent LLM Key — risico op US-doorgifte → SCC's nodig
+- Stripe (Ierland) - SCC's
+- Google Firebase (EU regio) - vereist EU-data-residency check
+- OpenAI/Anthropic via Emergent LLM Key - risico op US-doorgifte → SCC's nodig
 
 **Verplichte documenten (apart op te leveren):**
 - Privacyverklaring (publiek)
@@ -279,14 +279,14 @@
 
 ---
 
-## Fase 2 — Factcheck (controlepunten)
+## Fase 2 - Factcheck (controlepunten)
 
 | Vraag | Antwoord (op basis van codebase) | Juridische impact |
 |---|---|---|
 | Welke landen worden bediend? | Primair NL (Dutch UI), bereikbaar EU-breed | NL-recht + EU-regelgeving |
 | Alleen Nederlands of EU-breed? | NL-only content, geen geo-block | EU consumentenrecht waar van toepassing |
 | Merken = consument of zakelijk (B2B)? | **Strikt B2B** (KvK-veld verplicht) | Geen 14-dagen herroeping, B2B-voorwaarden |
-| Worden producten direct verkocht? | **Nee** — alleen promotie/redirect | Geen marketplace-liability; merk = verkoper |
+| Worden producten direct verkocht? | **Nee** - alleen promotie/redirect | Geen marketplace-liability; merk = verkoper |
 | Betalingen via? | Stripe (live), Shopify (geplaatst) | PCI-DSS via Stripe, geen kaartdata bij ons |
 | Worden gebruikersdata gedeeld met merken? | **Alleen aggregaten** (impressies/clicks) | Geen DPA voor merken nodig op platform-niveau |
 | Influencers gekoppeld? | Geen formele influencer-koppeling (nog) | Disclosure-verplichting via "Gesponsord"-tag |
@@ -295,25 +295,25 @@
 
 ---
 
-## Fase 3 — Definitieve oplevering (next steps)
+## Fase 3 - Definitieve oplevering (next steps)
 
 Op basis van bovenstaande analyse moeten de volgende documenten worden
 opgeleverd (apart, in juridische taal door advocaat/jurist te reviewen):
 
-1. **Gebruikersreglement Merkenportaal** — registratie, account-beheer,
+1. **Gebruikersreglement Merkenportaal** - registratie, account-beheer,
    moderatie, beëindiging
-2. **Algemene Voorwaarden Merken** (B2B) — diensten, prijzen,
+2. **Algemene Voorwaarden Merken** (B2B) - diensten, prijzen,
    aansprakelijkheid, IE-rechten, toepasselijk recht (Nederlands recht,
    rechtbank Amsterdam)
-3. **Campagnevoorwaarden** — booking, budget, plaatsingen, resultaat-
+3. **Campagnevoorwaarden** - booking, budget, plaatsingen, resultaat-
    indicatie, annulering
-4. **Contentrichtlijnen** — beeldspecs, beschrijvings-regels, reclame-
+4. **Contentrichtlijnen** - beeldspecs, beschrijvings-regels, reclame-
    ethiek, inclusiviteit
-5. **Acceptable Use Policy** — wat mag wel/niet (zie sectie 8)
-6. **Privacyverklaring + Cookiebeleid** — AVG-compliant
-7. **Verwerkersovereenkomst (DPA)** — voor merken die zelf persoons-
+5. **Acceptable Use Policy** - wat mag wel/niet (zie sectie 8)
+6. **Privacyverklaring + Cookiebeleid** - AVG-compliant
+7. **Verwerkersovereenkomst (DPA)** - voor merken die zelf persoons-
    gegevens via formulieren verzamelen
-8. **Sanctie- en Moderatiebeleid** — escalatieladder, beroep, hersteltermijn
+8. **Sanctie- en Moderatiebeleid** - escalatieladder, beroep, hersteltermijn
 
 ---
 
@@ -340,7 +340,7 @@ opgeleverd (apart, in juridische taal door advocaat/jurist te reviewen):
 
 ---
 
-**Versie**: v1.0 — 14 februari 2026
-**Status**: Functionele inventarisatie compleet — juridische teksten
+**Versie**: v1.0 - 14 februari 2026
+**Status**: Functionele inventarisatie compleet - juridische teksten
 te schrijven door juridisch specialist.
 **Eigenaar**: Paskamer Praat / Doubleyou Tailored for Tall & Plus Size

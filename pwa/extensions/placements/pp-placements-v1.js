@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PaskamerPraat — Placements Extension Helper (v1.0.0)
+ * PaskamerPraat - Placements Extension Helper (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Centrale helper voor placement-gating zonder bestaande code te wijzigen.
@@ -36,8 +36,8 @@
 
   /**
    * Check of een placement actief is voor een specifieke gebruiker.
-   * @param {object} user — Firebase user doc OR { plaatsingen, feature_flags }
-   * @param {string} placement — 'feed' | 'stories' | 'outfit_review' | 'ai_assist' | 'similar_items'
+   * @param {object} user - Firebase user doc OR { plaatsingen, feature_flags }
+   * @param {string} placement - 'feed' | 'stories' | 'outfit_review' | 'ai_assist' | 'similar_items'
    * @returns {boolean}
    */
   function isPlacementEnabled(user, placement) {
@@ -53,7 +53,7 @@
       return userArr.indexOf(placement) !== -1;
     }
 
-    // 3. Default: ON (backward compat — geen user.plaatsingen = alles aan)
+    // 3. Default: ON (backward compat - geen user.plaatsingen = alles aan)
     return true;
   }
 
@@ -69,7 +69,7 @@
 
   /**
    * Filter een array van campaigns/items op user's enabled placements.
-   * @param {array} items — items met .plaatsingen array
+   * @param {array} items - items met .plaatsingen array
    * @param {object} user
    * @returns {array}
    */
@@ -88,7 +88,7 @@
    *
    * Failure-tolerant: bij permission-denied (rules niet gedeployed of
    * anonieme user zonder read access) → silent fallback naar defaults.
-   * Geen console warnings — gebruikers hoeven dit niet te zien.
+   * Geen console warnings - gebruikers hoeven dit niet te zien.
    */
   function subscribeAdminPlacements(firestore) {
     if (!firestore) return;

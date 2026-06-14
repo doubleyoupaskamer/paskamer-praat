@@ -1,5 +1,5 @@
 /**
- * BRAND PORTAL — Campaign Auto-Complete Worker
+ * BRAND PORTAL - Campaign Auto-Complete Worker
  * DoubleYou / Paskamer Praat  •  v1.0.0 (februari 2026)
  *
  * DOEL:
@@ -9,7 +9,7 @@
  *
  * DRAAIFREQUENTIE:
  *   1× per uur is ruim voldoende (campagnes worden niet seconde-precies
- *   afgesloten — uurprecisie volstaat). Iedere 6 uur is ook prima.
+ *   afgesloten - uurprecisie volstaat). Iedere 6 uur is ook prima.
  *   Cron expression: "0 * * * *"  (elk uur op 00 minuten)
  *
  * IDEMPOTENTIE:
@@ -39,7 +39,7 @@
 const BATCH_SIZE = 100;  // max campagnes per run (ruim genoeg voor MVP)
 
 // ─────────────────────────────────────────────────────────────
-// FIREBASE REST API CLIENT (identiek aan pvdw worker — hergebruik)
+// FIREBASE REST API CLIENT (identiek aan pvdw worker - hergebruik)
 // ─────────────────────────────────────────────────────────────
 
 class FirestoreClient {

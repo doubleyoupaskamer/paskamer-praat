@@ -1,7 +1,7 @@
-# Index — Juridische documenten Paskamer Praat Merkenportaal
+# Index - Juridische documenten Paskamer Praat Merkenportaal
 
-**Versie**: v1.0 — 14 februari 2026
-**Status**: ⚠️ **CONCEPT — review door juridisch specialist vereist
+**Versie**: v1.0 - 14 februari 2026
+**Status**: ⚠️ **CONCEPT - review door juridisch specialist vereist
 voordat publicatie.**
 
 ---
@@ -12,7 +12,7 @@ voordat publicatie.**
 |---|---|---|---|
 | 0 | `../MERKENPORTAAL_JURIDISCHE_ANALYSE.md` | Functionele + juridische inventarisatie (basis voor alle docs) | 1.0 |
 | 1 | `01-gebruikersreglement-merken.md` | Hoofd-gebruikersovereenkomst voor Merken | 1.0 |
-| 2 | `02-acceptable-use-policy.md` | Wat mag wel/niet — AUP | 1.0 |
+| 2 | `02-acceptable-use-policy.md` | Wat mag wel/niet - AUP | 1.0 |
 | 3 | `03-privacyverklaring-cookiebeleid.md` | AVG-compliant privacy + cookies | 1.0 |
 | 4 | `04-algemene-voorwaarden-merken-B2B.md` | Zakelijke voorwaarden (B2B) | 1.0 |
 | 5 | `05-campagnevoorwaarden.md` | Specifiek voor advertentie-/campagne-diensten | 1.0 |
@@ -22,7 +22,7 @@ voordat publicatie.**
 ## Volgordeling bij merk-registratie (technisch implementeren)
 
 ```
-Registratiestap 3 — Akkoord:
+Registratiestap 3 - Akkoord:
 
 ☐ Ik heb het Gebruikersreglement gelezen en ga akkoord
 ☐ Ik heb het Acceptable Use Policy gelezen en ga akkoord
@@ -82,14 +82,14 @@ Bij doorgaan accepteert u deze voorwaarden voor deze campagne.
       via paskamerpraat.nl/subprocessors)
 - [ ] **Transfer Impact Assessment (TIA)** voor Stripe/Shopify/AI
       providers met US-doorgifte
-- [ ] **Records of Processing Activities (RoPA)** — AVG art. 30
+- [ ] **Records of Processing Activities (RoPA)** - AVG art. 30
 - [ ] **Datalek-protocol** met 72u-meldingsprocedure
 - [ ] **Aansluiting geschillencommissie** of mediation-route (B2B
       conflicten)
 - [ ] **BTW-advies** B2B EU-grensoverschrijdend (Stripe Ierland →
       Nederland)
 - [ ] **Stripe Customer Portal** activeren (voor self-service
-      opzegging — vereist live Stripe key + dashboard config)
+      opzegging - vereist live Stripe key + dashboard config)
 - [ ] **Reclamecode-aansluiting** (Stichting Reclame Code)
 
 ---

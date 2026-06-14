@@ -1,4 +1,4 @@
-/* Klant wallet styles — v1.0.0 */
+/* Klant wallet styles - v1.0.0 */
 
 .bp-wallet-hero {
   margin-top: 18px;
@@ -47,7 +47,7 @@
   .bp-wallet-hero { padding: 22px 18px; }
 }
 
-/* v1.0.4 — Wallet tabs + topup amount grid */
+/* v1.0.4 - Wallet tabs + topup amount grid */
 .bp-wallet-tabs {
   display: flex; gap: 6px; flex-wrap: wrap;
   margin-top: 22px;

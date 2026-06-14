@@ -1,5 +1,5 @@
 /**
- * POST VAN DE WEEK — Cloudflare Worker
+ * POST VAN DE WEEK - Cloudflare Worker
  * DoubleYou / Paskamer Praat  •  v1.1.0 (februari 2026)
  *
  * WIJZIGINGEN T.O.V. v1.0.0:
@@ -7,7 +7,7 @@
  *   + DSP-bonus wordt nu OOK opgeteld bij users/{uid}.dsp_lifetime + dsp_seizoen
  *     via FieldTransform increment (atomic), zodat winnaar direct op leaderboard verschijnt
  *
- * GEEN andere wijzigingen — alle bestaande logica intact (idempotency, audit log,
+ * GEEN andere wijzigingen - alle bestaande logica intact (idempotency, audit log,
  * timezone handling, week-bereik berekening).
  *
  * DEPLOY-INSTRUCTIES:
@@ -222,7 +222,7 @@ class FirestoreClient {
   }
 
   /**
-   * v1.1 NIEUW — Atomaire field increment via commit endpoint.
+   * v1.1 NIEUW - Atomaire field increment via commit endpoint.
    * Voorkomt race conditions wanneer winnaar gelijktijdig elders DSP krijgt.
    * fieldDeltas = { dsp_lifetime: 50, dsp_seizoen: 50 }
    */
@@ -304,7 +304,7 @@ function docToObject(firestoreDoc) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// RULE ENGINE — Post van de Week selectie
+// RULE ENGINE - Post van de Week selectie
 // ─────────────────────────────────────────────────────────────
 
 /**
@@ -417,7 +417,7 @@ async function runPvdwWorker(env) {
     workerVersion: 'v1.1.0',
   }).catch(e => console.error('[pvdw] audit log schrijven mislukt:', e.message));
 
-  console.log(`[pvdw] Week ${weekId}: ${auditStatus} — ${auditMsg}`);
+  console.log(`[pvdw] Week ${weekId}: ${auditStatus} - ${auditMsg}`);
   return { weekId, status: auditStatus, bericht: auditMsg, ...resultaat };
 }
 
@@ -527,18 +527,18 @@ async function verwerkWeek(db, weekId, bereik) {
   // ── DSP-bonus uitkeren ──────────────────────────────────────
   const auteurId = winnaar.userId || winnaar.authorId;
   if (auteurId) {
-    // 1. dsp_log (audit trail) — bestaand gedrag
+    // 1. dsp_log (audit trail) - bestaand gedrag
     await db.addDoc('dsp_log', {
       uid:     auteurId,
       actie:   'pvdw_winnaar',
       pts:     DSP_BONUS,
-      label:   `Post van de Week (${weekId}) — ${DSP_BONUS} DSP bonus`,
+      label:   `Post van de Week (${weekId}) - ${DSP_BONUS} DSP bonus`,
       postId:  winnaar._id,
       weekId,
       ts:      new Date().toISOString(),
     }).catch(e => console.error('[pvdw] DSP bonus dsp_log schrijven mislukt:', e.message));
 
-    // 2. v1.1 NIEUW — atomic increment van users/{uid}.dsp_lifetime + dsp_seizoen
+    // 2. v1.1 NIEUW - atomic increment van users/{uid}.dsp_lifetime + dsp_seizoen
     //    Zonder dit verschijnt de winnaar niet op de leaderboard.
     await db.incrementFields('users', auteurId, {
       dsp_lifetime: DSP_BONUS,

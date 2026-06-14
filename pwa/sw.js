@@ -1,4 +1,4 @@
-// Paskamer Praat — Service Worker v21
+// Paskamer Praat - Service Worker v21
 // Veilige runtime caching:
 //   - HTML/navigaties: NETWORK-FIRST met snelle fallback (max 3s) → altijd verse content na deploy
 //   - Versioned JS (/js/*-v*.js + /js/pwa-v*.js): CACHE-FIRST, immutable
@@ -10,7 +10,7 @@
 // Strategie is bewust simpel + bestand-naam-gebaseerd zodat een nieuwe deploy
 // (nieuwe versioned filename) automatisch niet uit cache komt.
 
-const VERSION       = 'v60.1.72-20260214-doubleyou-naam';
+const VERSION       = 'v60.1.73-20260214-cleanup-emdash';
 const STATIC_CACHE  = 'pp-static-' + VERSION;
 const RUNTIME_CACHE = 'pp-runtime-' + VERSION;
 const IMG_CACHE     = 'pp-images-' + VERSION;
@@ -192,7 +192,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(req.url);
 
   // ═══════════════════════════════════════════════════════════════
-  // WEB SHARE TARGET — vang POST /share-target op (Android/Chromium)
+  // WEB SHARE TARGET - vang POST /share-target op (Android/Chromium)
   // Slaat gedeelde content op in IndexedDB en redirect naar composer
   // ═══════════════════════════════════════════════════════════════
   if (req.method === 'POST' && url.pathname === '/share-target' && url.origin === self.location.origin) {
@@ -220,7 +220,7 @@ self.addEventListener('fetch', event => {
     return; // laat browser default afhandelen
   }
 
-  // 2. Service worker zelf — nooit cachen
+  // 2. Service worker zelf - nooit cachen
   if (url.pathname.endsWith('/sw.js')) return;
 
   // 3. Admin / debug → network-only
@@ -282,7 +282,7 @@ self.addEventListener('push', e => {
   try { if (e.data) data = Object.assign(data, e.data.json()); } catch (err) { /* noop */ }
 
   // Brand-aligned native notification (Android toont kleur als accent;
-  // iOS gebruikt het app-icoon — beide tonen ons premium logo)
+  // iOS gebruikt het app-icoon - beide tonen ons premium logo)
   const opts = {
     body: data.body,
     icon: data.icon || '/icons/apple-touch-icon-180.png',
@@ -297,7 +297,7 @@ self.addEventListener('push', e => {
     timestamp: Date.now(),
     data: { url: data.url || '/', category: data.category || 'algemeen' }
   };
-  // Rich image (alleen Android) — bv. preview van outfit/match
+  // Rich image (alleen Android) - bv. preview van outfit/match
   if (data.image) opts.image = data.image;
   // Action buttons (alleen Android desktop)
   if (Array.isArray(data.actions) && data.actions.length) {
@@ -333,7 +333,7 @@ self.addEventListener('message', e => {
   }
 });
 
-// ─── Background Sync — drain queued requests (non-invasief opt-in) ───────
+// ─── Background Sync - drain queued requests (non-invasief opt-in) ───────
 // Companion script `bg-sync-v1.js` op de pagina stopt mislukte POST's in
 // IndexedDB ('pp-bg-sync' / store 'queue') en registreert een sync tag
 // 'pp-bg-sync'. Bij netwerk-terug speelt de SW ze één voor één af.

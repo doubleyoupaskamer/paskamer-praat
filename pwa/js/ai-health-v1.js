@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════════════════════
-// Paskamer Praat — AI Backend Health & Config (v48-fix)
+// Paskamer Praat - AI Backend Health & Config (v48-fix)
 //
 // Centrale plek voor:
-//   1. apiBase() resolver — slimme default per host
-//   2. healthCheck() — pingt /api/ai/health met cache (1 call per sessie)
+//   1. apiBase() resolver - slimme default per host
+//   2. healthCheck() - pingt /api/ai/health met cache (1 call per sessie)
 //   3. Helper voor andere scripts om "lazy" features uit te zetten
 //      als backend offline is (geen rode error-toasts in productie)
 //

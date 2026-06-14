@@ -146,11 +146,11 @@ button{font-family:var(--font)}
   .tb-title{font-size:13px;font-weight:600}
   .tb-sep,.tb-sub,.tb-pill{display:none!important}
 
-  /* GRIDS — alles 1 kolom */
+  /* GRIDS - alles 1 kolom */
   .g4,.g3,.g2,
   [class*="grid"]{grid-template-columns:1fr!important}
 
-  /* ROWS — altijd stapelen */
+  /* ROWS - altijd stapelen */
   .row,.flex:not(.panel-head):not(.panel-actions):not(.flex.gap-sm){
     flex-direction:column!important;flex-wrap:wrap
   }
@@ -178,7 +178,7 @@ button{font-family:var(--font)}
   table{width:100%;min-width:0}
   th,td{padding:7px 8px;font-size:11px}
 
-  /* Berichten split view — stapelen op mobiel */
+  /* Berichten split view - stapelen op mobiel */
   #dm-split{flex-direction:column!important}
   #dm-list-panel{width:100%!important;flex-shrink:unset!important}
   #dm-list{max-height:300px!important}
@@ -288,7 +288,7 @@ button{font-family:var(--font)}
   .panel table,.panel>table{max-width:100%;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
 
   /* Verberg seconderaire info kolommen in smalle tabellen */
-  /* (alleen verbergen, niet weggooien — met class .hide-mobile) */
+  /* (alleen verbergen, niet weggooien - met class .hide-mobile) */
   .hide-mobile{display:none!important}
 
   /* Topbar: zorg dat breadcrumb niet overflows */
@@ -556,7 +556,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
     </div>
 
     <div class="nav-foot">
-      <div class="nav-user" id="nav-email">—</div>
+      <div class="nav-user" id="nav-email">-</div>
       <button class="btn btn-sm btn-red" onclick="doLogout()" style="width:100%">Uitloggen</button>
     </div>
   </nav>
@@ -576,29 +576,29 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
     <div id="content">
 
-<!-- ═══ KAI — OUTFIT AI MONITORING ═══════════════════════════════ -->
+<!-- ═══ KAI - OUTFIT AI MONITORING ═══════════════════════════════ -->
 <div class="tab" id="t-kai">
 
   <!-- KPI rij -->
   <div class="grid g4">
     <div class="card gold">
       <div class="card-label">Vergelijkingen vandaag</div>
-      <div class="card-val" id="kai-verg-vandaag">—</div>
+      <div class="card-val" id="kai-verg-vandaag">-</div>
       <div class="card-sub">analyses vergeleken</div>
     </div>
     <div class="card">
       <div class="card-label">Vergelijkingen totaal</div>
-      <div class="card-val" id="kai-verg-totaal">—</div>
+      <div class="card-val" id="kai-verg-totaal">-</div>
       <div class="card-sub">alle tijd</div>
     </div>
     <div class="card green">
       <div class="card-label">Opgeslagen vandaag</div>
-      <div class="card-val" id="kai-saved-vandaag">—</div>
+      <div class="card-val" id="kai-saved-vandaag">-</div>
       <div class="card-sub">outfits opgeslagen</div>
     </div>
     <div class="card">
       <div class="card-label">Opgeslagen totaal</div>
-      <div class="card-val" id="kai-saved-totaal">—</div>
+      <div class="card-val" id="kai-saved-totaal">-</div>
       <div class="card-sub">alle tijd</div>
     </div>
   </div>
@@ -607,22 +607,22 @@ tr:hover td{background:rgba(255,255,255,.015)}
   <div class="grid g4">
     <div class="card">
       <div class="card-label">Poll stemmen totaal</div>
-      <div class="card-val" id="kai-poll-totaal">—</div>
+      <div class="card-val" id="kai-poll-totaal">-</div>
       <div class="card-sub">A of B gekozen</div>
     </div>
     <div class="card green">
       <div class="card-label">Outfit A gekozen</div>
-      <div class="card-val" id="kai-poll-a">—</div>
-      <div class="card-sub" id="kai-poll-a-pct">—%</div>
+      <div class="card-val" id="kai-poll-a">-</div>
+      <div class="card-sub" id="kai-poll-a-pct">-%</div>
     </div>
     <div class="card gold">
       <div class="card-label">Outfit B gekozen</div>
-      <div class="card-val" id="kai-poll-b">—</div>
-      <div class="card-sub" id="kai-poll-b-pct">—%</div>
+      <div class="card-val" id="kai-poll-b">-</div>
+      <div class="card-sub" id="kai-poll-b-pct">-%</div>
     </div>
     <div class="card">
       <div class="card-label">Vandaag gestemd</div>
-      <div class="card-val" id="kai-poll-vandaag">—</div>
+      <div class="card-val" id="kai-poll-vandaag">-</div>
       <div class="card-sub">stemmen vandaag</div>
     </div>
   </div>
@@ -631,19 +631,19 @@ tr:hover td{background:rgba(255,255,255,.015)}
   <div class="grid g4" style="margin-top:8px">
     <div class="card">
       <div class="card-label">Analyses vandaag</div>
-      <div class="card-val" id="kai-analyse-vandaag">—</div>
+      <div class="card-val" id="kai-analyse-vandaag">-</div>
     </div>
     <div class="card">
       <div class="card-label">Verbeteracties</div>
-      <div class="card-val" id="kai-verbeter-totaal">—</div>
+      <div class="card-val" id="kai-verbeter-totaal">-</div>
     </div>
     <div class="card">
       <div class="card-label">Chat vragen</div>
-      <div class="card-val" id="kai-chat-totaal">—</div>
+      <div class="card-val" id="kai-chat-totaal">-</div>
     </div>
     <div class="card">
       <div class="card-label">Uploads vandaag</div>
-      <div class="card-val" id="kai-upload-vandaag">—</div>
+      <div class="card-val" id="kai-upload-vandaag">-</div>
     </div>
   </div>
 
@@ -748,16 +748,16 @@ tr:hover td{background:rgba(255,255,255,.015)}
 <!-- ═══ DASHBOARD ═══════════════════════════════════════════════ -->
 <div class="tab on" id="t-dash">
   <div class="grid g4">
-    <div class="card gold"><div class="card-label">Totaal gebruikers</div><div class="card-val" id="d-users">—</div><div class="card-sub">geregistreerd</div></div>
-    <div class="card green"><div class="card-label">Online nu</div><div class="card-val" id="d-online">—</div><div class="card-sub">actieve sessies</div></div>
-    <div class="card"><div class="card-label">Stories totaal</div><div class="card-val" id="d-stories">—</div></div>
-    <div class="card"><div class="card-label">DSP uitgegeven</div><div class="card-val" id="d-dsp">—</div></div>
+    <div class="card gold"><div class="card-label">Totaal gebruikers</div><div class="card-val" id="d-users">-</div><div class="card-sub">geregistreerd</div></div>
+    <div class="card green"><div class="card-label">Online nu</div><div class="card-val" id="d-online">-</div><div class="card-sub">actieve sessies</div></div>
+    <div class="card"><div class="card-label">Stories totaal</div><div class="card-val" id="d-stories">-</div></div>
+    <div class="card"><div class="card-label">DSP uitgegeven</div><div class="card-val" id="d-dsp">-</div></div>
   </div>
   <div class="grid g4">
-    <div class="card"><div class="card-label">Looks</div><div class="card-val" id="d-looks">—</div></div>
-    <div class="card"><div class="card-label">Reviews</div><div class="card-val" id="d-reviews">—</div></div>
-    <div class="card"><div class="card-label">Berichten gesprekken</div><div class="card-val" id="d-msgs">—</div></div>
-    <div class="card"><div class="card-label">Kleur stemmen</div><div class="card-val" id="d-stems">—</div></div>
+    <div class="card"><div class="card-label">Looks</div><div class="card-val" id="d-looks">-</div></div>
+    <div class="card"><div class="card-label">Reviews</div><div class="card-val" id="d-reviews">-</div></div>
+    <div class="card"><div class="card-label">Berichten gesprekken</div><div class="card-val" id="d-msgs">-</div></div>
+    <div class="card"><div class="card-label">Kleur stemmen</div><div class="card-val" id="d-stems">-</div></div>
   </div>
   <div class="row">
     <div class="col">
@@ -832,12 +832,12 @@ tr:hover td{background:rgba(255,255,255,.015)}
         <div id="ud-avatar" style="width:52px;height:52px;border-radius:50%;background:var(--gold2);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--gold);flex-shrink:0">?</div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <span id="ud-name" style="font-size:18px;font-weight:700">—</span>
+            <span id="ud-name" style="font-size:18px;font-weight:700">-</span>
             <span id="ud-niveau-badge" class="badge b-gold" style="font-size:10px;display:none"></span>
             <span id="ud-online-badge" class="badge b-gray" style="font-size:10px">Offline</span>
             <span id="ud-pwa-badge" class="badge b-amber" style="font-size:10px;display:none">PWA</span>
           </div>
-          <div id="ud-sub" style="font-size:11px;color:var(--text3);margin-top:3px">—</div>
+          <div id="ud-sub" style="font-size:11px;color:var(--text3);margin-top:3px">-</div>
           <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
             <button class="btn btn-sm" onclick="closeUserDetail()">✕ Sluiten</button>
             <button class="btn btn-sm" id="ud-mod-btn" onclick="quickMod()">⚠ Modereren</button>
@@ -846,21 +846,21 @@ tr:hover td{background:rgba(255,255,255,.015)}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
           <div style="font-size:10px;color:var(--text3)">Live route</div>
-          <div id="ud-live-route" class="badge b-blue">—</div>
+          <div id="ud-live-route" class="badge b-blue">-</div>
           <div style="font-size:10px;color:var(--text3);margin-top:4px">Sessieduur</div>
-          <div id="ud-live-sess" style="font-size:11px;font-weight:600;color:var(--gold)">—</div>
+          <div id="ud-live-sess" style="font-size:11px;font-weight:600;color:var(--gold)">-</div>
         </div>
       </div>
     </div>
 
     <!-- KPI STRIP -->
     <div style="display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--border)">
-      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">DSP lifetime</div><div id="ud-dsp" style="font-size:18px;font-weight:700;color:var(--gold)">—</div></div>
-      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Streak</div><div id="ud-streak" style="font-size:18px;font-weight:700;color:var(--amber)">—</div></div>
-      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Events (24u)</div><div id="ud-events" style="font-size:18px;font-weight:700">—</div></div>
-      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Likes</div><div id="ud-likes" style="font-size:18px;font-weight:700;color:var(--red)">—</div></div>
-      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Posts</div><div id="ud-posts" style="font-size:18px;font-weight:700;color:var(--green)">—</div></div>
-      <div style="padding:12px;text-align:center"><div style="font-size:10px;color:var(--text3)">Sessies</div><div id="ud-sessions" style="font-size:18px;font-weight:700">—</div></div>
+      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">DSP lifetime</div><div id="ud-dsp" style="font-size:18px;font-weight:700;color:var(--gold)">-</div></div>
+      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Streak</div><div id="ud-streak" style="font-size:18px;font-weight:700;color:var(--amber)">-</div></div>
+      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Events (24u)</div><div id="ud-events" style="font-size:18px;font-weight:700">-</div></div>
+      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Likes</div><div id="ud-likes" style="font-size:18px;font-weight:700;color:var(--red)">-</div></div>
+      <div style="padding:12px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3)">Posts</div><div id="ud-posts" style="font-size:18px;font-weight:700;color:var(--green)">-</div></div>
+      <div style="padding:12px;text-align:center"><div style="font-size:10px;color:var(--text3)">Sessies</div><div id="ud-sessions" style="font-size:18px;font-weight:700">-</div></div>
     </div>
 
     <!-- TAB NAV -->
@@ -936,7 +936,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <div class="card"><div class="card-label">Anoniem</div><div class="card-val" id="pres-anon">0</div></div>
     <div class="card"><div class="card-label">PWA</div><div class="card-val" id="pres-pwa">0</div></div>
     <div class="card red"><div class="card-label">Recent offline</div><div class="card-val" id="pres-offline-cnt">0</div><div class="card-sub">&lt; 15 min geleden</div></div>
-    <div class="card"><div class="card-label">Gem. sessie</div><div class="card-val" id="pres-avg-sess">—</div></div>
+    <div class="card"><div class="card-label">Gem. sessie</div><div class="card-val" id="pres-avg-sess">-</div></div>
     <div class="card"><div class="card-label">Mobiel</div><div class="card-val" id="pres-mobile">0</div></div>
     <div class="card"><div class="card-label">Desktop</div><div class="card-val" id="pres-desktop">0</div></div>
   </div>
@@ -991,13 +991,13 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
     <div class="col" style="max-width:220px">
       <div class="panel"><div class="panel-head"><span class="panel-title">Device</span></div>
-      <div class="panel-body bars" id="pres-device-bars"><div class="loading">—</div></div></div>
+      <div class="panel-body bars" id="pres-device-bars"><div class="loading">-</div></div></div>
       <div class="panel" style="margin-top:12px"><div class="panel-head"><span class="panel-title">Routes</span></div>
-      <div class="panel-body bars" id="pres-route-bars"><div class="loading">—</div></div></div>
+      <div class="panel-body bars" id="pres-route-bars"><div class="loading">-</div></div></div>
       <div class="panel" style="margin-top:12px"><div class="panel-head"><span class="panel-title">Landen</span></div>
-      <div class="panel-body bars" id="pres-country-bars"><div class="loading">—</div></div></div>
+      <div class="panel-body bars" id="pres-country-bars"><div class="loading">-</div></div></div>
       <div class="panel" style="margin-top:12px"><div class="panel-head"><span class="panel-title">Browser</span></div>
-      <div class="panel-body bars" id="pres-browser-bars"><div class="loading">—</div></div></div>
+      <div class="panel-body bars" id="pres-browser-bars"><div class="loading">-</div></div></div>
     </div>
   </div>
 </div>
@@ -1007,18 +1007,18 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
   <!-- KPI rij 1 -->
   <div class="grid g4">
-    <div class="card gold"><div class="card-label">Events (24u)</div><div class="card-val" id="an-ev">—</div><div class="card-sub" id="an-ev-sub"></div></div>
-    <div class="card green"><div class="card-label">Unieke sessies</div><div class="card-val" id="an-ses">—</div></div>
-    <div class="card"><div class="card-label">Overlays geopend</div><div class="card-val" id="an-ov">—</div></div>
-    <div class="card"><div class="card-label">DMs verstuurd</div><div class="card-val" id="an-dm">—</div></div>
+    <div class="card gold"><div class="card-label">Events (24u)</div><div class="card-val" id="an-ev">-</div><div class="card-sub" id="an-ev-sub"></div></div>
+    <div class="card green"><div class="card-label">Unieke sessies</div><div class="card-val" id="an-ses">-</div></div>
+    <div class="card"><div class="card-label">Overlays geopend</div><div class="card-val" id="an-ov">-</div></div>
+    <div class="card"><div class="card-label">DMs verstuurd</div><div class="card-val" id="an-dm">-</div></div>
   </div>
 
   <!-- KPI rij 2 -->
   <div class="grid g4">
-    <div class="card"><div class="card-label">Likes (24u)</div><div class="card-val" id="an-lk">—</div></div>
-    <div class="card"><div class="card-label">Posts geplaatst</div><div class="card-val" id="an-po">—</div></div>
-    <div class="card"><div class="card-label">Gem. sessieduur</div><div class="card-val" id="an-dur">—</div></div>
-    <div class="card"><div class="card-label">Terugkerende users</div><div class="card-val" id="an-ret">—</div></div>
+    <div class="card"><div class="card-label">Likes (24u)</div><div class="card-val" id="an-lk">-</div></div>
+    <div class="card"><div class="card-label">Posts geplaatst</div><div class="card-val" id="an-po">-</div></div>
+    <div class="card"><div class="card-label">Gem. sessieduur</div><div class="card-val" id="an-dur">-</div></div>
+    <div class="card"><div class="card-label">Terugkerende users</div><div class="card-val" id="an-ret">-</div></div>
   </div>
 
   <!-- Filter balk -->
@@ -1147,14 +1147,14 @@ tr:hover td{background:rgba(255,255,255,.015)}
     </div>
   </div>
 
-  <!-- Body & maat analytics — KPI strip -->
+  <!-- Body & maat analytics - KPI strip -->
   <div class="grid g3" id="an-body-kpi">
-    <div class="card"><div class="card-label">Users met lengte</div><div class="card-val">—</div></div>
-    <div class="card"><div class="card-label">Users met bouw</div><div class="card-val">—</div></div>
-    <div class="card"><div class="card-label">Users met maat</div><div class="card-val">—</div></div>
+    <div class="card"><div class="card-label">Users met lengte</div><div class="card-val">-</div></div>
+    <div class="card"><div class="card-label">Users met bouw</div><div class="card-val">-</div></div>
+    <div class="card"><div class="card-label">Users met maat</div><div class="card-val">-</div></div>
   </div>
 
-  <!-- Body & maat analytics — grafieken -->
+  <!-- Body & maat analytics - grafieken -->
   <div class="row">
     <div class="col">
       <div class="panel">
@@ -1187,9 +1187,9 @@ tr:hover td{background:rgba(255,255,255,.015)}
 <!-- ═══ DSP ═══════════════════════════════════════════════════════ -->
 <div class="tab" id="t-dsp">
   <div class="grid g3">
-    <div class="card gold"><div class="card-label">Totaal DSP ooit</div><div class="card-val" id="dsp-tot">—</div></div>
-    <div class="card"><div class="card-label">DSP logs vandaag</div><div class="card-val" id="dsp-today">—</div></div>
-    <div class="card"><div class="card-label">Actieve streaks ≥3</div><div class="card-val" id="dsp-str">—</div></div>
+    <div class="card gold"><div class="card-label">Totaal DSP ooit</div><div class="card-val" id="dsp-tot">-</div></div>
+    <div class="card"><div class="card-label">DSP logs vandaag</div><div class="card-val" id="dsp-today">-</div></div>
+    <div class="card"><div class="card-label">Actieve streaks ≥3</div><div class="card-val" id="dsp-str">-</div></div>
   </div>
   <div class="row">
     <div class="col">
@@ -1219,8 +1219,8 @@ tr:hover td{background:rgba(255,255,255,.015)}
 <!-- ═══ POLLS ══════════════════════════════════════════════════ -->
 <div class="tab" id="t-vergelijkingen">
   <div class="grid g4">
-    <div class="card gold"><div class="card-label">Totaal vergelijkingen</div><div class="card-val" id="verg-count">—</div></div>
-    <div class="card"><div class="card-label">Met context ingevuld</div><div class="card-val" id="verg-met-context">—</div></div>
+    <div class="card gold"><div class="card-label">Totaal vergelijkingen</div><div class="card-val" id="verg-count">-</div></div>
+    <div class="card"><div class="card-label">Met context ingevuld</div><div class="card-val" id="verg-met-context">-</div></div>
   </div>
   <div class="panel" style="margin-top:14px">
     <div class="panel-head">
@@ -1239,10 +1239,10 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
 <div class="tab" id="t-pvdw">
   <div class="grid g4">
-    <div class="card gold"><div class="card-label">Huidige winnaar</div><div class="card-val" id="pvdw-huidige-winnaar">—</div></div>
-    <div class="card"><div class="card-label">Weken met winnaar</div><div class="card-val" id="pvdw-weken-count">—</div></div>
-    <div class="card"><div class="card-label">Laatste run</div><div class="card-val" id="pvdw-laatste-run" style="font-size:12px">—</div></div>
-    <div class="card"><div class="card-label">Run status</div><div class="card-val" id="pvdw-run-status">—</div></div>
+    <div class="card gold"><div class="card-label">Huidige winnaar</div><div class="card-val" id="pvdw-huidige-winnaar">-</div></div>
+    <div class="card"><div class="card-label">Weken met winnaar</div><div class="card-val" id="pvdw-weken-count">-</div></div>
+    <div class="card"><div class="card-label">Laatste run</div><div class="card-val" id="pvdw-laatste-run" style="font-size:12px">-</div></div>
+    <div class="card"><div class="card-label">Run status</div><div class="card-val" id="pvdw-run-status">-</div></div>
   </div>
 
   <div class="panel" style="margin-top:14px">
@@ -1291,10 +1291,10 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
 <div class="tab" id="t-polls">
   <div class="grid g4">
-    <div class="card gold"><div class="card-label">Totaal stemmen</div><div class="card-val" id="poll-total">—</div></div>
-    <div class="card green"><div class="card-label">Ingelogd</div><div class="card-val" id="poll-auth">—</div></div>
-    <div class="card"><div class="card-label">Gasten</div><div class="card-val" id="poll-anon">—</div></div>
-    <div class="card"><div class="card-label">Winnende optie</div><div class="card-val" id="poll-winner" style="font-size:14px">—</div></div>
+    <div class="card gold"><div class="card-label">Totaal stemmen</div><div class="card-val" id="poll-total">-</div></div>
+    <div class="card green"><div class="card-label">Ingelogd</div><div class="card-val" id="poll-auth">-</div></div>
+    <div class="card"><div class="card-label">Gasten</div><div class="card-val" id="poll-anon">-</div></div>
+    <div class="card"><div class="card-label">Winnende optie</div><div class="card-val" id="poll-winner" style="font-size:14px">-</div></div>
   </div>
   <div class="row">
     <div class="col">
@@ -1339,11 +1339,11 @@ tr:hover td{background:rgba(255,255,255,.015)}
     </div>
     <div class="col" style="max-width:220px">
       <div class="panel"><div class="panel-head"><span class="panel-title">Per keuze</span></div>
-      <div class="panel-body bars" id="poll-keuze-bars"><div class="loading">—</div></div></div>
+      <div class="panel-body bars" id="poll-keuze-bars"><div class="loading">-</div></div></div>
       <div class="panel" style="margin-top:12px"><div class="panel-head"><span class="panel-title">Per bouw</span></div>
-      <div class="panel-body bars" id="poll-bouw-bars"><div class="loading">—</div></div></div>
+      <div class="panel-body bars" id="poll-bouw-bars"><div class="loading">-</div></div></div>
       <div class="panel" style="margin-top:12px"><div class="panel-head"><span class="panel-title">Device</span></div>
-      <div class="panel-body bars" id="poll-device-bars"><div class="loading">—</div></div></div>
+      <div class="panel-body bars" id="poll-device-bars"><div class="loading">-</div></div></div>
     </div>
   </div>
 </div>
@@ -1351,9 +1351,9 @@ tr:hover td{background:rgba(255,255,255,.015)}
 <!-- ═══ CONTENT ══════════════════════════════════════════════════ -->
 <div class="tab" id="t-content">
   <div class="grid g3">
-    <div class="card"><div class="card-label">Stories</div><div class="card-val" id="ct-st">—</div></div>
-    <div class="card"><div class="card-label">Looks</div><div class="card-val" id="ct-lk">—</div></div>
-    <div class="card"><div class="card-label">Reviews</div><div class="card-val" id="ct-rv">—</div></div>
+    <div class="card"><div class="card-label">Stories</div><div class="card-val" id="ct-st">-</div></div>
+    <div class="card"><div class="card-label">Looks</div><div class="card-val" id="ct-lk">-</div></div>
+    <div class="card"><div class="card-label">Reviews</div><div class="card-val" id="ct-rv">-</div></div>
   </div>
   <div class="panel">
     <div class="panel-head">
@@ -1374,9 +1374,9 @@ tr:hover td{background:rgba(255,255,255,.015)}
 <div class="tab" id="t-berichten">
   <!-- KPI strip -->
   <div class="grid g3">
-    <div class="card"><div class="card-label">Gesprekken</div><div class="card-val" id="dm-g">—</div></div>
-    <div class="card"><div class="card-label">Berichten totaal</div><div class="card-val" id="dm-m">—</div></div>
-    <div class="card"><div class="card-label">Actief vandaag</div><div class="card-val" id="dm-a">—</div></div>
+    <div class="card"><div class="card-label">Gesprekken</div><div class="card-val" id="dm-g">-</div></div>
+    <div class="card"><div class="card-label">Berichten totaal</div><div class="card-val" id="dm-m">-</div></div>
+    <div class="card"><div class="card-label">Actief vandaag</div><div class="card-val" id="dm-a">-</div></div>
   </div>
 
   <!-- Zoek + filters -->
@@ -1430,7 +1430,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
         </div>
         <!-- Realtime indicator -->
         <div id="dm-live-bar" style="display:none;padding:6px 14px;font-size:11px;color:var(--gold);border-top:1px solid var(--border)">
-          🔴 Live — nieuwe berichten verschijnen automatisch
+          🔴 Live - nieuwe berichten verschijnen automatisch
         </div>
       </div><!-- /panel -->
     </div><!-- /dm-chat-panel -->
@@ -1441,9 +1441,9 @@ tr:hover td{background:rgba(255,255,255,.015)}
 <!-- ═══ MODERATIE ════════════════════════════════════════════════ -->
 <div class="tab" id="t-mod">
   <div class="grid g3">
-    <div class="card red"><div class="card-label">Acties uitgevoerd</div><div class="card-val" id="mod-n">—</div></div>
-    <div class="card"><div class="card-label">Gewaarschuwde users</div><div class="card-val" id="mod-w">—</div></div>
-    <div class="card"><div class="card-label">Content verborgen</div><div class="card-val" id="mod-h">—</div></div>
+    <div class="card red"><div class="card-label">Acties uitgevoerd</div><div class="card-val" id="mod-n">-</div></div>
+    <div class="card"><div class="card-label">Gewaarschuwde users</div><div class="card-val" id="mod-w">-</div></div>
+    <div class="card"><div class="card-label">Content verborgen</div><div class="card-val" id="mod-h">-</div></div>
   </div>
   <div class="panel">
     <div class="panel-head"><span class="panel-title">Gebruiker acties</span></div>
@@ -1481,9 +1481,9 @@ tr:hover td{background:rgba(255,255,255,.015)}
 <!-- ═══ ERRORS ═══════════════════════════════════════════════════ -->
 <div class="tab" id="t-errors">
   <div class="grid g3">
-    <div class="card red"><div class="card-label">Errors (24u)</div><div class="card-val" id="er-n">—</div></div>
-    <div class="card"><div class="card-label">JS fouten</div><div class="card-val" id="er-js">—</div></div>
-    <div class="card"><div class="card-label">Promise errors</div><div class="card-val" id="er-pr">—</div></div>
+    <div class="card red"><div class="card-label">Errors (24u)</div><div class="card-val" id="er-n">-</div></div>
+    <div class="card"><div class="card-label">JS fouten</div><div class="card-val" id="er-js">-</div></div>
+    <div class="card"><div class="card-label">Promise errors</div><div class="card-val" id="er-pr">-</div></div>
   </div>
   <div class="panel">
     <div class="panel-head">
@@ -1518,7 +1518,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <div class="panel-body flex" style="flex-wrap:wrap;gap:8px">
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;font-size:12px;margin-bottom:8px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Ingelogd als (Firebase UID):</div>
-          <div class="mono" id="my-uid" style="font-size:11px;color:var(--gold)">—</div>
+          <div class="mono" id="my-uid" style="font-size:11px;color:var(--gold)">-</div>
           <div style="font-size:10px;color:var(--text3);margin-top:6px">Kopieer dit UID om andere admins toe te voegen.</div>
         </div>
         <button class="btn" onclick="sysFlush()">🗑 Logs opruimen (30+ dagen)</button>
@@ -1538,10 +1538,10 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
     <div class="tab" id="t-meldingen">
       <div class="grid g4">
-        <div class="card red"><div class="card-label">Open</div><div class="card-val" id="mel-stat-open">—</div><div class="card-sub">niet afgehandeld</div></div>
-        <div class="card gold"><div class="card-label">Hoog prioriteit</div><div class="card-val" id="mel-stat-hoog">—</div><div class="card-sub">direct aandacht</div></div>
-        <div class="card"><div class="card-label">Afgehandeld</div><div class="card-val" id="mel-stat-done">—</div><div class="card-sub">verwerkt</div></div>
-        <div class="card green"><div class="card-label">Melders</div><div class="card-val" id="mel-stat-users">—</div><div class="card-sub">unieke gebruikers</div></div>
+        <div class="card red"><div class="card-label">Open</div><div class="card-val" id="mel-stat-open">-</div><div class="card-sub">niet afgehandeld</div></div>
+        <div class="card gold"><div class="card-label">Hoog prioriteit</div><div class="card-val" id="mel-stat-hoog">-</div><div class="card-sub">direct aandacht</div></div>
+        <div class="card"><div class="card-label">Afgehandeld</div><div class="card-val" id="mel-stat-done">-</div><div class="card-sub">verwerkt</div></div>
+        <div class="card green"><div class="card-label">Melders</div><div class="card-val" id="mel-stat-users">-</div><div class="card-sub">unieke gebruikers</div></div>
       </div>
       <div class="panel">
         <div class="panel-head">
@@ -1577,22 +1577,22 @@ tr:hover td{background:rgba(255,255,255,.015)}
   <div class="grid g4">
     <div class="card gold">
       <div class="card-label">Totaal ingeschreven</div>
-      <div class="card-val" id="ml-kpi-totaal">—</div>
+      <div class="card-val" id="ml-kpi-totaal">-</div>
       <div class="card-sub">actieve e-mails</div>
     </div>
     <div class="card green">
       <div class="card-label">Nieuw deze maand</div>
-      <div class="card-val" id="ml-kpi-maand">—</div>
+      <div class="card-val" id="ml-kpi-maand">-</div>
       <div class="card-sub">inschrijvingen</div>
     </div>
     <div class="card">
       <div class="card-label">Opt-outs</div>
-      <div class="card-val" id="ml-kpi-optout">—</div>
+      <div class="card-val" id="ml-kpi-optout">-</div>
       <div class="card-sub">uitgeschreven</div>
     </div>
     <div class="card">
       <div class="card-label">Campagnes verzonden</div>
-      <div class="card-val" id="ml-kpi-campagnes">—</div>
+      <div class="card-val" id="ml-kpi-campagnes">-</div>
       <div class="card-sub">alle tijd</div>
     </div>
   </div>
@@ -1645,7 +1645,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
     </div>
     <div id="ml-pager" style="display:flex;justify-content:center;gap:8px;padding:10px;border-top:1px solid var(--border)">
       <button class="btn btn-sm" id="ml-prev" onclick="mlPagina(-1)" disabled>← Vorige</button>
-      <span id="ml-pager-info" style="font-size:11px;color:var(--text3);line-height:26px">—</span>
+      <span id="ml-pager-info" style="font-size:11px;color:var(--text3);line-height:26px">-</span>
       <button class="btn btn-sm" id="ml-next" onclick="mlPagina(1)">Volgende →</button>
     </div>
   </div>
@@ -1672,7 +1672,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <span style="font-weight:700;font-size:14px">✉ Bulk mail verzenden</span>
       <button class="btn btn-sm btn-red" onclick="mlSluitModal()">✕ Sluiten</button>
     </div>
-    <div style="font-size:11px;color:var(--text3)" id="ml-modal-cnt-info">—</div>
+    <div style="font-size:11px;color:var(--text3)" id="ml-modal-cnt-info">-</div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <label style="font-size:11px;color:var(--text3)">Onderwerp</label>
       <input class="inp" id="ml-mail-onderwerp" placeholder="Onderwerp van de e-mail…" style="width:100%">
@@ -1699,7 +1699,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="/js/admin-logic-v177.js?t=20260602-v360"></script>
-<script defer src="/js/admin-errors-v1.js?v=60"></script>
+<script defer src="/js/admin-errors-v1.js?v=60.1.73-cleanup-emdash"></script>
 
 <div class="tab" id="t-challenges">
   <style>
@@ -1752,7 +1752,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
         </div>
         <div id="ch-form-status" style="font-size:12px;color:rgba(252,248,239,0.5);min-height:18px;"></div>
       </div>
-      <div class="ch-log" id="ch-log">— actielog —</div>
+      <div class="ch-log" id="ch-log">- actielog -</div>
     </div>
   </div>
 </div>

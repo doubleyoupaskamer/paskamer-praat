@@ -1,10 +1,10 @@
-# Privacyverklaring & Cookiebeleid — Paskamer Praat
+# Privacyverklaring & Cookiebeleid - Paskamer Praat
 
-**Versie 1.0 — 14 februari 2026**
+**Versie 1.0 - 14 februari 2026**
 **Verwerkingsverantwoordelijke**: Doubleyou Tailored for Tall & Plus Size h.o.d.n. *Paskamer Praat*
 **Contact AVG**: privacy@paskamerpraat.nl
 
-> ⚠️ Concept — juridische review door privacy-jurist aanbevolen voor
+> ⚠️ Concept - juridische review door privacy-jurist aanbevolen voor
 > definitieve publicatie. Aansluiting bij Autoriteit Persoonsgegevens
 > en mogelijke DPO-aanstelling te onderzoeken.
 
@@ -106,7 +106,7 @@ verzoek.
 
 ## 6. Cookies en vergelijkbare technieken
 
-### 6.1 Functionele cookies (altijd actief — geen toestemming nodig)
+### 6.1 Functionele cookies (altijd actief - geen toestemming nodig)
 | Cookie | Doel | Bewaartermijn |
 |---|---|---|
 | `firebase:authUser:*` | Login-sessie | Tot logout |
@@ -114,7 +114,7 @@ verzoek.
 | `dy_locale` | Taal-voorkeur | 12 maanden |
 | `dy_theme` | UI-thema | 12 maanden |
 
-### 6.2 Analytische cookies (anoniem — soft opt-in)
+### 6.2 Analytische cookies (anoniem - soft opt-in)
 | Cookie | Doel | Bewaartermijn |
 |---|---|---|
 | `_ga`, `_gid` (indien actief) | Aggregatie pageviews | 14 maanden |
@@ -234,10 +234,10 @@ notificatie.
 
 ## Aanvullende documenten (separaat te leveren)
 
-- **Verwerkersovereenkomst (DPA)** — voor Merken die zelf
+- **Verwerkersovereenkomst (DPA)** - voor Merken die zelf
   persoonsgegevens via campagne-lead-formulieren verwerken
-- **Sub-verwerkerslijst** — actueel overzicht, gepubliceerd op
+- **Sub-verwerkerslijst** - actueel overzicht, gepubliceerd op
   paskamerpraat.nl/subprocessors
-- **Transfer Impact Assessment (TIA)** — voor doorgifte buiten EU
-- **Records of Processing Activities (RoPA)** — interne registratie
+- **Transfer Impact Assessment (TIA)** - voor doorgifte buiten EU
+- **Records of Processing Activities (RoPA)** - interne registratie
   van verwerkingen (AVG art. 30)
