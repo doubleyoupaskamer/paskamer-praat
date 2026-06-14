@@ -599,6 +599,19 @@
   window.DY.cardActions = {
     tryon:   actTryon,
     score:   actScore,
+    /* v60.1.41: 'outfit_analyse' triggert de bestaande DY._feedOutfitReview
+       pipeline (opent overlay, draait AI analyse). Pure verplaatsing van
+       trigger-locatie, onderliggende AI/analyse flow ongewijzigd. */
+    outfit_analyse: function(kaart) {
+      if (!kaart) return;
+      var docId = kaart.dataset && (kaart.dataset.docId || kaart.dataset.docid || kaart.getAttribute('data-doc-id'));
+      if (!docId) return;
+      var img = kaart.querySelector('.dy-reel-bg, img, .dy-reel-bg-video');
+      var foto = (img && (img.currentSrc || img.src)) || null;
+      if (window.DY && typeof window.DY._feedOutfitReview === 'function') {
+        window.DY._feedOutfitReview(docId, foto);
+      }
+    },
     share:   actShare,
     bewaar:  actBewaar,
     similar: actSimilar,

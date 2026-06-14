@@ -4762,14 +4762,9 @@ DY.verhaalKaart = function(data, opties) {
         <svg class="dy-reel-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       </button>
 
-      <!-- Delen: papieren vliegtuig -->
-      <button class="dy-reel-action-btn" onclick="event.stopPropagation();DY.deelVerhaal('${docId}','${DY.escapeHtml(titel || preview)}')" aria-label="Delen">
-        <svg class="dy-reel-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
-      <button class="dy-reel-report-btn dy-meld-trigger" data-id="${docId}" data-naam="${naam}" data-foto="${foto||''}" data-uid="${kaartUid}" onclick="event.stopPropagation();DY._toonMeldModalFromEl(this)" aria-label="Rapporteren" title="Rapporteren">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span class="dy-reel-report-label">Rapporteren</span>
-      </button>
+      <!-- v60.1.41: Delen + Rapporteren knoppen verwijderd uit feed kaart UI.
+           Handlers (DY.deelVerhaal, DY._toonMeldModalFromEl) blijven beschikbaar
+           voor de 3-puntjes card-hub popover (extra-menu-v3.js). -->
 
     </div>
   `;
@@ -5298,26 +5293,18 @@ DY.toonVerhaalPopup = async function(id) {
             '<svg class="dy-sd-actie-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
             '<span>Reageer</span>' +
           '</button>' +
-          '<button class="dy-sd-actie-btn" onclick="DY.deelVerhaal(\'' + data._docId + '\',\'' + shareTitle + '\')">' +
-            '<svg class="dy-sd-actie-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
-            '<span>Deel</span>' +
-          '</button>' +
-          (!isEigen
-            ? '<button class="dy-sd-actie-btn dy-meld-trigger" data-id="' + data._docId + '" data-naam="' + DY.escapeHtml(naam) + '" data-foto="' + (foto || '') + '" data-uid="' + kaartUid + '" onclick="DY._toonMeldModalFromEl(this)" aria-label="Rapporteren">' +
-                '<svg class="dy-sd-actie-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
-                '<span>Rapporteren</span>' +
-              '</button>'
-            : '') +
+          /* v60.1.41: Deel + Rapporteren verwijderd uit overlay acties-rij.
+             Handlers (DY.deelVerhaal, DY._toonMeldModalFromEl) blijven actief
+             via de 3-puntjes card-hub popover (extra-menu-v3.js). */
         '</div>' +
       '</div>' +
 
-      // Outfit Review knop + paneel + verbeter-sectie (altijd aanwezig in DOM)
+      // v60.1.41: Outfit Analyse trigger BUTTON verwijderd uit overlay UI.
+      // De wrapper + panel-container BLIJVEN bestaan zodat de AI-render
+      // vanuit de card-hub menu (extra-menu-v3.js → outfit_analyse actie) hier
+      // het resultaat kan plaatsen. Verbeter-sectie blijft ook.
       (foto
-        ? '<div class="dy-ai-sectie-wrap" id="dy-ai-sw-' + data._docId + '">' +
-            '<button class="dy-ai-trigger dy-sd-ai-btn" data-docid="' + data._docId + '" aria-label="Klik hier voor een outfit analyse">' +
-              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>' +
-              '\u2728 Klik hier voor een outfit analyse' +
-            '</button>' +
+        ? '<div class="dy-ai-sectie-wrap" id="dy-ai-sw-' + data._docId + '" data-docid="' + data._docId + '">' +
             '<div class="dy-ai-panel" id="dy-ai-panel-' + data._docId + '" data-docid="' + data._docId + '"></div>' +
             '<div class="dy-or-verbeter-buiten" id="dy-or-vb-' + data._docId + '" style="display:none">' +
               '<div class="dy-kai-sectie dy-kai-vb-wrap dy-or-verbeter-wrap" id="dy-or-verbeter-wrap-' + data._docId + '">' +
@@ -5347,13 +5334,11 @@ DY.toonVerhaalPopup = async function(id) {
           : '<p style="padding:12px 16px;font-size:0.8rem;color:rgba(253,248,240,0.55)"><button onclick="DY.navigeer(\'login\')" style="color:var(--clay);background:none;border:none;cursor:pointer;font-weight:600">Log in</button> om te reageren</p>') +
       '</div>';
 
-    // Topnav acties (delen + verwijderen als eigen)
+    // Topnav acties: v60.1.41 — Delen-knop verwijderd. Alleen verwijder-knop
+    // voor eigen verhaal blijft. Delen blijft beschikbaar via card-hub popover.
     var topnavActies = document.getElementById('dy-vp-topnav-acties');
     if (topnavActies) {
       topnavActies.innerHTML =
-        '<button class="dy-sd-nav-btn" onclick="DY.deelVerhaal(\'' + data._docId + '\',\'' + shareTitle + '\')">' +
-          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
-        '</button>' +
         (isEigen
           ? '<button class="dy-sd-nav-btn dy-sd-del-btn" onclick="DY.verwijderVerhaal(\'' + data._docId + '\', ' + heeftMedia + ', ' + tekst.split(/\s+/).length + ')">' +
               '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>' +
@@ -23416,17 +23401,17 @@ DY._feedOutfitReview = function(docId, fotoUrl) {
   DY.toonVerhaalPopup(docId);
 
   // Wacht tot popup gerenderd is, zoek dan het AI panel en trigger het
+  // v60.1.41: triggerBtn is verwijderd uit overlay UI, dus we wachten alleen
+  // op panelEl (de container waarin het analyse-resultaat rendert).
   var pogingen = 0;
   var interval = setInterval(function() {
     pogingen++;
     var panelEl = document.getElementById('dy-ai-panel-' + docId);
-    var triggerBtn = document.querySelector('.dy-ai-trigger[data-docid="' + docId + '"]');
-    if (panelEl && triggerBtn) {
+    if (panelEl) {
       clearInterval(interval);
-      // Scroll naar het panel zodat het zichtbaar is
       setTimeout(function() {
-        try { triggerBtn.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e) {}
-        DY.toonAIAnalyse(docId, fotoUrl || triggerBtn.dataset.foto || null, panelEl);
+        try { panelEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e) {}
+        DY.toonAIAnalyse(docId, fotoUrl || null, panelEl);
       }, 80);
     } else if (pogingen > 20) {
       clearInterval(interval); // stop na 2s
@@ -23446,56 +23431,12 @@ DY.verhaalKaart = function(data, opties) {
   var docId = data._docId || data.id || '';
   if (!docId) return el;
 
-  var foto = data.photo || data.foto || null;
+  // v60.1.41: Outfit Analyse + Opslaan buttons verwijderd uit feed kaart UI.
+  // Outfit Analyse blijft beschikbaar via card-hub popover (extra-menu-v3.js).
+  // Opslaan/Bewaar functie blijft beschikbaar via card-hub popover (Bewaar item).
+  // Handler DY._feedOutfitReview en bookmark-handlers blijven actief voor menu.
 
-  // ── Outfit Review knop — alleen als er een foto is (outfit zichtbaar)
-  var actiesBar = el.querySelector('.dy-reel-actions');
-  if (actiesBar && foto) {
-    var reviewBtn = document.createElement('button');
-    reviewBtn.className = 'dy-reel-action-btn dy-reel-outfit-review-btn';
-    reviewBtn.setAttribute('aria-label', 'Outfit Analyse');
-    reviewBtn.innerHTML =
-      '<svg class="dy-reel-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
-        + '<path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>'
-      + '</svg>'
-      + '<span class="dy-reel-action-count">Outfit analyse</span>';
-    reviewBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      DY._feedOutfitReview(docId, foto);
-    });
-    // Invoegen vóór report-knop
-    var reportBtn = actiesBar.querySelector('.dy-reel-report-btn');
-    if (reportBtn) {
-      actiesBar.insertBefore(reviewBtn, reportBtn);
-    } else {
-      actiesBar.appendChild(reviewBtn);
-    }
-  }
-
-  // Voeg bookmark knop toe aan dy-reel-actions (na de last action-btn)
-  var actiesBar = el.querySelector('.dy-reel-actions');
-  if (actiesBar) {
-    var bmarkReel = document.createElement('button');
-    bmarkReel.className = 'dy-reel-action-btn dy-bookmark-btn';
-    bmarkReel.dataset.doc = docId;
-    bmarkReel.setAttribute('aria-label', 'Opslaan');
-    bmarkReel.innerHTML =
-      '<svg class="dy-reel-action-icon dy-bookmark-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>' +
-      '<span class="dy-reel-action-count dy-bookmark-label">Opslaan</span>';
-    bmarkReel.addEventListener('click', function(e) {
-      e.stopPropagation();
-      DY._toonBookmarkSheet(docId, bmarkReel);
-    });
-    // Voeg in vóór de report-knop (laatste item)
-    var reportBtn = actiesBar.querySelector('.dy-reel-report-btn');
-    if (reportBtn) {
-      actiesBar.insertBefore(bmarkReel, reportBtn);
-    } else {
-      actiesBar.appendChild(bmarkReel);
-    }
-  }
-
-  // Laad bookmark status async (na render)
+  // Laad bookmark status async (na render) — voor synchronisatie met popover Bewaar-state
   if (DY.user) {
     DY.laadBookmarkStatus(docId).catch(function(){}).then(function() {
       DY._updateBookmarkBtns(docId);
@@ -23532,36 +23473,17 @@ DY.toonVerhaalPopup = async function(id) {
   var actiesEl = contentEl.querySelector('.dy-sd-acties');
   if (!actiesEl) return; // popup nog niet volledig geladen
 
-  // ── Voeg bookmark knop toe aan actie-rij
-  var bestaandBookmark = actiesEl.querySelector('.dy-bookmark-btn');
-  if (!bestaandBookmark) {
-    var state = DY._getPostState(id);
-    var bmarkDetailEl = document.createElement('button');
-    bmarkDetailEl.className = 'dy-sd-actie-btn dy-bookmark-btn' + (state.bookmarked ? ' saved' : '');
-    bmarkDetailEl.dataset.doc = id;
-    bmarkDetailEl.setAttribute('aria-label', 'Opslaan');
-    bmarkDetailEl.innerHTML =
-      '<svg class="dy-sd-actie-icon dy-bookmark-icon" viewBox="0 0 24 24" fill="' + (state.bookmarked ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>' +
-      '<span>Opslaan</span>';
-    bmarkDetailEl.addEventListener('click', function(e) {
-      e.stopPropagation();
-      DY._toonBookmarkSheet(id, bmarkDetailEl);
-    });
-    // Voeg in als tweede knop (na like, vóór reageer)
-    var eersteActie = actiesEl.querySelector('.dy-sd-actie-btn');
-    if (eersteActie && eersteActie.nextSibling) {
-      actiesEl.insertBefore(bmarkDetailEl, eersteActie.nextSibling);
-    } else {
-      actiesEl.appendChild(bmarkDetailEl);
-    }
-    // Laad bookmark status
-    if (DY.user) {
-      DY.laadBookmarkStatus(id).catch(function(){}).then(function() { DY._updateBookmarkBtns(id); });
-    }
+  // v60.1.41: Opslaan-knop injectie in overlay verwijderd. Bewaar-functie
+  // blijft beschikbaar via card-hub popover. Bookmark-state synchronisatie blijft
+  // intact zodat de popover de juiste 'saved' state toont.
+  if (DY.user) {
+    DY.laadBookmarkStatus(id).catch(function(){}).then(function() { DY._updateBookmarkBtns(id); });
   }
 
-  // ── Koppel foto-url + click-handler aan de hardcoded AI-trigger knop
-  // De dy-ai-sectie-wrap zit al in de DOM via de originele contentHTML string.
+  // v60.1.41: Outfit Analyse trigger BUTTON is verwijderd uit overlay (zit nu
+  // alleen in card-hub popover). De onderstaande hook is no-op geworden voor
+  // de overlay, maar blijft staan voor backwards-compat met andere code paden
+  // die mogelijk nog een dy-ai-trigger element renderen.
   var aiTriggerBestaand = contentEl.querySelector('.dy-ai-trigger[data-docid="' + id + '"]');
   if (aiTriggerBestaand) {
     if (foto) aiTriggerBestaand.dataset.foto = foto;
