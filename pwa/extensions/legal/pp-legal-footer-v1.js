@@ -52,7 +52,7 @@
       '<a href="/voorwaarden/#av" data-testid="footer-av">Algemene Voorwaarden</a>' +
       '<span class="pp-legal-sep">·</span>' +
       '<a href="/voorwaarden/#campagnes" data-testid="footer-campagnes">Campagnevoorwaarden</a>' +
-      '<div style="margin-top:8px;opacity:.6">© 2026 Newnewnet Media B.V. — Paskamer Praat v60.1.71</div>';
+      '<div style="margin-top:8px;opacity:.6">© 2026 Doubleyou Tailored for Tall & Plus Size — Paskamer Praat v60.1.72</div>';
     // Append aan body, niet aan dy-main, om scroll-snap conflicten te vermijden
     document.body.appendChild(f);
   }

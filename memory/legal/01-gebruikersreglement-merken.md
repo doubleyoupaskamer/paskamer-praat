@@ -1,7 +1,7 @@
 # Gebruikersreglement Merkenportaal Paskamer Praat
 
 **Versie 1.0 — 14 februari 2026**
-**Beheerder**: Newnewnet Media B.V. h.o.d.n. *Paskamer Praat*
+**Beheerder**: Doubleyou Tailored for Tall & Plus Size h.o.d.n. *Paskamer Praat*
 **Contact**: support@paskamerpraat.nl
 
 > ⚠️ **Disclaimer**: Dit is een concept opgesteld op basis van functionele

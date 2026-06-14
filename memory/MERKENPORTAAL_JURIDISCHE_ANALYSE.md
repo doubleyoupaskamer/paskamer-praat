@@ -343,4 +343,4 @@ opgeleverd (apart, in juridische taal door advocaat/jurist te reviewen):
 **Versie**: v1.0 — 14 februari 2026
 **Status**: Functionele inventarisatie compleet — juridische teksten
 te schrijven door juridisch specialist.
-**Eigenaar**: Paskamer Praat / Newnewnet Media
+**Eigenaar**: Paskamer Praat / Doubleyou Tailored for Tall & Plus Size

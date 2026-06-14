@@ -1,7 +1,7 @@
 # Algemene Voorwaarden Merken (B2B) — Paskamer Praat
 
 **Versie 1.0 — 14 februari 2026**
-**Newnewnet Media B.V. h.o.d.n. Paskamer Praat**
+**Doubleyou Tailored for Tall & Plus Size h.o.d.n. Paskamer Praat**
 
 > ⚠️ Concept — juridische review vereist.
 

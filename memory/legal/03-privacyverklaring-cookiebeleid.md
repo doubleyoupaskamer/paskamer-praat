@@ -1,7 +1,7 @@
 # Privacyverklaring & Cookiebeleid — Paskamer Praat
 
 **Versie 1.0 — 14 februari 2026**
-**Verwerkingsverantwoordelijke**: Newnewnet Media B.V. h.o.d.n. *Paskamer Praat*
+**Verwerkingsverantwoordelijke**: Doubleyou Tailored for Tall & Plus Size h.o.d.n. *Paskamer Praat*
 **Contact AVG**: privacy@paskamerpraat.nl
 
 > ⚠️ Concept — juridische review door privacy-jurist aanbevolen voor
@@ -204,7 +204,7 @@ aangeleverd.
 ## 11. Contact
 
 **Verwerkingsverantwoordelijke:**
-Newnewnet Media B.V.
+Doubleyou Tailored for Tall & Plus Size
 [adres invullen]
 KvK: [invullen]
 privacy@paskamerpraat.nl
