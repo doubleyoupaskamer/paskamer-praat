@@ -160,7 +160,7 @@
       '  <button class="dy-prem-close" data-close="1" aria-label="Sluiten" data-testid="premium-close-btn">×</button>' +
       '  <div class="dy-prem-crown">PREMIUM</div>' +
       '  <h2 id="dy-prem-title">Upgrade naar Premium</h2>' +
-      '  <p class="dy-prem-sub">Onbeperkt AI styling voor €6,99/maand</p>' +
+      '  <p class="dy-prem-sub">Onbeperkt AI styling voor €4,99/maand</p>' +
       '  <ul class="dy-prem-perks">' +
       '    <li>Onbeperkt Virtual Try-on</li>' +
       '    <li>Onbeperkt Style Score</li>' +
@@ -488,7 +488,7 @@
         '  </svg>' +
         '</span>' +
         '<span class="dy-card-hub-item-label">Upgrade naar Premium</span>' +
-        '<span class="dy-card-hub-item-pill" aria-hidden="true">€6,99/m</span>';
+        '<span class="dy-card-hub-item-pill" aria-hidden="true">€4,99/m</span>';
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         // Sluit het hub-menu vóór we de modal openen
