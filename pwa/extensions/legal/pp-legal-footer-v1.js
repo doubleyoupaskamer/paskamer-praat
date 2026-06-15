@@ -70,8 +70,35 @@
     document.head.appendChild(s);
   }
 
+  // ── Helper: bepaal of we op de homepagina zitten ────────────────────
+  function isHomePagina() {
+    // 1. DY router source of truth: DY.pagina === 'home'
+    try {
+      if (window.DY && typeof window.DY.pagina === 'string') {
+        return window.DY.pagina === 'home';
+      }
+    } catch (e) { /* noop */ }
+    // 2. Fallback voor pre-DY load: kijk naar URL queryparam ?pagina=
+    try {
+      var sp = new URLSearchParams(location.search);
+      var p = sp.get('pagina');
+      if (p) return p === 'home';
+    } catch (e) { /* noop */ }
+    // 3. Geen pagina parameter en root path = home
+    return location.pathname === '/' || location.pathname === '/index.html';
+  }
+
+  function updateFooterVisibility() {
+    var el = document.getElementById(FOOTER_ID);
+    if (!el) return;
+    el.style.display = isHomePagina() ? '' : 'none';
+  }
+
   function injectFooter() {
-    if (document.getElementById(FOOTER_ID)) return;
+    if (document.getElementById(FOOTER_ID)) {
+      updateFooterVisibility();
+      return;
+    }
     // Voorkom dubbele injectie op /voorwaarden zelf
     if (location.pathname.indexOf('/voorwaarden') === 0) return;
     var f = document.createElement('footer');
@@ -95,6 +122,7 @@
         + ' · ' + ((window.PP_BRAND && window.PP_BRAND.version) || 'v60.1.79') + '</div>';
     // Append aan body, niet aan dy-main, om scroll-snap conflicten te vermijden
     document.body.appendChild(f);
+    updateFooterVisibility();
   }
 
   // ── TOS-acceptatie bewaking voor ingelogde merken ───────────────────
@@ -146,10 +174,8 @@
 
   function init() {
     ensureStyle();
-    // v60.1.79: Footer hersteld - eerdere uitschakeling was misverstand.
-    // Issue was alleen de KLEUREN: transparent bg liet de cream body
-    // achtergrond doorschijnen, waardoor lichte tekst onleesbaar werd.
-    // Fix in CSS hieronder: solid dark background + helderdere tekst.
+    // v60.1.81: Footer alleen tonen op de homepage (DY.pagina === 'home').
+    // Andere pagina's krijgen geen footer-blok meer.
     injectFooter();
     // Cleanup: verwijder een eventueel reeds geinjecteerd footer-element
     // van een vorige cached versie (voorkomt dubbele footer).
@@ -157,14 +183,36 @@
     if (staleNodes.length > 1) {
       for (var i = 1; i < staleNodes.length; i++) staleNodes[i].remove();
     }
+    // Navigatie hooks: zichtbaarheid van footer bijwerken bij elke
+    // routewissel. DY heeft geen eigen route-event, dus we combineren:
+    //   1. hashchange + popstate (URL changes)
+    //   2. clicks op .dy-nav-item / .dy-sb-item / [data-pagina]
+    //   3. periodieke poll (1.5s) als safety net voor DY.pagina mutaties
+    window.addEventListener('hashchange',  updateFooterVisibility);
+    window.addEventListener('popstate',    updateFooterVisibility);
+    document.addEventListener('click', function (ev) {
+      var t = ev.target;
+      while (t && t !== document) {
+        if (t.matches && (t.matches('[data-pagina]') ||
+                          t.matches('.dy-nav-item') ||
+                          t.matches('.dy-sb-item'))) {
+          setTimeout(updateFooterVisibility, 80);
+          return;
+        }
+        t = t.parentNode;
+      }
+    }, true);
+    setInterval(updateFooterVisibility, 1500);
+
     // Re-check bij navigatie/userchange
     setTimeout(checkTosAcceptance, 2000);
     document.addEventListener('pp:login', function() { setTimeout(checkTosAcceptance, 1500); });
     document.addEventListener('pp:userchange', function() { setTimeout(checkTosAcceptance, 1500); });
-    document.addEventListener('pp:refreshed', function() { checkTosAcceptance(); });
+    document.addEventListener('pp:refreshed', function() { checkTosAcceptance(); updateFooterVisibility(); });
     document.addEventListener('pp:logout', function() {
       var b = document.getElementById('pp-legal-banner');
       if (b) b.remove();
+      updateFooterVisibility();
     });
   }
 

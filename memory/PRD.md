@@ -232,6 +232,16 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 ## Admin credentials
 - `williamdevriesis@gmail.com` - secret header `wivri` voor backend API
 
+## v60.1.81 (2026-02-14) - Footer alleen op homepage
+- Legal footer wordt nu alleen getoond als `DY.pagina === 'home'`.
+- Helper `isHomePagina()`: source of truth = `DY.pagina`, fallback
+  naar `?pagina=` query of root path.
+- `updateFooterVisibility()` zet `display:''` of `display:none`.
+- Navigation hooks: `hashchange`, `popstate`, delegated click op
+  `[data-pagina]` / `.dy-nav-item` / `.dy-sb-item`, plus 1.5s
+  safety polling (DY router heeft geen eigen route-event).
+- Cache bump: SW v60.1.81-footer-home-only.
+
 ## v60.1.80 (2026-02-14) - Goud-getinte W wordmark in legal footer
 - Subtiel cirkel-icoon met "W" (Playfair Display serif) toegevoegd
   boven de footer-links, centraal uitgelijnd.
