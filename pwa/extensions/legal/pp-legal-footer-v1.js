@@ -29,6 +29,17 @@
         'border-top:1px solid rgba(212,145,10,.18);' +
         'margin-top:32px;' +
         'letter-spacing:.01em}' +
+      '#pp-legal-footer .pp-legal-mark{display:block;margin:0 auto 14px;' +
+        'width:36px;height:36px;border-radius:50%;' +
+        'background:radial-gradient(circle at 30% 30%,rgba(232,200,120,.18),rgba(212,145,10,.06) 60%,transparent 75%);' +
+        'border:1px solid rgba(212,145,10,.35);' +
+        'color:#e8c878;' +
+        'font:700 18px/34px "Playfair Display",Georgia,serif;' +
+        'text-align:center;letter-spacing:0;' +
+        'text-shadow:0 0 8px rgba(212,145,10,.25);' +
+        'transition:transform .35s ease,border-color .25s ease,color .25s ease}' +
+      '#pp-legal-footer .pp-legal-mark:hover{transform:rotate(-6deg) scale(1.05);' +
+        'border-color:rgba(212,145,10,.6);color:#f4d98c}' +
       '#pp-legal-footer .pp-legal-row{display:inline-flex;flex-wrap:wrap;' +
         'justify-content:center;align-items:center;gap:4px 0;max-width:560px;margin:0 auto}' +
       '#pp-legal-footer a{color:#fcf8ef;text-decoration:none;' +
@@ -67,6 +78,7 @@
     f.id = FOOTER_ID;
     f.setAttribute('data-testid', 'pp-legal-footer');
     f.innerHTML =
+      '<div class="pp-legal-mark" aria-hidden="true">W</div>' +
       '<div class="pp-legal-row">' +
         '<a href="/voorwaarden/#reglement" data-testid="footer-reglement">Gebruikersreglement</a>' +
         '<span class="pp-legal-sep">·</span>' +

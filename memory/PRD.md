@@ -232,6 +232,16 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 ## Admin credentials
 - `williamdevriesis@gmail.com` - secret header `wivri` voor backend API
 
+## v60.1.80 (2026-02-14) - Goud-getinte W wordmark in legal footer
+- Subtiel cirkel-icoon met "W" (Playfair Display serif) toegevoegd
+  boven de footer-links, centraal uitgelijnd.
+- Goud-radial gradient achtergrond `rgba(232,200,120,.18)` →
+  `rgba(212,145,10,.06)` → transparent, 1px goud border (.35 opacity),
+  text-shadow voor zachte gloed.
+- Hover: lichte rotatie + scale + helderdere goud tint.
+- Geen extra dependencies; pure CSS, 36x36px footprint.
+- Cache bump: SW v60.1.80-footer-wordmark.
+
 ## v60.1.79 (2026-02-14) - Footer hersteld + kleur-fix
 ### Misverstand vorige sessie
 v60.1.78 verwijderde de footer per ongeluk; gebruiker wilde alleen de
