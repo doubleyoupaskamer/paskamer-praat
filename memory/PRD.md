@@ -232,6 +232,40 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 ## Admin credentials
 - `williamdevriesis@gmail.com` - secret header `wivri` voor backend API
 
+## v60.1.78 (2026-02-14) - Footer cleanup + leaked JS-code fix
+### Root cause: zichtbare JS-code leak op mobiel
+Op mobiele schermen was er ruwe JavaScript zichtbaar als tekst onder
+de pagina-content: `_check', Date.now().toString()); } catch(e) {} })();`
+Oorzaak: in `index.html` stond na regel 1175 (`</html>`) een dubbel-gekopieerd
+fragment van het PWA-removal IIFE block, ZONDER omsluitend `<script>` tag.
+De browser rendert dit als tekst.
+Fix: het dangling fragment (regels 1176-1181) verwijderd.
+
+### Legal footer-blok onderin verwijderd
+Op verzoek van gebruiker is het zichtbare blok onderaan iedere pagina
+weggehaald (Gebruikersreglement, Acceptable Use, Privacy & Cookies,
+Algemene Voorwaarden, Campagnevoorwaarden + copyright + versienummer).
+- `injectFooter()` call in `pp-legal-footer-v1.js init()` uitgecommentarieerd
+- Bij init wordt elk reeds geinjecteerde `#pp-legal-footer` element
+  uit de DOM verwijderd (cleanup voor gebruikers met oude cache)
+- **Belangrijk**: de TOS-acceptatie banner voor merken (`checkTosAcceptance`)
+  blijft volledig actief. Alleen het zichtbare footer-blok is uit; de
+  legale verplichting voor merken om voorwaarden te accepteren is intact.
+- De voorwaarden-pagina `/voorwaarden/` blijft bereikbaar en zichtbaar.
+
+### Cache discipline
+- SW VERSION → `v60.1.78-20260214-footer-cleanup`
+- `pp-legal-footer-v1.js?v=60.1.78-footer-cleanup`
+- `pp-brand-config-v1.js?v=60.1.78-footer-cleanup`
+- `PP_BRAND.version` → `v60.1.78`
+
+### Niet gewijzigd
+- Bestaande functionaliteit, routes, flows
+- TOS-acceptatie banner voor merken
+- Voorwaarden-pagina inhoud
+- Brand portal mid-page footer ("Algemene voorwaarden · Privacybeleid · Contact")
+  blijft staan (dat is een andere footer, niet de legal-extension)
+
 ## v60.1.77 (2026-02-14) - SW stabilisatie + Promise rejection cleanup
 ### Root cause analyse
 De gerapporteerde "Promise rejection x13/x15 - Failed to update a

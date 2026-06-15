@@ -830,11 +830,11 @@ window._dyEmergencyTimer = setTimeout(function() {
   <!-- ═══ Extensions v1.0.13 - Session cleanup + auto-refresh MUST load first ═══ -->
   <!-- ═══ Brand config (single source of truth) - moet als EERSTE laden ═══ -->
   <script defer src="/extensions/stability/pp-promise-guard-v1.js?v=60.1.77-sw-stability"></script>
-  <script defer src="/extensions/config/pp-brand-config-v1.js?v=60.1.77-sw-stability"></script>
+  <script defer src="/extensions/config/pp-brand-config-v1.js?v=60.1.78-footer-cleanup"></script>
   <script defer src="/extensions/config/pp-theme-config-v1.js?v=60.1.77-sw-stability"></script>
   <script defer src="/extensions/auth/pp-session-cleanup-v1.js?v=60.1.75-doubleyou-rebrand"></script>
   <script defer src="/extensions/auth/pp-auto-refresh-v1.js?v=60.1.75-doubleyou-rebrand"></script>
-  <script defer src="/extensions/legal/pp-legal-footer-v1.js?v=60.1.75-doubleyou-rebrand"></script>
+  <script defer src="/extensions/legal/pp-legal-footer-v1.js?v=60.1.78-footer-cleanup"></script>
   <!-- ═══ Extensions v1.0.11 - Wallet + Placements + Admin modules + Diagnose + Renderer + FeedTabs v2.1 ═══ -->
   <link rel="stylesheet" href="/extensions/payments/pp-wallet.css?v=60.1.75-doubleyou-rebrand">
   <link rel="stylesheet" href="/extensions/admin/pp-admin-ext.css?v=60.1.75-doubleyou-rebrand">
@@ -1168,12 +1168,6 @@ window._dyEmergencyTimer = setTimeout(function() {
       }
     }
     try { localStorage.setItem('dy_pwa_last_check', Date.now().toString()); } catch(e) {}
-  })();
-  </script>
-
-</body>
-</html>
-_check', Date.now().toString()); } catch(e) {}
   })();
   </script>
 

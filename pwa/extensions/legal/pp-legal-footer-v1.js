@@ -108,7 +108,15 @@
 
   function init() {
     ensureStyle();
-    injectFooter();
+    // v60.1.78: Legal footer-blok verwijderd op verzoek van gebruiker
+    // (zag er slordig uit op mobiel en stoorde de scroll-flow).
+    // De TOS-acceptatie bewaking blijft actief voor merken; alleen het
+    // zichtbare voorwaarden-blok onderaan iedere pagina is uitgezet.
+    // injectFooter();   // <- opzettelijk uitgeschakeld
+    // Opruimen: verwijder een eventueel reeds geinjecteerd footer-element
+    // dat van een vorige cached versie nog in de DOM zou zitten.
+    var stale = document.getElementById(FOOTER_ID);
+    if (stale && stale.parentNode) stale.parentNode.removeChild(stale);
     // Re-check bij navigatie/userchange
     setTimeout(checkTosAcceptance, 2000);
     document.addEventListener('pp:login', function() { setTimeout(checkTosAcceptance, 1500); });
