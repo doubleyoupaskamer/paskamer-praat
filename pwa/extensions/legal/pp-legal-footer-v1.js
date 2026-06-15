@@ -57,6 +57,11 @@
         '#pp-legal-footer a{margin:3px 6px;display:inline-block}' +
         '#pp-legal-footer .pp-legal-sep{margin:0 1px}' +
       '}' +
+      /* v60.1.84: desktop grid breekt af bij sidebar. Footer moet
+         de volledige breedte beslaan in de body-grid (kolom 1/-1). */
+      '@media (min-width:1024px){' +
+        '#pp-legal-footer{grid-column:1 / -1}' +
+      '}' +
       '#pp-legal-banner{position:fixed;bottom:80px;left:16px;right:16px;max-width:520px;margin:0 auto;background:#1e1a0f;border:1px solid rgba(212,145,10,.4);border-radius:14px;padding:14px 16px;color:#fcf8ef;font:500 13px/1.45 "DM Sans",sans-serif;box-shadow:0 20px 40px -10px rgba(0,0,0,.6);z-index:9998;animation:ppLegalSlide .35s ease}' +
       '@keyframes ppLegalSlide{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}' +
       '#pp-legal-banner .pp-lb-title{font-weight:700;color:#d4910a;margin-bottom:4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase}' +

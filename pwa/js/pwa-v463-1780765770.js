@@ -2265,13 +2265,9 @@ DY.renderHome = function() {
               '<button class="dy-hm-hero-partner-cta-secundair" onclick="DY.brandPortal && DY.brandPortal.openPortaal ? DY.brandPortal.openPortaal() : DY.navigeer(\x27brand_register\x27)" data-testid="home-partner-register-btn">Aanmelden als merk</button>' +
             '</div>' +
           '</div>' +
-          '<div class="dy-hm-hero-legal">' +
-            '<button onclick="DY.navigeer(\x27voorwaarden\x27)" class="dy-hm-hero-legal-link">Algemene voorwaarden</button>' +
-            '<span class="dy-hm-hero-legal-sep">·</span>' +
-            '<button onclick="DY.navigeer(\x27privacy\x27)" class="dy-hm-hero-legal-link">Privacybeleid</button>' +
-            '<span class="dy-hm-hero-legal-sep">·</span>' +
-            '<a href="mailto:info@doubleyousmallandtall.nl" class="dy-hm-hero-legal-link">Contact</a>' +
-          '</div>' +
+          /* v60.1.84: dy-hm-hero-legal blok verwijderd op verzoek van
+             gebruiker. Alleen homepage-affected. Footer onderaan dekt
+             de juridische links. */
           '</div>' /* einde dy-hm-hero-actions */ +
         '</div>' +
       '</section>' +
