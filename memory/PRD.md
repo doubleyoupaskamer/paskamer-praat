@@ -232,6 +232,18 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 ## Admin credentials
 - `williamdevriesis@gmail.com` - secret header `wivri` voor backend API
 
+## v60.1.82 (2026-02-14) - Social icons in footer
+- "Volg ons" rij toegevoegd boven legal links:
+  - Instagram (@paskamerpraat) - https://www.instagram.com/paskamerpraat
+  - TikTok (@doubleyou_fitcheck) - https://www.tiktok.com/@doubleyou_fitcheck
+- Pill-shaped chips: goud border, icon + handle, hover state met
+  translate-up + lichter goud.
+- Inline SVG icons (geen externe assets/dependencies), 18x18px.
+- "VOLG ONS" caption in goud-tint, uppercase, letter-spacing.
+- Responsive: <380px tonen alleen icons (handle verborgen).
+- ARIA labels + target="_blank" rel="noopener noreferrer" voor security.
+- Cache bump: SW v60.1.82-footer-social.
+
 ## v60.1.81 (2026-02-14) - Footer alleen op homepage
 - Legal footer wordt nu alleen getoond als `DY.pagina === 'home'`.
 - Helper `isHomePagina()`: source of truth = `DY.pagina`, fallback
