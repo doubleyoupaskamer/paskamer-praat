@@ -40,29 +40,6 @@
         'transition:transform .35s ease,border-color .25s ease,color .25s ease}' +
       '#pp-legal-footer .pp-legal-mark:hover{transform:rotate(-6deg) scale(1.05);' +
         'border-color:rgba(212,145,10,.6);color:#f4d98c}' +
-      '#pp-legal-footer .pp-legal-social{display:flex;flex-wrap:wrap;' +
-        'justify-content:center;align-items:center;gap:14px;' +
-        'margin:0 auto 16px;max-width:520px}' +
-      '#pp-legal-footer .pp-legal-social-label{color:rgba(232,200,120,.6);' +
-        'font:600 10px/1 "DM Sans",sans-serif;letter-spacing:.14em;' +
-        'text-transform:uppercase}' +
-      '#pp-legal-footer .pp-legal-social a{display:inline-flex;align-items:center;' +
-        'gap:7px;color:#e8c878;text-decoration:none;padding:6px 12px;' +
-        'border:1px solid rgba(212,145,10,.28);border-radius:999px;' +
-        'background:rgba(212,145,10,.04);' +
-        'font:600 11.5px/1 "DM Sans",sans-serif;letter-spacing:.01em;' +
-        'transition:all .2s ease;margin:0}' +
-      '#pp-legal-footer .pp-legal-social a:hover,' +
-      '#pp-legal-footer .pp-legal-social a:focus{' +
-        'color:#f4d98c;border-color:rgba(212,145,10,.6);' +
-        'background:rgba(212,145,10,.12);transform:translateY(-1px);outline:none}' +
-      '#pp-legal-footer .pp-legal-social svg{flex-shrink:0;opacity:.9}' +
-      '#pp-legal-footer .pp-legal-social-handle{white-space:nowrap}' +
-      '@media (max-width:380px){' +
-        '#pp-legal-footer .pp-legal-social{gap:10px}' +
-        '#pp-legal-footer .pp-legal-social a{padding:5px 10px;font-size:11px}' +
-        '#pp-legal-footer .pp-legal-social-handle{display:none}' +
-      '}' +
       '#pp-legal-footer .pp-legal-row{display:inline-flex;flex-wrap:wrap;' +
         'justify-content:center;align-items:center;gap:4px 0;max-width:560px;margin:0 auto}' +
       '#pp-legal-footer a{color:#fcf8ef;text-decoration:none;' +
@@ -129,26 +106,6 @@
     f.setAttribute('data-testid', 'pp-legal-footer');
     f.innerHTML =
       '<div class="pp-legal-mark" aria-hidden="true">W</div>' +
-      '<div class="pp-legal-social" data-testid="footer-social">' +
-        '<span class="pp-legal-social-label">Volg ons</span>' +
-        '<a href="https://www.instagram.com/paskamerpraat" target="_blank" rel="noopener noreferrer" ' +
-          'aria-label="Instagram @paskamerpraat" data-testid="footer-instagram">' +
-          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" ' +
-            'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-            '<rect x="3" y="3" width="18" height="18" rx="5"/>' +
-            '<circle cx="12" cy="12" r="4"/>' +
-            '<circle cx="17.5" cy="6.5" r=".9" fill="currentColor" stroke="none"/>' +
-          '</svg>' +
-          '<span class="pp-legal-social-handle">@paskamerpraat</span>' +
-        '</a>' +
-        '<a href="https://www.tiktok.com/@doubleyou_fitcheck" target="_blank" rel="noopener noreferrer" ' +
-          'aria-label="TikTok @doubleyou_fitcheck" data-testid="footer-tiktok">' +
-          '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">' +
-            '<path d="M19.6 6.9a5.6 5.6 0 0 1-3.4-1.2 5.5 5.5 0 0 1-2-3.7h-3.4v12.5a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V8.6a6 6 0 0 0-.8-.1 6 6 0 1 0 6 6V9.4a8.9 8.9 0 0 0 5.4 1.8V7.8a5.6 5.6 0 0 1 0-.9z"/>' +
-          '</svg>' +
-          '<span class="pp-legal-social-handle">@doubleyou_fitcheck</span>' +
-        '</a>' +
-      '</div>' +
       '<div class="pp-legal-row">' +
         '<a href="/voorwaarden/#reglement" data-testid="footer-reglement">Gebruikersreglement</a>' +
         '<span class="pp-legal-sep">·</span>' +
