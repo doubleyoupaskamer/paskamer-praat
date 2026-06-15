@@ -30,7 +30,7 @@
     if (!worker) return;
     try {
       worker.postMessage({ type: 'SKIP_WAITING' });
-    } catch (e) {}
+    } catch (e) { /* noop */ }
   }
 
   // ─── Toon kleine "update beschikbaar" toast (optioneel) ─────────
@@ -56,16 +56,16 @@
         'font-weight:600;cursor:pointer;font-family:inherit">Vernieuwen</button>';
       var btn = t.querySelector('button');
       btn.onclick = function() {
-        try { window.location.reload(); } catch (e) {}
+        try { window.location.reload(); } catch (e) { /* noop */ }
       };
       document.body.appendChild(t);
       // Auto-hide na 8 sec (als gebruiker niet klikt - update gebeurt
       // automatisch bij volgende navigatie/reload)
       setTimeout(function() {
-        try { t.style.opacity = '0'; t.style.transition='opacity .4s'; } catch (e) {}
-        setTimeout(function() { try { t.remove(); } catch (e) {} }, 500);
+        try { t.style.opacity = '0'; t.style.transition='opacity .4s'; } catch (e) { /* noop */ }
+        setTimeout(function() { try { t.remove(); } catch (e) { /* noop */ } }, 500);
       }, 8000);
-    } catch (e) {}
+    } catch (e) { /* noop */ }
   }
 
   // ─── Reageer op nieuwe SW die geïnstalleerd is ──────────────────
@@ -100,7 +100,7 @@
             // en zal alleen de opties updaten (geen tweede SW installeren).
             navigator.serviceWorker.register(SW_URL, { updateViaCache: 'none' }).catch(function(){});
           }
-        } catch(e) {}
+        } catch (e) { /* noop */ }
 
         // A. Direct wachtende SW? (tab geladen met v23 al klaar maar v22 actief)
         if (reg.waiting && navigator.serviceWorker.controller) {
@@ -113,15 +113,28 @@
           bewaakInstalling(reg.installing);
         });
 
-        // C. Poll periodiek voor updates
+        // C. Poll periodiek voor updates - reg.update() retourneert
+        //    een Promise; try/catch vangt geen async rejection af.
+        //    Daarom hier expliciet .catch() om unhandledrejection te
+        //    voorkomen (was bron van Promise rejection x13/x15 errors).
         setInterval(function() {
-          try { reg.update(); } catch (e) {}
+          try {
+            var p = reg.update();
+            if (p && typeof p.catch === 'function') {
+              p.catch(function() { /* stale of unreachable - SW blijft draaien */ });
+            }
+          } catch (e) { /* sync fout: negeer */ }
         }, POLL_MS);
 
-        // D. Bij focus terug naar tab → check ook
+        // D. Bij focus terug naar tab - check ook
         document.addEventListener('visibilitychange', function() {
           if (document.visibilityState === 'visible') {
-            try { reg.update(); } catch (e) {}
+            try {
+              var p2 = reg.update();
+              if (p2 && typeof p2.catch === 'function') {
+                p2.catch(function() { /* idem - silently swallow */ });
+              }
+            } catch (e) { /* noop */ }
           }
         });
       })

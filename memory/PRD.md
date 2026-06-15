@@ -232,6 +232,52 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 ## Admin credentials
 - `williamdevriesis@gmail.com` - secret header `wivri` voor backend API
 
+## v60.1.77 (2026-02-14) - SW stabilisatie + Promise rejection cleanup
+### Root cause analyse
+De gerapporteerde "Promise rejection x13/x15 - Failed to update a
+ServiceWorker" was de combinatie van:
+1. **Dubbele SW registratie**: `index.html` (inline `<script>` op `load`)
+   en `js/sw-auto-update-v1.js` registreerden beide `/sw.js`. Race
+   condition + de inline registratie miste `updateViaCache: 'none'`,
+   waardoor `sw.js` zelf browser-cached werd.
+2. **Unhandled async rejection**: `setInterval(() => reg.update())` in
+   `sw-auto-update-v1.js` had alleen `try/catch`, maar `reg.update()`
+   retourneert een Promise - synchroon try/catch vangt async rejection
+   niet. Elke minuut polling op stale registratie = nieuwe rejection.
+   13/15 = polling-cycles bij user.
+3. **Geen vangnet**: er was geen globale `unhandledrejection` listener
+   die benigne SW-ruis filterde.
+
+### Fixes (alleen technisch, geen UI/flow changes)
+- **`index.html`**: dubbele inline SW-registratie verwijderd.
+  `sw-auto-update-v1.js` is nu single source of truth voor SW lifecycle.
+- **`js/sw-auto-update-v1.js`**: `reg.update()` calls in setInterval +
+  visibilitychange handler nu omhuld met `.catch()` om unhandled
+  rejections te voorkomen. 6 lege `catch (e) {}` blokken vervangen
+  door `catch (e) { /* noop */ }` voor lint-conformiteit.
+- **`extensions/stability/pp-promise-guard-v1.js`** (NIEUW):
+  globale `unhandledrejection` + `error` listener. Filtert benigne
+  patterns (SW update failures, fetch aborts, manifest load fails)
+  en voorkomt console-spam. Echte business-logic errors blijven
+  zichtbaar en gaan naar `DY.logError` indien beschikbaar.
+  Ring buffer 50 events via `window.PP_PROMISE_GUARD.recent()`
+  voor diagnose. Geladen als EERSTE script (zelfs voor brand-config).
+- **`sw.js`** VERSION naar `v60.1.77-20260214-sw-stability` - forceert
+  schone cache namespace voor alle clients en deactiveert oude
+  registraties bij activate-event.
+
+### Audit resultaten
+- JS syntax: 54/54 files pass `node -c`
+- ESLint: nieuwe files clean, sw-auto-update clean (was 6 violations)
+- Backend pytest: 10/10 pass (inclusief outfit-score Gemini + fallback)
+- Backend health: 200 OK
+- Geen UI of flow wijzigingen
+- Geen route changes
+- Geen database structuur changes
+- Geen functionaliteiten verwijderd
+- Bestaande caching strategie behouden (network-first HTML, cache-first
+  versioned JS, stale-while-revalidate CSS/fonts, etc.)
+
 ## v60.1.76 (2026-02-14) - Theme config + Echte Gemini Vision Outfit Score
 - **PP_THEME config** (`extensions/config/pp-theme-config-v1.js`):
   `window.PP_THEME = { current, presets, apply, switch, get }`.

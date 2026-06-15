@@ -337,28 +337,10 @@
     })();
   </script>
 
-  <!-- Service Worker registratie -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js')
-          .then(function(reg) {
-            // Stuur SKIP_WAITING als er een wachtende SW is
-            if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-            reg.addEventListener('updatefound', function() {
-              var nw = reg.installing;
-              if (!nw) return;
-              nw.addEventListener('statechange', function() {
-                if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-                  nw.postMessage({ type: 'SKIP_WAITING' });
-                }
-              });
-            });
-          })
-          .catch(function() {});
-      });
-    }
-  </script>
+  <!-- Service Worker registratie - SINGLE SOURCE: handled by sw-auto-update-v1.js -->
+  <!-- v60.1.77 stabilisatie: dubbele registratie verwijderd (veroorzaakte
+       race conditions en stale reg.update() rejections). De auto-update
+       extensie registreert /sw.js met updateViaCache:'none' en pollt. -->
 </head>
 <body>
   <a href="#dy-main" class="dy-skip-link">Ga naar inhoud</a>
@@ -840,15 +822,16 @@ window._dyEmergencyTimer = setTimeout(function() {
   <script defer src="js/error-boundary-v1.js?v=60.1.75-doubleyou-rebrand"></script>
   <script defer src="js/share-target-v1.js?v=60.1.75-doubleyou-rebrand"></script>
   <script defer src="js/zoek-mijnmaat-v1.js?v=60.1.75-doubleyou-rebrand"></script>
-  <script defer src="js/sw-auto-update-v1.js?v=60.1.75-doubleyou-rebrand"></script>
+  <script defer src="js/sw-auto-update-v1.js?v=60.1.77-sw-stability"></script>
   <script defer src="js/extra-menu-v3.js?v=60.1.75-doubleyou-rebrand"></script>
   <script defer src="js/brand-portal-v1.js?v=60.1.75-doubleyou-rebrand"></script>
   <script defer src="js/admin-imggen-v1.js?v=60.1.75-doubleyou-rebrand"></script>
 
   <!-- ═══ Extensions v1.0.13 - Session cleanup + auto-refresh MUST load first ═══ -->
   <!-- ═══ Brand config (single source of truth) - moet als EERSTE laden ═══ -->
-  <script defer src="/extensions/config/pp-brand-config-v1.js?v=60.1.76-theme-vision"></script>
-  <script defer src="/extensions/config/pp-theme-config-v1.js?v=60.1.76-theme-vision"></script>
+  <script defer src="/extensions/stability/pp-promise-guard-v1.js?v=60.1.77-sw-stability"></script>
+  <script defer src="/extensions/config/pp-brand-config-v1.js?v=60.1.77-sw-stability"></script>
+  <script defer src="/extensions/config/pp-theme-config-v1.js?v=60.1.77-sw-stability"></script>
   <script defer src="/extensions/auth/pp-session-cleanup-v1.js?v=60.1.75-doubleyou-rebrand"></script>
   <script defer src="/extensions/auth/pp-auto-refresh-v1.js?v=60.1.75-doubleyou-rebrand"></script>
   <script defer src="/extensions/legal/pp-legal-footer-v1.js?v=60.1.75-doubleyou-rebrand"></script>
