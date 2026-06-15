@@ -232,6 +232,42 @@ Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 ## Admin credentials
 - `williamdevriesis@gmail.com` - secret header `wivri` voor backend API
 
+## v60.1.79 (2026-02-14) - Footer hersteld + kleur-fix
+### Misverstand vorige sessie
+v60.1.78 verwijderde de footer per ongeluk; gebruiker wilde alleen de
+KLEUREN aanpassen. De vorige CSS had `background:transparent` waardoor
+op brand-portal pagina's (cream `var(--cream)` body sections) de
+lichte tekst onleesbaar werd tegen lichte achtergrond.
+
+### Fix
+- `injectFooter()` weer geactiveerd in `init()`.
+- Cleanup van eventuele dubbele cached injecties bij init.
+- CSS volledig herwerkt voor consistente dark look ongeacht pagina:
+  - `background: #0a0806` (solid donker, geen doorlek meer)
+  - `color: rgba(252,248,239,.78)` (helderdere tekst voor leesbaarheid)
+  - `border-top: 1px solid rgba(212,145,10,.18)` (subtiele goud-accent)
+  - Separator `·` in goud-tint (`rgba(212,145,10,.45)`)
+  - Links iets prominenter (`#fcf8ef` ipv 70% opacity)
+  - Copyright op aparte regel als `.pp-legal-copy` met eigen styling
+  - Wrapper `.pp-legal-row` voor flex-wrap op smalle schermen
+  - Media query <=520px: links wrappen netjes, geen overlap
+  - `padding-bottom: calc(110px + env(safe-area-inset-bottom))` voor
+    iPhone notch-respect onder de bottom-nav
+- HTML structuur: separator van inline naar gestructureerd
+  `<div class="pp-legal-row">` + `<div class="pp-legal-copy">`
+
+### Cache discipline
+- SW VERSION → `v60.1.79-20260214-footer-colors`
+- `pp-legal-footer-v1.js?v=60.1.79-footer-colors`
+- `pp-brand-config-v1.js?v=60.1.79-footer-colors`
+- `PP_BRAND.version` → `v60.1.79`
+
+### Niet gewijzigd
+- TOS-banner functionaliteit
+- Voorwaarden-pagina
+- Brand portal mid-page footer
+- Alle bestaande flows en routes
+
 ## v60.1.78 (2026-02-14) - Footer cleanup + leaked JS-code fix
 ### Root cause: zichtbare JS-code leak op mobiel
 Op mobiele schermen was er ruwe JavaScript zichtbaar als tekst onder

@@ -18,10 +18,34 @@
     var s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent =
-      '#pp-legal-footer{position:relative;z-index:1;background:transparent;color:rgba(252,248,239,.45);font:500 11px/1.5 "DM Sans",system-ui,sans-serif;padding:24px 16px 110px;text-align:center;border-top:1px solid rgba(252,248,239,.06);margin-top:40px}' +
-      '#pp-legal-footer a{color:rgba(252,248,239,.7);text-decoration:none;margin:0 6px;border-bottom:1px dotted rgba(252,248,239,.18);padding-bottom:1px}' +
-      '#pp-legal-footer a:hover{color:#d4910a;border-bottom-color:#d4910a}' +
-      '#pp-legal-footer .pp-legal-sep{opacity:.4}' +
+      // v60.1.79: solid dark background + duidelijke contrast, ongeacht
+      // de pagina eronder (was transparent, gaf cream doorlek op mobiel).
+      '#pp-legal-footer{position:relative;z-index:1;' +
+        'background:#0a0806;' +
+        'color:rgba(252,248,239,.78);' +
+        'font:500 11px/1.6 "DM Sans",system-ui,sans-serif;' +
+        'padding:20px 16px calc(110px + env(safe-area-inset-bottom,0px));' +
+        'text-align:center;' +
+        'border-top:1px solid rgba(212,145,10,.18);' +
+        'margin-top:32px;' +
+        'letter-spacing:.01em}' +
+      '#pp-legal-footer .pp-legal-row{display:inline-flex;flex-wrap:wrap;' +
+        'justify-content:center;align-items:center;gap:4px 0;max-width:560px;margin:0 auto}' +
+      '#pp-legal-footer a{color:#fcf8ef;text-decoration:none;' +
+        'margin:0 8px;padding:4px 2px;' +
+        'border-bottom:1px dotted rgba(252,248,239,.28);' +
+        'transition:color .15s ease,border-color .15s ease}' +
+      '#pp-legal-footer a:hover,#pp-legal-footer a:focus{color:#d4910a;' +
+        'border-bottom-color:#d4910a;outline:none}' +
+      '#pp-legal-footer .pp-legal-sep{color:rgba(212,145,10,.45);' +
+        'margin:0 2px;font-weight:600}' +
+      '#pp-legal-footer .pp-legal-copy{display:block;margin-top:12px;' +
+        'color:rgba(252,248,239,.45);font-size:10.5px;line-height:1.5}' +
+      '@media (max-width:520px){' +
+        '#pp-legal-footer{padding-top:18px;font-size:11.5px}' +
+        '#pp-legal-footer a{margin:3px 6px;display:inline-block}' +
+        '#pp-legal-footer .pp-legal-sep{margin:0 1px}' +
+      '}' +
       '#pp-legal-banner{position:fixed;bottom:80px;left:16px;right:16px;max-width:520px;margin:0 auto;background:#1e1a0f;border:1px solid rgba(212,145,10,.4);border-radius:14px;padding:14px 16px;color:#fcf8ef;font:500 13px/1.45 "DM Sans",sans-serif;box-shadow:0 20px 40px -10px rgba(0,0,0,.6);z-index:9998;animation:ppLegalSlide .35s ease}' +
       '@keyframes ppLegalSlide{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}' +
       '#pp-legal-banner .pp-lb-title{font-weight:700;color:#d4910a;margin-bottom:4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase}' +
@@ -43,18 +67,20 @@
     f.id = FOOTER_ID;
     f.setAttribute('data-testid', 'pp-legal-footer');
     f.innerHTML =
-      '<a href="/voorwaarden/#reglement" data-testid="footer-reglement">Gebruikersreglement</a>' +
-      '<span class="pp-legal-sep">·</span>' +
-      '<a href="/voorwaarden/#aup" data-testid="footer-aup">Acceptable Use</a>' +
-      '<span class="pp-legal-sep">·</span>' +
-      '<a href="/voorwaarden/#privacy" data-testid="footer-privacy">Privacy &amp; Cookies</a>' +
-      '<span class="pp-legal-sep">·</span>' +
-      '<a href="/voorwaarden/#av" data-testid="footer-av">Algemene Voorwaarden</a>' +
-      '<span class="pp-legal-sep">·</span>' +
-      '<a href="/voorwaarden/#campagnes" data-testid="footer-campagnes">Campagnevoorwaarden</a>' +
-      '<div style="margin-top:8px;opacity:.6" data-pp-copy>\u00A9 ' + (new Date()).getFullYear() + ' '
+      '<div class="pp-legal-row">' +
+        '<a href="/voorwaarden/#reglement" data-testid="footer-reglement">Gebruikersreglement</a>' +
+        '<span class="pp-legal-sep">·</span>' +
+        '<a href="/voorwaarden/#aup" data-testid="footer-aup">Acceptable Use</a>' +
+        '<span class="pp-legal-sep">·</span>' +
+        '<a href="/voorwaarden/#privacy" data-testid="footer-privacy">Privacy &amp; Cookies</a>' +
+        '<span class="pp-legal-sep">·</span>' +
+        '<a href="/voorwaarden/#av" data-testid="footer-av">Algemene Voorwaarden</a>' +
+        '<span class="pp-legal-sep">·</span>' +
+        '<a href="/voorwaarden/#campagnes" data-testid="footer-campagnes">Campagnevoorwaarden</a>' +
+      '</div>' +
+      '<div class="pp-legal-copy" data-pp-copy>\u00A9 ' + (new Date()).getFullYear() + ' '
         + ((window.PP_BRAND && window.PP_BRAND.organisation) || 'Doubleyou Tailored for Tall & Plus Size')
-        + ' - Doubleyou ' + ((window.PP_BRAND && window.PP_BRAND.version) || 'v60.1.75') + '</div>';
+        + ' · ' + ((window.PP_BRAND && window.PP_BRAND.version) || 'v60.1.79') + '</div>';
     // Append aan body, niet aan dy-main, om scroll-snap conflicten te vermijden
     document.body.appendChild(f);
   }
@@ -108,15 +134,17 @@
 
   function init() {
     ensureStyle();
-    // v60.1.78: Legal footer-blok verwijderd op verzoek van gebruiker
-    // (zag er slordig uit op mobiel en stoorde de scroll-flow).
-    // De TOS-acceptatie bewaking blijft actief voor merken; alleen het
-    // zichtbare voorwaarden-blok onderaan iedere pagina is uitgezet.
-    // injectFooter();   // <- opzettelijk uitgeschakeld
-    // Opruimen: verwijder een eventueel reeds geinjecteerd footer-element
-    // dat van een vorige cached versie nog in de DOM zou zitten.
-    var stale = document.getElementById(FOOTER_ID);
-    if (stale && stale.parentNode) stale.parentNode.removeChild(stale);
+    // v60.1.79: Footer hersteld - eerdere uitschakeling was misverstand.
+    // Issue was alleen de KLEUREN: transparent bg liet de cream body
+    // achtergrond doorschijnen, waardoor lichte tekst onleesbaar werd.
+    // Fix in CSS hieronder: solid dark background + helderdere tekst.
+    injectFooter();
+    // Cleanup: verwijder een eventueel reeds geinjecteerd footer-element
+    // van een vorige cached versie (voorkomt dubbele footer).
+    var staleNodes = document.querySelectorAll('#' + FOOTER_ID);
+    if (staleNodes.length > 1) {
+      for (var i = 1; i < staleNodes.length; i++) staleNodes[i].remove();
+    }
     // Re-check bij navigatie/userchange
     setTimeout(checkTosAcceptance, 2000);
     document.addEventListener('pp:login', function() { setTimeout(checkTosAcceptance, 1500); });
