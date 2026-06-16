@@ -47,8 +47,9 @@
     // Outfit-score popups en backdrop
     '.dy-score-detail.is-sheet',
     '.dy-score-backdrop',
-    // Hamburger popover
-    '#dy-extra-menu-popover',
+    // v60.1.99: CORRECTE IDs voor hamburger popover (waren fout in v60.1.97)
+    '#dy-card-hub-pop',
+    '#dy-card-hub-backdrop',
     '.dy-card-hub-btn.open',
     // Premium modal
     '#dy-prem-overlay',
