@@ -21,8 +21,8 @@
 
   var DEFAULT_API_BASE = '';
   var STYLE_ID = 'dy-outfit-score-style';
-  var LS_PREFIX = 'dy_outfit_score_v3_';   // v60.1.87: bumped van v2 voor prompt-fix
-  var LS_OLD_PREFIXES = ['dy_outfit_score_', 'dy_outfit_score_v2_'];
+  var LS_PREFIX = 'dy_outfit_score_v4_';   // v60.1.90: bumped voor avatar-fix
+  var LS_OLD_PREFIXES = ['dy_outfit_score_', 'dy_outfit_score_v2_', 'dy_outfit_score_v3_'];
 
   // Nuclear cache cleanup van oude prefixes (v60.1.87).
   // Reden: v60.1.87 fixt prompt + safety-net voor sportieve outfits.
@@ -73,9 +73,9 @@
       '.dy-score-pill.loading{opacity:.6;pointer-events:none}',
       '.dy-score-pill.loading .num::after{content:"…";display:inline}',
       /* Desktop / inline detail */
-      '.dy-score-detail{position:relative;margin-top:10px;background:#fefcf5;',
+      '.dy-score-detail{position:relative;margin-top:10px;background:#fefcf5 !important;',
       '  border:1px solid rgba(30,26,15,.1);border-radius:14px;padding:16px 18px 18px;',
-      '  font:400 13px/1.5 "DM Sans",system-ui,sans-serif;color:#1e1a0f;',
+      '  font:400 13px/1.5 "DM Sans",system-ui,sans-serif;color:#1e1a0f !important;',
       '  animation:dyScoreSlide .3s cubic-bezier(.23,1,.32,1)}',
       '@keyframes dyScoreSlide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}',
       '.dy-score-detail .dy-score-detail-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding-right:32px}',
@@ -110,7 +110,11 @@
       '.dy-score-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;animation:dyScoreFade .25s ease}',
       '@keyframes dyScoreFade{from{opacity:0}to{opacity:1}}',
       'body.dy-score-modal-open{overflow:hidden}',
-      '.dy-score-detail.is-sheet{position:fixed;left:0;right:0;bottom:0;margin:0;',
+      /* v60.1.90: !important op kleur/bg zodat eventuele app.css overrides */
+      /* geen donker-doorlek meer veroorzaken (was bron van klacht        */
+      /* "tekst valt weg tegen donkerbruine achtergrond" op mobiel).      */
+      '.dy-score-detail.is-sheet{position:fixed !important;left:0;right:0;bottom:0;margin:0;',
+      '  background:#fefcf5 !important;color:#1e1a0f !important;',
       '  border-radius:20px 20px 0 0;border:0;padding:24px 20px calc(28px + env(safe-area-inset-bottom,0px));',
       '  max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch;',
       '  z-index:9999;box-shadow:0 -20px 60px rgba(0,0,0,.45);',
@@ -118,13 +122,15 @@
       '.dy-score-detail.is-sheet::before{content:"";display:block;width:42px;height:4px;border-radius:4px;',
       '  background:rgba(30,26,15,.18);margin:-8px auto 14px}',
       '.dy-score-detail.is-sheet .dy-score-detail-head{margin-bottom:10px}',
-      '.dy-score-detail.is-sheet .dy-score-detail-label{font-size:15px}',
-      '.dy-score-detail.is-sheet .summary{font-size:14px;line-height:1.55;color:#1e1a0f}',
-      '.dy-score-detail.is-sheet .tips li{font-size:14px;line-height:1.55;color:#1e1a0f;padding:8px 0 8px 26px}',
+      '.dy-score-detail.is-sheet .dy-score-detail-label{font-size:15px;color:#1e1a0f !important}',
+      '.dy-score-detail.is-sheet .summary{font-size:14px;line-height:1.55;color:#1e1a0f !important}',
+      '.dy-score-detail.is-sheet .tips li{font-size:14px;line-height:1.55;color:#1e1a0f !important;padding:8px 0 8px 26px}',
       '.dy-score-detail.is-sheet .tips li::before{left:6px;font-size:15px}',
       '.dy-score-detail.is-sheet .palette{margin-top:14px}',
+      '.dy-score-detail.is-sheet .palette small{color:rgba(30,26,15,.55) !important}',
+      '.dy-score-detail.is-sheet .dy-score-chip{color:#1e1a0f !important}',
       '.dy-score-detail.is-sheet .dy-score-close{top:12px;right:12px;width:40px;height:40px;',
-      '  background:rgba(30,26,15,.10)}',
+      '  background:rgba(30,26,15,.10);color:#1e1a0f !important}',
       '@keyframes dyScoreSheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}',
       '@media (prefers-reduced-motion: reduce){.dy-score-detail,.dy-score-detail.is-sheet,.dy-score-backdrop{animation:none}.dy-score-detail .dy-score-close:hover{transform:none}}'
     ].join('\n');
@@ -136,29 +142,68 @@
     var postId = card.getAttribute('data-post-id') ||
                  card.id ||
                  (card.querySelector('[data-post-id]') && card.querySelector('[data-post-id]').getAttribute('data-post-id'));
-    // v60.1.86: STRENGE foto-selectie - voorkomt dat avatar/badge/icoon
-    // wordt aangezien voor outfit foto (was root cause van foute analyse).
-    // 1. Skip avatars (.dy-avatar / [data-pp-avatar])
-    // 2. Skip skeletons (data-pp-skeleton)
-    // 3. Skip badges/icons (max(naturalWidth) < 120 = te klein)
-    // 4. Skip nog niet geladen images (naturalWidth == 0)
-    // 5. Pak de GROOTSTE geladen image (typisch de outfit foto)
-    var imgs = card.querySelectorAll('img');
-    var best = null;
-    var bestArea = 0;
-    for (var i = 0; i < imgs.length; i++) {
-      var im = imgs[i];
-      if (im.matches('.dy-avatar,[data-pp-skeleton],[data-pp-avatar]')) continue;
-      // Skip kleine pixel-perfect icons en stories (avatars in story-bar)
-      if (im.closest && im.closest('.dy-story-circle,.dy-avatar,.dy-story-bar,.dy-stories-bar,.dy-prof-mini,.dy-badge,.dy-niveau-badge')) continue;
-      var nw = im.naturalWidth || 0;
-      var nh = im.naturalHeight || 0;
-      if (nw < 120 || nh < 120) continue;          // te klein = niet outfit
-      var area = nw * nh;
-      if (area > bestArea) { bestArea = area; best = im; }
+    // v60.1.90: KRITIEKE fix - zoek eerst in bekende foto-containers.
+    // Vorige largest-img heuristiek pakte soms de USER AVATAR (william)
+    // omdat die op Firebase Storage op hoge resolutie (256+) opgeslagen
+    // staat. Drie verschillende posts gaven daardoor IDENTIEKE analyse
+    // van diezelfde avatar (paars overhemd + stropdas).
+    //
+    // Strategie:
+    // 1. Probeer EERST de canonieke outfit-foto-container van een card
+    //    (`.dy-reel-foto`, `.dy-reel-foto-wrap img`, `.dy-feed-img`,
+    //     `.dy-feed-photo img`, `.dy-post-photo img`).
+    // 2. Als die niet bestaat: pak de grootste img die GEEN avatar is,
+    //    met een hogere min-grootte (480px) zodat avatars uitvallen.
+    var img = null;
+    var photoSelectors = [
+      '.dy-reel-foto-wrap img', '.dy-reel-foto', '.dy-reel-img',
+      '.dy-feed-photo img', '.dy-feed-img', '.dy-feed-foto-wrap img',
+      '.dy-post-foto img', '.dy-post-photo img', '.dy-post-img',
+      '[data-outfit-photo] img', '[data-pp-outfit-img]',
+      'figure img', '.dy-card-photo img'
+    ];
+    for (var s = 0; s < photoSelectors.length; s++) {
+      var found = card.querySelector(photoSelectors[s]);
+      if (found && found.tagName === 'IMG') {
+        // Verifieer dat het geladen is en redelijk groot
+        var nw0 = found.naturalWidth || 0;
+        var nh0 = found.naturalHeight || 0;
+        if (nw0 >= 200 && nh0 >= 200) { img = found; break; }
+      }
     }
-    var imgUrl = best ? (best.currentSrc || best.src) : null;
-    return { postId: postId, imgUrl: imgUrl, img: best };
+    // Fallback: scan alle img'en maar met STRENGE filter
+    if (!img) {
+      var imgs = card.querySelectorAll('img');
+      var best = null;
+      var bestArea = 0;
+      for (var i = 0; i < imgs.length; i++) {
+        var im = imgs[i];
+        // Hard skip: alles wat avatar/badge/icon/story-achtig is
+        if (im.matches && im.matches([
+          '.dy-avatar', '[data-pp-avatar]', '[data-pp-skeleton]',
+          '.dy-feed-avatar', '.dy-reel-avatar', '.dy-post-avatar',
+          '.dy-user-avatar', '.dy-prof-mini-img', '.dy-niveau-badge img'
+        ].join(','))) continue;
+        if (im.closest && im.closest([
+          '.dy-story-circle', '.dy-avatar', '.dy-avatar-wrap',
+          '.dy-story-bar', '.dy-stories-bar', '.dy-prof-mini',
+          '.dy-badge', '.dy-niveau-badge', '.dy-user-info',
+          '.dy-reel-author', '.dy-feed-author', '.dy-post-author',
+          '.dy-reel-header', '.dy-feed-header', '.dy-post-header',
+          'header'   // generieke header in een card
+        ].join(','))) continue;
+        var nw = im.naturalWidth || 0;
+        var nh = im.naturalHeight || 0;
+        // v60.1.90: van 120 naar 480px. Outfit foto's zijn altijd
+        // groter; avatars (zelfs 256x256 op Firebase) vallen uit.
+        if (nw < 480 || nh < 480) continue;
+        var area = nw * nh;
+        if (area > bestArea) { bestArea = area; best = im; }
+      }
+      img = best;
+    }
+    var imgUrl = img ? (img.currentSrc || img.src) : null;
+    return { postId: postId, imgUrl: imgUrl, img: img };
   }
 
   function findCards() {
