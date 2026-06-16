@@ -131,7 +131,7 @@
       trending.removeAttribute('data-pp-hidden');
     }
 
-    // Voeg Uitgelicht tab toe (idempotent)
+    // Voeg Uitgelicht tab toe (idempotent), als 2e tab (na "Ontdek")
     if (!bar.querySelector(TAB_ATTR)) {
       var btn = document.createElement('button');
       btn.className = 'dy-filter';
@@ -142,7 +142,16 @@
         e.preventDefault();
         handleUitgelichtClick(btn);
       });
-      bar.appendChild(btn);
+      // v60.1.94: plaats direct na 'Ontdek' (data-filter="recent")
+      // voor de gewenste volgorde: Ontdek -> Uitgelicht -> Mijn postuur -> Trending
+      var ontdek = bar.querySelector('[data-filter="recent"]');
+      if (ontdek && ontdek.nextSibling) {
+        bar.insertBefore(btn, ontdek.nextSibling);
+      } else if (ontdek) {
+        bar.appendChild(btn);
+      } else {
+        bar.appendChild(btn);
+      }
     }
     return true;
   }

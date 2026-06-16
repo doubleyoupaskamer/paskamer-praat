@@ -123,15 +123,11 @@
       btn.setAttribute('aria-expanded', 'false');
       btn.innerHTML =
         '<svg class="dy-card-hub-crown" width="17" height="17" viewBox="0 0 24 24" aria-hidden="true">' +
-          '<defs>' +
-            '<linearGradient id="dy-crown-grad" x1="0" y1="0" x2="1" y2="1">' +
-              '<stop offset="0%"  stop-color="#fde4a3"/>' +
-              '<stop offset="45%" stop-color="#e8b94a"/>' +
-              '<stop offset="100%" stop-color="#a87618"/>' +
-            '</linearGradient>' +
-          '</defs>' +
-          '<path d="M5 16 L3 7 l5 4 4-7 4 7 5-4 -2 9 Z" fill="url(#dy-crown-grad)" stroke="#5a3a08" stroke-width="0.6" stroke-linejoin="round"/>' +
-          '<rect x="5" y="17.4" width="14" height="2" rx="0.6" fill="url(#dy-crown-grad)" stroke="#5a3a08" stroke-width="0.4"/>' +
+          /* v60.1.94: solid gold ipv linearGradient met id="dy-crown-grad". */
+          /* Duplicate IDs in meerdere cards veroorzaakten dat kroon donker  */
+          /* werd zodra de eerste card uit DOM gescrolld werd (broken ref).  */
+          '<path d="M5 16 L3 7 l5 4 4-7 4 7 5-4 -2 9 Z" fill="#e8b94a" stroke="#5a3a08" stroke-width="0.6" stroke-linejoin="round"/>' +
+          '<rect x="5" y="17.4" width="14" height="2" rx="0.6" fill="#e8b94a" stroke="#5a3a08" stroke-width="0.4"/>' +
           '<circle cx="12" cy="9.5" r="1.1" fill="#fff5d6" opacity="0.9"/>' +
         '</svg>';
       btn.addEventListener('click', function(e) {
