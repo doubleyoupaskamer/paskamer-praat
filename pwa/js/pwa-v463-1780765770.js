@@ -943,13 +943,21 @@ DY.toonPagina = function(pagina) {
   DY._laatstGerenderd = pagina;
   DY._forceRender = false;
   // ─────────────────────────────────────────────────────────────────────
-  // Verberg initiële loading screen zodra eerste pagina wordt gerenderd
+  // Verberg initiële loading screen zodra eerste pagina wordt gerenderd,
+  // maar respecteer de 8-seconden minimum-display tijd (window._dyMinSpinnerUntil).
   var initLoader = document.getElementById('dy-initial-loader');
   if (initLoader && !initLoader.classList.contains('verborgen')) {
-    initLoader.classList.add('verborgen');
+    var _minUntil = window._dyMinSpinnerUntil || 0;
+    var _delay = Math.max(0, _minUntil - Date.now());
     setTimeout(function() {
-      if (initLoader && initLoader.parentNode) initLoader.parentNode.removeChild(initLoader);
-    }, 350);
+      var _l = document.getElementById('dy-initial-loader');
+      if (_l && !_l.classList.contains('verborgen')) {
+        _l.classList.add('verborgen');
+        setTimeout(function() {
+          if (_l && _l.parentNode) _l.parentNode.removeChild(_l);
+        }, 350);
+      }
+    }, _delay);
   }
   // Annuleer skeleton timeout als die nog loopt
   if (window._dySkeletonTimeout) { clearTimeout(window._dySkeletonTimeout); window._dySkeletonTimeout = null; }

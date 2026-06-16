@@ -126,6 +126,9 @@
     // zichtbaar is in DOM, niet ook nog een eigen sheet tonen.
     var inlineBanner = document.getElementById('dy-install-banner');
     if (inlineBanner && inlineBanner.style && inlineBanner.style.display === 'flex') return;
+    // v60.1.110: als bottom-sheet activeren, verberg de inline banner permanent
+    // voor deze sessie zodat we nooit 2 install-CTA's tegelijk hebben.
+    if (inlineBanner) { inlineBanner.style.display = 'none'; }
     var el = buildShell();
     el.innerHTML =
       '<div class="head">' +
@@ -166,6 +169,7 @@
     } catch(e) {}
     var inlineBanner = document.getElementById('dy-install-banner');
     if (inlineBanner && inlineBanner.style && inlineBanner.style.display === 'flex') return;
+    if (inlineBanner) { inlineBanner.style.display = 'none'; }
     var el = buildShell();
     el.innerHTML =
       '<div class="head">' +

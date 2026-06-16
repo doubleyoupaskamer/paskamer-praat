@@ -1809,16 +1809,85 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
 .dy-niveau-rij-info span { font-size: var(--t-xs); color: rgba(253,248,240,0.40); line-height: 1.5; }
 .dy-niveau-rij-pts { font-size: var(--t-sm); font-weight: 700; color: var(--clay); white-space: nowrap; }
 
-.dy-auth-wrap { min-height: calc(100vh - var(--topbar-h) - var(--nav-h)); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--sp-8) var(--sp-5); background: var(--cream); }
-.dy-auth-card { width: 100%; max-width: 380px; }
-.dy-auth-logo { text-align: center; margin-bottom: var(--sp-8); }
-.dy-auth-w { font-family: 'Cormorant Garamond', serif; font-size: var(--t-3xl); font-weight: 700; color: var(--clay); line-height: 1; }
-.dy-auth-brand { font-family: 'DM Sans', sans-serif; font-size: var(--t-lg); font-weight: 800; color: var(--ink); }
-.dy-auth-sub { font-size: var(--t-xs); color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: var(--sp-1); }
-.dy-auth-title { font-size: var(--t-xl); font-weight: 800; color: var(--ink); margin-bottom: var(--sp-2); font-family: 'DM Sans', sans-serif; }
+.dy-auth-wrap {
+  min-height: calc(100vh - var(--topbar-h) - var(--nav-h));
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: var(--sp-8) var(--sp-5);
+  background:
+    radial-gradient(circle at 15% 15%, rgba(198,125,6,0.10) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(198,125,6,0.06) 0%, transparent 50%),
+    linear-gradient(180deg, #fdf8f0 0%, #f5edda 100%);
+  position: relative;
+  overflow: hidden;
+}
+.dy-auth-wrap::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(rgba(30,26,15,0.025) 1px, transparent 1px),
+    radial-gradient(rgba(30,26,15,0.015) 1px, transparent 1px);
+  background-size: 24px 24px, 12px 12px;
+  background-position: 0 0, 12px 12px;
+  opacity: 0.6;
+}
+.dy-auth-wrap > * { position: relative; z-index: 1; }
+.dy-auth-card {
+  width: 100%; max-width: 400px;
+  background: rgba(253,248,240,0.92);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(198,125,6,0.18);
+  border-radius: 24px;
+  padding: var(--sp-7) var(--sp-6) var(--sp-6);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 24px 48px -16px rgba(30,26,15,0.18),
+    0 4px 12px -2px rgba(30,26,15,0.06);
+}
+.dy-auth-logo { text-align: center; margin-bottom: var(--sp-7); }
+.dy-auth-w {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3.4rem; font-weight: 700; color: var(--clay);
+  line-height: 1;
+  text-shadow: 0 2px 24px rgba(198,125,6,0.30);
+  letter-spacing: -0.02em;
+}
+.dy-auth-brand {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.35rem; font-weight: 800;
+  color: var(--ink);
+  margin-top: var(--sp-2);
+  letter-spacing: -0.01em;
+}
+.dy-auth-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.72rem; font-weight: 600;
+  color: var(--clay);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin-top: var(--sp-1);
+}
+.dy-auth-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem; font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 var(--sp-2);
+  letter-spacing: -0.01em;
+}
 .dy-auth-sub-small { font-size: var(--t-sm); color: var(--ink-muted); margin-bottom: var(--sp-5); line-height: 1.6; }
-.dy-auth-err { color: var(--danger); font-size: var(--t-sm); margin-top: var(--sp-2); padding: var(--sp-2) var(--sp-3); background: rgba(192,57,43,0.06); border-radius: var(--r-sm); border: 1px solid rgba(192,57,43,0.15); display: none; }
-.dy-auth-note { font-size: var(--t-sm); color: var(--ink-muted); text-align: center; margin-top: var(--sp-4); line-height: 1.6; }
+.dy-auth-err {
+  color: var(--danger); font-size: var(--t-sm);
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-3);
+  background: rgba(192,57,43,0.06);
+  border-radius: var(--r-md);
+  border: 1px solid rgba(192,57,43,0.18);
+  display: none;
+}
+.dy-auth-note {
+  font-size: var(--t-sm); color: var(--ink-muted);
+  text-align: center; margin-top: var(--sp-5);
+  line-height: 1.6;
+}
 
 .dy-rv-kaart-grid {
   display: flex;
