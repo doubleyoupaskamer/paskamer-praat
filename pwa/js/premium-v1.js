@@ -29,8 +29,8 @@
   var PP_SHOPIFY_PREMIUM = {
     shop_domain: 'doubleyousmallandtall.nl',
     variants: {
-      'monthly': '',   // <-- Variant-ID voor "Doubleyou Premium - 1 maand" (€4,99)
-      'yearly':  ''    // <-- (optioneel) Variant-ID voor jaarabonnement
+      'monthly': '57525570273624',   // Variant-ID voor "Premium Paskamerpraat" (€4,99 / maand)
+      'yearly':  ''                  // (optioneel) Variant-ID voor jaarabonnement
     },
     return_path: '/?premium=success'
   };
