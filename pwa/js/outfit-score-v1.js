@@ -82,6 +82,14 @@
       '.dy-score-detail .dy-score-detail-badge{background:#c89b3c;color:#1e1a0f;border-radius:999px;',
       '  padding:3px 10px;font:800 13px/1 "DM Sans",sans-serif;min-width:30px;text-align:center}',
       '.dy-score-detail .dy-score-detail-label{font-weight:700;font-size:14px;color:#1e1a0f}',
+      /* Chips rij voor herkende stijl + kledingstukken */
+      '.dy-score-detail .dy-score-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;padding-right:28px}',
+      '.dy-score-detail .dy-score-chip{display:inline-flex;align-items:center;',
+      '  background:rgba(200,155,60,.12);color:#1e1a0f;border:1px solid rgba(200,155,60,.32);',
+      '  border-radius:999px;padding:3px 10px;font:500 11px/1.3 "DM Sans",sans-serif;',
+      '  letter-spacing:.01em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+      '.dy-score-detail .dy-score-chip-stijl{background:#c89b3c;color:#1e1a0f;',
+      '  border-color:#c89b3c;font-weight:700;text-transform:capitalize}',
       '.dy-score-detail .summary{font-weight:600;margin:0 0 8px;color:#1e1a0f}',
       '.dy-score-detail .tips{margin:8px 0 0;padding-left:0;list-style:none}',
       '.dy-score-detail .tips li{padding:6px 0 6px 22px;position:relative;color:#3b3624;font-weight:500}',
@@ -323,6 +331,24 @@
       var palHtml = (data.color_palette || []).map(function(c) {
         return '<span class="swatch" style="background:' + escapeHtml(c) + '" title="' + escapeHtml(c) + '"></span>';
       }).join('');
+      // v60.1.88: chips voor stijl + herkende kledingstukken zodat de
+      // gebruiker direct ziet WAAR de AI naar gekeken heeft. Bouwt
+      // vertrouwen ("AI heeft mijn hoodie herkend") en maakt foutieve
+      // herkenning meteen zichtbaar.
+      var chipParts = [];
+      if (data.stijl) {
+        chipParts.push('<span class="dy-score-chip dy-score-chip-stijl">' +
+          escapeHtml(String(data.stijl)) + '</span>');
+      }
+      if (data.kledingstukken && data.kledingstukken.length) {
+        for (var ki = 0; ki < Math.min(data.kledingstukken.length, 4); ki++) {
+          chipParts.push('<span class="dy-score-chip">' +
+            escapeHtml(String(data.kledingstukken[ki])) + '</span>');
+        }
+      }
+      var chipsHtml = chipParts.length
+        ? '<div class="dy-score-chips" data-testid="outfit-score-chips">' + chipParts.join('') + '</div>'
+        : '';
       detail.innerHTML =
         '<button type="button" class="dy-score-close" aria-label="Sluiten" data-testid="outfit-score-close">' +
           '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">' +
@@ -332,6 +358,7 @@
           '<span class="dy-score-detail-badge">' + escapeHtml(String(data.score)) + '</span>' +
           '<span class="dy-score-detail-label">' + escapeHtml(data.label || 'Style Score') + '</span>' +
         '</div>' +
+        chipsHtml +
         '<div class="summary">' + escapeHtml(data.summary || '') + '</div>' +
         '<ul class="tips">' + tipsHtml + '</ul>' +
         (palHtml ? '<div class="palette"><small>Palet:</small>' + palHtml + '</div>' : '');
