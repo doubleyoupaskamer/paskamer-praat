@@ -165,10 +165,8 @@
     try {
       var current = (window.DY && window.DY.pagina) || null;
       if (current !== lastPagina) {
-        if (lastPagina !== null) {
-          // Echte route-wissel (niet de eerste check)
-          closeAllOverlays('route-change');
-        }
+        // v60.1.102: GEEN cleanup meer op route-change. Was bron van
+        // bug waarbij menu-items die navigeerden hun eigen modal sloten.
         lastPagina = current;
       }
     } catch (e) { /* noop */ }
@@ -181,11 +179,14 @@
     try { lastPagina = (window.DY && window.DY.pagina) || null; } catch (e) { /* noop */ }
 
     window.addEventListener('hashchange', function () {
-      closeAllOverlays('hashchange');
+      // v60.1.102: closeAllOverlays op hashchange UITGESCHAKELD.
+      // Reden: hamburger menu items navigeren via hashchange en triggeren
+      // dan nieuwe modals. Mijn cleanup sloot die modals direct weer.
+      // We blijven WEL route-change tracken voor route-change events,
+      // maar zonder overlays te sluiten.
       checkRouteChange();
     });
     window.addEventListener('popstate', function () {
-      closeAllOverlays('popstate');
       checkRouteChange();
     });
     document.addEventListener('pp:refreshed', function () {

@@ -9,7 +9,7 @@
   if (window.PP_BRAND) return;
 
   // Versie wordt bij elke release gebumpt; UI leest hier vanaf.
-  var APP_VERSION = 'v60.1.101';
+  var APP_VERSION = 'v60.1.102';
 
   function formatDateNL(d) {
     try {
