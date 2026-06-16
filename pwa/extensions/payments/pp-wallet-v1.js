@@ -34,10 +34,10 @@
   var PP_SHOPIFY_TOPUPS = {
     shop_domain: 'doubleyousmallandtall.nl',  // jouw custom domein
     variants: {
-      '25':  '',   // <-- Variant-ID voor €25 top-up
-      '50':  '',   // <-- Variant-ID voor €50 top-up
-      '100': '',   // <-- Variant-ID voor €100 top-up
-      '250': ''    // <-- Variant-ID voor €250 top-up
+      '25':  '57524873855320',   // Variant-ID voor €25 top-up
+      '50':  '57524878410072',   // Variant-ID voor €50 top-up
+      '100': '57524916879704',   // Variant-ID voor €100 top-up
+      '250': '57524918616408'    // Variant-ID voor €250 top-up
     },
     return_path: '/?pagina=wallet&topup=success'
   };
