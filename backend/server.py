@@ -686,10 +686,28 @@ async def outfit_score(req: OutfitScoreRequest):
                     photo_source = "server-fetched"
         except Exception as e:
             logger.warning("Outfit score: server-side image fetch mislukte: %s", e)
-    if not api_key or not b64:
+    if (not api_key) or (not b64):
         out = _outfit_score_fallback(req)
         out["photo_source"] = photo_source
         return out
+
+    # v60.1.92: sanity check - b64 payload moet redelijke image-grootte
+    # hebben. Te klein = placeholder/icon/avatar = niet scoren.
+    try:
+        import base64 as _b64check
+        raw_len = len(_b64check.b64decode(b64, validate=False))
+        if raw_len < 8 * 1024:                       # < 8KB
+            logger.warning(
+                "Outfit score: image te klein (%d bytes), waarschijnlijk "
+                "placeholder/avatar. Geen analyse, fallback met note.",
+                raw_len
+            )
+            out = _outfit_score_fallback(req)
+            out["photo_source"] = photo_source
+            out["error_hint"] = "image-too-small"
+            return out
+    except Exception:
+        pass
 
     system_prompt = (
         "Je bent een professionele Tall & Plus Size fashion stylist voor Doubleyou. "

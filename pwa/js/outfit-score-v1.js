@@ -142,69 +142,29 @@
     var postId = card.getAttribute('data-post-id') ||
                  card.id ||
                  (card.querySelector('[data-post-id]') && card.querySelector('[data-post-id]').getAttribute('data-post-id'));
-    // v60.1.90: KRITIEKE fix - zoek eerst in bekende foto-containers.
-    // Vorige largest-img heuristiek pakte soms de USER AVATAR (william)
-    // omdat die op Firebase Storage op hoge resolutie (256+) opgeslagen
-    // staat. Drie verschillende posts gaven daardoor IDENTIEKE analyse
-    // van diezelfde avatar (paars overhemd + stropdas).
-    //
-    // Strategie:
-    // 1. Probeer EERST de canonieke outfit-foto-container van een card
-    //    (`.dy-reel-foto`, `.dy-reel-foto-wrap img`, `.dy-feed-img`,
-    //     `.dy-feed-photo img`, `.dy-post-photo img`).
-    // 2. Als die niet bestaat: pak de grootste img die GEEN avatar is,
-    //    met een hogere min-grootte (480px) zodat avatars uitvallen.
-    var img = null;
-    var photoSelectors = [
-      '[data-pp-outfit-img]',                          // v60.1.91: expliciete marker (snelste pad)
-      '.dy-reel-bg-img-main',                          // v60.1.91: hoofd-outfit-foto in reel
-      '.dy-reel-foto-wrap img', '.dy-reel-foto', '.dy-reel-img',
-      '.dy-feed-photo img', '.dy-feed-img', '.dy-feed-foto-wrap img',
-      '.dy-post-foto img', '.dy-post-photo img', '.dy-post-img',
-      '[data-outfit-photo] img',
-      'figure img', '.dy-card-photo img'
-    ];
-    for (var s = 0; s < photoSelectors.length; s++) {
-      var found = card.querySelector(photoSelectors[s]);
-      if (found && found.tagName === 'IMG') {
-        // Verifieer dat het geladen is en redelijk groot
-        var nw0 = found.naturalWidth || 0;
-        var nh0 = found.naturalHeight || 0;
-        if (nw0 >= 200 && nh0 >= 200) { img = found; break; }
-      }
+    // v60.1.92: FINALE STRIKTE detectie. Geen heuristiek meer.
+    // Alleen exact deze 2 selectors mogen de outfit-foto leveren:
+    //   1. [data-pp-outfit-img] (expliciete marker in pwa-v463 sinds v60.1.91)
+    //   2. .dy-reel-bg-img-main (canonieke class voor de hero-foto)
+    // Bij ALLE andere img's (avatars, badges, stories, profielfoto's):
+    // NIET scoren. Geen analyse > verkeerde analyse.
+    var img = card.querySelector('[data-pp-outfit-img]') ||
+              card.querySelector('img.dy-reel-bg-img-main');
+    if (!img) return { postId: postId, imgUrl: null, img: null };
+    // Verifieer dat het GEEN avatar parent heeft (defense in depth)
+    if (img.closest && img.closest([
+      '.dy-avatar', '.dy-avatar-wrap', '.dy-story-circle', '.dy-story-bar',
+      '.dy-stories-bar', '.dy-prof-mini', '.dy-badge', '.dy-niveau-badge',
+      '.dy-feed-author', '.dy-reel-author', '.dy-post-author',
+      '.dy-feed-header', '.dy-reel-header', '.dy-post-header'
+    ].join(','))) {
+      return { postId: postId, imgUrl: null, img: null };
     }
-    // Fallback: scan alle img'en maar met STRENGE filter
-    if (!img) {
-      var imgs = card.querySelectorAll('img');
-      var best = null;
-      var bestArea = 0;
-      for (var i = 0; i < imgs.length; i++) {
-        var im = imgs[i];
-        // Hard skip: alles wat avatar/badge/icon/story-achtig is
-        if (im.matches && im.matches([
-          '.dy-avatar', '[data-pp-avatar]', '[data-pp-skeleton]',
-          '.dy-feed-avatar', '.dy-reel-avatar', '.dy-post-avatar',
-          '.dy-user-avatar', '.dy-prof-mini-img', '.dy-niveau-badge img'
-        ].join(','))) continue;
-        if (im.closest && im.closest([
-          '.dy-story-circle', '.dy-avatar', '.dy-avatar-wrap',
-          '.dy-story-bar', '.dy-stories-bar', '.dy-prof-mini',
-          '.dy-badge', '.dy-niveau-badge', '.dy-user-info',
-          '.dy-reel-author', '.dy-feed-author', '.dy-post-author',
-          '.dy-reel-header', '.dy-feed-header', '.dy-post-header',
-          'header'   // generieke header in een card
-        ].join(','))) continue;
-        var nw = im.naturalWidth || 0;
-        var nh = im.naturalHeight || 0;
-        // v60.1.90: van 120 naar 480px. Outfit foto's zijn altijd
-        // groter; avatars (zelfs 256x256 op Firebase) vallen uit.
-        if (nw < 480 || nh < 480) continue;
-        var area = nw * nh;
-        if (area > bestArea) { bestArea = area; best = im; }
-      }
-      img = best;
+    var imgUrl = img.currentSrc || img.src || null;
+    // Skip lege/placeholder src
+    if (!imgUrl || imgUrl.indexOf('data:image/gif') === 0 || imgUrl.length < 20) {
+      return { postId: postId, imgUrl: null, img: null };
     }
-    var imgUrl = img ? (img.currentSrc || img.src) : null;
     return { postId: postId, imgUrl: imgUrl, img: img };
   }
 
