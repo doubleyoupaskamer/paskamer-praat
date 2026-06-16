@@ -47,7 +47,7 @@
     // Outfit-score popups en backdrop
     '.dy-score-detail.is-sheet',
     '.dy-score-backdrop',
-    // v60.1.99: CORRECTE IDs voor hamburger popover (waren fout in v60.1.97)
+    // v60.1.100: CORRECTE IDs voor hamburger popover + backdrop + button
     '#dy-card-hub-pop',
     '#dy-card-hub-backdrop',
     '.dy-card-hub-btn.open',
@@ -60,8 +60,46 @@
     '.dy-modal.dy-modal-open',
     '.dy-modal-overlay',
     '.dy-overlay',
-    // Toasts kunnen blijven; geen targeting
   ];
+
+  // v60.1.100: overlay GROEPEN - bij-elkaar-horende elementen.
+  // Wanneer een element uit groep X opent, blijven ALLE andere elementen
+  // van groep X open (button + backdrop + popover gaan samen).
+  // Anderen groepen worden gesloten.
+  var OVERLAY_GROUPS = [
+    // Hamburger menu groep
+    ['#dy-card-hub-pop', '#dy-card-hub-backdrop', '.dy-card-hub-btn.open'],
+    // Outfit-score popup groep
+    ['.dy-score-detail.is-sheet', '.dy-score-backdrop'],
+    // Premium modal groep
+    ['#dy-prem-overlay', '#dy-prem-manage-overlay'],
+    // TOS banner
+    ['#pp-legal-banner'],
+  ];
+
+  function groupOfElement(el) {
+    if (!el) return null;
+    for (var g = 0; g < OVERLAY_GROUPS.length; g++) {
+      var grp = OVERLAY_GROUPS[g];
+      for (var s = 0; s < grp.length; s++) {
+        try {
+          if (el.matches && el.matches(grp[s])) return grp;
+          if (el.id && el.id === grp[s].replace(/^#/, '')) return grp;
+        } catch (e) { /* noop */ }
+      }
+    }
+    return null;
+  }
+
+  function isInGroup(el, group) {
+    if (!group) return false;
+    for (var s = 0; s < group.length; s++) {
+      try {
+        if (el.matches && el.matches(group[s])) return true;
+      } catch (e) { /* noop */ }
+    }
+    return false;
+  }
 
   function closeAllOverlays(reason, exceptEl) {
     var removed = 0;
