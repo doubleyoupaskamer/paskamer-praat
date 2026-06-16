@@ -1930,7 +1930,7 @@ DY.renderLogin = function() {
       <div class="dy-auth-logo">
         <div class="dy-auth-w">W</div>
         <div class="dy-auth-brand">DoubleYou</div>
-        <div class="dy-auth-sub">Doubleyou</div>
+        <div class="dy-auth-sub">Paskamerpraat</div>
       </div>
       <div class="dy-auth-card">
         <h2 class="dy-auth-title">Inloggen</h2>
@@ -2010,7 +2010,7 @@ DY.renderRegister = function() {
       <div class="dy-auth-logo">
         <div class="dy-auth-w">W</div>
         <div class="dy-auth-brand">DoubleYou</div>
-        <div class="dy-auth-sub">Doubleyou</div>
+        <div class="dy-auth-sub">Paskamerpraat</div>
       </div>
       <div class="dy-auth-card">
         <h2 class="dy-auth-title">Account aanmaken</h2>
@@ -3082,11 +3082,11 @@ DY.toonBodyPositivityOverlay = function() {
         '<span class="dy-bpos-w">W</span>' +
         '<div>' +
           '<span class="dy-bpos-titel">Body Positivity Reglement</span>' +
-          '<span class="dy-bpos-sub">Doubleyou Community</span>' +
+          '<span class="dy-bpos-sub">Paskamerpraat Community</span>' +
         '</div>' +
       '</div>' +
       '<div class="dy-bpos-content">' +
-        '<p class="dy-bpos-welkom">Welkom bij DoubleYou Doubleyou. Onze community draait om <strong>zelfvertrouwen, respect en inclusiviteit</strong>.</p>' +
+        '<p class="dy-bpos-welkom">Welkom bij Doubleyou Paskamerpraat. Onze community draait om <strong>zelfvertrouwen, respect en inclusiviteit</strong>.</p>' +
         '<div class="dy-bpos-regels">' +
           '<div class="dy-bpos-regel"><span class="dy-bpos-nr">1</span><div><strong>Respect voor ieder lichaam</strong><p>Geen discriminatie over gewicht, lengte, lichaamsvorm, huidskleur of kledingstijl.</p></div></div>' +
           '<div class="dy-bpos-regel"><span class="dy-bpos-nr">2</span><div><strong>Geen bodyshaming</strong><p>Kwetsende opmerkingen, vernederende vergelijkingen en pestgedrag zijn verboden.</p></div></div>' +
