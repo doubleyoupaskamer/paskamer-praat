@@ -239,20 +239,30 @@
     } catch (e) { /* noop */ }
   }
 
-  async function fetchScore(imgUrl, requestId) {
-    // Image → base64 (via canvas, vermijdt CORS issues van Firebase Storage)
-    var b64 = await imageUrlToB64(imgUrl);
+  async function fetchScore(imgUrl, requestId, imgElement) {
+    // v60.1.89: probeer eerst de bestaande <img> direct te lezen via
+    // canvas (zonder NIEUWE Image() met crossOrigin - die faalt vaak
+    // op Firebase Storage URLs zonder CORS). Bij security/CORS-fout
+    // sturen we ALLEEN de URL en laat backend het zelf fetchen.
+    var b64 = null;
+    try {
+      b64 = await imageElementToB64(imgElement, imgUrl);
+    } catch (e) {
+      console.info('[outfit-score] client-side b64 mislukt, server-side fetch via URL:', e && e.message);
+    }
     var hash = imgHash(imgUrl);
+    var payload = {
+      photo_mime: 'image/jpeg',
+      photo_url: imgUrl,
+      uid: getUid(),
+      request_id: requestId,
+      image_hash: hash
+    };
+    if (b64) payload.photo_b64 = b64;
     var res = await fetch(apiBase() + '/api/outfit-score', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        photo_b64: b64,
-        photo_mime: 'image/jpeg',
-        uid: getUid(),
-        request_id: requestId,
-        image_hash: hash
-      })
+      body: JSON.stringify(payload)
     });
     if (!res.ok) {
       var t = await res.text();
@@ -274,26 +284,44 @@
     return data;
   }
 
-  function imageUrlToB64(url) {
-    return new Promise(function(resolve, reject) {
-      var img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = function() {
+  // v60.1.89: probeer eerst bestaande img te canvassen (geen extra
+  // network request). Bij CORS-tainting throw'en we; backend doet
+  // dan server-side fetch.
+  function imageElementToB64(existingImg, url) {
+    return new Promise(function (resolve, reject) {
+      function drawAndExport(im) {
         try {
           var maxSide = 1024;
-          var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+          var w = im.naturalWidth || im.width, h = im.naturalHeight || im.height;
+          if (!w || !h) return reject(new Error('no-dims'));
           if (w > maxSide || h > maxSide) {
             if (w > h) { h = Math.round(h * (maxSide / w)); w = maxSide; }
             else       { w = Math.round(w * (maxSide / h)); h = maxSide; }
           }
           var c = document.createElement('canvas'); c.width = w; c.height = h;
-          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          c.getContext('2d').drawImage(im, 0, 0, w, h);
+          // toDataURL kan SecurityError throwen bij tainted canvas
           resolve(c.toDataURL('image/jpeg', 0.84).split(',')[1]);
         } catch (e) { reject(e); }
-      };
-      img.onerror = function() { reject(new Error('img load fail')); };
+      }
+      // Snelste pad: gebruik bestaande img element
+      if (existingImg && existingImg.complete && existingImg.naturalWidth) {
+        try {
+          drawAndExport(existingImg);
+          return;
+        } catch (e) { /* fall through */ }
+      }
+      // Fallback: laad opnieuw met crossOrigin (werkt alleen bij correct CORS)
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function () { drawAndExport(img); };
+      img.onerror = function () { reject(new Error('img load fail')); };
       img.src = url;
     });
+  }
+
+  function imageUrlToB64(url) {
+    return imageElementToB64(null, url);
   }
 
   function renderPill(card, data, postId) {
@@ -449,7 +477,7 @@
     var loadingHost = renderLoading(card, pid);
     try {
       var reqId = newReqId();
-      var data = await fetchScore(info.imgUrl, reqId);
+      var data = await fetchScore(info.imgUrl, reqId, info.img);
       // v59 guard: kaart kan recycled zijn voordat response binnen is
       var nowInfo = getPostInfo(card);
       if (nowInfo.imgUrl !== info.imgUrl) {

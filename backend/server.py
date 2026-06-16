@@ -629,6 +629,7 @@ async def stripe_webhook(request: Request):
 # ════════════════════════════════════════════════════════════════════════
 class OutfitScoreRequest(BaseModel):
     photo_b64: Optional[str] = None
+    photo_url: Optional[str] = None        # v60.1.89: server-side fetch optie
     photo_mime: Optional[str] = "image/jpeg"
     uid: Optional[str] = None
     request_id: Optional[str] = None
@@ -663,8 +664,32 @@ def _outfit_score_fallback(req: OutfitScoreRequest) -> dict:
 @api_router.post("/outfit-score")
 async def outfit_score(req: OutfitScoreRequest):
     api_key = os.environ.get("EMERGENT_LLM_KEY")
-    if not api_key or not req.photo_b64:
-        return _outfit_score_fallback(req)
+    # v60.1.89: als photo_b64 ontbreekt maar photo_url is gegeven,
+    # fetch de afbeelding server-side. Dit omzeilt browser-CORS issues
+    # bij Firebase Storage (was bron van hallucinatie: canvas raakte
+    # tainted, toDataURL gaf leeg beeld, Gemini hallucineerde dan een
+    # generieke "overhemd + stropdas" outfit).
+    b64 = req.photo_b64
+    photo_source = "client-b64"
+    if (not b64) and req.photo_url:
+        try:
+            import base64 as _b64lib
+            import httpx
+            async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as cx:
+                r = await cx.get(req.photo_url, headers={"User-Agent": "Doubleyou/1.0"})
+                r.raise_for_status()
+                ct = (r.headers.get("content-type") or "").lower()
+                if not ct.startswith("image/"):
+                    logger.warning("Outfit score: photo_url niet image content-type: %s", ct)
+                else:
+                    b64 = _b64lib.b64encode(r.content).decode("ascii")
+                    photo_source = "server-fetched"
+        except Exception as e:
+            logger.warning("Outfit score: server-side image fetch mislukte: %s", e)
+    if not api_key or not b64:
+        out = _outfit_score_fallback(req)
+        out["photo_source"] = photo_source
+        return out
 
     system_prompt = (
         "Je bent een professionele Tall & Plus Size fashion stylist voor Doubleyou. "
@@ -707,7 +732,6 @@ async def outfit_score(req: OutfitScoreRequest):
         ).with_model("gemini", "gemini-3.1-pro-preview")
 
         # Strip eventuele data:URL prefix
-        b64 = req.photo_b64
         if b64.startswith("data:"):
             try:
                 b64 = b64.split(",", 1)[1]
@@ -786,6 +810,7 @@ async def outfit_score(req: OutfitScoreRequest):
             "stijl": stijl or None,
             "kledingstukken": kledingstukken,
             "source": "gemini-3.1-pro-preview",
+            "photo_source": photo_source,
             "request_id": req.request_id,
             "image_hash": req.image_hash,
         }
