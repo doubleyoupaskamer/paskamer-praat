@@ -2941,8 +2941,8 @@ DY.renderFeed = function() {
     '<div class="dy-feed-nav-strip">' + DY.feedNavLinksHTML() + '</div>' +
     '<div id="dy-feed-filters" class="dy-filters">' +
       '<button class="dy-filter active" data-filter="recent" onclick="DY.setFilter(this.dataset.filter,this)">Ontdek ⭐</button>' +
-      '<button class="dy-filter" data-filter="vergelijk" onclick="DY.setFilter(this.dataset.filter,this)">Mijn postuur 🧍' + (!DY.user ? ' 🔒' : '') + '</button>' +
       '<button class="dy-filter" data-filter="populair" onclick="DY.setFilter(this.dataset.filter,this)">Trending 🔥</button>' +
+      '<button class="dy-filter" data-filter="vergelijk" onclick="DY.setFilter(this.dataset.filter,this)">Mijn postuur 🧍' + (!DY.user ? ' 🔒' : '') + '</button>' +
       (DY.user ? '<button class="dy-filter" data-filter="mijn" onclick="DY.setFilter(this.dataset.filter,this)">Mijn posts</button>' : '') +
     '</div>' +
     '<div id="dy-verhalen" class="dy-feed-reel"></div>' +

@@ -142,13 +142,13 @@
         e.preventDefault();
         handleUitgelichtClick(btn);
       });
-      // v60.1.95: Uitgelicht ALS EERSTE tab (vóór "Ontdek").
-      // Volgorde: Uitgelicht -> Ontdek -> Mijn postuur -> Trending
+      // v60.1.96: Uitgelicht NA Ontdek. Volgorde:
+      // Ontdek -> Uitgelicht -> Trending -> Mijn postuur
       var ontdek = bar.querySelector('[data-filter="recent"]');
-      if (ontdek) {
-        bar.insertBefore(btn, ontdek);
-      } else if (bar.firstChild) {
-        bar.insertBefore(btn, bar.firstChild);
+      if (ontdek && ontdek.nextSibling) {
+        bar.insertBefore(btn, ontdek.nextSibling);
+      } else if (ontdek) {
+        bar.appendChild(btn);
       } else {
         bar.appendChild(btn);
       }
