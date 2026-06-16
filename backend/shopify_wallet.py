@@ -182,6 +182,18 @@ async def health():
     }
 
 
+@wallet_router.get("/setup-url")
+async def setup_url(request: Request):
+    """
+    Eenvoudige plaintext page met DE webhook-URL die je in Shopify moet plakken.
+    Open deze URL in je browser, selecteer-alles (Ctrl+A) en kopieer.
+    Geen chat-highlight contamination.
+    """
+    from fastapi.responses import PlainTextResponse
+    url = "https://paskamer-stability.preview.emergentagent.com/api/wallet/webhook/shopify"
+    return PlainTextResponse(url)
+
+
 @wallet_router.post("/webhook/shopify")
 async def shopify_webhook(request: Request,
                           x_shopify_hmac_sha256: Optional[str] = Header(None),
