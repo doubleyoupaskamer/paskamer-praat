@@ -8034,7 +8034,7 @@ DY.toonLoginPrompt = function(reden, opties) {
         '<span class="dy-login-sheet-w">W</span>' +
         '<div class="dy-login-sheet-merk-tekst">' +
           '<span class="dy-login-sheet-merk-naam">Doubleyou</span>' +
-          '<span class="dy-login-sheet-merk-sub">door DoubleYou</span>' +
+          '<span class="dy-login-sheet-merk-sub">Paskamerpraat</span>' +
         '</div>' +
       '</div>' +
 
