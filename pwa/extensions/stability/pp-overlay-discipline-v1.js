@@ -201,55 +201,12 @@
     // Veiligheidsnet: poll elke 2s voor stille route changes via DY.pagina
     setInterval(checkRouteChange, 2000);
 
-    // SINGLE ACTIVE SURFACE enforcement via MutationObserver.
-    // Zodra een nieuwe overlay verschijnt in de DOM tree, sluit alle
-    // bestaande overlays behalve de nieuwe. Voorkomt dat hamburger
-    // popover + Premium modal samen open kunnen staan.
-    try {
-      var mo = new MutationObserver(function (muts) {
-        for (var i = 0; i < muts.length; i++) {
-          var m = muts[i];
-          if (!m.addedNodes || !m.addedNodes.length) continue;
-          for (var j = 0; j < m.addedNodes.length; j++) {
-            var n = m.addedNodes[j];
-            if (n.nodeType !== 1) continue;
-            if (isOverlayNode(n)) {
-              // Wacht 1 animation frame zodat het nieuwe element zeker
-              // gerenderd is voor we de oude opruimen.
-              (function (newEl) {
-                requestAnimationFrame(function () {
-                  enforceSingleActive(newEl);
-                });
-              })(n);
-              return;
-            }
-          }
-        }
-      });
-      mo.observe(document.body, { childList: true, subtree: false });
-
-      // Ook 'class change' op .dy-card-hub-btn detecteren (hamburger
-      // gebruikt class toggle, niet element-add). Zelfde principe.
-      var moCls = new MutationObserver(function (muts) {
-        for (var i = 0; i < muts.length; i++) {
-          var m = muts[i];
-          if (m.type !== 'attributes' || m.attributeName !== 'class') continue;
-          var target = m.target;
-          if (target && target.classList && target.classList.contains('open') &&
-              target.classList.contains('dy-card-hub-btn')) {
-            // Hamburger zojuist geopend - sluit alle andere overlays
-            (function (newEl) {
-              requestAnimationFrame(function () {
-                enforceSingleActive(newEl);
-              });
-            })(target);
-          }
-        }
-      });
-      moCls.observe(document.body, {
-        attributes: true, attributeFilter: ['class'], subtree: true
-      });
-    } catch (e) { /* noop */ }
+    // v60.1.101: MutationObservers voor single-active-surface UITGESCHAKELD.
+    // Reden: ze conflicteerden met extra-menu-v3.js eigen lifecycle en
+    // braken het hamburger menu. Single-active-surface wordt nu alleen
+    // afgedwongen op route-change events (hashchange/popstate/logout).
+    // Premium modal + hamburger samen open is visueel niet ideaal, maar
+    // werkbaar - en de hamburger werkt nu weer correct, wat belangrijker is.
 
     // Escape-toets als globale "sluit-alle-overlays" handler
     document.addEventListener('keydown', function (ev) {

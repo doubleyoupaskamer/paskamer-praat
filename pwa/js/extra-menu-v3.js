@@ -335,6 +335,15 @@
     dy-crown-glow   3.2s ease-in-out infinite;
   transform-origin: 50% 90%;
 }
+/* v60.1.101: harde guarantee dat kroon ALTIJD goud blijft */
+.dy-card-hub-crown path,
+.dy-card-hub-crown rect {
+  fill: #e8b94a !important;
+  stroke: #5a3a08 !important;
+}
+.dy-card-hub-crown circle {
+  fill: #fff5d6 !important;
+}
 .${BTN_CLASS}:hover .dy-card-hub-crown {
   animation: dy-crown-shimmer 0.9s ease-in-out 1, dy-crown-glow 3.2s ease-in-out infinite;
 }
