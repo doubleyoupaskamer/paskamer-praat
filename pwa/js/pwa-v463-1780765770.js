@@ -1998,8 +1998,12 @@ DY.renderLogin = function() {
   document.getElementById('btn-reset').onclick = async () => {
     const email = document.getElementById('login-email').value.trim();
     if (!email) { DY.toast('Vul eerst je e-mailadres in.'); return; }
-    await DY.resetPassword(email);
-    DY.toast('✓ Resetmail verstuurd. Check je inbox.');
+    try {
+      await DY.resetPassword(email);
+      DY.toast('✓ Resetmail verstuurd. Check je inbox.');
+    } catch(e) {
+      DY.toast('Resetmail versturen mislukt. Controleer je e-mailadres.');
+    }
   };
 
   var _loginPw = document.getElementById('login-pw');

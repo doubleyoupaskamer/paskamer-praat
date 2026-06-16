@@ -23,6 +23,16 @@
   var BUFFER_MAX = 50;
   var buffer = [];
 
+  // Merge early-bootstrap buffer (zie inline script in index.html head)
+  try {
+    if (window.__dyEarlyBuffer && window.__dyEarlyBuffer.length) {
+      for (var _i = 0; _i < window.__dyEarlyBuffer.length && buffer.length < BUFFER_MAX; _i++) {
+        buffer.push(window.__dyEarlyBuffer[_i]);
+      }
+      window.__dyEarlyBuffer.length = 0;
+    }
+  } catch (e) { /* ignore */ }
+
   function bufferPush(entry) {
     buffer.push(entry);
     if (buffer.length > BUFFER_MAX) buffer.shift();
