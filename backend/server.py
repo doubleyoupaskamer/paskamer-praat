@@ -668,19 +668,34 @@ async def outfit_score(req: OutfitScoreRequest):
 
     system_prompt = (
         "Je bent een professionele Tall & Plus Size fashion stylist voor Doubleyou. "
-        "Analyseer de outfit op de foto en geef een gestructureerde score. "
+        "Je krijgt EEN foto van een outfit. Volg STRIKT deze stappen:\n"
+        "STAP 1 - KIJK ZORGVULDIG naar de foto. Identificeer per kledingstuk:\n"
+        "  - Type (bv. hoodie, sweater, T-shirt, blouse, overhemd, jurk, broek, "
+        "joggingbroek, jeans, rok, blazer, jas, schoenen, sneakers, etc.)\n"
+        "  - Kleur (specifieke benoeming)\n"
+        "  - Stijlcategorie: sportief / casual / smart-casual / zakelijk / avond / lounge\n"
+        "STAP 2 - Bepaal de DOMINANTE stijlcategorie van de OUTFIT als geheel.\n"
+        "STAP 3 - Geef tips die PASSEN bij de werkelijk zichtbare stijl. "
+        "GEEF NOOIT tips over boord/dasknoop/stropdas/colbert/manchet bij een "
+        "casual/sportieve look (hoodie, sweater, jogger, T-shirt, sneakers).\n"
+        "STAP 4 - Geef de score volgens richtlijn.\n"
+        "\n"
         "Antwoord UITSLUITEND in valide JSON. Geen markdown, geen toelichting buiten JSON. "
         "Schema:\n"
         "{\n"
         '  "score": <int 0-100>,\n'
-        '  "label": "<korte titel, max 3 woorden NL>",\n'
-        '  "summary": "<1 zin NL, max 140 tekens>",\n'
-        '  "tips": ["<tip 1 NL>", "<tip 2 NL>", "<tip 3 NL>"],\n'
+        '  "stijl": "<sportief|casual|smart-casual|zakelijk|avond|lounge>",\n'
+        '  "kledingstukken": ["<type kledingstuk + kleur, bv. zwarte hoodie>", "..."],\n'
+        '  "label": "<korte titel, max 3 woorden NL, gerelateerd aan stijl>",\n'
+        '  "summary": "<1 zin NL, max 140 tekens; benoem stijl + kernobservatie>",\n'
+        '  "tips": ["<tip 1 NL, passend bij stijl>", "<tip 2 NL>", "<tip 3 NL>"],\n'
         '  "color_palette": ["#hex1", "#hex2", "#hex3"],\n'
         '  "breakdown": {"kleur": <int>, "fit": <int>, "styling": <int>, "occasion": <int>}\n'
         "}\n"
         "Wees concreet, vriendelijk en focus op pasvorm voor tall (1.85m+) of plus size lichamen. "
-        "Score-richtlijn: 90+ iconisch, 80-89 top fit, 70-79 goede look, 60-69 solide basis, <60 verbetering nodig."
+        "Score-richtlijn: 90+ iconisch, 80-89 top fit, 70-79 goede look, 60-69 solide basis, <60 verbetering nodig. "
+        "BELANGRIJK: zelfs als de foto onduidelijk is, baseer je antwoord ALTIJD op wat je daadwerkelijk ziet. "
+        "Verzin nooit kledingstukken die niet zichtbaar zijn."
     )
 
     try:
@@ -733,6 +748,33 @@ async def outfit_score(req: OutfitScoreRequest):
             "styling":  int(max(0, min(100, int(bd_in.get("styling",  score))))),
             "occasion": int(max(0, min(100, int(bd_in.get("occasion", score))))),
         }
+        stijl = str(data.get("stijl", "")).lower().strip()
+        kledingstukken = [str(k)[:60] for k in (data.get("kledingstukken") or [])][:8]
+
+        # v60.1.87: Safety net - bij sportief/casual mogen tips NIET
+        # gaan over formele kleding-elementen (stropdas, dasknoop, boord,
+        # manchet, colbert, etc.). Dit was de bron van klacht "AI niet
+        # accuraat" wanneer Gemini incidenteel formele tips opdiste bij
+        # een hoodie/sweater foto.
+        FORMELE_TERMEN = (
+            "stropdas", "dasknoop", "das ", "boord", "manchet",
+            "colbert", "vest met das", "overhemd", "blouse manchet"
+        )
+        CASUAL_TYPES = ("sportief", "casual", "lounge", "smart-casual")
+        if stijl in CASUAL_TYPES:
+            for t in tips:
+                if any(term in t.lower() for term in FORMELE_TERMEN):
+                    logger.warning(
+                        "Outfit score: formele tip ontvangen bij stijl=%s, "
+                        "tips worden hergegenereerd: %s", stijl, t
+                    )
+                    # Vervang door generieke veilige casual tips
+                    tips = [
+                        "Speel met laagjes voor extra dimensie.",
+                        "Houd kleurpalet rustig of voeg een statement-stuk toe.",
+                        "Schoenen mogen sportief of clean blijven.",
+                    ]
+                    break
 
         return {
             "score": score,
@@ -741,6 +783,8 @@ async def outfit_score(req: OutfitScoreRequest):
             "tips": tips,
             "color_palette": palette,
             "breakdown": breakdown,
+            "stijl": stijl or None,
+            "kledingstukken": kledingstukken,
             "source": "gemini-3.1-pro-preview",
             "request_id": req.request_id,
             "image_hash": req.image_hash,

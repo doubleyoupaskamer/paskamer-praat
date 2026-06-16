@@ -21,18 +21,29 @@
 
   var DEFAULT_API_BASE = '';
   var STYLE_ID = 'dy-outfit-score-style';
-  var LS_PREFIX = 'dy_outfit_score_v2_';   // v60.1.86: bumped van v1 prefix
-  var LS_OLD_PREFIX = 'dy_outfit_score_';  // wordt geveegd bij init
+  var LS_PREFIX = 'dy_outfit_score_v3_';   // v60.1.87: bumped van v2 voor prompt-fix
+  var LS_OLD_PREFIXES = ['dy_outfit_score_', 'dy_outfit_score_v2_'];
 
-  // Eenmalige cleanup van oude (mogelijk foute) cache-entries.
-  // Reden: v60.1.86 lost root cause op van wrong-photo binding; alle
-  // pre-v60.1.86 entries kunnen op een ander beeld gebaseerd zijn.
+  // Nuclear cache cleanup van oude prefixes (v60.1.87).
+  // Reden: v60.1.87 fixt prompt + safety-net voor sportieve outfits.
+  // Alle pre-v3 entries kunnen verkeerde "zakelijke" analyses bevatten.
   try {
-    for (var _i = localStorage.length - 1; _i >= 0; _i--) {
+    var _toRemove = [];
+    for (var _i = 0; _i < localStorage.length; _i++) {
       var _k = localStorage.key(_i);
-      if (_k && _k.indexOf(LS_OLD_PREFIX) === 0 && _k.indexOf(LS_PREFIX) !== 0) {
-        try { localStorage.removeItem(_k); } catch (_e) { /* noop */ }
+      if (!_k) continue;
+      for (var _p = 0; _p < LS_OLD_PREFIXES.length; _p++) {
+        if (_k.indexOf(LS_OLD_PREFIXES[_p]) === 0 && _k.indexOf(LS_PREFIX) !== 0) {
+          _toRemove.push(_k);
+          break;
+        }
       }
+    }
+    for (var _j = 0; _j < _toRemove.length; _j++) {
+      try { localStorage.removeItem(_toRemove[_j]); } catch (_e) { /* noop */ }
+    }
+    if (_toRemove.length) {
+      console.info('[outfit-score] Cleared', _toRemove.length, 'stale cache entries (v3 migration)');
     }
   } catch (_e) { /* noop */ }
 
