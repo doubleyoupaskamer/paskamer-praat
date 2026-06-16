@@ -27,6 +27,18 @@
   function esc(s) { var d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
   function db() { return window.firebase && window.firebase.firestore ? window.firebase.firestore() : null; }
 
+  // v1.0.11 PRIVACY: respect GDPR analytics-consent.
+  // Geen UID in tracking events tenzij user expliciet consent.analytics=true heeft gegeven.
+  // Default: anonieme impressions/clicks (uid=null) — voldoende voor ad-billing op placement-level.
+  function _trackingUid() {
+    try {
+      var prof = window.DY && window.DY.profile;
+      var hasConsent = prof && prof.consent && prof.consent.analytics === true;
+      if (!hasConsent) return null;
+      return (window.firebase.auth().currentUser || {}).uid || null;
+    } catch (e) { return null; }
+  }
+
   function routeToPlacement(pagina) {
     if (pagina === 'feed' || pagina === 'home' || pagina === 'merken') return 'feed';
     if (pagina === 'stories') return 'stories';
@@ -91,7 +103,7 @@
           type: 'impression', subtype: 'campaign',
           campaignId: c._id, brandId: c.brandId || null,
           plaatsing: placement,
-          uid: (window.firebase.auth().currentUser || {}).uid || null,
+          uid: _trackingUid(),
           ts: window.firebase.firestore.FieldValue.serverTimestamp(),
           processed: false
         }).catch(function(){});
@@ -147,7 +159,7 @@
       db().collection('events').add({
         type: 'campaign_click', campaignId: campaignId,
         brandId: brandId || null, plaatsing: routeToPlacement(window.DY && window.DY.pagina),
-        uid: (window.firebase.auth().currentUser || {}).uid || null,
+        uid: _trackingUid(),
         ts: window.firebase.firestore.FieldValue.serverTimestamp(), processed: false
       }).catch(function(){});
     } catch(e) {}

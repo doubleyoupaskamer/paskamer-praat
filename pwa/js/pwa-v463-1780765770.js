@@ -229,7 +229,7 @@ DY._normBouw = function(bouw) {
     'plus size':   '5XL', 'Plus Size':   '5XL',
     'plus_size':   '5XL', 'plus-size':   '5XL',
     'plussize':    '5XL', 'Plussize':    '5XL',
-    'plus-size':   '5XL', 'PLUSSIZE':    '5XL',
+    'PLUSSIZE':    '5XL',
   };
   return map[bouw] || bouw;
 };
