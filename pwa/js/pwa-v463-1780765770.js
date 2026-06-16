@@ -4703,7 +4703,7 @@ DY.verhaalKaart = function(data, opties) {
     ? (video
       ? `<video class="dy-reel-bg-video" src="${video}" muted playsinline loop preload="metadata" poster="${foto || ''}"></video>`
       : `<img class="dy-reel-bg-blur" src="${foto}" alt="" loading="lazy" decoding="async" aria-hidden="true">
-         <img class="dy-reel-bg-img-main" src="${foto}" alt="" loading="lazy" decoding="async">`)
+         <img class="dy-reel-bg-img-main" data-pp-outfit-img="true" src="${foto}" alt="" loading="lazy" decoding="async">`)
     : `<div class="dy-reel-bg-kleur"></div>`;
 
   // ── Preview tekst: dedupliceer auto-gegenereerde titel

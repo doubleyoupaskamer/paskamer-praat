@@ -156,10 +156,12 @@
     //    met een hogere min-grootte (480px) zodat avatars uitvallen.
     var img = null;
     var photoSelectors = [
+      '[data-pp-outfit-img]',                          // v60.1.91: expliciete marker (snelste pad)
+      '.dy-reel-bg-img-main',                          // v60.1.91: hoofd-outfit-foto in reel
       '.dy-reel-foto-wrap img', '.dy-reel-foto', '.dy-reel-img',
       '.dy-feed-photo img', '.dy-feed-img', '.dy-feed-foto-wrap img',
       '.dy-post-foto img', '.dy-post-photo img', '.dy-post-img',
-      '[data-outfit-photo] img', '[data-pp-outfit-img]',
+      '[data-outfit-photo] img',
       'figure img', '.dy-card-photo img'
     ];
     for (var s = 0; s < photoSelectors.length; s++) {
