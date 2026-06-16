@@ -94,15 +94,29 @@ async def get_status_checks():
 # ════════════════════════════════════════════════════════════════
 @api_router.get("/downloads/{filename}")
 async def download_bundle(filename: str):
-    # Restrictie: alleen .zip in /app, geen path traversal
-    if not filename.endswith(".zip") or "/" in filename or ".." in filename:
+    # Restrictie: alleen toegestane extensies in /app of /app/pwa/branding, geen path traversal
+    ALLOWED_EXTS = (".zip", ".jpg", ".jpeg", ".png", ".webp", ".pdf", ".md")
+    if not filename.lower().endswith(ALLOWED_EXTS) or "/" in filename or ".." in filename:
         raise HTTPException(status_code=400, detail="Ongeldige bestandsnaam")
-    path = Path("/app") / filename
-    if not path.exists() or not path.is_file():
+
+    # Zoek bestand in /app (zips) of /app/pwa/branding (logo's & images)
+    candidates = [Path("/app") / filename, Path("/app/pwa/branding") / filename]
+    path = next((p for p in candidates if p.exists() and p.is_file()), None)
+    if not path:
         raise HTTPException(status_code=404, detail="Bestand niet gevonden")
+
+    # Bepaal MIME
+    ext = path.suffix.lower()
+    media_types = {
+        ".zip": "application/zip",
+        ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+        ".png": "image/png", ".webp": "image/webp",
+        ".pdf": "application/pdf",
+        ".md":  "text/markdown",
+    }
     return FileResponse(
         path=str(path),
-        media_type="application/zip",
+        media_type=media_types.get(ext, "application/octet-stream"),
         filename=filename,
     )
 
