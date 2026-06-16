@@ -62,11 +62,12 @@
     // Toasts kunnen blijven; geen targeting
   ];
 
-  function closeAllOverlays(reason) {
+  function closeAllOverlays(reason, exceptEl) {
     var removed = 0;
     OVERLAY_SELECTORS.forEach(function (sel) {
       try {
         document.querySelectorAll(sel).forEach(function (el) {
+          if (exceptEl && (el === exceptEl || el.contains(exceptEl))) return;
           // .open class wordt aria-state, alleen toggle terug;
           // popovers/backdrop worden verwijderd uit DOM.
           if (el.classList.contains('open') && !el.matches('.dy-modal-open')) {
@@ -85,13 +86,36 @@
       document.body.classList.remove('dy-modal-open');
       document.body.classList.remove('dy-drawer-open');
       // overflow inline style die soms wordt gezet
-      if (document.body.style.overflow === 'hidden') {
+      if (document.body.style.overflow === 'hidden' && !exceptEl) {
         document.body.style.overflow = '';
       }
     } catch (e) { /* noop */ }
     if (removed && window.console && console.debug) {
       console.debug('[overlay-discipline] cleaned', removed, 'overlays (' + reason + ')');
     }
+  }
+
+  // ── Single-Active-Surface enforcement ────────────────────────────────
+  // v60.1.98: zodra een nieuwe overlay verschijnt, sluit alle anderen.
+  // Detecteert via MutationObserver op document.body en sluit ALLE
+  // bestaande overlays behalve degene die zojuist verscheen.
+  function isOverlayNode(node) {
+    if (!node || node.nodeType !== 1) return false;
+    for (var i = 0; i < OVERLAY_SELECTORS.length; i++) {
+      try {
+        if (node.matches && node.matches(OVERLAY_SELECTORS[i])) return true;
+        if (node.querySelector && node.querySelector(OVERLAY_SELECTORS[i])) {
+          // Het is een wrapper met een overlay erin
+          return true;
+        }
+      } catch (e) { /* noop */ }
+    }
+    return false;
+  }
+
+  function enforceSingleActive(newOverlayEl) {
+    // Sluit alle BESTAANDE overlays behalve degene die nu is toegevoegd
+    closeAllOverlays('single-active', newOverlayEl);
   }
 
   // ── 3. Route-change detectie ─────────────────────────────────────────
@@ -137,6 +161,56 @@
 
     // Veiligheidsnet: poll elke 2s voor stille route changes via DY.pagina
     setInterval(checkRouteChange, 2000);
+
+    // SINGLE ACTIVE SURFACE enforcement via MutationObserver.
+    // Zodra een nieuwe overlay verschijnt in de DOM tree, sluit alle
+    // bestaande overlays behalve de nieuwe. Voorkomt dat hamburger
+    // popover + Premium modal samen open kunnen staan.
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          if (!m.addedNodes || !m.addedNodes.length) continue;
+          for (var j = 0; j < m.addedNodes.length; j++) {
+            var n = m.addedNodes[j];
+            if (n.nodeType !== 1) continue;
+            if (isOverlayNode(n)) {
+              // Wacht 1 animation frame zodat het nieuwe element zeker
+              // gerenderd is voor we de oude opruimen.
+              (function (newEl) {
+                requestAnimationFrame(function () {
+                  enforceSingleActive(newEl);
+                });
+              })(n);
+              return;
+            }
+          }
+        }
+      });
+      mo.observe(document.body, { childList: true, subtree: false });
+
+      // Ook 'class change' op .dy-card-hub-btn detecteren (hamburger
+      // gebruikt class toggle, niet element-add). Zelfde principe.
+      var moCls = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          if (m.type !== 'attributes' || m.attributeName !== 'class') continue;
+          var target = m.target;
+          if (target && target.classList && target.classList.contains('open') &&
+              target.classList.contains('dy-card-hub-btn')) {
+            // Hamburger zojuist geopend - sluit alle andere overlays
+            (function (newEl) {
+              requestAnimationFrame(function () {
+                enforceSingleActive(newEl);
+              });
+            })(target);
+          }
+        }
+      });
+      moCls.observe(document.body, {
+        attributes: true, attributeFilter: ['class'], subtree: true
+      });
+    } catch (e) { /* noop */ }
 
     // Escape-toets als globale "sluit-alle-overlays" handler
     document.addEventListener('keydown', function (ev) {
