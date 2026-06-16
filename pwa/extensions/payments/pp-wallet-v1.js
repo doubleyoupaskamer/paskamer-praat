@@ -1,25 +1,47 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * Doubleyou - Klant Wallet Module (v1.0.0)
+ * Doubleyou - Klant Wallet Module (v1.1.0 - Shopify direct checkout)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Toevoegingen ZONDER bestaande code te wijzigen:
  *   - Nieuwe route 'wallet' via DY.toonPagina wrapper
  *   - Knop in hamburger-menu (auto-inject als die bestaat)
- *   - Renders: huidig saldo + transactie-history + "Saldo opwaarderen" button
+ *   - Renders: huidig saldo + transactie-history + "Saldo opwaarderen" buttons
  *
- * Werking:
- *   - Leest users/{uid}.wallet_balance via Firestore (rules: self-read)
- *   - Leest payments.where('uid','==', user) voor history
- *   - Topup-button opent Shopify hosted checkout URL in nieuw tab
- *     (URL configurable via admin_settings/global.shopify_config.topup_checkout_url)
+ * Werking (v1.1.0):
+ *   - Top-up bedragen zijn vaste Shopify producten (€25 / €50 / €100 / €250)
+ *   - Iedere knop bouwt direct: https://{SHOP_DOMAIN}/cart/{VARIANT_ID}:1?attributes[...]
+ *     Zo slaat de gebruiker de Shopify storefront over en gaat direct naar checkout.
+ *   - De uid van het ingelogde merk + amount_cents reizen mee als cart-attributes
+ *     en komen in `note_attributes` van de Shopify Order terecht.
+ *   - Backend webhook /api/wallet/webhook/shopify pakt deze attributes op,
+ *     verifieert HMAC en credit `users/{uid}.wallet_balance` via Firebase Admin.
  *
- * Backend-onafhankelijk:
- *   Voor MVP werkt de UI ZONDER backend Shopify integratie. Admin moet
- *   handmatig wallet adjust doen via admin_wallet na betaling. Met
- *   firebase-admin SDK + webhook setup wordt dit automatisch.
+ * CONFIG (PP_SHOPIFY_TOPUPS): vul je 4 variant-IDs in onderaan dit bestand.
+ *   - Eenmalig instellen → daarna alles automatisch.
+ *
+ * Override via Firestore (optioneel, geen redeploy nodig):
+ *   admin_settings/global.shopify_config = {
+ *     shop_domain: 'doubleyousmallandtall.nl',
+ *     variants: { '25': '12345', '50': '23456', '100': '34567', '250': '45678' }
+ *   }
  * ═══════════════════════════════════════════════════════════════════════ */
 (function() {
   'use strict';
+
+  // ────────── HARD-CODED CONFIG (mag je hier aanpassen) ──────────
+  // Vul de Variant-IDs in zodra je de 4 Shopify producten hebt aangemaakt.
+  // Variant-ID ophalen → zie SETUP_SHOPIFY.md (Shopify Admin → Product → Variant URL).
+  var PP_SHOPIFY_TOPUPS = {
+    shop_domain: 'doubleyousmallandtall.nl',  // jouw custom domein
+    variants: {
+      '25':  '',   // <-- Variant-ID voor €25 top-up
+      '50':  '',   // <-- Variant-ID voor €50 top-up
+      '100': '',   // <-- Variant-ID voor €100 top-up
+      '250': ''    // <-- Variant-ID voor €250 top-up
+    },
+    return_path: '/?pagina=wallet&topup=success'
+  };
+  // ───────────────────────────────────────────────────────────────
 
   function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
   function isLogged() { return !!(window.DY && window.DY.user && window.DY.user.uid); }
@@ -59,12 +81,15 @@
       var balance = Number(userData.wallet_balance || 0);
       var currency = userData.wallet_currency || 'EUR';
 
-      // 2. Topup URL uit admin_settings (fallback: empty → toon "binnenkort beschikbaar")
+      // 2. Shopify topup config (lokaal default + Firestore override)
       var settingsSnap = await db().collection('admin_settings').doc('global').get();
       var settings = settingsSnap.exists ? settingsSnap.data() : {};
-      var shopCfg = settings.shopify_config || {};
-      var topupUrl = shopCfg.topup_checkout_url || '';
-      var topupEnabled = (settings.feature_flags || {}).wallet_topup_enabled === true && !!topupUrl;
+      var shopCfg = Object.assign({}, PP_SHOPIFY_TOPUPS, settings.shopify_config || {});
+      shopCfg.variants = Object.assign({}, PP_SHOPIFY_TOPUPS.variants, (settings.shopify_config || {}).variants || {});
+      // Topup is enabled zodra er minimaal 1 variant-ID is ingevuld
+      var topupEnabled = Object.keys(shopCfg.variants).some(function(k){ return !!shopCfg.variants[k]; });
+      // Cache config for topup()
+      window.PP_SHOPIFY_TOPUPS_RESOLVED = shopCfg;
 
       // 3. Recente transacties uit payments collectie (max 20)
       var txRows = [];
@@ -112,7 +137,7 @@
             '</div>' +
             '<div class="bp-wallet-acties">' +
               (topupEnabled
-                ? '<button class="bp-btn bp-btn-primair" onclick="PP_Wallet.topup()" data-testid="wallet-topup-btn">Saldo opwaarderen</button>'
+                ? '<button class="bp-btn bp-btn-primair" onclick="PP_Wallet.openTopup()" data-testid="wallet-topup-btn">Saldo opwaarderen</button>'
                 : '<button class="bp-btn bp-btn-primair" disabled title="Opwaarderen wordt binnenkort beschikbaar" data-testid="wallet-topup-disabled">Opwaarderen (binnenkort)</button>'
               ) +
               '<button class="bp-btn bp-btn-ghost" onclick="PP_Wallet.refresh()" data-testid="wallet-refresh">↻ Vernieuwen</button>' +
@@ -144,11 +169,13 @@
             '<h2 class="bp-section-titel" style="margin-top:18px">Kies een bedrag</h2>' +
             (topupEnabled
               ? '<div class="bp-topup-grid">' +
-                  [25,50,100,250,500,1000].map(function(amt){
+                  [25,50,100,250].filter(function(amt){
+                    return !!shopCfg.variants[String(amt)];
+                  }).map(function(amt){
                     return '<button class="bp-topup-bedrag" onclick="PP_Wallet.topup(' + amt + ')" data-testid="wallet-topup-' + amt + '">€ ' + amt + '</button>';
                   }).join('') +
                 '</div>' +
-                '<p class="bp-mini" style="margin-top:14px">Je wordt doorgestuurd naar Shopify checkout. Het saldo wordt automatisch bijgeschreven na bevestiging.</p>'
+                '<p class="bp-mini" style="margin-top:14px">Je wordt doorgestuurd naar de Shopify checkout op <strong>' + esc(shopCfg.shop_domain) + '</strong>. Het saldo wordt automatisch bijgeschreven zodra de betaling is bevestigd.</p>'
               : '<div class="bp-empty"><div class="bp-empty-titel">Opwaarderen tijdelijk uit</div>' +
                 '<div>De Shopify-koppeling wordt op dit moment geconfigureerd. Probeer later opnieuw of neem contact op met support voor handmatige opwaardering.</div></div>'
             ) +
@@ -175,18 +202,71 @@
   }
 
   // ── TOPUP ──────────────────────────────────────────────────────────
+  // Bouwt een directe Shopify checkout-URL:
+  //   https://{shop_domain}/cart/{variant_id}:1?attributes[wallet_topup_uid]=...&attributes[wallet_topup_amount_cents]=...&return_to=...
+  // Hierdoor slaat de gebruiker de storefront over en gaat direct naar checkout.
+  // De cart-attributes komen na betaling als `note_attributes` in de Shopify Order webhook.
   async function topup(amount) {
     try {
-      var s = await db().collection('admin_settings').doc('global').get();
-      var url = (s.exists && s.data() && s.data().shopify_config || {}).topup_checkout_url;
-      if (!url) { toast('Opwaarderen nog niet beschikbaar', true); return; }
-      var u = encodeURIComponent(uid() || '');
-      var ret = encodeURIComponent(window.location.origin + '/?pagina=wallet');
-      var sep = url.indexOf('?') === -1 ? '?' : '&';
-      var amt = amount ? '&amount=' + encodeURIComponent(amount) : '';
-      window.open(url + sep + 'wallet_uid=' + u + '&return_url=' + ret + amt, '_blank', 'noopener');
+      var u = uid();
+      if (!u) { toast('Log eerst in', true); return; }
+      if (!amount) { toast('Geen bedrag gekozen', true); return; }
+
+      // Probeer eerst de resolved config (gevuld door renderWallet). Anders herlees uit Firestore.
+      var cfg = window.PP_SHOPIFY_TOPUPS_RESOLVED;
+      if (!cfg) {
+        var s = await db().collection('admin_settings').doc('global').get();
+        var ov = (s.exists && s.data() && s.data().shopify_config) || {};
+        cfg = Object.assign({}, PP_SHOPIFY_TOPUPS, ov);
+        cfg.variants = Object.assign({}, PP_SHOPIFY_TOPUPS.variants, ov.variants || {});
+      }
+
+      var variantId = cfg.variants[String(amount)];
+      if (!variantId) {
+        toast('Bedrag €' + amount + ' nog niet beschikbaar — neem contact op met support', true);
+        return;
+      }
+
+      var domain = (cfg.shop_domain || 'doubleyousmallandtall.nl').replace(/^https?:\/\//,'').replace(/\/$/,'');
+      var amountCents = String(Math.round(Number(amount) * 100));
+      var returnTo = window.location.origin + (cfg.return_path || '/?pagina=wallet&topup=success');
+
+      // Shopify cart attributes — exact syntax: attributes[name]=value
+      var params = [
+        'attributes%5Bwallet_topup_uid%5D=' + encodeURIComponent(u),
+        'attributes%5Bwallet_topup_amount_cents%5D=' + encodeURIComponent(amountCents),
+        'attributes%5Bwallet_topup_amount_eur%5D=' + encodeURIComponent(String(amount)),
+        'return_to=' + encodeURIComponent(returnTo)
+      ];
+      var url = 'https://' + domain + '/cart/' + encodeURIComponent(variantId) + ':1?' + params.join('&');
+
+      // Optioneel: log pending-betaling lokaal (UI-feedback bij terugkeer)
+      try {
+        await db().collection('payments').add({
+          uid: u,
+          type: 'topup',
+          amount_cents: Number(amountCents),
+          currency: 'EUR',
+          status: 'pending_checkout',
+          source: 'shopify',
+          shop_domain: domain,
+          variant_id: variantId,
+          created_at: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+      } catch(e) {
+        // Geen rechten / offline → niet blokkerend
+        try { console.warn('[wallet] kon pending payment niet loggen:', e.code || e.message); } catch(_){}
+      }
+
+      // Mobile-first: same-tab nav voorkomt popup-blockers
+      var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent || '');
+      if (isMobile) {
+        window.location.href = url;
+      } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
     } catch(e) {
-      toast('Fout: ' + e.message, true);
+      toast('Fout: ' + (e.message || e), true);
     }
   }
 
@@ -203,6 +283,21 @@
   }
 
   function refresh() { renderWallet(); }
+
+  // Open de Opwaarderen-tab vanuit elke knop
+  function openTopup() {
+    try {
+      var btn = document.querySelector('.bp-wallet-tab[data-tab="opwaarderen"]');
+      if (btn) { switchTab(btn, 'opwaarderen'); return; }
+      // Fallback: re-render en wacht
+      renderWallet().then(function(){
+        setTimeout(function(){
+          var b = document.querySelector('.bp-wallet-tab[data-tab="opwaarderen"]');
+          if (b) switchTab(b, 'opwaarderen');
+        }, 50);
+      });
+    } catch(e) {}
+  }
 
   // ── ROUTE REGISTRATIE via wrapper (geen BP_PAGES mutatie) ─────────
   // v1.0.4: Force-reset _laatstGerenderd + render lock zodat herhaalde
@@ -277,6 +372,27 @@
     var obs = new MutationObserver(injectMenuLink);
     obs.observe(document.body, { childList: true, subtree: true });
     injectMenuLink();
+    // ── Topup-return: ?topup=success → toast + re-render na 1.5s (geeft webhook tijd) ──
+    try {
+      var qs = new URLSearchParams(window.location.search);
+      if (qs.get('topup') === 'success') {
+        if (window.DY && DY.toast) DY.toast('Bedankt! Je betaling is ontvangen. Saldo wordt binnen 1 minuut bijgewerkt.');
+        // Verwijder de query zodat refresh deze niet opnieuw triggert
+        try {
+          var url = new URL(window.location.href);
+          url.searchParams.delete('topup');
+          history.replaceState(null, '', url.toString());
+        } catch(_){}
+        // Force-render wallet na korte delay
+        setTimeout(function(){
+          if (window.DY && DY.navigeer) DY.navigeer('wallet');
+        }, 1500);
+        // Tweede refresh na 8s voor de zekerheid
+        setTimeout(function(){
+          if (window.PP_Wallet && PP_Wallet.refresh) PP_Wallet.refresh();
+        }, 8000);
+      }
+    } catch(e) {}
   }
 
   if (document.readyState === 'loading') {
@@ -288,8 +404,9 @@
   window.PP_Wallet = {
     renderWallet: renderWallet,
     topup:        topup,
+    openTopup:    openTopup,
     refresh:      refresh,
     switchTab:    switchTab,
-    VERSION:      '1.0.4'
+    VERSION:      '1.1.0'
   };
 })();

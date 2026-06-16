@@ -11,7 +11,7 @@
 
   var FOOTER_ID = 'pp-legal-footer';
   var STYLE_ID  = 'pp-legal-style';
-  var TOS_VERSION = '1.0';
+  var TOS_VERSION = '2.0';
 
   function ensureStyle() {
     if (document.getElementById(STYLE_ID)) return;

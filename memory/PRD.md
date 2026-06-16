@@ -1,10 +1,43 @@
-# PRD — Paskamer Praat (PWA)
+# PRD — Paskamer Praat (PWA) → Doubleyou
 
 ## Origineel probleem (huidige sessie)
 "Het merkenportaal werkt momenteel niet correct na het toevoegen van database-indexen.
 Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet correct weergegeven."
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
+
+## v60.1.103 — Shopify Wallet + A-Z Reglement (14 feb 2026)
+
+### Shopify Wallet Top-up flow
+- **Frontend** (`/app/pwa/extensions/payments/pp-wallet-v1.js` v1.1.0):
+  - Config-block `PP_SHOPIFY_TOPUPS` met 4 variant-slots (€25/€50/€100/€250)
+  - Optionele Firestore-override via `admin_settings/global.shopify_config`
+  - Bouwt direct `https://doubleyousmallandtall.nl/cart/{VARIANT_ID}:1?attributes[wallet_topup_uid]=...`
+  - Same-tab redirect op mobiel, new-tab op desktop
+  - `?topup=success` query → toast + auto-refresh wallet
+- **Backend** (`/app/backend/shopify_wallet.py` nieuw, geladen via `server.py`):
+  - `POST /api/wallet/webhook/shopify` — HMAC-SHA256 geverifieerd
+  - Atomic credit via Firebase Admin SDK (`firestore.Increment`)
+  - Idempotent via `payments.shopify_order_id` check
+  - **Fallback**: indien Firebase Admin niet geconfigureerd → MongoDB queue
+  - `GET /api/wallet/health` — config-status
+  - `GET /api/wallet/admin/queue` — admin lijst pending (header `X-Admin-Secret`)
+  - `POST /api/wallet/admin/replay/{order_id}` — re-credit van queue
+- **ENV vars** (in `/app/backend/.env`, leeg ingesteld):
+  - `SHOPIFY_WEBHOOK_SECRET`, `SHOPIFY_SHOP_DOMAIN=doubleyousmallandtall.nl`
+  - `FIREBASE_PROJECT_ID`, `FIREBASE_SERVICE_ACCOUNT_JSON_B64`
+- **Setup-gids**: `/app/pwa/extensions/payments/SETUP_SHOPIFY.md`
+- **Cache bumped**: `sw.js` v60.1.103, `pp-wallet-v1.js?v=60.1.103-shopify-direct-checkout`
+- **ZIP**: `/app/01-paskamerpraat-pwa-cloudflare.zip` (2.4MB)
+
+### A-Z Gebruikersreglement Merkenportaal v2.0
+- `/app/pwa/voorwaarden/index.html` — vervangen Artikel 1-10 door 26 artikelen (A-Z)
+- Onderwerpen: Aanvaarding, Begrippen, Content, Doel, Eigendom/IP, Facturering/BTW,
+  Gebruikersaccount, Handhaving (escalatieladder), Inhoudelijke verantwoordelijkheid,
+  Juridische status, Klachten, Licentie, Moderatie, Naleving (AVG/Reclamecode/DSA),
+  Opzegging, Privacy, Quota/limieten, Refunds, Shopify/Stripe, Tarieven, Uptime/overmacht,
+  Vrijwaring, Wijzigingen, eXterne diensten, Ijzeren regels, Zekerheidsstelling/recht
+- TOS-version bumped → `2.0` in `pp-legal-footer-v1.js` (banner verschijnt bij login)
 
 ## Architectuur
 - **Frontend**: Vanilla JS PWA + HTML/CSS, gehost op paskamerpraat.nl (Cloudflare)

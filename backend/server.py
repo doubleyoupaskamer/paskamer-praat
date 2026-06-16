@@ -32,8 +32,19 @@ db = client[os.environ['DB_NAME']]
 # Create the main app without a prefix
 app = FastAPI()
 
+# Expose mongo db via app.state zodat sub-routers (bv. shopify_wallet) er bij kunnen
+app.state.mongo_db = db
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
+
+# ── Shopify Wallet router (orders/paid webhook + admin queue) ──────────
+try:
+    from shopify_wallet import wallet_router as _shopify_wallet_router
+    app.include_router(_shopify_wallet_router)
+    logger.info("Shopify wallet router geladen op /api/wallet/*")
+except Exception as _e:
+    logger.exception("Shopify wallet router niet geladen: %s", _e)
 
 
 # Define Models
