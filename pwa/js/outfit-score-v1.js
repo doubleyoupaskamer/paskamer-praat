@@ -21,7 +21,20 @@
 
   var DEFAULT_API_BASE = '';
   var STYLE_ID = 'dy-outfit-score-style';
-  var LS_PREFIX = 'dy_outfit_score_';
+  var LS_PREFIX = 'dy_outfit_score_v2_';   // v60.1.86: bumped van v1 prefix
+  var LS_OLD_PREFIX = 'dy_outfit_score_';  // wordt geveegd bij init
+
+  // Eenmalige cleanup van oude (mogelijk foute) cache-entries.
+  // Reden: v60.1.86 lost root cause op van wrong-photo binding; alle
+  // pre-v60.1.86 entries kunnen op een ander beeld gebaseerd zijn.
+  try {
+    for (var _i = localStorage.length - 1; _i >= 0; _i--) {
+      var _k = localStorage.key(_i);
+      if (_k && _k.indexOf(LS_OLD_PREFIX) === 0 && _k.indexOf(LS_PREFIX) !== 0) {
+        try { localStorage.removeItem(_k); } catch (_e) { /* noop */ }
+      }
+    }
+  } catch (_e) { /* noop */ }
 
   function apiBase() {
     if (window.DY && window.DY.aiHealth && typeof window.DY.aiHealth.apiBase === 'function') {
@@ -48,19 +61,53 @@
       '.dy-score-pill .lbl{font-weight:500;font-size:11px;opacity:.85}',
       '.dy-score-pill.loading{opacity:.6;pointer-events:none}',
       '.dy-score-pill.loading .num::after{content:"…";display:inline}',
-      '.dy-score-detail{margin-top:10px;background:#fefcf5;border:1px solid rgba(30,26,15,.1);',
-      '  border-radius:14px;padding:14px;font:400 13px/1.5 "DM Sans",system-ui,sans-serif;color:#1e1a0f;',
+      /* Desktop / inline detail */
+      '.dy-score-detail{position:relative;margin-top:10px;background:#fefcf5;',
+      '  border:1px solid rgba(30,26,15,.1);border-radius:14px;padding:16px 18px 18px;',
+      '  font:400 13px/1.5 "DM Sans",system-ui,sans-serif;color:#1e1a0f;',
       '  animation:dyScoreSlide .3s cubic-bezier(.23,1,.32,1)}',
       '@keyframes dyScoreSlide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}',
-      '.dy-score-detail .summary{font-weight:600;margin-bottom:8px}',
+      '.dy-score-detail .dy-score-detail-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding-right:32px}',
+      '.dy-score-detail .dy-score-detail-badge{background:#c89b3c;color:#1e1a0f;border-radius:999px;',
+      '  padding:3px 10px;font:800 13px/1 "DM Sans",sans-serif;min-width:30px;text-align:center}',
+      '.dy-score-detail .dy-score-detail-label{font-weight:700;font-size:14px;color:#1e1a0f}',
+      '.dy-score-detail .summary{font-weight:600;margin:0 0 8px;color:#1e1a0f}',
       '.dy-score-detail .tips{margin:8px 0 0;padding-left:0;list-style:none}',
-      '.dy-score-detail .tips li{padding:6px 0 6px 22px;position:relative;color:#3b3624}',
+      '.dy-score-detail .tips li{padding:6px 0 6px 22px;position:relative;color:#3b3624;font-weight:500}',
       '.dy-score-detail .tips li::before{content:"✓";position:absolute;left:4px;color:#c89b3c;font-weight:700}',
-      '.dy-score-detail .palette{margin-top:10px;display:flex;gap:6px;align-items:center}',
-      '.dy-score-detail .palette small{color:rgba(30,26,15,.55);font-size:11px;margin-right:4px}',
+      '.dy-score-detail .palette{margin-top:12px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}',
+      '.dy-score-detail .palette small{color:rgba(30,26,15,.55);font-size:11px;margin-right:4px;font-weight:600}',
       '.dy-score-detail .swatch{width:22px;height:22px;border-radius:999px;border:1px solid rgba(30,26,15,.12);box-shadow:inset 0 0 0 2px #fff}',
+      /* Close button - rechtsboven */
+      '.dy-score-detail .dy-score-close{position:absolute;top:8px;right:8px;',
+      '  width:34px;height:34px;display:flex;align-items:center;justify-content:center;',
+      '  background:rgba(30,26,15,.08);border:0;border-radius:50%;cursor:pointer;',
+      '  color:#1e1a0f;-webkit-tap-highlight-color:transparent;',
+      '  transition:background .15s,transform .12s}',
+      '.dy-score-detail .dy-score-close:hover{background:rgba(30,26,15,.16);transform:rotate(90deg)}',
+      '.dy-score-detail .dy-score-close:active{transform:scale(.92)}',
       '.dy-score-host{margin-top:8px}',
-      '@media (prefers-reduced-motion: reduce){.dy-score-detail{animation:none}}'
+      /* Mobile bottom-sheet variant */
+      '.dy-score-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;animation:dyScoreFade .25s ease}',
+      '@keyframes dyScoreFade{from{opacity:0}to{opacity:1}}',
+      'body.dy-score-modal-open{overflow:hidden}',
+      '.dy-score-detail.is-sheet{position:fixed;left:0;right:0;bottom:0;margin:0;',
+      '  border-radius:20px 20px 0 0;border:0;padding:24px 20px calc(28px + env(safe-area-inset-bottom,0px));',
+      '  max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch;',
+      '  z-index:9999;box-shadow:0 -20px 60px rgba(0,0,0,.45);',
+      '  animation:dyScoreSheetUp .32s cubic-bezier(.23,1,.32,1);font-size:14px;line-height:1.55}',
+      '.dy-score-detail.is-sheet::before{content:"";display:block;width:42px;height:4px;border-radius:4px;',
+      '  background:rgba(30,26,15,.18);margin:-8px auto 14px}',
+      '.dy-score-detail.is-sheet .dy-score-detail-head{margin-bottom:10px}',
+      '.dy-score-detail.is-sheet .dy-score-detail-label{font-size:15px}',
+      '.dy-score-detail.is-sheet .summary{font-size:14px;line-height:1.55;color:#1e1a0f}',
+      '.dy-score-detail.is-sheet .tips li{font-size:14px;line-height:1.55;color:#1e1a0f;padding:8px 0 8px 26px}',
+      '.dy-score-detail.is-sheet .tips li::before{left:6px;font-size:15px}',
+      '.dy-score-detail.is-sheet .palette{margin-top:14px}',
+      '.dy-score-detail.is-sheet .dy-score-close{top:12px;right:12px;width:40px;height:40px;',
+      '  background:rgba(30,26,15,.10)}',
+      '@keyframes dyScoreSheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}',
+      '@media (prefers-reduced-motion: reduce){.dy-score-detail,.dy-score-detail.is-sheet,.dy-score-backdrop{animation:none}.dy-score-detail .dy-score-close:hover{transform:none}}'
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -70,9 +117,29 @@
     var postId = card.getAttribute('data-post-id') ||
                  card.id ||
                  (card.querySelector('[data-post-id]') && card.querySelector('[data-post-id]').getAttribute('data-post-id'));
-    var img = card.querySelector('img:not(.dy-avatar):not([data-pp-skeleton])');
-    var imgUrl = img ? (img.currentSrc || img.src) : null;
-    return { postId: postId, imgUrl: imgUrl, img: img };
+    // v60.1.86: STRENGE foto-selectie - voorkomt dat avatar/badge/icoon
+    // wordt aangezien voor outfit foto (was root cause van foute analyse).
+    // 1. Skip avatars (.dy-avatar / [data-pp-avatar])
+    // 2. Skip skeletons (data-pp-skeleton)
+    // 3. Skip badges/icons (max(naturalWidth) < 120 = te klein)
+    // 4. Skip nog niet geladen images (naturalWidth == 0)
+    // 5. Pak de GROOTSTE geladen image (typisch de outfit foto)
+    var imgs = card.querySelectorAll('img');
+    var best = null;
+    var bestArea = 0;
+    for (var i = 0; i < imgs.length; i++) {
+      var im = imgs[i];
+      if (im.matches('.dy-avatar,[data-pp-skeleton],[data-pp-avatar]')) continue;
+      // Skip kleine pixel-perfect icons en stories (avatars in story-bar)
+      if (im.closest && im.closest('.dy-story-circle,.dy-avatar,.dy-story-bar,.dy-stories-bar,.dy-prof-mini,.dy-badge,.dy-niveau-badge')) continue;
+      var nw = im.naturalWidth || 0;
+      var nh = im.naturalHeight || 0;
+      if (nw < 120 || nh < 120) continue;          // te klein = niet outfit
+      var area = nw * nh;
+      if (area > bestArea) { bestArea = area; best = im; }
+    }
+    var imgUrl = best ? (best.currentSrc || best.src) : null;
+    return { postId: postId, imgUrl: imgUrl, img: best };
   }
 
   function findCards() {
@@ -224,19 +291,57 @@
       '<span class="lbl">' + escapeHtml(data.label || 'Style Score') + '</span>';
     host.appendChild(pill);
     var detail = null;
+    var backdrop = null;
+    function closeDetail() {
+      if (detail) { detail.remove(); detail = null; }
+      if (backdrop) { backdrop.remove(); backdrop = null; }
+      document.body.classList.remove('dy-score-modal-open');
+    }
     pill.addEventListener('click', function() {
-      if (detail) { detail.remove(); detail = null; return; }
+      if (detail) { closeDetail(); return; }
+      // v60.1.86: op mobiel als bottom-sheet (fixed) - voorkomt
+      // tekst die wegvalt tegen donkere achtergrond bij scroll.
+      // Op desktop blijft inline-onder-de-pill werking behouden.
+      var isMobile = window.matchMedia('(max-width: 720px)').matches;
       detail = document.createElement('div');
-      detail.className = 'dy-score-detail';
+      detail.className = 'dy-score-detail' + (isMobile ? ' is-sheet' : '');
+      detail.setAttribute('role', 'dialog');
+      detail.setAttribute('aria-label', 'Outfit analyse');
+      detail.setAttribute('data-testid', 'outfit-score-detail-' + (postId || 'unknown'));
       var tipsHtml = (data.tips || []).map(function(t) { return '<li>' + escapeHtml(t) + '</li>'; }).join('');
       var palHtml = (data.color_palette || []).map(function(c) {
         return '<span class="swatch" style="background:' + escapeHtml(c) + '" title="' + escapeHtml(c) + '"></span>';
       }).join('');
       detail.innerHTML =
+        '<button type="button" class="dy-score-close" aria-label="Sluiten" data-testid="outfit-score-close">' +
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">' +
+          '<path d="M6 6l12 12M18 6L6 18"/></svg>' +
+        '</button>' +
+        '<div class="dy-score-detail-head">' +
+          '<span class="dy-score-detail-badge">' + escapeHtml(String(data.score)) + '</span>' +
+          '<span class="dy-score-detail-label">' + escapeHtml(data.label || 'Style Score') + '</span>' +
+        '</div>' +
         '<div class="summary">' + escapeHtml(data.summary || '') + '</div>' +
         '<ul class="tips">' + tipsHtml + '</ul>' +
         (palHtml ? '<div class="palette"><small>Palet:</small>' + palHtml + '</div>' : '');
-      host.appendChild(detail);
+      if (isMobile) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'dy-score-backdrop';
+        backdrop.setAttribute('data-testid', 'outfit-score-backdrop');
+        backdrop.addEventListener('click', closeDetail);
+        document.body.appendChild(backdrop);
+        document.body.appendChild(detail);
+        document.body.classList.add('dy-score-modal-open');
+      } else {
+        host.appendChild(detail);
+      }
+      // X-knop & Escape
+      var closeBtn = detail.querySelector('.dy-score-close');
+      if (closeBtn) closeBtn.addEventListener('click', closeDetail);
+      function onKey(ev) {
+        if (ev.key === 'Escape') { closeDetail(); document.removeEventListener('keydown', onKey); }
+      }
+      document.addEventListener('keydown', onKey);
       logEvent('outfit_score_expanded', { score: data.score, postId: postId || null });
     });
     actions.appendChild(host);
@@ -259,8 +364,33 @@
     if (card.hasAttribute('data-pp-score')) return;
     card.setAttribute('data-pp-score', 'pending');
     var info = getPostInfo(card);
-    if (!info.imgUrl) { card.setAttribute('data-pp-score', 'no-image'); return; }
+    // v60.1.86: skip als foto nog niet geladen - retry zodra image
+    // 'load' event vuurt. Voorkomt scoren op placeholder/skelet URL.
+    if (!info.imgUrl) {
+      card.setAttribute('data-pp-score', 'no-image');
+      // Probeer opnieuw zodra een img in de card geladen is
+      try {
+        var pending = card.querySelectorAll('img');
+        for (var i = 0; i < pending.length; i++) {
+          (function (im) {
+            if (im.complete && im.naturalWidth > 120) return;
+            im.addEventListener('load', function () {
+              card.removeAttribute('data-pp-score');
+              setTimeout(function () { processCard(card); }, 50);
+            }, { once: true });
+          })(pending[i]);
+        }
+      } catch (e) { /* ignore */ }
+      return;
+    }
     var pid = info.postId || hashUrl(info.imgUrl);
+
+    // Aggressief opschonen: verwijder eventuele oude score-host elementen
+    // die nog in deze card hangen van vorige (recycled) render.
+    try {
+      var stale = card.querySelectorAll('.dy-score-host');
+      for (var k = 0; k < stale.length; k++) stale[k].remove();
+    } catch (e) { /* ignore */ }
 
     var cached = loadCached(pid, info.imgUrl);
     if (cached) {
