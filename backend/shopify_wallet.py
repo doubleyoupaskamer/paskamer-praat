@@ -311,6 +311,76 @@ async def shopify_webhook(request: Request,
     uid = attrs.get("wallet_topup_uid") or attrs.get("uid")
     amount_cents_raw = attrs.get("wallet_topup_amount_cents") or attrs.get("amount_cents")
 
+    # ── PREMIUM SUBSCRIPTION FLOW ──────────────────────────────────────
+    # Cart-attributes: premium_user_key, premium_email, premium_plan='monthly'
+    premium_user_key = attrs.get("premium_user_key")
+    premium_email    = attrs.get("premium_email")
+    premium_plan     = attrs.get("premium_plan", "monthly")
+
+    if premium_user_key or premium_email:
+        # Premium upgrade order
+        mongo_db = getattr(request.app.state, "mongo_db", None)
+        if mongo_db is None:
+            return {"status": "error", "reason": "no mongo db"}
+
+        # Periode bepalen: monthly=30d, yearly=365d
+        days = 365 if premium_plan == "yearly" else 30
+        now = datetime.now(timezone.utc)
+
+        # Idempotency: check of order al verwerkt
+        existing = await mongo_db.premium_users.find_one(
+            {"shopify_orders": str(order_id)}
+        )
+        if existing:
+            return {"ok": True, "status": "already_processed", "order_id": str(order_id),
+                    "user_key": existing.get("user_key")}
+
+        # Bestaand record ophalen via user_key OR email
+        key = premium_user_key or premium_email
+        rec = None
+        if premium_user_key:
+            rec = await mongo_db.premium_users.find_one({"user_key": premium_user_key})
+        if not rec and premium_email:
+            rec = await mongo_db.premium_users.find_one({"email": premium_email})
+
+        # Bepaal nieuwe end-datum: extend bij bestaand actief, anders +days vanaf nu
+        from datetime import timedelta
+        current_end_iso = (rec or {}).get("current_period_end")
+        base_dt = now
+        if current_end_iso:
+            try:
+                cur = datetime.fromisoformat(current_end_iso.replace('Z', '+00:00'))
+                if cur > now:
+                    base_dt = cur  # stack op huidige periode
+            except Exception:
+                pass
+        new_end = base_dt + timedelta(days=days)
+
+        update_doc = {
+            "$set": {
+                "user_key": key,
+                "email":    premium_email or (rec or {}).get("email"),
+                "is_premium": True,
+                "plan": f"premium_{premium_plan}_shopify",
+                "current_period_start": now.isoformat(),
+                "current_period_end":   new_end.isoformat(),
+                "premium_activated":    True,
+                "source":               "shopify",
+                "shop_domain":          x_shopify_shop_domain,
+                "last_payment_at":      now.isoformat(),
+                "last_shopify_order":   str(order_id),
+            },
+            "$addToSet": {"shopify_orders": str(order_id)},
+            "$setOnInsert": {"created_at": now.isoformat()},
+        }
+        await mongo_db.premium_users.update_one({"user_key": key}, update_doc, upsert=True)
+
+        return {"ok": True, "type": "premium",
+                "user_key": key, "plan": premium_plan,
+                "expires_at": new_end.isoformat(),
+                "order_id": str(order_id)}
+
+    # ── WALLET TOPUP FLOW (default) ────────────────────────────────────
     # Bedrag bepalen: 1) attribuut amount_cents, 2) total_price van order
     amount_eur = 0.0
     try:

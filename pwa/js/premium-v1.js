@@ -1,18 +1,17 @@
 // ═══════════════════════════════════════════════════════════════════
-// Doubleyou - Premium Tier v55 (Stripe checkout error-handling fix)
+// Doubleyou - Premium Tier v60 (Shopify checkout migration)
 //
-// v55 changes (vs v54):
-//   • Robuuste apiBase() fallback (LIVE_BACKEND_FALLBACK als aiHealth nog niet geladen)
-//   • Verbeterde error-handling in startCheckout: console.error logging, JSON-parse
-//     guard, Stripe "invalid email" message rebranded, géén generieke "Netwerkfout"
-//     meer als backend wél bereikbaar is.
-//   • Customer Portal-flow ook robuust gemaakt.
+// v60 changes (vs v55):
+//   • Stripe checkout vervangen door directe Shopify cart-redirect
+//   • Premium-product wordt op doubleyousmallandtall.nl gefactureerd
+//   • Backend webhook activeert premium na bevestigde Shopify-betaling
+//   • Return-flow: ?premium=success (geen session_id meer nodig)
 //
-// Stripe-checkout flow + premium status caching. Non-invasief:
+// Shopify-flow + premium status caching. Non-invasief:
 //   - Voegt premium-status check toe aan window.DY.premium
 //   - Voegt "Upgrade" item toe aan extra-menu hub (boven aan)
-//   - Toont upgrade-modal met perks + Stripe checkout button
-//   - Handelt success/cancel redirect af via ?premium=success&session_id=
+//   - Toont upgrade-modal met perks + Shopify checkout button
+//   - Handelt success/cancel redirect af via ?premium=success
 //   - Cached premium status in localStorage (5 min TTL) om backend te ontlasten
 // ═══════════════════════════════════════════════════════════════════
 (function () {
@@ -23,6 +22,18 @@
   var PKG_ID = 'premium_monthly';
   var LS_CACHE = 'dy_premium_cache';
   var LS_USERKEY = 'dy_premium_userkey'; // anoniem fallback id
+
+  // ─── Shopify Premium Config ──────────────────────────────────────
+  // Vul de Variant-ID van het Premium-maand-product hieronder in
+  // (zie SETUP_PREMIUM.md voor de stappen om 'm op te halen).
+  var PP_SHOPIFY_PREMIUM = {
+    shop_domain: 'doubleyousmallandtall.nl',
+    variants: {
+      'monthly': '',   // <-- Variant-ID voor "Doubleyou Premium - 1 maand" (€4,99)
+      'yearly':  ''    // <-- (optioneel) Variant-ID voor jaarabonnement
+    },
+    return_path: '/?premium=success'
+  };
 
   // ─── Helpers ─────────────────────────────────────────────────────
   // Hardcoded LIVE backend fallback - used als aiHealth nog niet geladen is
@@ -211,61 +222,38 @@
     payBtn.textContent = 'Bezig...';
 
     try {
-      var base = apiBase();
-      var body = {
-        package_id: PKG_ID,
-        origin_url: window.location.origin,
-        user_key: email || getUserKey(),
-        email: email,
-      };
-      var endpoint = base + '/api/checkout/session';
-      console.info('[premium] POST', endpoint, 'email=', email);
+      // ── Shopify Premium flow ──────────────────────────────────────
+      var cfg = PP_SHOPIFY_PREMIUM;
+      var plan = 'monthly';
+      var variantId = cfg.variants[plan];
+      if (!variantId) {
+        if (err) err.textContent = 'Premium-koppeling wordt geconfigureerd. Probeer later opnieuw.';
+        console.warn('[premium] Geen Shopify Variant-ID ingevuld voor', plan);
+        payBtn.disabled = false;
+        payBtn.textContent = 'Start Premium →';
+        return;
+      }
 
-      var r;
+      var userKey = email || getUserKey();
+      var domain = (cfg.shop_domain || 'doubleyousmallandtall.nl').replace(/^https?:\/\//,'').replace(/\/$/,'');
+      var returnTo = window.location.origin + (cfg.return_path || '/?premium=success');
+
+      var params = [
+        'attributes%5Bpremium_user_key%5D=' + encodeURIComponent(userKey),
+        'attributes%5Bpremium_email%5D=' + encodeURIComponent(email),
+        'attributes%5Bpremium_plan%5D=' + encodeURIComponent(plan),
+        'return_to=' + encodeURIComponent(returnTo)
+      ];
+      var url = 'https://' + domain + '/cart/' + encodeURIComponent(variantId) + ':1?' + params.join('&');
+
+      // Save pending marker (voor de return-toast)
       try {
-        r = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-      } catch (netErr) {
-        console.error('[premium] Network error during checkout fetch:', netErr);
-        if (err) err.textContent = 'Geen verbinding met de server. Check je internet en probeer opnieuw.';
-        payBtn.disabled = false;
-        payBtn.textContent = 'Start Premium →';
-        return;
-      }
+        localStorage.setItem('dy_premium_pending', 'shopify:' + plan + ':' + Date.now());
+      } catch (e) { /* ignore */ }
 
-      // Parse JSON defensively - backend kan 502 + JSON, 503 + JSON, of HTML-error retourneren
-      var d = null;
-      var rawText = '';
-      try {
-        rawText = await r.text();
-        d = rawText ? JSON.parse(rawText) : null;
-      } catch (parseErr) {
-        console.error('[premium] JSON parse failed. status=', r.status, 'body=', rawText.slice(0, 300));
-        if (err) err.textContent = 'Server gaf onverwacht antwoord (' + r.status + '). Probeer opnieuw.';
-        payBtn.disabled = false;
-        payBtn.textContent = 'Start Premium →';
-        return;
-      }
-
-      if (!r.ok || !d || !d.url) {
-        var msg = (d && d.detail) ? String(d.detail) : ('Kon checkout niet starten (' + r.status + ').');
-        // Stripe live mode error rebranding voor gebruiker
-        if (/invalid email/i.test(msg)) {
-          msg = 'Dit e-mailadres wordt door Stripe niet geaccepteerd. Gebruik je échte e-mailadres (geen test-adressen).';
-        }
-        console.warn('[premium] Checkout failed:', r.status, msg, d);
-        if (err) err.textContent = msg;
-        payBtn.disabled = false;
-        payBtn.textContent = 'Start Premium →';
-        return;
-      }
-      // Save pending session for status-polling on return
-      try { localStorage.setItem('dy_premium_pending', d.session_id); } catch (e) { /* ignore */ }
-      console.info('[premium] Redirecting to Stripe:', d.url);
-      window.location.href = d.url;
+      console.info('[premium] Redirecting to Shopify:', url);
+      // Same-tab redirect ipv popup (geen blocker-issues)
+      window.location.href = url;
     } catch (e) {
       console.error('[premium] Unexpected error in startCheckout:', e);
       if (err) err.textContent = 'Onverwachte fout: ' + (e && e.message ? e.message : 'probeer opnieuw');
@@ -274,24 +262,27 @@
     }
   }
 
-  // ─── Return-flow polling ─────────────────────────────────────────
-  async function pollStatus(sessionId, attempts) {
+  // ─── Return-flow polling (Shopify) ───────────────────────────────
+  // Na Shopify checkout return: poll /api/premium/status tot is_premium=true
+  // (webhook moet binnen ~30s premium activeren in MongoDB)
+  async function pollPremiumStatus(attempts) {
     attempts = attempts || 0;
-    if (attempts > 6) return showReturnToast('Betaling kon niet bevestigd worden. Check je mail.', false);
-    var base = apiBase();
+    if (attempts > 12) {  // 12 * 2.5s = 30s max
+      return showReturnToast('Betaling ontvangen, maar status wordt nog verwerkt. Vernieuw over 1 min.', false);
+    }
     try {
-      var r = await fetch(base + '/api/checkout/status/' + encodeURIComponent(sessionId));
-      var d = await r.json();
-      if (d.payment_status === 'paid' && d.premium_activated) {
+      var s = await fetchStatus(true);  // force refresh, bypass cache
+      if (s && s.is_premium) {
         try { localStorage.removeItem('dy_premium_pending'); localStorage.removeItem(LS_CACHE); } catch (e) { /* ignore */ }
-        await fetchStatus(true);
         return showReturnToast('Welkom bij Premium! 👑 Alle AI-features zijn onbeperkt.', true);
       }
-      if (d.status === 'expired' || d.payment_status === 'unpaid' && d.status === 'complete') {
-        return showReturnToast('Betaling is niet doorgegaan.', false);
-      }
     } catch (e) { /* ignore */ }
-    setTimeout(function () { pollStatus(sessionId, attempts + 1); }, 1800);
+    setTimeout(function () { pollPremiumStatus(attempts + 1); }, 2500);
+  }
+
+  // Behoud oude pollStatus voor backwards compat (Stripe-stijl) — verwijst nu naar nieuwe flow
+  async function pollStatus(sessionId, attempts) {
+    return pollPremiumStatus(attempts);
   }
 
   function showReturnToast(msg, ok) {
@@ -309,8 +300,9 @@
     var sid = u.searchParams.get('session_id');
     var p = u.searchParams.get('premium');
     if (!sid && !p) return;
-    if (p === 'success' && sid) {
-      pollStatus(sid, 0);
+    if (p === 'success') {
+      // Shopify-flow: geen session_id meer nodig, poll gewoon de premium status
+      pollPremiumStatus(0);
     } else if (p === 'cancel') {
       showReturnToast('Premium upgrade geannuleerd.', false);
     }
