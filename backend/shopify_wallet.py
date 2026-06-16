@@ -194,6 +194,95 @@ async def setup_url(request: Request):
     return PlainTextResponse(url)
 
 
+@wallet_router.get("/setup")
+async def setup_helper():
+    """1-klik HTML-pagina met de webhook-URL en een 'Kopieer' knop."""
+    from fastapi.responses import HTMLResponse
+    url = "https://paskamer-stability.preview.emergentagent.com/api/wallet/webhook/shopify"
+    secret_set = bool(SHOPIFY_WEBHOOK_SECRET)
+    fb_ready = _init_firebase() is not None
+    html = f"""<!DOCTYPE html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Doubleyou — Shopify Webhook Setup</title>
+<style>
+  body {{ background:#0a0806; color:#fcf8ef; font:16px/1.5 system-ui,-apple-system,sans-serif;
+         margin:0; padding:40px 20px; min-height:100vh; }}
+  .wrap {{ max-width:640px; margin:0 auto; }}
+  h1 {{ font-size:1.6rem; color:#d4910a; margin:0 0 8px; }}
+  .lead {{ color:rgba(252,248,239,.7); margin:0 0 28px; }}
+  .field {{ background:#1e1a0f; border:1px solid rgba(212,145,10,.4); border-radius:12px;
+            padding:16px; margin-bottom:16px; }}
+  .field-label {{ font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+                  color:#d4910a; font-weight:600; margin-bottom:8px; }}
+  .field-value {{ font-family:'SF Mono',Monaco,monospace; font-size:14px;
+                  word-break:break-all; user-select:all; padding:10px; background:#0a0806;
+                  border-radius:8px; border:1px solid rgba(252,248,239,.1); }}
+  .btn {{ display:inline-block; background:#d4910a; color:#0a0806; padding:12px 24px;
+          border:none; border-radius:100px; font-weight:700; cursor:pointer;
+          font-size:15px; margin-top:8px; transition:transform .15s; }}
+  .btn:hover {{ transform:scale(1.03); background:#e8a31f; }}
+  .btn.ok {{ background:#3a7d3a; color:#fff; }}
+  .status {{ display:flex; gap:8px; margin:20px 0; flex-wrap:wrap; }}
+  .pill {{ display:inline-flex; align-items:center; gap:6px; padding:6px 12px;
+           background:rgba(255,255,255,.05); border-radius:100px; font-size:13px; }}
+  .pill.ok {{ color:#7ee07e; }}
+  .pill.no {{ color:#ff8a8a; }}
+  .steps {{ background:rgba(212,145,10,.06); border:1px solid rgba(212,145,10,.2);
+            border-radius:12px; padding:18px 22px; margin-top:24px; }}
+  .steps h2 {{ margin:0 0 12px; font-size:1rem; color:#d4910a; }}
+  .steps ol {{ margin:0; padding-left:20px; }}
+  .steps li {{ margin-bottom:10px; color:rgba(252,248,239,.85); }}
+</style></head>
+<body><div class="wrap">
+  <h1>🔗 Shopify Webhook Setup</h1>
+  <p class="lead">1 klik = URL in je klembord. Plak 'm daarna in Shopify.</p>
+
+  <div class="status">
+    <span class="pill {'ok' if secret_set else 'no'}">{'✅' if secret_set else '⏳'} Signing secret: {'actief' if secret_set else 'wacht op'}</span>
+    <span class="pill {'ok' if fb_ready else 'no'}">{'✅' if fb_ready else '⏳'} Firebase Admin: {'klaar' if fb_ready else 'wacht op JSON'}</span>
+  </div>
+
+  <div class="field">
+    <div class="field-label">Webhook URL (kopieer en plak in Shopify)</div>
+    <div class="field-value" id="url">{url}</div>
+    <button class="btn" id="copyBtn" onclick="copyUrl()">📋 Kopieer URL</button>
+  </div>
+
+  <div class="steps">
+    <h2>Stappen in Shopify Admin</h2>
+    <ol>
+      <li>Settings → Notifications → Webhooks</li>
+      <li>Klik op de bestaande "Betaling van bestelling" webhook → ⋯ → Bewerken</li>
+      <li>URL-veld leegmaken (Ctrl+A → Delete)</li>
+      <li>Klik hierboven <strong>"📋 Kopieer URL"</strong> → in Shopify URL-veld <strong>Ctrl+V</strong></li>
+      <li>Webhook-API-versie: <strong>2025-01</strong> (géén Release-kandidaat)</li>
+      <li>Opslaan ✓</li>
+    </ol>
+  </div>
+</div>
+<script>
+  async function copyUrl() {{
+    const url = document.getElementById('url').textContent.trim();
+    const btn = document.getElementById('copyBtn');
+    try {{
+      await navigator.clipboard.writeText(url);
+      btn.textContent = '✅ Gekopieerd!';
+      btn.classList.add('ok');
+      setTimeout(() => {{ btn.textContent = '📋 Kopieer URL'; btn.classList.remove('ok'); }}, 2500);
+    }} catch (e) {{
+      // Fallback: select de tekst
+      const range = document.createRange();
+      range.selectNodeContents(document.getElementById('url'));
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      btn.textContent = '⚠️ Druk Ctrl+C nu';
+    }}
+  }}
+</script></body></html>"""
+    return HTMLResponse(html)
+
+
 @wallet_router.post("/webhook/shopify")
 async def shopify_webhook(request: Request,
                           x_shopify_hmac_sha256: Optional[str] = Header(None),
