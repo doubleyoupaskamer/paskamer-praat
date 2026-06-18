@@ -116,29 +116,46 @@
     } catch (e) {}
   }
 
-  // CTA-knop "Bekijk pakketten" in brand-portal merken-landing modal
+  // CTA-knop "Bekijk campagne-pakketten" in de bestaande "Samenwerken met
+  // Paskamerpraat" overlay. De titel zit in <span id="dy-sw-titel"> en de
+  // content in .dy-sw-content. We plaatsen de CTA als eerste sectie in de
+  // content zodat hij prominent zichtbaar is bovenaan.
   function injectLandingCTA() {
     try {
-      // Modal-headerblok met "Samenwerken met Paskamerpraat" → voeg knop toe in actie-balk
-      var headers = document.querySelectorAll('h1, h2, h3');
-      headers.forEach(function (h) {
-        if (h.dataset && h.dataset._pp_pkgcta) return;
-        if ((h.textContent || '').toLowerCase().indexOf('samenwerken met paskamerpraat') === -1) return;
-        // Zoek de bp-page container
-        var page = h.closest('.bp-page') || h.parentNode;
-        if (!page) return;
-        if (page.querySelector('[data-testid="merk-landing-pkg-cta"]')) return;
-        var btn = document.createElement('button');
-        btn.className = 'bp-btn bp-btn-primair';
-        btn.style.cssText = 'margin-top:12px;display:inline-flex;align-items:center;gap:6px';
-        btn.setAttribute('data-testid', 'merk-landing-pkg-cta');
-        btn.textContent = 'Bekijk campagne-pakketten';
-        btn.onclick = function () { window.DY.navigeer('merken_pakketten'); };
-        h.dataset._pp_pkgcta = '1';
-        // Plaats na de header
-        if (h.nextSibling) h.parentNode.insertBefore(btn, h.nextSibling);
-        else h.parentNode.appendChild(btn);
-      });
+      var content = document.querySelector('.dy-sw-content');
+      if (!content) return;
+      if (content.querySelector('[data-testid="merk-landing-pkg-cta-section"]')) return;
+
+      var sect = document.createElement('section');
+      sect.className = 'dy-sw-sectie';
+      sect.setAttribute('data-testid', 'merk-landing-pkg-cta-section');
+      sect.style.cssText = 'background:rgba(212,145,10,0.08);border:1px solid rgba(212,145,10,0.35);border-radius:12px;padding:14px;text-align:center';
+      sect.innerHTML =
+        '<h3 class="dy-sw-sectie-titel" style="margin-top:0">Onze campagne-pakketten</h3>' +
+        '<p style="margin:0 0 12px;opacity:0.85">Bekijk alle pakketten met prijzen, beschrijvingen en verwachte impact voor je merk.</p>' +
+        '<button class="bp-btn bp-btn-primair" data-testid="merk-landing-pkg-cta" style="width:100%;max-width:280px">Bekijk campagne-pakketten</button>';
+
+      // Plaats als EERSTE sectie binnen .dy-sw-content
+      content.insertBefore(sect, content.firstChild);
+
+      var btn = sect.querySelector('[data-testid="merk-landing-pkg-cta"]');
+      if (btn) {
+        btn.onclick = function (e) {
+          e.preventDefault();
+          // Sluit eerst de samenwerken-overlay
+          var ov = document.getElementById('dy-sw-overlay') ||
+                   document.querySelector('.dy-sw-sheet') ||
+                   document.querySelector('[aria-labelledby="dy-sw-titel"]');
+          try {
+            if (ov) {
+              var sluit = ov.querySelector('.dy-sw-sluit, [data-testid="sw-overlay-sluit-btn"]');
+              if (sluit) sluit.click();
+              else if (ov.parentNode && ov.classList.contains('dy-bpos-overlay')) ov.remove();
+            }
+          } catch (_) {}
+          setTimeout(function () { window.DY.navigeer('merken_pakketten'); }, 80);
+        };
+      }
     } catch (e) {}
   }
 

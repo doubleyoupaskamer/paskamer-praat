@@ -7,6 +7,35 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.132 — Samenwerken CTA Fix (18 jun 2026)
+
+### Root cause
+v60.1.131 zocht naar `<h1>/<h2>/<h3>` met tekst "Samenwerken met Paskamerpraat" om de CTA-knop te injecteren. Maar die titel zit in een **`<span class="dy-bpos-titel" id="dy-sw-titel">`** (zie `pwa-v463-1780765770.js` regel 2311). De MutationObserver matched dus nooit → geen knop in de modal.
+
+### Fix
+`injectLandingCTA()` zoekt nu op de **stabiele DOM-anchor `.dy-sw-content`** (de content-container van de samenwerken-overlay) en plaatst een hele nieuwe sectie als EERSTE child:
+
+```html
+<section class="dy-sw-sectie" data-testid="merk-landing-pkg-cta-section"
+         style="background:rgba(212,145,10,0.08);border:1px solid rgba(212,145,10,0.35);
+                border-radius:12px;padding:14px;text-align:center">
+  <h3 class="dy-sw-sectie-titel">Onze campagne-pakketten</h3>
+  <p>Bekijk alle pakketten met prijzen, beschrijvingen en verwachte impact voor je merk.</p>
+  <button class="bp-btn bp-btn-primair" data-testid="merk-landing-pkg-cta">
+    Bekijk campagne-pakketten
+  </button>
+</section>
+```
+
+Knop sluit eerst de overlay (klik op `.dy-sw-sluit`) en navigeert dan naar `merken_pakketten` route. Prominent zichtbaar bovenaan met gouden achtergrond + border accent.
+
+### Cache bumped → `v60.1.132-sw-cta-fix`
+- `sw.js` VERSION → `v60.1.132-20260618-sw-cta-fix`
+- `index.html` 20× `?v=` bumped
+- ZIP: 3.8 MB, 3,957,403 bytes
+
+
+
 ## v60.1.131 — Merken Pakketten Public View (18 jun 2026)
 
 ### Doel
