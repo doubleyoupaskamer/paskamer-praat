@@ -207,6 +207,20 @@
   // Hierdoor slaat de gebruiker de storefront over en gaat direct naar checkout.
   // De cart-attributes komen na betaling als `note_attributes` in de Shopify Order webhook.
   async function topup(amount) {
+    // Coming-soon intercept (B2B Merken Wallet) — toont popup i.p.v. checkout.
+    // Bestaande onderliggende Shopify-flow blijft intact; verwijder enkel deze
+    // intercept om opwaarderen weer live te zetten.
+    try {
+      if (window.PP_TopupComingSoon && PP_TopupComingSoon.show) {
+        PP_TopupComingSoon.show({
+          naam: 'Merken wallet top-up',
+          prijs: Number(amount),
+          source: 'b2b'
+        });
+        return;
+      }
+    } catch (e) { /* fallthrough naar bestaande flow */ }
+
     try {
       var u = uid();
       if (!u) { toast('Log eerst in', true); return; }

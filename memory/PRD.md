@@ -7,6 +7,37 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.123 — "Binnenkort beschikbaar" Topup Popup (18 jun 2026)
+
+### Nieuwe gedeelde module: `pp-topup-comingsoon-v1.js`
+Toont een native modal met:
+- ⏰ Icoon + titel "Binnenkort beschikbaar"
+- Korte uitlegtekst over de naderende launch
+- Pakket-naam + prijs context (uit de aanroep)
+- Instagram link → `https://www.instagram.com/paskamerpraat`
+- Website link → `https://www.doubleyoufashion.nl`
+- Sluit-knoppen (X, ESC, "Sluiten" button, click-outside)
+
+### Intercepts (puur additief, bovenaan `topup()`)
+- **B2B Merken Wallet** (`pp-wallet-v1.js` regel 209+): voor alle bedragen (€25/€50/€100/€250)
+- **B2C Klant Wallet** (`pp-b2c-wallet-v1.js` regel 313+): voor alle pakketten (Starter/Groei/Plus/Pro/Ultimate), lookup pakket-naam uit `PP_B2C_PACKAGES_DEFAULT`
+
+### Backwards compatibility (NIETS gewijzigd aan):
+- Onderliggende Shopify checkout flow (cart-redirect, attributes, email-override) — intact
+- Variant-IDs, pakket-config, transparantie-tekst, productkaarten — intact
+- Backend webhook `_credit_firestore` + `_credit_b2c_firestore` — intact
+- Boost-flow, Premium, Merkenportaal, Profiel — alles ongewijzigd
+
+### Activeren / deactiveren
+**Live zetten**: verwijder de `if (window.PP_TopupComingSoon && ...) return;` blok bovenaan beide `topup()` functies — alle onderliggende code blijft werken.
+
+### Cache bumped → `v60.1.123-topup-comingsoon`
+- `sw.js` VERSION → `v60.1.123-20260618-topup-comingsoon`
+- index.html: 14× `?v=` ge-update
+- ZIP: 3.7 MB, 3,853,196 bytes
+
+
+
 ## v60.1.122 — B2C Wallet Boost Productbeschrijvingen (18 jun 2026)
 
 ### Centrale productconfig in `pp-b2c-wallet-v1.js`

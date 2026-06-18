@@ -311,6 +311,28 @@
 
   // ── TOPUP ──────────────────────────────────────────────────────────
   async function topup(amount) {
+    // Coming-soon intercept (B2C Klant Wallet) — toont popup i.p.v. checkout.
+    // Bestaande onderliggende Shopify-flow + pakket-config blijven intact;
+    // verwijder enkel deze intercept om opwaarderen weer live te zetten.
+    try {
+      if (window.PP_TopupComingSoon && PP_TopupComingSoon.show) {
+        // Lookup pakket-naam uit de centrale config voor mooie weergave in popup
+        var pkgName = null;
+        try {
+          var defaults = PP_B2C_PACKAGES_DEFAULT.filter(function (p) {
+            return p && p.amount === Number(amount);
+          });
+          if (defaults.length) pkgName = defaults[0].name;
+        } catch (_) {}
+        PP_TopupComingSoon.show({
+          naam: pkgName || ('Wallet top-up €' + amount),
+          prijs: Number(amount),
+          source: 'b2c'
+        });
+        return;
+      }
+    } catch (e) { /* fallthrough naar bestaande flow */ }
+
     try {
       var u = uid();
       if (!u) { toast('Log eerst in', true); return; }
