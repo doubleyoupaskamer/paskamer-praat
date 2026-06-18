@@ -238,12 +238,17 @@
       var domain = (cfg.shop_domain || 'doubleyousmallandtall.nl').replace(/^https?:\/\//,'').replace(/\/$/,'');
       var returnTo = window.location.origin + (cfg.return_path || '/?premium=success');
 
+      // v60.1.117: force checkout-email naar de ingelogde gebruiker (override Shop Pay device-cache)
       var params = [
         'attributes%5Bpremium_user_key%5D=' + encodeURIComponent(userKey),
         'attributes%5Bpremium_email%5D=' + encodeURIComponent(email),
         'attributes%5Bpremium_plan%5D=' + encodeURIComponent(plan),
         'return_to=' + encodeURIComponent(returnTo)
       ];
+      if (email) {
+        params.push('checkout%5Bemail%5D=' + encodeURIComponent(email));
+        params.push('checkout%5Bnote%5D=' + encodeURIComponent('Premium ' + plan + ' voor account=' + email));
+      }
       var url = 'https://' + domain + '/cart/' + encodeURIComponent(variantId) + ':1?' + params.join('&');
 
       // Save pending marker (voor de return-toast)

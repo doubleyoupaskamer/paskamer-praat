@@ -231,13 +231,29 @@
       var amountCents = String(Math.round(Number(amount) * 100));
       var returnTo = window.location.origin + (cfg.return_path || '/?pagina=wallet&topup=success');
 
+      // v1.2.0: pak de email + displayName van de INGELOGDE Firebase user, zodat de
+      // Shopify checkout niet auto-fills met een eerder Shop Pay device-email.
+      var fbUser = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+      var userEmail = (fbUser && fbUser.email) ? fbUser.email : '';
+      var userName  = (fbUser && (fbUser.displayName || '')) || '';
+
       // Shopify cart attributes — exact syntax: attributes[name]=value
+      // checkout[email] forceert het juiste email-veld i.p.v. Shop Pay device-cache.
       var params = [
         'attributes%5Bwallet_topup_uid%5D=' + encodeURIComponent(u),
         'attributes%5Bwallet_topup_amount_cents%5D=' + encodeURIComponent(amountCents),
         'attributes%5Bwallet_topup_amount_eur%5D=' + encodeURIComponent(String(amount)),
+        'attributes%5Bwallet_topup_account_email%5D=' + encodeURIComponent(userEmail),
         'return_to=' + encodeURIComponent(returnTo)
       ];
+      // Force checkout email (override Shop Pay cache) — pas toevoegen als email bekend is
+      if (userEmail) {
+        params.push('checkout%5Bemail%5D=' + encodeURIComponent(userEmail));
+        params.push('checkout%5Bnote%5D=' + encodeURIComponent('Wallet top-up voor uid=' + u + ' account=' + userEmail));
+      }
+      if (userName) {
+        params.push('checkout%5Bshipping_address%5D%5Bfirst_name%5D=' + encodeURIComponent(userName));
+      }
       var url = 'https://' + domain + '/cart/' + encodeURIComponent(variantId) + ':1?' + params.join('&');
 
       // Optioneel: log pending-betaling lokaal (UI-feedback bij terugkeer)
@@ -407,6 +423,6 @@
     openTopup:    openTopup,
     refresh:      refresh,
     switchTab:    switchTab,
-    VERSION:      '1.1.0'
+    VERSION:      '1.2.0'
   };
 })();
