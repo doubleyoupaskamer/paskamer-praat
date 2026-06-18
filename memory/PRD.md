@@ -7,6 +7,41 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.131 — Merken Pakketten Public View (18 jun 2026)
+
+### Doel
+B2B campagne-pakketten zichtbaar maken binnen het bestaande merkenportaal, in dezelfde card-layout. Beheer blijft op `admin_b2b_packages` (Fase 1 admin), data-bron is dezelfde Firestore key `admin_settings/global.b2b_packages`.
+
+### Nieuwe module: `pp-merken-pakketten-v1.js`
+- **Route**: `merken_pakketten` (publiek, binnen brand portal context)
+- **Hergebruikt**: zelfde `.pp-b2c-pkg-card` styling als B2C wallet (uit `pp-wallet.css`) voor visuele consistentie
+- **Data-bron**: `admin_settings/global.b2b_packages` (zelfde als admin editor) + fallback naar 4 default pakketten
+- **CTA per kaart**: 
+  - Niet-ingelogd → "Aanmelden als merk" (route `merken_aanmelden`)
+  - Ingelogd → "Naar merkenportaal" (route `merken`)
+- **Admin-only**: extra "Pakketten beheren" knop naar `admin_b2b_packages`
+- **Auto-inject CTA**: MutationObserver vangt `<h*>` met "Samenwerken met Paskamerpraat" tekst en plaatst "Bekijk campagne-pakketten" knop daarna
+
+### Eigenschappen
+- Read-only voor merken (alleen tonen)
+- Filter op `active !== false` (soft-delete respecteert)
+- Populair-badge per pakket (uit `popular` veld)
+- Volledig responsive (1-koloms <480px, auto-fill grid daarboven)
+- Disclosure tekst onderaan (zelfde wording als B2B admin editor)
+
+### Backwards compatibility (NIETS gewijzigd aan)
+- `brand-portal-v1.js`, `pp-admin-packages-v1.js`, `pp-wallet-v1.js`, `pp-b2c-wallet-v1.js`
+- Bestaande "Samenwerken met Paskamerpraat" modal blijft intact — krijgt enkel een extra CTA-knop erbij
+- Wallet/Boost/Premium/Profiel/Admin flows — onaangeraakt
+- Bestaande database structuur — onaangeraakt
+
+### Cache bumped → `v60.1.131-merken-pakketten`
+- `sw.js` VERSION → `v60.1.131-20260618-merken-pakketten`
+- `index.html` 20× `?v=` bumped (+1 nieuw script)
+- ZIP: 3.8 MB, 3,957,157 bytes
+
+
+
 ## v60.1.130 — Install Button Path Fix (KRITIEK) (18 jun 2026)
 
 ### Root cause definitief gevonden
