@@ -1131,3 +1131,32 @@ ServiceWorker" was de combinatie van:
 - Service Worker VERSION naar `v60.1.73-20260214-cleanup-emdash`.
 - ZIP herbouwd: `/app/01-paskamerpraat-pwa-cloudflare.zip` (2.5 MB, 156 files).
 - Syntax check: alle JS bestanden valid (`node -c` pass).
+
+## v60.1.136 (2026-02-18) - Topup Modal Router (non-breaking auth/premium gate)
+- **Probleem**: klik op "Saldo opwaarderen" toonde voor IEDEREEN de
+  generieke "Binnenkort beschikbaar" popup. UX-flow verbroken, context
+  verloren (geen auth-detectie, geen premium-detectie).
+- **Fix (non-breaking, additive)**:
+  Nieuwe extensie `/app/pwa/extensions/payments/pp-topup-modal-router-v1.js`
+  wrapt `PP_TopupComingSoon.show(ctx)` met auth/premium routing.
+  - Niet ingelogd → `DY.toonLoginPrompt(reden)` (bestaande auth bottom-sheet)
+  - B2B merken-context → originele coming-soon popup (geen premium-gate
+    voor merken; die hebben eigen pakketten-flow)
+  - B2C ingelogd, niet premium → `PP_Premium.openUpgrade()` (bestaande
+    upgrade modal)
+  - B2C premium → originele coming-soon popup (= huidige wallet flow)
+- **Geen wijzigingen** aan `pp-b2c-wallet-v1.js`, `pp-wallet-v1.js`,
+  `pp-topup-comingsoon-v1.js`, Shopify-flow of routes.
+- **Safety nets**: fallback naar originele popup bij elke fout
+  (premium-check failure, ontbrekende modal API). Nooit blank screen,
+  nooit redirect, nooit page reload.
+- **Debug layer**: `window.__ppTopupAudit` (laatste 50 routings) +
+  `window.PP_TopupRouter.audit() / .isWrapped()`. Console-prefix
+  `[topup-router]`.
+- Script geregistreerd in `index.html` (regel 960) met leading slash
+  `/extensions/payments/pp-topup-modal-router-v1.js`, defer, na
+  coming-soon popup script.
+- Alle `?v=` querystrings gebumpt naar `60.1.136-topup-router-v1`.
+- Service Worker `VERSION` naar `v60.1.136-20260618-topup-router-v1`.
+- ZIP herbouwd: `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.97 MB).
+- Syntax check: `node --check` pass.
