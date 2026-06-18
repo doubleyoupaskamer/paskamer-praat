@@ -7,6 +7,50 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.122 — B2C Wallet Boost Productbeschrijvingen (18 jun 2026)
+
+### Centrale productconfig in `pp-b2c-wallet-v1.js`
+Nieuwe `PP_B2C_PACKAGES_DEFAULT` array — één bron van waarheid voor 5 wallet boost-pakketten:
+- **Starter Boost** (€5) — "eerste extra zetje" / kleine extra zichtbaarheid
+- **Groei Boost** (€10) — "stijl vaker zichtbaar" / langere actieve periode
+- **Plus Boost** (€15) `popular` — "meer aandacht voor content" / hogere zichtbaarheid + engagement
+- **Pro Boost** (€25) — "beste outfits laten opvallen" / uitgebreidere zichtbaarheid
+- **Ultimate Boost** (€50) — "maximaal onder de aandacht" / maximale boostondersteuning
+
+Schema (uitbreidbaar):
+```
+{ id, name, amount, credits, duration, description, expectedImpact, active, popular? }
+```
+Override mogelijk via Firestore `admin_settings/global.b2c_packages` (geen redeploy).
+
+### Transparantie-tekst (vóór aankoop, mobiel-leesbaar)
+`PP_B2C_DISCLOSURE`: "Een boost vergroot de zichtbaarheid van je post binnen Paskamerpraat. Het daadwerkelijke bereik kan verschillen afhankelijk van content, activiteit en interesses van andere gebruikers."
+
+### UI: productkaarten i.p.v. simpele bedragknoppen
+Nieuwe `pp-b2c-pkg-card` componenten in `pp-wallet.css`:
+- Naam + prijs in header (flex met wrap voor smalle schermen)
+- Beschrijving (max ~3 regels op desktop)
+- Verwachting in geel-accent block met linker-rand
+- "Populair" badge bij Plus Boost
+- "Wallet opwaarderen" CTA per kaart
+- Grid: `auto-fill, minmax(280px, 1fr)` → 1-koloms op <480px
+- Extra padding/font-aanpassing op <360px
+
+### Backwards compatibility (geen breaking changes)
+- Bestaande `PP_B2C_TOPUPS.variants` ongewijzigd (zelfde Shopify variant-IDs)
+- Aankoopflow `PP_B2CWallet.topup(amount)` ongewijzigd
+- `_renderPackagesHTML()` fallback: variants zonder pakket-config krijgen automatisch een standaard-kaart
+- Wallet-saldo verwerking, payment audit, webhook flow alles ongewijzigd
+- Boost activatie flow (`/api/boost/activate`) ongewijzigd
+- Premium / Merkenportaal / Advertenties / Profiel ongewijzigd
+
+### Cache bumped → `v60.1.122-boost-pkg-descriptions`
+- `sw.js` VERSION → `v60.1.122-20260618-boost-pkg-descriptions`
+- index.html: 13× `?v=` ge-update
+- ZIP: `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.7 MB, 3,849,294 bytes)
+
+
+
 ## v60.1.120 — Shopify-only Premium + Variant-IDs + Boost button + Stripe verwijderd (18 jun 2026)
 
 ### B2C Wallet Variant-IDs ingebakken (live)

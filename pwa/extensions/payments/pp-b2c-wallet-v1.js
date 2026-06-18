@@ -33,6 +33,68 @@
     },
     return_path: '/?pagina=b2c_wallet&topup=success'
   };
+
+  // ────────── B2C WALLET BOOST PAKKETTEN ──────────
+  // Centraal beheerd: één bron van waarheid voor naam, omschrijving en
+  // verwachte impact per opwaardeer-bedrag. Override mogelijk via Firestore
+  // (admin_settings/global.b2c_packages) zonder redeploy.
+  // Schema: { id, name, amount, credits, duration, description, expectedImpact, active }
+  var PP_B2C_PACKAGES_DEFAULT = [
+    {
+      id: 'starter-5',
+      name: 'Starter Boost',
+      amount: 5,
+      credits: '€5 boost-saldo',
+      duration: 'Eénmalig saldo',
+      description: 'Voor gebruikers die hun outfit of post een eerste extra zetje willen geven. Met deze boost krijgt jouw post tijdelijk extra zichtbaarheid binnen de community. Ideaal om nieuwe mensen kennis te laten maken met jouw stijl en om meer kansen te creëren op likes, reacties en profielbezoeken.',
+      expectedImpact: 'Kleine extra zichtbaarheid voor één specifieke post.',
+      active: true
+    },
+    {
+      id: 'groei-10',
+      name: 'Groei Boost',
+      amount: 10,
+      credits: '€10 boost-saldo',
+      duration: 'Eénmalig saldo',
+      description: 'Voor gebruikers die hun stijl vaker zichtbaar willen maken. Deze boost geeft jouw post meer ruimte om ontdekt te worden door relevante gebruikers en vergroot de kans op interactie binnen de community.',
+      expectedImpact: 'Meer zichtbaarheid en een langere actieve periode dan Starter Boost.',
+      active: true
+    },
+    {
+      id: 'plus-15',
+      name: 'Plus Boost',
+      amount: 15,
+      credits: '€15 boost-saldo',
+      duration: 'Eénmalig saldo',
+      description: 'Voor gebruikers die meer aandacht willen voor hun content. Ideaal voor outfits waarvan je extra feedback, inspiratie en interactie wilt ontvangen. Jouw post krijgt een sterkere ondersteuning binnen de beschikbare boostmogelijkheden.',
+      expectedImpact: 'Hogere zichtbaarheid en meer kansen op engagement.',
+      active: true,
+      popular: true
+    },
+    {
+      id: 'pro-25',
+      name: 'Pro Boost',
+      amount: 25,
+      credits: '€25 boost-saldo',
+      duration: 'Eénmalig saldo',
+      description: 'Voor gebruikers die hun beste outfits extra willen laten opvallen. Dit pakket is geschikt voor belangrijke posts en looks waarvan je wilt dat ze langer zichtbaar blijven binnen de community.',
+      expectedImpact: 'Uitgebreidere zichtbaarheid en meer kansen op likes, reacties en opgeslagen outfits.',
+      active: true
+    },
+    {
+      id: 'ultimate-50',
+      name: 'Ultimate Boost',
+      amount: 50,
+      credits: '€50 boost-saldo',
+      duration: 'Eénmalig saldo',
+      description: 'De krachtigste boost voor gebruikers die hun stijl maximaal onder de aandacht willen brengen. Geef jouw favoriete outfit de meeste ondersteuning binnen het boost systeem en vergroot de kans dat meer gebruikers jouw stijl ontdekken.',
+      expectedImpact: 'Maximale boostondersteuning binnen de beschikbare mogelijkheden.',
+      active: true
+    }
+  ];
+
+  // Vaste transparantie-tekst onder de pakketten (zichtbaar vóór aankoop).
+  var PP_B2C_DISCLOSURE = 'Een boost vergroot de zichtbaarheid van je post binnen Paskamerpraat. Het daadwerkelijke bereik kan verschillen afhankelijk van content, activiteit en interesses van andere gebruikers.';
   // ──────────────────────────────────────
 
   function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
@@ -155,16 +217,13 @@
 
           // Opwaarderen
           '<div class="bp-wallet-tabpanel" data-panel="opwaarderen" style="display:none" data-testid="b2c-wallet-panel-opwaarderen">' +
-            '<h2 class="bp-section-titel" style="margin-top:18px">Kies een bedrag</h2>' +
+            '<h2 class="bp-section-titel" style="margin-top:18px">Kies een boost-pakket</h2>' +
             (topupEnabled
-              ? '<div class="bp-topup-grid">' +
-                  [5, 10, 15, 25, 50].filter(function (amt) {
-                    return !!b2cCfg.variants[String(amt)];
-                  }).map(function (amt) {
-                    return '<button class="bp-topup-bedrag" onclick="PP_B2CWallet.topup(' + amt + ')" data-testid="b2c-wallet-topup-' + amt + '">€ ' + amt + '</button>';
-                  }).join('') +
+              ? '<div class="pp-b2c-pkg-grid" data-testid="b2c-wallet-pkg-grid">' +
+                  _renderPackagesHTML(b2cCfg, settings) +
                 '</div>' +
-                '<p class="bp-mini" style="margin-top:14px">Je wordt doorgestuurd naar de Shopify checkout op <strong>' + esc(b2cCfg.shop_domain) + '</strong>. Het saldo wordt automatisch bijgeschreven zodra de betaling is bevestigd.</p>'
+                '<p class="pp-b2c-disclosure" data-testid="b2c-wallet-disclosure">' + esc(PP_B2C_DISCLOSURE) + '</p>' +
+                '<p class="bp-mini" style="margin-top:10px">Je wordt doorgestuurd naar de Shopify checkout op <strong>' + esc(b2cCfg.shop_domain) + '</strong>. Het saldo wordt automatisch bijgeschreven zodra de betaling is bevestigd.</p>'
               : '<div class="bp-empty"><div class="bp-empty-titel">Opwaarderen tijdelijk uit</div>' +
                 '<div>De Shopify-koppeling wordt op dit moment geconfigureerd. Neem contact op met support voor handmatige opwaardering of probeer het later opnieuw.</div></div>'
             ) +
@@ -188,6 +247,66 @@
           '</div>' +
         '</div>';
     }
+  }
+
+  // ── PAKKET-KAART RENDERING ────────────────────────────────────────
+  // Combineert default-pakketten met optionele Firestore-override en
+  // filtert op beschikbare Shopify variants. Bestaande variants zonder
+  // pakket-config blijven werken via een veilige fallback (default kaart).
+  function _resolvePackages(settings) {
+    var override = (settings && settings.b2c_packages) ? settings.b2c_packages : null;
+    var base = (override && Array.isArray(override) && override.length) ? override : PP_B2C_PACKAGES_DEFAULT;
+    return base.filter(function (p) { return p && p.active !== false; });
+  }
+
+  function _renderPackagesHTML(b2cCfg, settings) {
+    var packages = _resolvePackages(settings);
+    var availableAmounts = Object.keys(b2cCfg.variants).filter(function (k) {
+      return !!b2cCfg.variants[k];
+    }).map(function (k) { return Number(k); });
+
+    // Index pakketten op amount voor snelle lookup
+    var byAmount = {};
+    packages.forEach(function (p) { if (p && p.amount != null) byAmount[String(p.amount)] = p; });
+
+    // Render één kaart per beschikbaar bedrag, in oplopende volgorde
+    return availableAmounts.sort(function (a, b) { return a - b; }).map(function (amt) {
+      var p = byAmount[String(amt)];
+      // Veilige fallback voor variants zonder pakket-config
+      if (!p) {
+        p = {
+          id: 'topup-' + amt,
+          name: '€ ' + amt + ' Wallet Top-up',
+          amount: amt,
+          credits: '€' + amt + ' boost-saldo',
+          duration: 'Eénmalig saldo',
+          description: '',
+          expectedImpact: ''
+        };
+      }
+      var popular = !!p.popular;
+      return (
+        '<article class="pp-b2c-pkg-card' + (popular ? ' pp-b2c-pkg-popular' : '') + '" data-testid="b2c-wallet-pkg-' + esc(p.id || ('amt-' + amt)) + '">' +
+          (popular ? '<div class="pp-b2c-pkg-badge">Populair</div>' : '') +
+          '<header class="pp-b2c-pkg-head">' +
+            '<h3 class="pp-b2c-pkg-naam">' + esc(p.name || ('€ ' + amt)) + '</h3>' +
+            '<div class="pp-b2c-pkg-prijs">€ ' + Number(amt).toFixed(0) + '</div>' +
+          '</header>' +
+          (p.description
+            ? '<p class="pp-b2c-pkg-beschr">' + esc(p.description) + '</p>'
+            : '') +
+          (p.expectedImpact
+            ? '<div class="pp-b2c-pkg-verwacht">' +
+                '<span class="pp-b2c-pkg-verwacht-label">Verwachting</span>' +
+                '<span class="pp-b2c-pkg-verwacht-tekst">' + esc(p.expectedImpact) + '</span>' +
+              '</div>'
+            : '') +
+          '<button class="bp-btn bp-btn-primair pp-b2c-pkg-cta" onclick="PP_B2CWallet.topup(' + amt + ')" data-testid="b2c-wallet-topup-' + amt + '">' +
+            'Wallet opwaarderen' +
+          '</button>' +
+        '</article>'
+      );
+    }).join('');
   }
 
   // ── TOPUP ──────────────────────────────────────────────────────────

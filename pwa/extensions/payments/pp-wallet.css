@@ -97,3 +97,127 @@
   border-color: #d4910a;
   transform: translateY(-1px);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * B2C Wallet Boost Pakket-kaarten (v60.1.122)
+ * Native uitbreiding van de bestaande wallet pagina-styling.
+ * ═══════════════════════════════════════════════════════════════════════ */
+.pp-b2c-pkg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+@media (max-width: 480px) {
+  .pp-b2c-pkg-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+.pp-b2c-pkg-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 18px 16px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(212,145,10,0.18);
+  border-radius: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.18s, background 0.18s, transform 0.18s;
+}
+.pp-b2c-pkg-card:hover {
+  border-color: rgba(212,145,10,0.45);
+  background: rgba(212,145,10,0.04);
+  transform: translateY(-1px);
+}
+.pp-b2c-pkg-popular {
+  border-color: #d4910a;
+  background: linear-gradient(180deg, rgba(212,145,10,0.08), rgba(212,145,10,0.02));
+}
+.pp-b2c-pkg-badge {
+  position: absolute;
+  top: -10px;
+  right: 14px;
+  background: #d4910a;
+  color: #0a0806;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(212,145,10,0.35);
+}
+.pp-b2c-pkg-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.pp-b2c-pkg-naam {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+  color: #f5e9d8;
+  line-height: 1.2;
+}
+.pp-b2c-pkg-prijs {
+  font-size: 24px;
+  font-weight: 700;
+  color: #d4910a;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.pp-b2c-pkg-beschr {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(245,233,216,0.78);
+  margin: 0;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+.pp-b2c-pkg-verwacht {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  background: rgba(212,145,10,0.06);
+  border-left: 2px solid rgba(212,145,10,0.55);
+  border-radius: 0 6px 6px 0;
+}
+.pp-b2c-pkg-verwacht-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(212,145,10,0.85);
+  font-weight: 600;
+}
+.pp-b2c-pkg-verwacht-tekst {
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(245,233,216,0.88);
+}
+.pp-b2c-pkg-cta {
+  margin-top: auto;
+  width: 100%;
+  min-height: 42px;
+}
+.pp-b2c-disclosure {
+  margin: 18px 0 4px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(245,233,216,0.7);
+}
+@media (max-width: 360px) {
+  .pp-b2c-pkg-card { padding: 14px 14px 14px; }
+  .pp-b2c-pkg-naam { font-size: 16px; }
+  .pp-b2c-pkg-prijs { font-size: 22px; }
+  .pp-b2c-pkg-beschr { font-size: 13.5px; }
+}
