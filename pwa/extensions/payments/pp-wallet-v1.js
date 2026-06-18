@@ -43,6 +43,106 @@
   };
   // ───────────────────────────────────────────────────────────────
 
+  // ────────── B2B MERKEN WALLET PAKKETTEN ──────────
+  // Centraal beheerd: één bron van waarheid voor naam, omschrijving en
+  // verwachte impact per opwaardeer-bedrag. Override mogelijk via Firestore
+  // (admin_settings/global.b2b_packages) zonder redeploy.
+  // Schema: { id, name, amount, credits, duration, description, expectedImpact, active }
+  var PP_B2B_PACKAGES_DEFAULT = [
+    {
+      id: 'starter-25',
+      name: 'Starter Campagne',
+      amount: 25,
+      credits: '€25 campagne-saldo',
+      duration: 'Eénmalig saldo',
+      description: 'Voor merken die hun zichtbaarheid binnen Paskamerpraat willen testen. Met dit instapbedrag kun je je eerste advertentie of placement opzetten en kennismaken met de mogelijkheden van de community.',
+      expectedImpact: 'Beperkte testronde voor één campagne of placement.',
+      active: true
+    },
+    {
+      id: 'groei-50',
+      name: 'Groei Campagne',
+      amount: 50,
+      credits: '€50 campagne-saldo',
+      duration: 'Eénmalig saldo',
+      description: 'Voor merken die meer impact willen maken binnen de community. Geschikt voor het draaien van meerdere placements of een langere campagne met voldoende ruimte voor optimalisatie.',
+      expectedImpact: 'Meer campagne-impressies en ruimte voor A/B-testing.',
+      active: true,
+      popular: true
+    },
+    {
+      id: 'pro-100',
+      name: 'Pro Campagne',
+      amount: 100,
+      credits: '€100 campagne-saldo',
+      duration: 'Eénmalig saldo',
+      description: 'Voor merken die structureel zichtbaar willen zijn. Dit pakket biedt voldoende budget voor uitgebreide campagnes, meerdere productgroepen en consistente aanwezigheid binnen de feed.',
+      expectedImpact: 'Sterke aanwezigheid en hogere kans op brand-recognition.',
+      active: true
+    },
+    {
+      id: 'ultimate-250',
+      name: 'Ultimate Campagne',
+      amount: 250,
+      credits: '€250 campagne-saldo',
+      duration: 'Eénmalig saldo',
+      description: 'Voor merken die maximale zichtbaarheid willen binnen Paskamerpraat. Ideaal voor seizoenscampagnes, productlanceringen en langlopende strategische placements met de meeste ruimte voor optimalisatie.',
+      expectedImpact: 'Maximale campagne-impact en langlopende zichtbaarheid.',
+      active: true
+    }
+  ];
+
+  // Vaste transparantie-tekst onder de pakketten (zichtbaar vóór aankoop).
+  var PP_B2B_DISCLOSURE = 'Campagne-saldo wordt gebruikt voor placements, advertenties en boosts binnen Paskamerpraat. Het daadwerkelijke bereik kan verschillen afhankelijk van campagne-instellingen, doelgroep en interactie van community-leden.';
+
+  // Render-helper: combineert beschikbare variants met pakket-config en bouwt kaart-grid.
+  function _renderB2BPackagesHTML(shopCfg, settings) {
+    var override = (settings && settings.b2b_packages && Array.isArray(settings.b2b_packages) && settings.b2b_packages.length)
+      ? settings.b2b_packages
+      : PP_B2B_PACKAGES_DEFAULT;
+    var packages = override.filter(function (p) { return p && p.active !== false; });
+    var availableAmounts = Object.keys(shopCfg.variants).filter(function (k) {
+      return !!shopCfg.variants[k];
+    }).map(function (k) { return Number(k); });
+
+    var byAmount = {};
+    packages.forEach(function (p) { if (p && p.amount != null) byAmount[String(p.amount)] = p; });
+
+    return availableAmounts.sort(function (a, b) { return a - b; }).map(function (amt) {
+      var p = byAmount[String(amt)] || {
+        id: 'topup-' + amt,
+        name: '€ ' + amt + ' Wallet Top-up',
+        amount: amt,
+        credits: '€' + amt + ' campagne-saldo',
+        duration: 'Eénmalig saldo',
+        description: '',
+        expectedImpact: ''
+      };
+      var popular = !!p.popular;
+      return (
+        '<article class="pp-b2c-pkg-card' + (popular ? ' pp-b2c-pkg-popular' : '') + '" data-testid="wallet-pkg-' + esc(p.id || ('amt-' + amt)) + '">' +
+          (popular ? '<div class="pp-b2c-pkg-badge">Populair</div>' : '') +
+          '<header class="pp-b2c-pkg-head">' +
+            '<h3 class="pp-b2c-pkg-naam">' + esc(p.name || ('€ ' + amt)) + '</h3>' +
+            '<div class="pp-b2c-pkg-prijs">€ ' + Number(amt).toFixed(0) + '</div>' +
+          '</header>' +
+          (p.description
+            ? '<p class="pp-b2c-pkg-beschr">' + esc(p.description) + '</p>'
+            : '') +
+          (p.expectedImpact
+            ? '<div class="pp-b2c-pkg-verwacht">' +
+                '<span class="pp-b2c-pkg-verwacht-label">Verwachting</span>' +
+                '<span class="pp-b2c-pkg-verwacht-tekst">' + esc(p.expectedImpact) + '</span>' +
+              '</div>'
+            : '') +
+          '<button class="bp-btn bp-btn-primair pp-b2c-pkg-cta" onclick="PP_Wallet.topup(' + amt + ')" data-testid="wallet-topup-' + amt + '">' +
+            'Wallet opwaarderen' +
+          '</button>' +
+        '</article>'
+      );
+    }).join('');
+  }
+
   function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
   function isLogged() { return !!(window.DY && window.DY.user && window.DY.user.uid); }
   function uid()      { return (window.DY && window.DY.user && window.DY.user.uid) || null; }
@@ -166,16 +266,13 @@
 
           // Tab content: Opwaarderen
           '<div class="bp-wallet-tabpanel" data-panel="opwaarderen" style="display:none" data-testid="wallet-panel-opwaarderen">' +
-            '<h2 class="bp-section-titel" style="margin-top:18px">Kies een bedrag</h2>' +
+            '<h2 class="bp-section-titel" style="margin-top:18px">Kies een campagne-pakket</h2>' +
             (topupEnabled
-              ? '<div class="bp-topup-grid">' +
-                  [25,50,100,250].filter(function(amt){
-                    return !!shopCfg.variants[String(amt)];
-                  }).map(function(amt){
-                    return '<button class="bp-topup-bedrag" onclick="PP_Wallet.topup(' + amt + ')" data-testid="wallet-topup-' + amt + '">€ ' + amt + '</button>';
-                  }).join('') +
+              ? '<div class="pp-b2c-pkg-grid" data-testid="wallet-pkg-grid">' +
+                  _renderB2BPackagesHTML(shopCfg, settings) +
                 '</div>' +
-                '<p class="bp-mini" style="margin-top:14px">Je wordt doorgestuurd naar de Shopify checkout op <strong>' + esc(shopCfg.shop_domain) + '</strong>. Het saldo wordt automatisch bijgeschreven zodra de betaling is bevestigd.</p>'
+                '<p class="pp-b2c-disclosure" data-testid="wallet-disclosure">' + esc(PP_B2B_DISCLOSURE) + '</p>' +
+                '<p class="bp-mini" style="margin-top:10px">Je wordt doorgestuurd naar de Shopify checkout op <strong>' + esc(shopCfg.shop_domain) + '</strong>. Het saldo wordt automatisch bijgeschreven zodra de betaling is bevestigd.</p>'
               : '<div class="bp-empty"><div class="bp-empty-titel">Opwaarderen tijdelijk uit</div>' +
                 '<div>De Shopify-koppeling wordt op dit moment geconfigureerd. Probeer later opnieuw of neem contact op met support voor handmatige opwaardering.</div></div>'
             ) +
@@ -212,8 +309,15 @@
     // intercept om opwaarderen weer live te zetten.
     try {
       if (window.PP_TopupComingSoon && PP_TopupComingSoon.show) {
+        var b2bPkgName = null;
+        try {
+          var defs = PP_B2B_PACKAGES_DEFAULT.filter(function (p) {
+            return p && p.amount === Number(amount);
+          });
+          if (defs.length) b2bPkgName = defs[0].name;
+        } catch (_) {}
         PP_TopupComingSoon.show({
-          naam: 'Merken wallet top-up',
+          naam: b2bPkgName || ('Merken wallet €' + amount),
           prijs: Number(amount),
           source: 'b2b'
         });

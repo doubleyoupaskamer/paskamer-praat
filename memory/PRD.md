@@ -7,6 +7,35 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.124 — B2B Pakketten + Launch-voortgang 68% (18 jun 2026)
+
+### B2B Merken Wallet productkaarten (gelijke layout als B2C)
+Nieuwe `PP_B2B_PACKAGES_DEFAULT` in `pp-wallet-v1.js`:
+- **Starter Campagne** (€25) — "instapbedrag om zichtbaarheid te testen" / beperkte testronde
+- **Groei Campagne** (€50) `popular` — "meer impact, ruimte voor A/B-testing" / meer impressies
+- **Pro Campagne** (€100) — "structureel zichtbaar zijn" / brand-recognition
+- **Ultimate Campagne** (€250) — "maximale zichtbaarheid" / langlopende strategische placements
+
+Bouwt op dezelfde CSS-klassen (`pp-b2c-pkg-*`) als B2C voor consistente look & feel — geen nieuwe styles nodig. Override via Firestore: `admin_settings/global.b2b_packages`. Veilige fallback voor variants zonder pakket-config.
+
+### Transparantie-tekst B2B
+`PP_B2B_DISCLOSURE`: "Campagne-saldo wordt gebruikt voor placements, advertenties en boosts binnen Paskamerpraat. Het daadwerkelijke bereik kan verschillen afhankelijk van campagne-instellingen, doelgroep en interactie van community-leden."
+
+### Coming-soon popup uitgebreid met voortgangsbalk
+`pp-topup-comingsoon-v1.js` nu met:
+- **"Launch voortgang 68%"** label + percentage-getal
+- Geanimeerde gradient-balk (CSS `@keyframes ppTopupCsFill`)
+- Subtekst "We zijn 68% klaar — launch verwacht binnenkort"
+- Aria-attributen (`role="progressbar"` + `aria-valuenow`)
+- Override mogelijk via aanroep: `PP_TopupComingSoon.show({ progressPct: 75, ... })`
+
+### Cache bumped → `v60.1.124-progress-b2b-pkgs`
+- `sw.js` VERSION → `v60.1.124-20260618-progress-b2b-pkgs`
+- index.html: 14× `?v=` ge-update
+- ZIP: 3.7 MB, 3,855,219 bytes
+
+
+
 ## v60.1.123 — "Binnenkort beschikbaar" Topup Popup (18 jun 2026)
 
 ### Nieuwe gedeelde module: `pp-topup-comingsoon-v1.js`

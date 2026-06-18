@@ -54,6 +54,23 @@
         'text-align:center;margin:0 0 10px;letter-spacing:-0.01em}' +
       '.pp-topup-cs-tekst{font-size:15px;line-height:1.55;color:rgba(245,233,216,0.8);' +
         'text-align:center;margin:0 0 18px}' +
+      // Voortgangsbalk
+      '.pp-topup-cs-progress-wrap{margin:0 0 18px;text-align:center}' +
+      '.pp-topup-cs-progress-meta{display:flex;justify-content:space-between;' +
+        'align-items:baseline;margin:0 0 8px;font-size:12px;' +
+        'color:rgba(245,233,216,0.65);letter-spacing:0.04em}' +
+      '.pp-topup-cs-progress-label{text-transform:uppercase;font-weight:600}' +
+      '.pp-topup-cs-progress-num{color:#d4910a;font-weight:700;font-size:14px;' +
+        'letter-spacing:0}' +
+      '.pp-topup-cs-progress-bar{position:relative;height:8px;width:100%;' +
+        'background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden}' +
+      '.pp-topup-cs-progress-fill{position:absolute;left:0;top:0;bottom:0;' +
+        'background:linear-gradient(90deg,#a86b00,#d4910a 60%,#f0b340);' +
+        'border-radius:999px;animation:ppTopupCsFill 0.9s cubic-bezier(0.22,0.61,0.36,1) forwards;' +
+        'box-shadow:0 0 12px rgba(212,145,10,0.45)}' +
+      '@keyframes ppTopupCsFill{from{width:0}to{width:var(--pp-cs-pct,68%)}}' +
+      '.pp-topup-cs-progress-sub{margin:8px 0 0;font-size:12px;' +
+        'color:rgba(245,233,216,0.5);letter-spacing:0.02em}' +
       '.pp-topup-cs-pakket{background:rgba(212,145,10,0.06);' +
         'border:1px solid rgba(212,145,10,0.2);border-radius:10px;' +
         'padding:10px 14px;text-align:center;margin:0 0 18px;font-size:13px;' +
@@ -121,6 +138,21 @@
         '</div>';
     }
 
+    var progressPct = (c.progressPct != null) ? Math.max(0, Math.min(100, Number(c.progressPct))) : 68;
+    var progressBlock =
+      '<div class="pp-topup-cs-progress-wrap" data-testid="topup-cs-progress">' +
+        '<div class="pp-topup-cs-progress-meta">' +
+          '<span class="pp-topup-cs-progress-label">Launch voortgang</span>' +
+          '<span class="pp-topup-cs-progress-num" data-testid="topup-cs-progress-pct">' + progressPct + '%</span>' +
+        '</div>' +
+        '<div class="pp-topup-cs-progress-bar" role="progressbar" ' +
+          'aria-valuenow="' + progressPct + '" aria-valuemin="0" aria-valuemax="100" ' +
+          'aria-label="Launch voortgang">' +
+          '<div class="pp-topup-cs-progress-fill" style="--pp-cs-pct:' + progressPct + '%;width:' + progressPct + '%"></div>' +
+        '</div>' +
+        '<p class="pp-topup-cs-progress-sub">We zijn ' + progressPct + '% klaar — launch verwacht binnenkort</p>' +
+      '</div>';
+
     var ov = document.createElement('div');
     ov.id = 'pp-topup-cs-overlay';
     ov.className = 'pp-topup-cs-overlay';
@@ -145,6 +177,7 @@
           'Opwaarderen is op dit moment nog niet actief. We zetten de laatste puntjes ' +
           'op de i — heel binnenkort kun je je wallet opwaarderen en posts boosten.' +
         '</p>' +
+        progressBlock +
         pakketLabel +
         '<div class="pp-topup-cs-divider"></div>' +
         '<p class="pp-topup-cs-volgsubtitel">Blijf op de hoogte</p>' +
