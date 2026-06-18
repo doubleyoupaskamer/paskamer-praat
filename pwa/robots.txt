@@ -1,25 +1,98 @@
+# Doubleyou — robots.txt
+# Tall & Plus Size Fashion Community Nederland
+# https://paskamerpraat.nl
+
 User-agent: *
 Allow: /
 Allow: /feed
+Allow: /uitgelicht
 Allow: /looks
 Allow: /reviews
+Allow: /merken
 Allow: /winkel
 Allow: /challenges
 Allow: /post-van-de-week
 Allow: /outfit-vergelijker
-Allow: /voorwaarden
+Allow: /ai-stijladvies
+Allow: /voorwaarden/
+Allow: /voorwaarden/index.html
 Allow: /privacy
 Allow: /community-regels
 Allow: /beta
 Allow: /sitemap.xml
 Allow: /manifest.json
 Allow: /hero-model.png
+Allow: /icons/
 
 Disallow: /admin
 Disallow: /admin.html
 Disallow: /debug.html
+Disallow: /vernieuw.html
+Disallow: /test-hub.html
 Disallow: /login
 Disallow: /register
+Disallow: /profiel
+Disallow: /instellingen
+Disallow: /wallet
+Disallow: /chat
+Disallow: /berichten
+Disallow: /uploaden
+Disallow: /api/
+Disallow: /branding/
+
+# AI training & search crawlers — expliciet toegestaan voor publieke pagina's
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /profiel
+Disallow: /wallet
+Disallow: /api/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /profiel
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /profiel
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /profiel
+Disallow: /api/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /profiel
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /profiel
+Disallow: /api/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin
+Disallow: /api/
 
 # Sitemap
 Sitemap: https://paskamerpraat.nl/sitemap.xml

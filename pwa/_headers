@@ -46,6 +46,14 @@
   Pragma: no-cache
   X-Robots-Tag: noindex, nofollow
 
+/test-hub.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow
+
+/vernieuw.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow
+
 
 # ── Service Worker: NOOIT cachen ─────────────────────────────────
 /sw.js
