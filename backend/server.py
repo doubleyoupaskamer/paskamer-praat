@@ -94,12 +94,12 @@ async def get_status_checks():
 # ════════════════════════════════════════════════════════════════
 @api_router.get("/downloads/{filename}")
 async def download_bundle(filename: str):
-    # Restrictie: alleen toegestane extensies in /app of /app/pwa/branding, geen path traversal
-    ALLOWED_EXTS = (".zip", ".jpg", ".jpeg", ".png", ".webp", ".pdf", ".md")
+    # Restrictie: alleen toegestane extensies, geen path traversal (/, ..)
+    ALLOWED_EXTS = (".zip", ".jpg", ".jpeg", ".png", ".webp", ".pdf", ".md", ".js", ".html", ".css", ".txt")
     if not filename.lower().endswith(ALLOWED_EXTS) or "/" in filename or ".." in filename:
         raise HTTPException(status_code=400, detail="Ongeldige bestandsnaam")
 
-    # Zoek bestand in /app (zips) of /app/pwa/branding (logo's & images)
+    # Zoek bestand in /app (zips) of /app/pwa/branding (logo's, individuele bestanden)
     candidates = [Path("/app") / filename, Path("/app/pwa/branding") / filename]
     path = next((p for p in candidates if p.exists() and p.is_file()), None)
     if not path:
@@ -113,6 +113,10 @@ async def download_bundle(filename: str):
         ".png": "image/png", ".webp": "image/webp",
         ".pdf": "application/pdf",
         ".md":  "text/markdown",
+        ".js":  "application/javascript",
+        ".html":"text/html",
+        ".css": "text/css",
+        ".txt": "text/plain",
     }
     return FileResponse(
         path=str(path),
