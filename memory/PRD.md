@@ -7,6 +7,51 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.135 — Pakket Activate HARDENED v2 (18 jun 2026)
+
+### Toegevoegde hardening (niet-invasief, bovenop v1)
+Nieuwe module `pp-brand-pkg-activate-v2.js` wrapt `PP_BrandPkgActivate.activatePkg`:
+
+**1. Idempotency Engine**
+- `activation_id = hash(uid + pkg_id + amount + dayWindow)` via FNV-1a hash
+- Per dag exact 1 activatie per pakket per user, multi-tab safe
+- Nieuwe Firestore collection `pkg_activations/{activation_id}` als dedup-lock
+
+**2. Firestore Transaction Locking**
+- `db.runTransaction()` voor atomic read-then-write
+- Geen partial writes, geen concurrent overwrites
+- Wallet increment binnen transaction: lees → bereken → schrijf, alles in 1 lock
+
+**3. Click-lock per tab**
+- `_activeLocks[activation_id]` in-memory flag voorkomt dubbele triggers
+- Cross-tab beschermd via Firestore-lock op activation_id document
+
+**4. Safe Event Delegation**
+- Document-level capture-phase click listener als fallback voor v1 onclick
+- Cross-checked via `data-_v2_fired` attribute (3s window)
+
+**5. Observability counters in `users/{uid}`**
+- `pkg_activation_success_count` (FieldValue.increment(1))
+- `pkg_activation_failure_count` + `pkg_activation_last_failure` + `pkg_activation_last_failure_at`
+- `last_activation_id`, `pkg_activation_version: 2`, `last_wallet_sync_at`
+
+**6. Feature flags (admin_settings/global)**
+- `enable_activation_guard_v2` (default ON)
+- `enable_transaction_locking_v2` (default ON)
+- Kunnen disabled worden zonder redeploy
+
+### Audit logging hardening
+- `admin_logs` entry krijgt `activation_id` + `version: 2`
+- `payments` entry krijgt `activation_id` + `version: 2`
+- Volledig traceerbare ledger
+
+### Cache bumped → `v60.1.135-pkg-activate-v2`
+- `sw.js` VERSION → `v60.1.135-20260618-pkg-activate-v2`
+- `index.html` 23× `?v=` bumped
+- ZIP: 3.8 MB, 3,967,678 bytes
+
+
+
 ## v60.1.134 — Brand Pakket Auto-Credit + Roadmap (18 jun 2026)
 
 ### Nieuwe module: `pp-brand-pkg-activate-v1.js`
