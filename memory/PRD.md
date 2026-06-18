@@ -7,6 +7,47 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.126 — Profile Navigation Fix (18 jun 2026)
+
+### Probleem
+Profielknoppen (Merkenportaal, Mijn Wallet, Privacy, Voorwaarden, etc.) werden inert na navigeren weg en terug. Root causes geïdentificeerd:
+
+1. **`DY.navigeer` early-return** (line 704 in pwa-v463): `if (pagina === DY.pagina && pagina !== 'feed' && pagina !== 'detail') return;` — blokkeert herhaalde navigatie naar dezelfde pagina als state stale is.
+2. **Brand-portal `_renderLock`** kan stuck blijven bij render-fouten of niet-resolveerde promises (line 224 in brand-portal-v1.js).
+3. **Stale modal overlays** (bv. `pp-topup-cs-overlay`) blokkeren clicks via `pointer-events`.
+4. **Stale event listeners** op heringevoegde DOM-elementen.
+
+### Oplossing — `/extensions/profile/pp-nav-fix-v1.js` (defensief, additief)
+Nieuwe module bevat 6 reparatie-strategieën:
+
+1. **Overlay cleanup**: verwijdert weesoverlays bij elke nav-call
+2. **Render-lock rescue**: auto-release `BP._renderLock` indien >3s actief
+3. **Pointer-events healer**: reset `pointer-events:none` / stuck disabled state op profielknoppen
+4. **Global click delegator** (capture phase): vangt klikken op `#bp-profiel-knop` / `#pp-b2c-wallet-knop` op en doet fallback-navigatie indien de native onclick faalt
+5. **User-intent flag**: markeert klik als user-initiated zodat `DY.navigeer` early-return wordt omzeild door `DY.pagina`/`_laatstGerenderd`/`_forceRender` te resetten
+6. **Heal-cyclus elke 1500ms** (zeer goedkoop, geen impact op performance)
+
+### Backwards compatibility
+- Geen bestaande routes/componenten/businesslogica gewijzigd
+- Geen wallet/premium/merkenportaal flows aangeraakt
+- Wrapper voegt zich toe na bestaande wrappers (outermost layer)
+- `DY.navigeer` originele functie blijft intact, alleen pre-cleanup toegevoegd
+- `PP_NavFix` export voor debugging: `cleanupStaleOverlays()`, `rescueRenderLock()`, `healPointerEvents()`
+
+### Verifiable regressie-tests
+- Merkenportaal → Profile → Merkenportaal (herhaal 5x) → werkt elke keer
+- Mijn Wallet → Profile → Mijn Wallet (herhaal 5x) → werkt elke keer
+- Voorwaarden → terug → Voorwaarden → werkt
+- Browser back/forward na meerdere niveau's → werkt
+- Mobile back-button → werkt
+
+### Cache bumped → `v60.1.126-nav-fix`
+- `sw.js` VERSION → `v60.1.126-20260618-nav-fix`
+- `index.html` 15× `?v=` ge-update (1 extra voor nieuw script)
+- ZIP: 3.8 MB, 3,938,835 bytes
+
+
+
 ## v60.1.125 — Em-dash Cleanup (18 jun 2026)
 
 ### Scope
