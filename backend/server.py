@@ -46,6 +46,14 @@ try:
 except Exception as _e:
     logger.exception("Shopify wallet router niet geladen: %s", _e)
 
+# ── B2C Post Boost router ──────────────────────────────────────────
+try:
+    from boost_router import boost_router as _boost_router
+    app.include_router(_boost_router)
+    logger.info("B2C Boost router geladen op /api/boost/*")
+except Exception as _e:
+    logger.exception("Boost router niet geladen: %s", _e)
+
 
 # Define Models
 class StatusCheck(BaseModel):

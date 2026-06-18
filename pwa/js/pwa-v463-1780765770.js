@@ -3748,10 +3748,23 @@ DY.rankFeed = function(verhalen, profiel) {
 
   var n = verhalen.length;
   var ronde = sess.ronde;
+  var _nowIso = new Date().toISOString();
 
-  // ── 1. Score elk verhaal ─────────────────────────────────────
+  // v60.1.118: B2C boost-factor. Geldt alleen voor non-expired boosts.
+  function _boostFactor(v) {
+    try {
+      if (!v || !v.boost_active) return 1;
+      if (v.boost_expires_at && String(v.boost_expires_at) < _nowIso) return 1;
+      var w = Number(v.boost_weight || 1);
+      return (w > 1 && w <= 10) ? w : 1;
+    } catch(e) { return 1; }
+  }
+
+  // ── 1. Score elk verhaal (boost-factor wordt op rel-score toegepast) ──
   var gescoord = verhalen.map(function(v, i) {
-    return { v: v, rel: DY._relevantiScore(v, profiel, i, ronde), ts: DY._trendingScore(v) };
+    var rel = DY._relevantiScore(v, profiel, i, ronde);
+    var bf = _boostFactor(v);
+    return { v: v, rel: rel * bf, ts: DY._trendingScore(v) * bf, _boostFactor: bf };
   });
 
   // ── 2. Trending bucket (top 20% op velocity) ─────────────────

@@ -1,0 +1,147 @@
+/* B2C Post Boost - styling */
+
+.pp-boost-modal-overlay {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(30,26,15,0.72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  animation: pp-boost-fade-in 0.2s ease;
+}
+@keyframes pp-boost-fade-in {
+  from { opacity: 0; } to { opacity: 1; }
+}
+.pp-boost-modal-inner {
+  background: #fdf8f0;
+  border-radius: 24px;
+  padding: 28px 24px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid rgba(198,125,6,0.22);
+  box-shadow: 0 24px 64px -16px rgba(30,26,15,0.5);
+}
+.pp-boost-close {
+  position: absolute; top: 14px; right: 14px;
+  background: rgba(30,26,15,0.06);
+  border: none; border-radius: 50%;
+  width: 36px; height: 36px;
+  font-size: 22px; line-height: 1; cursor: pointer;
+  color: #1e1a0f;
+}
+.pp-boost-close:hover { background: rgba(30,26,15,0.12); }
+.pp-boost-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.5rem; margin: 0 0 8px;
+  color: #1e1a0f; padding-right: 36px;
+}
+.pp-boost-lead {
+  color: #3a3018; font-size: 0.92rem;
+  line-height: 1.5; margin: 0 0 18px;
+}
+.pp-boost-balance {
+  background: #fff;
+  border: 1px solid rgba(198,125,6,0.2);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.pp-boost-balance-label {
+  font-size: 0.85rem; color: #7a7062;
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.pp-boost-balance-value {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 700; font-size: 1.4rem;
+  color: #c67d06;
+}
+.pp-boost-topup-hint {
+  font-size: 0.85rem; color: #3a3018;
+  text-align: center; margin-bottom: 16px;
+}
+.pp-boost-topup-btn {
+  background: none; border: none;
+  color: #c67d06; text-decoration: underline;
+  cursor: pointer; font-weight: 600;
+  font-size: 0.9rem;
+}
+.pp-boost-pkgs {
+  display: grid; gap: 10px; margin: 12px 0 18px;
+}
+.pp-boost-pkg {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 4px 12px;
+  align-items: center;
+  background: #fff;
+  border: 1.5px solid rgba(198,125,6,0.18);
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+.pp-boost-pkg:hover:not([disabled]) {
+  border-color: #c67d06;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -6px rgba(198,125,6,0.3);
+}
+.pp-boost-pkg-locked, .pp-boost-pkg[disabled] {
+  opacity: 0.55; cursor: not-allowed;
+}
+.pp-boost-pkg-badge {
+  grid-row: 1 / span 2;
+  font-size: 24px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(198,125,6,0.08);
+  border-radius: 10px;
+  width: 36px; height: 36px;
+}
+.pp-boost-pkg-name {
+  font-weight: 700; font-size: 1rem;
+  color: #1e1a0f;
+}
+.pp-boost-pkg-prijs {
+  grid-row: 1 / span 2;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 700; font-size: 1.3rem;
+  color: #c67d06;
+}
+.pp-boost-pkg-duur, .pp-boost-pkg-weight {
+  font-size: 0.82rem; color: #7a7062;
+  grid-column: 2;
+}
+.pp-boost-pkg-weight { font-weight: 600; color: #3a7d3a; }
+.pp-boost-pkg-lock {
+  font-size: 0.78rem; color: #c0392b;
+  grid-column: 2; font-style: italic;
+}
+.pp-boost-fineprint {
+  font-size: 0.78rem; color: #7a7062;
+  line-height: 1.5; text-align: center;
+  margin: 8px 0 0;
+}
+
+/* "🚀 Boost actief" badge op posts in de feed */
+.dy-post-boost-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: linear-gradient(135deg, #c67d06, #e8a31f);
+  color: #fff;
+  font-size: 0.72rem; font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 100px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px -1px rgba(198,125,6,0.4);
+}
+
+@media (max-width: 480px) {
+  .pp-boost-modal-inner { padding: 22px 18px; border-radius: 18px; }
+  .pp-boost-title { font-size: 1.3rem; }
+  .pp-boost-pkg { padding: 12px; gap: 3px 10px; }
+}
