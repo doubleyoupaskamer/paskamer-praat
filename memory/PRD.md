@@ -7,6 +7,63 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.127 — Admin Pakketten + Dashboard MVP (Fase 1) (18 jun 2026)
+
+### Nieuwe admin module: `pp-admin-packages-v1.js`
+4 nieuwe DY-routes (admin-only via `DY._isAdmin()` guard):
+
+| Route | Functie |
+|---|---|
+| `admin_dashboard` | 8 read-only telling-widgets (users, premium, brands, pending, boosts, transacties, B2C+B2B omzet laatste 50 tx) + 3 quick-action knoppen |
+| `admin_b2c_packages` | Editor voor 5 B2C boost-pakketten (Starter/Groei/Plus/Pro/Ultimate). Velden: naam, bedrag, beschrijving, verwachte impact, actief, populair |
+| `admin_b2b_packages` | Editor voor 4 B2B campagne-pakketten (Starter/Groei/Pro/Ultimate Campagne). Zelfde structuur als B2C |
+| `admin_boost_products` | Editor voor 3 post-boost tiers (starter/groei/premium). Velden: naam, duur, prijs_cents, weight, badge, kleur |
+
+### Functionaliteiten
+- Toevoegen / Bewerken / Verwijderen / Reset-to-defaults per editor
+- Live render van bestaande pakketten uit `admin_settings/global.{b2c_packages,b2b_packages,boost_packages}`
+- Bij opslaan: schrijft direct naar `admin_settings/global` (B2C/B2B/Boost wallets lezen dezelfde keys → wijzigingen direct actief, geen redeploy)
+- Frontend client-side admin check via `DY._isAdmin()`; backend bescherming via bestaande Firestore rules op `admin_settings/global`
+
+### Audit logging (`admin_logs` collection)
+Elke save schrijft een audit-record:
+```json
+{
+  adminId: "uid",
+  adminEmail: "x@y.nl",
+  action: "packages_update" | "boost_products_update",
+  target: "b2c_packages" | "b2b_packages" | "boost_packages",
+  oldValue: [<vorige array/object>],
+  newValue: [<nieuwe array/object>],
+  timestamp: serverTimestamp
+}
+```
+
+### UI / Navigatie
+- Auto-injectie van 4 extra tabs ("Dashboard", "B2C pakketten", "B2B pakketten", "Boost producten") in de bestaande `.pp-admin-nav` (gemaakt door `pp-admin-ext-v1.js`)
+- Productkaart-styling consistent met bestaande `bp-page` huisstijl (donker thema, goud-accent)
+- Responsive: grid → 1-koloms op <480px
+- Vormelementen met focus-state (gouden border bij focus)
+
+### Backwards compatibility (NIETS gebroken)
+- Bestaande admin routes (admin_brands, admin_campagnes, admin_inkomsten, admin_wallet, admin_payments, admin_placements, admin_premium) — onaangeraakt
+- Bestaande `pp-admin-ext-v1.js` extension — onaangeraakt
+- Brand-portal, B2C wallet, B2B wallet, Boost flows — onveranderd
+- Wijzigingen via deze editors verschijnen automatisch in pp-b2c-wallet (al config-aware), pp-wallet (al config-aware) en pp-boost (al config-aware)
+
+### Cache bumped → `v60.1.127-admin-packages`
+- `sw.js` VERSION → `v60.1.127-20260618-admin-packages`
+- `index.html` 16× `?v=` ge-update (1 extra voor nieuw script)
+- ZIP: 3.8 MB, 3,946,625 bytes
+
+### Fase 2 (volgende sprint)
+- `admin_users` (zoeken, deactiveren, handmatige wallet-correctie)
+- `admin_transactions` (filterbare lijst per type)
+- "Mijn beheer" sectie in B2C profiel
+- `admin_b2c_pricing` editor voor Shopify variant-IDs
+
+
+
 ## v60.1.126 — Profile Navigation Fix (18 jun 2026)
 
 ### Probleem
