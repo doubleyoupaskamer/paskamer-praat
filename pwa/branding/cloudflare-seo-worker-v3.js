@@ -347,6 +347,58 @@ export default {
     const url = new URL(request.url);
     const pad = url.pathname;
 
+    // ── PREVIEW MODE FALLBACK ──
+    // In de Cloudflare Worker editor (preview tab op *.workers.dev) is env.ASSETS
+    // niet gebonden. We tonen dan een uitleg-pagina ipv te crashen.
+    // Op productie (paskamerpraat.nl) bestaat env.ASSETS wel en werkt alles normaal.
+    if (!env || !env.ASSETS || typeof env.ASSETS.fetch !== 'function') {
+      // Sta bot-rendering wel toe in preview (om SEO HTML te testen)
+      if (isBot(request)) {
+        const cfg = PAD_CONFIG[pad] || PAD_CONFIG['/'];
+        return new Response(getBotHTML(PAD_CONFIG[pad] ? pad : '/', cfg), {
+          status: 200,
+          headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Preview': 'bot-only' }
+        });
+      }
+      // Niet-bot in preview → uitleg
+      return new Response(
+        `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8">
+<title>Doubleyou SEO Worker — Preview</title>
+<style>body{font-family:-apple-system,sans-serif;max-width:640px;margin:48px auto;padding:24px;color:#1e1a0f;background:#fdf8f0;line-height:1.6}
+h1{font-family:Georgia,serif;color:#c67d06}code{background:#1e1a0f;color:#c67d06;padding:2px 6px;border-radius:4px;font-size:0.9em}
+.box{background:#fff;border:1px solid #e8e0d0;border-radius:12px;padding:18px;margin:18px 0}
+.ok{color:#3a7d3a;font-weight:700}.warn{color:#c67d06;font-weight:700}</style></head>
+<body>
+<h1>⚙️ Doubleyou SEO Worker</h1>
+<p class="warn">⚠️ Je bekijkt nu de <strong>preview</strong> op <code>*.workers.dev</code>.</p>
+<p>De <code>env.ASSETS</code> binding bestaat alleen op de productie route <strong>paskamerpraat.nl</strong>. In preview kan de worker geen Pages-assets ophalen — dat is normaal.</p>
+
+<div class="box">
+<p><strong>✅ Test als bot om SEO HTML te zien:</strong></p>
+<code>curl -A "Googlebot" https://paskamerpraat-seo.doubleuurbanluxury.workers.dev/</code>
+</div>
+
+<div class="box">
+<p><strong>🚀 Klaar om live te testen?</strong> Klik <a href="https://paskamerpraat.nl/" rel="noopener">Visit op productie</a>.</p>
+</div>
+
+<div class="box">
+<p><strong>🔗 Binding check (Settings → Bindings):</strong></p>
+<ul>
+<li>Type: <code>Service Binding</code> of <code>Assets Binding</code></li>
+<li>Variable: <code>ASSETS</code></li>
+<li>Service: jouw Pages project (paskamerpraat / doubleyou)</li>
+</ul>
+<p class="ok">Op productie werkt alles automatisch zodra de binding goed staat.</p>
+</div>
+
+</body></html>`,
+        { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'X-Preview': 'no-assets-binding' } }
+      );
+    }
+
+    // ── PRODUCTIE FLOW (env.ASSETS beschikbaar) ──
+
     // Statische assets altijd direct naar Pages
     const ASSETS_EXT = /\.(js|css|png|webp|jpg|jpeg|svg|ico|woff|woff2|ttf|json|xml|txt|mp4|webm|mp3|map|pdf|md)$/i;
     if (ASSETS_EXT.test(pad)) {
