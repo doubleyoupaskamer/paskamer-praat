@@ -304,7 +304,7 @@
   // Hierdoor slaat de gebruiker de storefront over en gaat direct naar checkout.
   // De cart-attributes komen na betaling als `note_attributes` in de Shopify Order webhook.
   async function topup(amount) {
-    // Coming-soon intercept (B2B Merken Wallet) — toont popup i.p.v. checkout.
+    // Coming-soon intercept (B2B Merken Wallet) - toont popup i.p.v. checkout.
     // Bestaande onderliggende Shopify-flow blijft intact; verwijder enkel deze
     // intercept om opwaarderen weer live te zetten.
     try {
@@ -341,7 +341,7 @@
 
       var variantId = cfg.variants[String(amount)];
       if (!variantId) {
-        toast('Bedrag €' + amount + ' nog niet beschikbaar — neem contact op met support', true);
+        toast('Bedrag €' + amount + ' nog niet beschikbaar. Neem contact op met support', true);
         return;
       }
 
@@ -355,7 +355,7 @@
       var userEmail = (fbUser && fbUser.email) ? fbUser.email : '';
       var userName  = (fbUser && (fbUser.displayName || '')) || '';
 
-      // Shopify cart attributes — exact syntax: attributes[name]=value
+      // Shopify cart attributes - exact syntax: attributes[name]=value
       // checkout[email] forceert het juiste email-veld i.p.v. Shop Pay device-cache.
       var params = [
         'attributes%5Bwallet_topup_uid%5D=' + encodeURIComponent(u),
@@ -364,7 +364,7 @@
         'attributes%5Bwallet_topup_account_email%5D=' + encodeURIComponent(userEmail),
         'return_to=' + encodeURIComponent(returnTo)
       ];
-      // Force checkout email (override Shop Pay cache) — pas toevoegen als email bekend is
+      // Force checkout email (override Shop Pay cache) - pas toevoegen als email bekend is
       if (userEmail) {
         params.push('checkout%5Bemail%5D=' + encodeURIComponent(userEmail));
         params.push('checkout%5Bnote%5D=' + encodeURIComponent('Wallet top-up voor uid=' + u + ' account=' + userEmail));

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * Doubleyou — B2C Klant Wallet Module (v1.0.0)
+ * Doubleyou - B2C Klant Wallet Module (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Strikt GESCHEIDEN van B2B Merken Wallet (pp-wallet-v1.js):
@@ -311,7 +311,7 @@
 
   // ── TOPUP ──────────────────────────────────────────────────────────
   async function topup(amount) {
-    // Coming-soon intercept (B2C Klant Wallet) — toont popup i.p.v. checkout.
+    // Coming-soon intercept (B2C Klant Wallet) - toont popup i.p.v. checkout.
     // Bestaande onderliggende Shopify-flow + pakket-config blijven intact;
     // verwijder enkel deze intercept om opwaarderen weer live te zetten.
     try {
@@ -348,7 +348,7 @@
 
       var variantId = cfg.variants[String(amount)];
       if (!variantId) {
-        toast('Bedrag €' + amount + ' nog niet beschikbaar — neem contact op met support', true);
+        toast('Bedrag €' + amount + ' nog niet beschikbaar. Neem contact op met support', true);
         return;
       }
 
@@ -360,7 +360,7 @@
       var userEmail = (fbUser && fbUser.email) ? fbUser.email : '';
       var userName  = (fbUser && (fbUser.displayName || '')) || '';
 
-      // B2C-marker attributes — webhook gebruikt b2c_wallet_topup_* prefix om
+      // B2C-marker attributes - webhook gebruikt b2c_wallet_topup_* prefix om
       // te detecteren dat dit een B2C top-up is (i.p.v. merken-wallet).
       var params = [
         'attributes%5Bb2c_wallet_topup_uid%5D=' + encodeURIComponent(u),
@@ -460,7 +460,7 @@
 
   // ── INJECT "Mijn Wallet" knop in profiel-menu ──────────────────────
   // Plaatst de knop in de eerste .dy-profiel-acties container (privacy-blok),
-  // ZICHTBAAR voor alle ingelogde users — gescheiden van het B2B merkenportaal.
+  // ZICHTBAAR voor alle ingelogde users - gescheiden van het B2B merkenportaal.
   function injecteerProfielKnop() {
     try {
       var main = document.getElementById('dy-main');

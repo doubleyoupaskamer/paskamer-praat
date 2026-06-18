@@ -1,6 +1,6 @@
 """
 ═══════════════════════════════════════════════════════════════════════════
-PaskamerPraat — AI Engine Backend Routes (v1.0.0)
+PaskamerPraat, AI Engine Backend Routes (v1.0.0)
 ═══════════════════════════════════════════════════════════════════════════
 
 Prepareert FastAPI endpoints voor:
@@ -20,7 +20,7 @@ EMERGENT LLM KEY:
   Verwacht via EMERGENT_LLM_KEY env-var. Voor productie: integratie via
   emergentintegrations library (integration_playbook_expert_v2 ouput).
 
-GEEN HARD-CODED OUTPUT — bij ontbrekende keys: 503 met heldere foutmelding.
+GEEN HARD-CODED OUTPUT, bij ontbrekende keys: 503 met heldere foutmelding.
 ═══════════════════════════════════════════════════════════════════════════
 """
 from fastapi import APIRouter, HTTPException
@@ -104,7 +104,7 @@ async def style_assistant(req: StyleAssistantRequest):
         raise HTTPException(status_code=503, detail="AI service niet geconfigureerd")
     raise HTTPException(
         status_code=501,
-        detail="Style assistant nog niet geïmplementeerd — wacht op integration_playbook voor Claude/Gemini chat."
+        detail="Style assistant nog niet geïmplementeerd, wacht op integration_playbook voor Claude/Gemini chat."
     )
 
 
@@ -132,6 +132,6 @@ async def ai_health():
     return {
         "configured": bool(EMERGENT_LLM_KEY),
         "endpoints": ["/score-outfit", "/style-assistant", "/similar-items"],
-        "status": "scaffolded — implementation pending integration_playbook_expert_v2 run",
+        "status": "scaffolded, implementation pending integration_playbook_expert_v2 run",
         "ts": time.time(),
     }

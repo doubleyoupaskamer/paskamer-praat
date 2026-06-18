@@ -134,7 +134,7 @@ async def download_bundle(filename: str):
 
 
 # ════════════════════════════════════════════════════════════════
-# v60.1.46 — AI Health + Wardrobe Recommend endpoints
+# v60.1.46 - AI Health + Wardrobe Recommend endpoints
 # Geactiveerd om "Wat te dragen deze week"-popup netwerkfout op te lossen.
 # ════════════════════════════════════════════════════════════════
 class WardrobeRecommendRequest(BaseModel):
@@ -181,11 +181,11 @@ async def wardrobe_recommend(req: WardrobeRecommendRequest):
                 {"titel": "Klassieke combinatie",
                  "omschrijving": "Combineer je favoriete top met een neutrale broek voor een tijdloze look."},
                 {"titel": "Layer it up",
-                 "omschrijving": "Probeer je opgeslagen jas over een fijngebreide trui — perfect voor de huidige tijd van het jaar."},
+                 "omschrijving": "Probeer je opgeslagen jas over een fijngebreide trui, perfect voor de huidige tijd van het jaar."},
                 {"titel": "Statement accent",
                  "omschrijving": "Voeg één opvallend item toe (kleur, textuur of accessoire) aan een rustige basis-outfit."},
             ],
-            "message": "AI service niet geconfigureerd — toon algemene tips.",
+            "message": "AI service niet geconfigureerd. Toon algemene tips.",
         }
 
     # Met Emergent LLM Key: real recommendation via Claude/Gemini
@@ -217,13 +217,13 @@ async def wardrobe_recommend(req: WardrobeRecommendRequest):
             "ideas": [
                 {"titel": "Try a classic", "omschrijving": "Combineer je top-favoriet met een neutrale onderkant."},
             ],
-            "message": f"AI tijdelijk onbeschikbaar — fallback geactiveerd. ({str(e)[:80]})",
+            "message": f"AI tijdelijk onbeschikbaar. Fallback geactiveerd. ({str(e)[:80]})",
         }
 
 
 # ════════════════════════════════════════════════════════════════
-# PASKAMERPRAAT — Admin Image Generator (Gemini Nano Banana)
-# v60.1.14 — admin-only hero/banner generator via EMERGENT_LLM_KEY
+# PASKAMERPRAAT - Admin Image Generator (Gemini Nano Banana)
+# v60.1.14 - admin-only hero/banner generator via EMERGENT_LLM_KEY
 # ════════════════════════════════════════════════════════════════
 
 class ImageGenRequest(BaseModel):
@@ -321,7 +321,7 @@ async def generate_image(
 
 
 # ════════════════════════════════════════════════════════════════
-# v60.1.44 — Admin Video Generator (Sora 2 via EMERGENT_LLM_KEY)
+# v60.1.44 - Admin Video Generator (Sora 2 via EMERGENT_LLM_KEY)
 # Text-to-video, UGC/editorial quality, admin-only
 # ════════════════════════════════════════════════════════════════
 
@@ -417,7 +417,7 @@ async def generate_video(
 
 
 # ════════════════════════════════════════════════════════════════════════
-# PREMIUM SUBSCRIPTION (v60.1.119) — volledig via Shopify (zie shopify_wallet.py)
+# PREMIUM SUBSCRIPTION (v60.1.119) - volledig via Shopify (zie shopify_wallet.py)
 # Stripe is verwijderd; alle Premium-betalingen lopen nu via Shopify Cart
 # attributes (premium_user_key, premium_email, premium_plan). Deze sectie
 # behoudt enkel de read-only endpoints + admin-grant/revoke flows.
@@ -458,7 +458,7 @@ async def premium_status(user_key: str, email: Optional[str] = None):
 
 @api_router.post("/billing/portal")
 async def billing_portal(user_key: str):
-    # Shopify Customer Account portal — zelfservice voor abonnement-beheer.
+    # Shopify Customer Account portal - zelfservice voor abonnement-beheer.
     shop_domain = os.environ.get("SHOPIFY_SHOP_DOMAIN") or "doubleyousmallandtall.nl"
     return {
         "url": f"https://{shop_domain}/account",
@@ -686,7 +686,7 @@ async def outfit_score(req: OutfitScoreRequest):
 
 
 # ════════════════════════════════════════════════════════════════════════
-# ADMIN PREMIUM MANAGEMENT (v60.1.57) — Full entitlement system
+# ADMIN PREMIUM MANAGEMENT (v60.1.57) - Full entitlement system
 # ════════════════════════════════════════════════════════════════════════
 def _mask(key: Optional[str]) -> str:
     if not key:
@@ -869,7 +869,7 @@ async def admin_premium_entitlements(
 
 
 # ════════════════════════════════════════════════════════════════════════
-# STABILIZATION STUBS (v60.1.58) — silences 404 noise van legacy endpoints.
+# STABILIZATION STUBS (v60.1.58) - silences 404 noise van legacy endpoints.
 # Deze endpoints zijn referenced in frontend code maar nog niet gekoppeld
 # aan echte features. Returnen graceful empty/no-op responses zodat console
 # errors verdwijnen en flows niet crashen.
@@ -888,7 +888,7 @@ class ClientErrorBody(BaseModel):
 
 @api_router.post("/client-error")
 async def log_client_error(body: ClientErrorBody):
-    """Frontend error reporter — stores client-side JS errors in MongoDB."""
+    """Frontend error reporter - stores client-side JS errors in MongoDB."""
     try:
         doc = body.model_dump() if hasattr(body, "model_dump") else body.dict()
         doc["received_at"] = datetime.now(timezone.utc).isoformat()
@@ -930,7 +930,7 @@ async def recent_client_errors(limit: int = 200):
     return {"errors": out, "count": len(out)}
 
 
-# ── AI prefetch hooks (PP_Engine, niet UI-gekoppeld — graceful stub) ────
+# ── AI prefetch hooks (PP_Engine, niet UI-gekoppeld - graceful stub) ────
 class AiScoreBody(BaseModel):
     outfit_id: Optional[str] = None
     image_url: Optional[str] = None
@@ -966,7 +966,7 @@ async def ai_similar_items(body: AiSimilarBody):
     return {"items": [], "outfit_id": body.outfit_id}
 
 
-# ── Overige legacy stubs — voorkomen 404 spam ──────────────────────────
+# ── Overige legacy stubs - voorkomen 404 spam ──────────────────────────
 class TryonBody(BaseModel):
     base_image_url: Optional[str] = None
     garment_image_url: Optional[str] = None
@@ -975,7 +975,7 @@ class TryonBody(BaseModel):
 
 @api_router.post("/tryon")
 async def virtual_tryon_stub(body: TryonBody):
-    return {"ok": False, "error": "Virtual try-on tijdelijk niet beschikbaar — wordt later opnieuw geactiveerd.", "result_url": None}
+    return {"ok": False, "error": "Virtual try-on tijdelijk niet beschikbaar. Wordt later opnieuw geactiveerd.", "result_url": None}
 
 
 @api_router.get("/proxy-image")

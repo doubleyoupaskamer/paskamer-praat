@@ -1,6 +1,6 @@
 """
 ═══════════════════════════════════════════════════════════════════════════
-Doubleyou — Shopify Wallet Top-up Router (v1.0.0)
+Doubleyou - Shopify Wallet Top-up Router (v1.0.0)
 ═══════════════════════════════════════════════════════════════════════════
 
 Verwerkt de Shopify `orders/paid` webhook en schrijft top-up bedragen
@@ -95,7 +95,7 @@ def _iso_now() -> str:
 def _extract_attrs(order: dict) -> dict:
     """Extract wallet_topup_uid & amount uit note_attributes/line_items properties."""
     attrs = {}
-    # 1. Cart-level note attributes (preferred — set via cart/{vid}:1?attributes[key]=val)
+    # 1. Cart-level note attributes (preferred - set via cart/{vid}:1?attributes[key]=val)
     for a in order.get("note_attributes") or []:
         if a.get("name") and a.get("value") is not None:
             attrs[str(a["name"])] = str(a["value"])
@@ -265,7 +265,7 @@ async def setup_helper():
     fb_ready = _init_firebase() is not None
     html = f"""<!DOCTYPE html>
 <html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Doubleyou — Shopify Webhook Setup</title>
+<title>Doubleyou | Shopify Webhook Setup</title>
 <style>
   body {{ background:#0a0806; color:#fcf8ef; font:16px/1.5 system-ui,-apple-system,sans-serif;
          margin:0; padding:40px 20px; min-height:100vh; }}

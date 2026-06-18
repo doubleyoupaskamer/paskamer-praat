@@ -1,5 +1,5 @@
 /**
- * Doubleyou SEO Worker v3.1 — BULLETPROOF EDITION
+ * Doubleyou SEO Worker v3.1 - BULLETPROOF EDITION
  *
  * Alle env.ASSETS.fetch() calls zijn nu ULTRA-DEFENSIEF via safeAssetsFetch().
  * Crash kan NIET meer optreden, zelfs in preview zonder binding.
@@ -13,22 +13,22 @@ function isBot(request) {
 }
 
 const PAD_CONFIG = {
-  '/':                   { pagina: 'home',         title: 'Doubleyou | Tailored for Tall & Plus Size — Fashion Community Nederland' },
-  '/feed':               { pagina: 'feed',         title: 'Community Feed — Doubleyou Paskamerpraat' },
-  '/uitgelicht':         { pagina: 'uitgelicht',   title: 'Uitgelicht — Aangeboden merken & campagnes | Doubleyou' },
-  '/merken':             { pagina: 'merken',       title: 'Merken voor Tall & Plus Size — Doubleyou' },
-  '/looks':              { pagina: 'looks',        title: 'Outfit Inspiratie voor Tall & Plus Size — Doubleyou' },
-  '/reviews':            { pagina: 'reviews',      title: 'Eerlijke Pasvorm Reviews — Doubleyou' },
-  '/winkel':             { pagina: 'winkel',       title: 'Winkel — Doubleyou Tailored for Tall & Plus Size' },
-  '/challenges':         { pagina: 'challenges',   title: 'Community Challenges — Doubleyou' },
-  '/post-van-de-week':   { pagina: 'ovdw',         title: 'Post van de Week — Doubleyou' },
-  '/outfit-vergelijker': { pagina: 'vergelijker',  title: 'AI Outfit Vergelijker — Doubleyou' },
-  '/ai-stijladvies':     { pagina: 'aistyle',      title: 'AI Stijladvies & Outfit Score — Doubleyou' },
-  '/voorwaarden':        { pagina: 'voorwaarden',  title: 'Voorwaarden & A-Z Gebruikersreglement — Doubleyou' },
-  '/voorwaarden/':       { pagina: 'voorwaarden',  title: 'Voorwaarden & A-Z Gebruikersreglement — Doubleyou' },
-  '/privacy':            { pagina: 'privacy',      title: 'Privacyverklaring & Cookies — Doubleyou' },
-  '/community-regels':   { pagina: 'regels',       title: 'Community Regels — Doubleyou' },
-  '/beta':               { pagina: 'beta',         title: 'Beta-programma — Doubleyou Paskamerpraat' },
+  '/':                   { pagina: 'home',         title: 'Doubleyou | Tailored for Tall & Plus Size | Fashion Community Nederland' },
+  '/feed':               { pagina: 'feed',         title: 'Community Feed | Doubleyou Paskamerpraat' },
+  '/uitgelicht':         { pagina: 'uitgelicht',   title: 'Uitgelicht | Aangeboden merken & campagnes | Doubleyou' },
+  '/merken':             { pagina: 'merken',       title: 'Merken voor Tall & Plus Size | Doubleyou' },
+  '/looks':              { pagina: 'looks',        title: 'Outfit Inspiratie voor Tall & Plus Size | Doubleyou' },
+  '/reviews':            { pagina: 'reviews',      title: 'Eerlijke Pasvorm Reviews | Doubleyou' },
+  '/winkel':             { pagina: 'winkel',       title: 'Winkel | Doubleyou Tailored for Tall & Plus Size' },
+  '/challenges':         { pagina: 'challenges',   title: 'Community Challenges | Doubleyou' },
+  '/post-van-de-week':   { pagina: 'ovdw',         title: 'Post van de Week | Doubleyou' },
+  '/outfit-vergelijker': { pagina: 'vergelijker',  title: 'AI Outfit Vergelijker | Doubleyou' },
+  '/ai-stijladvies':     { pagina: 'aistyle',      title: 'AI Stijladvies & Outfit Score | Doubleyou' },
+  '/voorwaarden':        { pagina: 'voorwaarden',  title: 'Voorwaarden & A-Z Gebruikersreglement | Doubleyou' },
+  '/voorwaarden/':       { pagina: 'voorwaarden',  title: 'Voorwaarden & A-Z Gebruikersreglement | Doubleyou' },
+  '/privacy':            { pagina: 'privacy',      title: 'Privacyverklaring & Cookies | Doubleyou' },
+  '/community-regels':   { pagina: 'regels',       title: 'Community Regels | Doubleyou' },
+  '/beta':               { pagina: 'beta',         title: 'Beta-programma | Doubleyou Paskamerpraat' },
 };
 
 function escapeHtml(s) {
@@ -36,7 +36,7 @@ function escapeHtml(s) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// ★ BULLETPROOF helper — werkt OOK als env.ASSETS undefined is
+// ★ BULLETPROOF helper - werkt OOK als env.ASSETS undefined is
 // ═══════════════════════════════════════════════════════════════════
 async function safeAssetsFetch(env, request) {
   try {
@@ -49,15 +49,15 @@ async function safeAssetsFetch(env, request) {
   // → toon vriendelijke uitleg-pagina, GEEN crash
   return new Response(
 `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8">
-<title>Doubleyou SEO Worker — Preview</title>
+<title>Doubleyou SEO Worker | Preview</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>body{font-family:-apple-system,sans-serif;max-width:640px;margin:48px auto;padding:24px;color:#1e1a0f;background:#fdf8f0;line-height:1.6}
 h1{font-family:Georgia,serif;color:#c67d06}code{background:#1e1a0f;color:#c67d06;padding:2px 6px;border-radius:4px;font-size:0.9em}
 .box{background:#fff;border:1px solid #e8e0d0;border-radius:12px;padding:18px;margin:18px 0}
 .ok{color:#3a7d3a;font-weight:700}.warn{color:#c67d06;font-weight:700}a{color:#c67d06}</style></head>
 <body>
-<h1>⚙️ Doubleyou SEO Worker — v3.1</h1>
-<p class="warn">⚠️ Preview mode op <code>*.workers.dev</code> — <code>env.ASSETS</code> niet beschikbaar.</p>
+<h1>⚙️ Doubleyou SEO Worker, v3.1</h1>
+<p class="warn">⚠️ Preview mode op <code>*.workers.dev</code>, <code>env.ASSETS</code> niet beschikbaar.</p>
 <p>Dit is normaal. De binding werkt alleen op productie (<code>paskamerpraat.nl</code>).</p>
 <div class="box">
 <p><strong>✅ Test als bot om de SEO-HTML te zien:</strong></p>
@@ -81,7 +81,7 @@ h1{font-family:Georgia,serif;color:#c67d06}code{background:#1e1a0f;color:#c67d06
 
 function getBotHTML(pad, config) {
   const canonicalUrl = `https://paskamerpraat.nl${pad}`;
-  const desc = 'Doubleyou — Community voor tall (1.85m+) en plus size (XL–5XL) fashion in Nederland. Eerlijke pasvorm reviews, AI stijladvies en outfit inspiratie.';
+  const desc = 'Doubleyou, Community voor tall (1.85m+) en plus size (XL–5XL) fashion in Nederland. Eerlijke pasvorm reviews, AI stijladvies en outfit inspiratie.';
   const safeTitle = escapeHtml(config.title);
   const jsonLd = JSON.stringify([
     { "@context":"https://schema.org","@type":"Organization","@id":"https://paskamerpraat.nl/#organization","name":"Doubleyou","alternateName":["Doubleyou Paskamerpraat","Paskamerpraat"],"url":"https://paskamerpraat.nl/","logo":"https://paskamerpraat.nl/icons/icon-512.png","description":desc,"sameAs":["https://doubleyousmallandtall.nl"]},
@@ -128,26 +128,26 @@ footer{margin-top:48px;padding-top:18px;border-top:1px solid #e8e0d0;font-size:0
 <a href="/feed">Feed</a><a href="/uitgelicht">Uitgelicht</a><a href="/merken">Merken</a>
 <a href="/looks">Looks</a><a href="/reviews">Reviews</a><a href="/ai-stijladvies">AI</a><a href="/winkel">Winkel</a></nav>
 
-<h1>${escapeHtml(config.title.split(' | ')[0].split(' — ')[0])}</h1>
+<h1>${escapeHtml(config.title.split(' | ')[0])}</h1>
 <p>De gratis Nederlandse community voor mensen die <strong>tall</strong> zijn (1.85m+) of <strong>plus size</strong> kleding dragen (XL–5XL). Een initiatief van Doubleyou Tailored for Tall &amp; Plus Size.</p>
 
 ${config.pagina === 'home' ? `
 <h2>Functies</h2>
 <ul>
-<li><a href="/feed">Community Feed</a> — Posts en fitchecks</li>
-<li><a href="/uitgelicht">Uitgelicht</a> — Aangeboden merken &amp; campagnes</li>
-<li><a href="/merken">Merken</a> — Overzicht alle deelnemende merken</li>
-<li><a href="/looks">Outfit Inspiratie</a> — Looks per lengte en maat</li>
-<li><a href="/reviews">Pasvorm Reviews</a> — Eerlijke beoordelingen</li>
-<li><a href="/ai-stijladvies">AI Stijladvies</a> — Outfit Score &amp; Style Match</li>
-<li><a href="/outfit-vergelijker">Outfit Vergelijker</a> — AI vergelijkt 2 outfits</li>
-<li><a href="/winkel">Winkel</a> — Doubleyou kleding</li>
+<li><a href="/feed">Community Feed</a>, Posts en fitchecks</li>
+<li><a href="/uitgelicht">Uitgelicht</a>, Aangeboden merken &amp; campagnes</li>
+<li><a href="/merken">Merken</a>, Overzicht alle deelnemende merken</li>
+<li><a href="/looks">Outfit Inspiratie</a>, Looks per lengte en maat</li>
+<li><a href="/reviews">Pasvorm Reviews</a>, Eerlijke beoordelingen</li>
+<li><a href="/ai-stijladvies">AI Stijladvies</a>, Outfit Score &amp; Style Match</li>
+<li><a href="/outfit-vergelijker">Outfit Vergelijker</a>, AI vergelijkt 2 outfits</li>
+<li><a href="/winkel">Winkel</a>, Doubleyou kleding</li>
 </ul>
 <h2>Veelgestelde vragen</h2>
 <dl>
 <dt>Is Doubleyou gratis?</dt><dd>Ja, alle community-functies zijn 100% gratis. Premium €4,99/maand voor onbeperkte AI.</dd>
 <dt>Welke maten worden besproken?</dt><dd>Tall (1.85m+) en plus size (XL–5XL).</dd>
-<dt>Wat zijn DSP punten?</dt><dd>Doubleyou Stijlpunten — verdien je door bijdragen aan de community.</dd>
+<dt>Wat zijn DSP punten?</dt><dd>Doubleyou Stijlpunten, verdien je door bijdragen aan de community.</dd>
 <dt>Hoe werkt AI Outfit Score?</dt><dd>Upload foto → AI analyseert pasvorm, kleur, proportie → krijg tips.</dd>
 </dl>` : `<p><a href="/">← Terug naar Doubleyou</a></p>`}
 
@@ -157,7 +157,7 @@ ${config.pagina === 'home' ? `
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// MAIN ENTRY — alle paden gebruiken safeAssetsFetch (nooit raw env.ASSETS)
+// MAIN ENTRY - alle paden gebruiken safeAssetsFetch (nooit raw env.ASSETS)
 // ═══════════════════════════════════════════════════════════════════
 export default {
   async fetch(request, env, ctx) {

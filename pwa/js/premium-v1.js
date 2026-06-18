@@ -285,7 +285,7 @@
     setTimeout(function () { pollPremiumStatus(attempts + 1); }, 2500);
   }
 
-  // Behoud oude pollStatus voor backwards compat — verwijst nu naar nieuwe Shopify-flow
+  // Behoud oude pollStatus voor backwards compat - verwijst nu naar nieuwe Shopify-flow
   async function pollStatus(sessionId, attempts) {
     return pollPremiumStatus(attempts);
   }
@@ -423,7 +423,7 @@
 
     var manageBtns = '';
     if (plan === 'premium_monthly' || plan === 'premium_monthly_shopify' || plan === 'premium_yearly_shopify') {
-      // Shopify Customer Account portal: zelfservice — bekijk bestellingen,
+      // Shopify Customer Account portal: zelfservice - bekijk bestellingen,
       // beheer abonnement (Shopify Subscriptions UI) en betaalgegevens.
       var shopAccount = 'https://doubleyousmallandtall.nl/account';
       var mailto = 'mailto:info@doubleyousmallandtall.nl?subject=' +

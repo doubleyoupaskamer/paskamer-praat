@@ -1,6 +1,6 @@
 """
 ═══════════════════════════════════════════════════════════════════════
-Doubleyou — B2C Post Boost Backend (v1.0.0)
+Doubleyou - B2C Post Boost Backend (v1.0.0)
 ═══════════════════════════════════════════════════════════════════════
 
 NIEUWE ENDPOINTS (alle onder /api/boost/*):

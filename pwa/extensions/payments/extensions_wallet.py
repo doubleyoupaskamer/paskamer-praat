@@ -1,6 +1,6 @@
 """
 ═══════════════════════════════════════════════════════════════════════════
-PaskamerPraat — Wallet + Shopify Payments Router (v1.0.0)
+PaskamerPraat, Wallet + Shopify Payments Router (v1.0.0)
 ═══════════════════════════════════════════════════════════════════════════
 
 FastAPI router voor:
@@ -120,7 +120,7 @@ class AdminAdjustRequest(BaseModel):
 async def get_balance(uid: str, x_user_token: Optional[str] = Header(None)):
     """
     User reads own balance. In productie: Firebase ID token verifiëren ipv plain uid.
-    Voor MVP: vereenvoudigde flow — frontend stuurt verified uid.
+    Voor MVP: vereenvoudigde flow, frontend stuurt verified uid.
     """
     # TODO: Firebase ID token verification via firebase-admin SDK
     doc = await _firestore_get_user(uid)

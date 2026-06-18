@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * Doubleyou — Topup "Binnenkort Beschikbaar" Popup (v1.0.0)
+ * Doubleyou - Topup "Binnenkort Beschikbaar" Popup (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Gedeelde popup voor zowel B2B merkenwallet als B2C gebruikerswallet.
@@ -150,7 +150,7 @@
           'aria-label="Launch voortgang">' +
           '<div class="pp-topup-cs-progress-fill" style="--pp-cs-pct:' + progressPct + '%;width:' + progressPct + '%"></div>' +
         '</div>' +
-        '<p class="pp-topup-cs-progress-sub">We zijn ' + progressPct + '% klaar — launch verwacht binnenkort</p>' +
+        '<p class="pp-topup-cs-progress-sub">We zijn ' + progressPct + '% klaar. Launch verwacht binnenkort</p>' +
       '</div>';
 
     var ov = document.createElement('div');
@@ -175,7 +175,7 @@
         '<h2 class="pp-topup-cs-titel" id="pp-topup-cs-titel">Binnenkort beschikbaar</h2>' +
         '<p class="pp-topup-cs-tekst">' +
           'Opwaarderen is op dit moment nog niet actief. We zetten de laatste puntjes ' +
-          'op de i — heel binnenkort kun je je wallet opwaarderen en posts boosten.' +
+          'op de i, heel binnenkort kun je je wallet opwaarderen en posts boosten.' +
         '</p>' +
         progressBlock +
         pakketLabel +

@@ -29,7 +29,7 @@
 
   // v1.0.11 PRIVACY: respect GDPR analytics-consent.
   // Geen UID in tracking events tenzij user expliciet consent.analytics=true heeft gegeven.
-  // Default: anonieme impressions/clicks (uid=null) — voldoende voor ad-billing op placement-level.
+  // Default: anonieme impressions/clicks (uid=null) - voldoende voor ad-billing op placement-level.
   function _trackingUid() {
     try {
       var prof = window.DY && window.DY.profile;

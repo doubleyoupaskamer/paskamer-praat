@@ -1,13 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * Doubleyou — B2C Post Boost Module (v1.0.0)
+ * Doubleyou - B2C Post Boost Module (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Strikt ADDITIEF: voegt nieuwe modal/flow toe, géén bestaande UI veranderen.
  *
  * Functionaliteit:
- *   - PP_Boost.openModal(postId, postOwnerId)  — toont boost-modal
- *   - PP_Boost.activateBoost(postId, pkg)      — trekt saldo af + activeert
- *   - PP_Boost.getB2CBalance()                 — leest users/{uid}.b2c_wallet_balance
+ *   - PP_Boost.openModal(postId, postOwnerId)  - toont boost-modal
+ *   - PP_Boost.activateBoost(postId, pkg)      - trekt saldo af + activeert
+ *   - PP_Boost.getB2CBalance()                 - leest users/{uid}.b2c_wallet_balance
  *
  * Pakketten (override via admin_settings/global.boost_packages):
  *   starter: 24u  · €1,99  · weight 1.5x
@@ -177,7 +177,7 @@
   // `<div class="dy-sd-topnav-acties">` met daarin de Delen-knop en
   // (voor eigenaar) een Verwijder-knop. We injecteren een 🚀 Boost-knop
   // tussen Delen en Verwijder ALS er een verwijder-knop aanwezig is
-  // (impliciete eigenaarscontrole — alleen eigenaars zien de delete-knop).
+  // (impliciete eigenaarscontrole - alleen eigenaars zien de delete-knop).
   function _extractPostIdFromDelBtn(btn) {
     try {
       var onclick = btn.getAttribute('onclick') || '';

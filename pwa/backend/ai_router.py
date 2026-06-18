@@ -1,5 +1,5 @@
 """
-Paskamer Praat — AI endpoints (v47)
+Paskamer Praat, AI endpoints (v47)
 
 Drie endpoints, allemaal gemount onder /api:
 
@@ -49,7 +49,7 @@ async def ai_health():
 
 
 # ─────────────────────────────────────────────────────────────
-# CORS image proxy — voor Try-On pre-fill van feed images die
+# CORS image proxy, voor Try-On pre-fill van feed images die
 # strenge CORS-headers hebben (Firebase Storage, CDN). Streamt
 # de image door zodat de frontend hem kan canvas-en.
 # ─────────────────────────────────────────────────────────────
@@ -67,7 +67,7 @@ async def proxy_image(url: str):
     if not url or len(url) > 2000:
         raise HTTPException(status_code=400, detail="Ongeldige URL")
     if not _ALLOWED_PROXY_HOSTS.match(url):
-        # Open hosts maar limiteer payload — niet voor arbitraire SSRF
+        # Open hosts maar limiteer payload, niet voor arbitraire SSRF
         if not url.startswith(("https://", "http://")):
             raise HTTPException(status_code=400, detail="Alleen http(s) URLs")
     try:
@@ -90,7 +90,7 @@ async def proxy_image(url: str):
 
 
 # ─────────────────────────────────────────────────────────────
-# Content reports — server-side queue (werkt zonder Firebase auth)
+# Content reports, server-side queue (werkt zonder Firebase auth)
 # ─────────────────────────────────────────────────────────────
 class ReportPayload(BaseModel):
     post_id: str = Field(..., max_length=300)
@@ -103,7 +103,7 @@ class ReportPayload(BaseModel):
 
 @ai_router.post("/report")
 async def submit_report(payload: ReportPayload, request: Request):
-    """Server-side report queue — schrijft naar MongoDB (collection: moderation_reports)."""
+    """Server-side report queue, schrijft naar MongoDB (collection: moderation_reports)."""
     from server import db  # lazy import to avoid circular
     doc = {
         "_id": str(uuid.uuid4()),
@@ -128,7 +128,7 @@ async def submit_report(payload: ReportPayload, request: Request):
 
 @ai_router.get("/reports/queue")
 async def reports_queue(status: str = "pending", limit: int = 50):
-    """Admin endpoint — lijst openstaande rapporten (geen auth in deze PWA — alleen via direct backend access)."""
+    """Admin endpoint, lijst openstaande rapporten (geen auth in deze PWA, alleen via direct backend access)."""
     from server import db
     if limit > 200:
         limit = 200
@@ -317,7 +317,7 @@ SCORE_PROMPT = """Analyseer deze outfit-foto kritisch maar opbouwend en geef ter
 1. Een score van 0-100 (eerlijk; 60-75 is normaal, 80+ is écht goed, 90+ uitzonderlijk)
 2. Een korte label-categorie: "Sterk", "Solide", "Kan beter", "Nog ruwe diamant"
 3. Een 1-zin samenvatting van de outfit
-4. Exact 3 korte, concrete tips (max 12 woorden elk) — geen vage adviezen
+4. Exact 3 korte, concrete tips (max 12 woorden elk), geen vage adviezen
 5. 3 dominante kleuren in HEX format
 
 Antwoord UITSLUITEND als JSON in dit exacte schema:
@@ -434,7 +434,7 @@ async def weekly_stylist(req: WeeklyStylistRequest):
     if req.user_context:
         prompt += f"\n\nUser context:\n{req.user_context.strip()[:1200]}"
     else:
-        prompt += "\n\nGeen specifieke context bekend — geef veelzijdige seizoens-toepasbare picks."
+        prompt += "\n\nGeen specifieke context bekend, geef veelzijdige seizoens-toepasbare picks."
 
     try:
         msg = UserMessage(text=prompt)

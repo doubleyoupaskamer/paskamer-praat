@@ -7,6 +7,66 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.125 — Em-dash Cleanup (18 jun 2026)
+
+### Scope
+Volledige codebase-audit en vervanging van alle em-dashes (U+2014, "—") in:
+- Frontend JS/HTML/CSS (PWA actieve files)
+- Backend Python (server.py, shopify_wallet.py, boost_router.py)
+- Cloudflare SEO Worker
+- Voorwaarden HTML
+
+### Aantallen gefixt per file
+| Bestand | Em-dashes voor | na |
+|---|---|---|
+| pp-wallet-v1.js | 4 | 0 |
+| pp-b2c-wallet-v1.js | 5 | 0 |
+| pp-topup-comingsoon-v1.js | 3 | 0 |
+| pp-boost-v1.js | 5 | 0 |
+| premium-v1.js | 2 | 0 |
+| index.html | 2 | 0 |
+| pp-campaign-renderer-v1.js | 1 | 0 |
+| voorwaarden/index.html | 35 | 0 |
+| cloudflare-seo-worker-v3.js | 33 | 0 |
+| backend/server.py | 15 | 0 |
+| backend/shopify_wallet.py | 3 | 0 |
+| backend/boost_router.py | 1 | 0 |
+| pwa/backend/* (legacy) | 11 | 0 |
+| pwa/extensions/*/extensions_*.py (legacy) | 6 | 0 |
+
+**Totaal: 126 em-dashes verwijderd.**
+
+### Vervangingsregels toegepast
+1. **Comments / docstrings** → `-` (gewone hyphen, niet user-facing)
+2. **User-facing strings**: contextueel
+   - Toast errors: `nog niet beschikbaar — neem contact op` → `nog niet beschikbaar. Neem contact op`
+   - Progress sub: `klaar — launch verwacht` → `klaar. Launch verwacht`
+   - AI omschrijvingen: `... trui — perfect voor` → `... trui, perfect voor`
+   - Modal tekst: `op de i — heel binnenkort` → `op de i, heel binnenkort`
+3. **Voorwaarden HTML**: 
+   - `<h3>A — Aanvaarding</h3>` → `<h3>A: Aanvaarding</h3>` (alle 26 letter-headings)
+   - Algemene zinsdelen: `, ` als separator
+4. **SEO Worker titels**: 
+   - `Page Title — Doubleyou` → `Page Title | Doubleyou` (consistent met andere titels)
+   - HTML body content: `, ` 
+   - `.split(' — ')` → verwijderd (vervangen door enkel `.split(' | ')`)
+
+### Functionaliteit-validatie (NIETS gebroken)
+- Backend `/api/wallet/health` → 200
+- Backend `/api/premium/status` → 200
+- Python lint: 0 errors
+- Wallet flow (B2B + B2C) — intact
+- Boost flow — intact
+- Voorwaarden bekijkbaar (A-Z hiërarchie behouden met `:` separator)
+- SEO titles werken (auto-derive `<h1>` via `split(' | ')[0]`)
+
+### Cache bumped → `v60.1.125-emdash-cleanup`
+- `sw.js` VERSION → `v60.1.125-20260618-emdash-cleanup`
+- index.html: 14× `?v=` ge-update
+- ZIP: 3.7 MB, 3,855,087 bytes
+
+
+
 ## v60.1.124 — B2B Pakketten + Launch-voortgang 68% (18 jun 2026)
 
 ### B2B Merken Wallet productkaarten (gelijke layout als B2C)

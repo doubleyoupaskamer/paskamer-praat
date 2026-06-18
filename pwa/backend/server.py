@@ -1,5 +1,5 @@
 """
-Paskamer Praat — Standalone AI Backend
+Paskamer Praat, Standalone AI Backend
 =======================================
 
 Minimalistische FastAPI app die alleen de v47 AI endpoints serveert:
@@ -35,7 +35,7 @@ app = FastAPI(
     version="47.0.0",
 )
 
-# CORS — open voor PWA op paskamerpraat.nl + alle previews
+# CORS, open voor PWA op paskamerpraat.nl + alle previews
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
