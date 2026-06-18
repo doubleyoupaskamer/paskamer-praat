@@ -2252,7 +2252,7 @@ DY.renderHome = function() {
           '<div class="dy-hm-hero-text-overlay">' +
             '<span class="dy-hm-hero-eyebrow">Tall, Plus &amp; Inclusieve Mode</span>' +
             '<h1 class="dy-hm-hero-titel">Mode die écht<br><em>past bij jou</em></h1>' +
-            '<p class="dy-hm-hero-sub">Een plek voor iedereen die buiten standaard confectiematen valt. Deel outfits, ontvang eerlijke feedback en ontdek stijladvies van de community en AI.</p>' +
+            '<p class="dy-hm-hero-sub">Een plek voor iedereen die buiten standaard confectiematen valt. Deel outfits, ontvang eerlijke feedback en ontdek stijladvies van de community en onze digitale stijl adviseur.</p>' +
           '</div>' +
         '</div>' +
         '<div class="dy-hm-hero-content">' +
@@ -2260,7 +2260,7 @@ DY.renderHome = function() {
           '<div class="dy-hm-hero-text-desktop">' +
             '<span class="dy-hm-hero-eyebrow">Tall, Plus &amp; Inclusieve Mode</span>' +
             '<h1 class="dy-hm-hero-titel">Mode die écht<br><em>past bij jou</em></h1>' +
-            '<p class="dy-hm-hero-sub">Een plek voor iedereen die buiten standaard confectiematen valt. Deel outfits, ontvang eerlijke feedback en ontdek stijladvies van de community en AI.</p>' +
+            '<p class="dy-hm-hero-sub">Een plek voor iedereen die buiten standaard confectiematen valt. Deel outfits, ontvang eerlijke feedback en ontdek stijladvies van de community en onze digitale stijl adviseur.</p>' +
           '</div>' +
           '<div class="dy-hm-hero-actions">' +
             '<div class="dy-hm-hero-knoppen">' +
@@ -2277,11 +2277,10 @@ DY.renderHome = function() {
               '<button class="dy-hm-hero-partner-cta-secundair" onclick="DY.brandPortal && DY.brandPortal.openPortaal ? DY.brandPortal.openPortaal() : DY.navigeer(\x27brand_register\x27)" data-testid="home-partner-register-btn">Aanmelden als merk</button>' +
             '</div>' +
           '</div>' +
-          /* v60.1.85: Alleen Contact-link behouden in hero legal-blok.
-             Algemene voorwaarden + Privacybeleid waren door v60.1.84 weg;
-             Contact was per ongeluk meeverwijderd - hersteld. */
+          /* v60.1.116: Contact-knop gekregen identieke styling als 'Ontdek de community'
+             en 'Body Positivity' (pill-shape secondary CTA) i.p.v. tekstuele legal-link. */
           '<div class="dy-hm-hero-legal">' +
-            '<a href="mailto:info@doubleyousmallandtall.nl" class="dy-hm-hero-legal-link" data-testid="home-contact-link">Contact</a>' +
+            '<a href="mailto:info@doubleyousmallandtall.nl" class="dy-hm-hero-cta-sec" data-testid="home-contact-link" style="display:inline-block;text-decoration:none;text-align:center">Contact</a>' +
           '</div>' +
           '</div>' /* einde dy-hm-hero-actions */ +
         '</div>' +
