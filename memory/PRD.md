@@ -7,6 +7,47 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.133 — Route Safety + Pre-selected Pakket flow (18 jun 2026)
+
+### Nieuwe module: `pp-route-safety-v1.js`
+Twee defensieve lagen voor stabiele navigatie:
+
+**1. Catch-all route guard**
+- Whitelist met ~35 bekende routes (`KNOWN_ROUTES`)
+- Wrapper rond `DY.navigeer` detecteert onbekende pagina-keys (typo, deprecated link)
+- Onbekende route → automatisch fallback naar `feed` (ingelogd) of `home` (anoniem)
+- `console.warn('[RouteSafety] unknown route: X → fallback to feed')` voor audit-trail
+- Geen 404 / dead-end / undefined state meer mogelijk
+
+**2. Pre-selected pakket flow**
+- Op `merken_pakketten` pagina hooken we elke "Aanmelden als merk" / "Naar merkenportaal" CTA via MutationObserver
+- Klik → `localStorage.dy_selected_pkg = {id, name, amount, ts}` (15 minuten TTL)
+- Navigeert door naar `merken_aanmelden` (bestaande route, ongewijzigd)
+- Op `merken_aanmelden` render injecteert deze module een **gele banner bovenaan**:
+  - "Gekozen pakket: [naam] · €[bedrag]"
+  - "Anders kiezen" knop → terug naar `merken_pakketten`
+- TTL-cleanup voorkomt stale selecties
+
+### Backwards compatibility
+- Geen wijzigingen aan pwa-v463-core, brand-portal, of merken_aanmelden form-rendering
+- `KNOWN_ROUTES` lijst kan eenvoudig uitgebreid worden zonder rebuild
+- localStorage gebruik geïsoleerd onder `dy_selected_pkg` key
+- Banner injectie is idempotent (skip als al bestaat)
+
+### Cache bumped → `v60.1.133-route-safety`
+- `sw.js` VERSION → `v60.1.133-20260618-route-safety`
+- `index.html` 21× `?v=` bumped (+1 nieuw script)
+- ZIP: 3.8 MB, 3,960,570 bytes
+
+### Voldoet aan Master Prompt criteria:
+- ✓ Catch-all route guard met fallback
+- ✓ Geen 404 / dead-end mogelijk meer
+- ✓ Console warnings voor audit trail
+- ✓ Pre-selected pakket context blijft behouden door de flow
+- ✓ Backwards compatible, additieve laag
+
+
+
 ## v60.1.132 — Samenwerken CTA Fix (18 jun 2026)
 
 ### Root cause
