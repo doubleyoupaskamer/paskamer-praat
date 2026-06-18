@@ -7,6 +7,47 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.130 — Install Button Path Fix (KRITIEK) (18 jun 2026)
+
+### Root cause definitief gevonden
+In `index.html` v60.1.128 + v60.1.129 stonden de script tags voor de install-manager en install-button met **relatieve paths zonder leading slash**:
+
+```html
+<!-- FOUT (v60.1.128/129): -->
+<script src="extensions/install/pp-install-manager-v1.js?v=...">
+<script src="extensions/install/pp-install-button-v1.js?v=...">
+```
+
+Wanneer een user op `/feed` of `/profiel` zit, resolveerde de browser deze paths naar `/feed/extensions/install/...` of `/profiel/extensions/install/...` → **HTTP 404 → scripts laadden NOOIT** → install-knop verscheen NIET op enige device.
+
+### Fix
+Alle 3 install-related scripts hebben nu leading slash (consistent met andere ~50 scripts in index.html):
+
+```html
+<!-- v60.1.130 (correct): -->
+<script src="/extensions/install/pp-install-manager-v1.js?v=...">
+<script src="/extensions/install/pp-install-button-v1.js?v=...">
+<script src="/js/a2hs-prompt-v1.js?v=...">
+```
+
+### Bijkomende verbetering
+`pp-install-button-v1.js` injecteerKnop logica versoepeld:
+- Verwijderd: `DY.pagina !== 'profiel'` check (race-condition prone)
+- Toegevoegd: directe DOM-check op `.dy-profiel-acties` element (bestaat alleen op profielpagina)
+- Skip-detectie gebruikt nu ALLEEN harde display-mode checks (geen localStorage flag meer, want stale)
+
+### Verificatie
+- ZIP geinspecteerd: alle 3 install scripts aanwezig met correcte paths
+- index.html geinspecteerd: 3× `/extensions/install/` en `/js/` met leading slash
+- HTTP 200 op download endpoint
+
+### Cache bumped → `v60.1.130-path-fix`
+- `sw.js` VERSION → `v60.1.130-20260618-path-fix`
+- `index.html` 19× `?v=` bumped
+- ZIP: 3.8 MB, 3,953,871 bytes
+
+
+
 ## v60.1.129 — Install Button Herstel + Stale-Flag Fix (18 jun 2026)
 
 ### Probleem

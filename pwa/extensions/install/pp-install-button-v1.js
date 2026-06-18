@@ -113,12 +113,20 @@
     try {
       var main = document.getElementById('dy-main');
       if (!main) return;
-      if (!window.DY || DY.pagina !== 'profiel') return;
-      if (main.querySelector('#pp-install-manual-btn')) return;
+      // Inject ALLEEN op profielpagina (.dy-profiel-acties is enkel daar aanwezig).
+      // We checken zowel DY.pagina als de DOM zodat re-renders/race-conditions
+      // niet voor stuck-state zorgen.
       var acties = main.querySelector('.dy-profiel-acties');
       if (!acties) return;
-      // Skip als app gegarandeerd geïnstalleerd is
-      if (isStandalone()) return;
+      if (main.querySelector('#pp-install-manual-btn')) return;
+      // Skip ALLEEN als app gegarandeerd geïnstalleerd is via display-mode.
+      // localStorage-flag NIET vertrouwen want kan stale zijn.
+      try {
+        if (window.matchMedia('(display-mode: standalone)').matches) return;
+        if (window.matchMedia('(display-mode: minimal-ui)').matches) return;
+        if (window.matchMedia('(display-mode: fullscreen)').matches) return;
+      } catch (e) {}
+      if (window.navigator && window.navigator.standalone === true) return;
 
       var knop = document.createElement('button');
       knop.id = 'pp-install-manual-btn';
