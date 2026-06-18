@@ -1160,3 +1160,41 @@ ServiceWorker" was de combinatie van:
 - Service Worker `VERSION` naar `v60.1.136-20260618-topup-router-v1`.
 - ZIP herbouwd: `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.97 MB).
 - Syntax check: `node --check` pass.
+
+## v60.1.137 (2026-02-18) - Merken Campagne Flow Audit Layer (non-breaking)
+- **Master prompt**: MERKEN CAMPAGNE FLOW STABILISATIE + DEBUG AUDIT LAYER.
+  Vereiste: 100% traceability + safety nets ZONDER bestaande
+  brand-portal-v1.js code te wijzigen.
+- **Fix (additive)**: nieuwe extensie
+  `/app/pwa/extensions/admin/pp-campaign-audit-v1.js` (v1.0.0) met:
+  1. Globale click-observer (capture-phase) op alle
+     `[data-testid^="brand-camp-|bp-camp-|admin-tab-campagnes|brand-dash-campagnes|admin-camp-"]`.
+  2. Wrapper rond `DY.navigeer(pagina)` voor route-validatie + safe
+     fallback naar `brand_dashboard` bij exceptions in campagne-routes.
+  3. Wrappers rond `DY.brandPortal.nieuweCampagne / bewerkCampagne /
+     pauseCampagne / resumeCampagne` voor state-mutatie tracing
+     (sync + async).
+  4. State drift watcher: signaleert wanneer `BP._huidigCampagneId`
+     >60s actief blijft buiten `brand_campagne_nieuw` route, auto-clear
+     om vervolgklikken niet te corrumperen.
+  5. Lichte Firestore-tracer voor `campaigns` collection (alleen
+     read-side logging, geen writes).
+- **Verbose mode**: stil-loggen altijd actief. Uitgebreide console-trace
+  via `?debug=campaign` of `localStorage.pp_debug_campaign='1'`.
+- **Public API**: `window.PP_CampaignAudit.report() / .summary() /
+  .events() / .clear() / .isInstalled() / .setVerbose(bool)`.
+  Ring-buffer `window.__ppCampaignAudit` (max 200 events).
+- **Rapport-structuur**: report() levert Button issues / Route issues /
+  State issues / API issues / Action errors / Race conditions
+  (>1 navigeer binnen 200ms) + Fix Strategy bullets (zoals master
+  prompt vereist).
+- **Veiligheidsnetten**: alle wrappers vangen exceptions, geven door
+  via log + fallback. Geen blank screen, geen route-break, geen
+  Firestore-state corruption.
+- Script geregistreerd in `index.html` (regel 974) met leading slash,
+  defer, na pp-brand-pkg-activate-v2.
+- Alle `?v=` querystrings gebumpt naar `60.1.137-campaign-audit-v1`.
+- Service Worker `VERSION` → `v60.1.137-20260618-campaign-audit-v1`.
+- ZIP herbouwd: `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.97 MB,
+  225 files). HTTP 200 geverifieerd.
+- Syntax check: `node --check` pass.
