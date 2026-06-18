@@ -7,6 +7,40 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.128 — PWA Install Manager (centrale popup-detectie) (18 jun 2026)
+
+### Probleem
+"Installeer Doubleyou" popup bleef tonen op desktop Chrome terwijl de PWA al elders geïnstalleerd was. Twee parallelle install-systemen (inline banner + a2hs bottom-sheet) misten `navigator.getInstalledRelatedApps()` detectie — die werkt waar `display-mode: standalone` niet werkt (browser-tab vs PWA-window).
+
+### Oplossing: `pp-install-manager-v1.js` (centrale beheerlaag)
+Detecteert "app geïnstalleerd" via 5 methodes (best-of-all):
+1. **`navigator.getInstalledRelatedApps()`** ← NIEUW (Chrome desktop+Android API)
+2. `display-mode` media queries (standalone/minimal-ui/fullscreen/wco)
+3. `navigator.standalone` (iOS Safari)
+4. `localStorage` flag `dy_pwa_geinstalleerd`
+5. Referrer `android-app://`
+
+Wanneer geïnstalleerd:
+- Zet PERMANENT `dy_pwa_geinstalleerd=1` + `dy_install_v3=1` + dismiss-timestamp
+- Hide BEIDE popup-systemen (`#dy-install-banner` inline + `#dy-a2hs-prompt` bottom-sheet)
+- MutationObserver vangt popups die toch nog opduiken (race-condition guard)
+- Re-detect bij `visibilitychange`/`focus` + elke 5s
+
+### Manifest update
+`manifest.json` krijgt `related_applications` met self-referentie zodat `getInstalledRelatedApps()` daadwerkelijk de PWA herkent als geïnstalleerd op Chrome desktop+Android.
+
+### Backwards compatibility
+- Bestaande inline banner script + `a2hs-prompt-v1.js` ongewijzigd — blijven werken voor first-time gebruikers
+- `DY.isAppInstalled()` wordt verrijkt (originele check + nieuwe related-apps check)
+- Public API: `window.PP_InstallManager.{getStatus, isInstalled, markInstalled, hidePopups, recheck}`
+
+### Cache bumped → `v60.1.128-install-manager`
+- `sw.js` VERSION → `v60.1.128-20260618-install-manager`
+- `index.html` 18× `?v=` (incl. nieuw script tag)
+- ZIP: 3.8 MB, 3,950,343 bytes
+
+
+
 ## v60.1.127 — Admin Pakketten + Dashboard MVP (Fase 1) (18 jun 2026)
 
 ### Nieuwe admin module: `pp-admin-packages-v1.js`
