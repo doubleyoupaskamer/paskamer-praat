@@ -1198,3 +1198,35 @@ ServiceWorker" was de combinatie van:
 - ZIP herbouwd: `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.97 MB,
   225 files). HTTP 200 geverifieerd.
 - Syntax check: `node --check` pass.
+
+## v60.1.138 (2026-02-18) - Onboarding Time Cap Guard (5s hard cap)
+- **Master prompt**: WELCOME SPINNER & ONBOARDING TIME CAP. Hard cap
+  5s end-to-end, optimistic UI shell, parallel loading, fallback render
+  bij >5s, geen blocking UI.
+- **Fix (non-breaking optimization)**:
+  Nieuwe extensie `/app/pwa/extensions/stability/pp-onboarding-timecap-v1.js`
+  (v1.0.0):
+  1. `initTimerGuard()` - onafhankelijke 5000ms hard-cap timer die
+     `#dy-initial-loader` forceert verbergen ongeacht state van pwa-v463.
+  2. `onboardingStateResolver()` - checkt `#dy-main` content na 5s,
+     triggert `DY.toonPagina('feed')` fallback of skeleton-shell.
+  3. Performance metrics: bootAt / firstPaintMs (via FCP observer) /
+     loaderHiddenMs / uiReadyMs / longTasks (>200ms via
+     PerformanceObserver).
+  4. Skeleton-shell injectie als degraded-mode fallback met shimmer
+     animatie - geen blocking spinner, geen blank screen.
+- **Timing tweaks in index.html** (pure optimization):
+  - CSS `dy-loader-autohide` animatie van 6.5s naar **5s**.
+  - `window._dyMinSpinnerUntil` van 6000ms naar **4500ms**.
+  - `_dySkeletonTimeout` van 6000ms naar **5000ms**.
+- **Public API**: `window.PP_OnboardingGuard.report() / .metrics() /
+  .initTimerGuard() / .onboardingStateResolver() / .forceHideLoader()`.
+- **Veiligheid**: geen aanpassing aan auth/wallet/campagne/Firestore
+  flows. Synchroniseert met bestaande `_dyMinSpinnerUntil` (kortste cap
+  wint).
+- Script geregistreerd in `index.html` (regel 941) na pp-promise-guard.
+- Alle `?v=` querystrings gebumpt naar `60.1.138-onboarding-timecap-v1`.
+- Service Worker `VERSION` → `v60.1.138-20260618-onboarding-timecap-v1`.
+- ZIP herbouwd: `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.98 MB,
+  226 files). HTTP 200 geverifieerd.
+- Syntax check: `node --check` pass.
