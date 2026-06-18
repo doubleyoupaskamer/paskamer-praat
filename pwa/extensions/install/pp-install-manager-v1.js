@@ -130,19 +130,43 @@
 
   // ───────── Hoofd-detectie ─────────
   function runDetection() {
-    var sync = checkDisplayMode() || checkNavigatorStandalone() ||
-               checkAndroidReferrer() || checkLocalStorageFlag();
-    if (sync) {
-      markInstalledPersistent(sync);
+    // Stap 1: hard sync-checks (display-mode, navigator.standalone, referrer)
+    // → DIRECT installed als één matcht
+    var hardSync = checkDisplayMode() || checkNavigatorStandalone() || checkAndroidReferrer();
+    if (hardSync) {
+      markInstalledPersistent(hardSync);
       hidePopups();
       _state.checked = true;
       return Promise.resolve(_state);
     }
+    // Stap 2: async getInstalledRelatedApps (authoritative voor desktop Chrome+Android)
     return checkRelatedApps().then(function (rel) {
       if (rel) {
         markInstalledPersistent(rel);
         hidePopups();
+        _state.checked = true;
+        return _state;
       }
+      // Stap 3: als noch hardSync, noch getInstalledRelatedApps → app is NIET
+      // geïnstalleerd in dit profiel. Een eerder gezette localStorage-flag
+      // is daarmee STALE (bv. app gedeïnstalleerd, of andere browser-profiel).
+      // We clearen die flag zodat de install-button weer kan verschijnen.
+      try {
+        // Alleen clearen als API beschikbaar is — anders kunnen we niet
+        // betrouwbaar zeggen dat hij niet geïnstalleerd is.
+        if (typeof navigator !== 'undefined' &&
+            typeof navigator.getInstalledRelatedApps === 'function') {
+          if (localStorage.getItem(STORAGE_INSTALLED) === '1') {
+            localStorage.removeItem(STORAGE_INSTALLED);
+          }
+        } else {
+          // Geen related-apps API → respecteer localStorage flag als hint
+          if (checkLocalStorageFlag()) {
+            markInstalledPersistent('localStorage-fallback');
+            hidePopups();
+          }
+        }
+      } catch (e) {}
       _state.checked = true;
       return _state;
     });

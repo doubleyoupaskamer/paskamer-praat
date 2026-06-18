@@ -7,6 +7,40 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.129 — Install Button Herstel + Stale-Flag Fix (18 jun 2026)
+
+### Probleem
+v60.1.128's `pp-install-manager-v1.js` was te agressief: localStorage flag `dy_pwa_geinstalleerd` werd gerespecteerd zelfs als de app daadwerkelijk NIET geïnstalleerd was (bv. na deïnstallatie of in nieuwe browser-profiel). Resultaat: install-button verdween volledig.
+
+### Fix 1 — Stale-flag detectie in `pp-install-manager-v1.js`
+Detectie-logica verbeterd naar 3-staps proces:
+1. **Hard sync checks** (display-mode, navigator.standalone, android-referrer) → indien match: installed
+2. **`getInstalledRelatedApps()`** async authoritative check (Chrome desktop+Android)
+3. **Stale-flag cleanup**: als `getInstalledRelatedApps()` ondersteund maar leeg → CLEAR `dy_pwa_geinstalleerd` (was stale). Anders: respecteer localStorage als fallback hint.
+
+### Fix 2 — Nieuwe altijd-werkende install-knop
+`pp-install-button-v1.js` voegt een **manual install button** toe in profiel-menu (boven Merkenportaal/Wallet/Privacy):
+
+- **Label**: "Installeer Doubleyou app" (Android/Desktop) of "Voeg toe aan beginscherm" (iOS)
+- **Werkt onafhankelijk** van automatische popup-detectie
+- **Android/Desktop**: roept `beforeinstallprompt.prompt()` aan als beschikbaar, anders toont browser-specifieke handleiding (Chrome menu / Edge menu / etc.)
+- **iOS Safari**: toont stap-voor-stap modal (Delen → Voeg toe aan beginscherm → Voeg toe)
+- **Verbergt zichzelf** zodra app gedetecteerd is als geïnstalleerd
+- **Toegankelijk**: data-testid, aria-labels, ESC/click-outside sluiten
+
+### Backwards compatibility
+- v60.1.128 install-manager ongewijzigd qua API
+- Inline banner + a2hs-prompt scripts onaangeraakt
+- Bestaande UI/UX, popups, en flows volledig intact
+- Nieuwe knop is PARALLEL ingang — geen vervanging
+
+### Cache bumped → `v60.1.129-install-button-fix`
+- `sw.js` VERSION → `v60.1.129-20260618-install-button-fix`
+- `index.html` 19× `?v=` (incl. nieuw script tag)
+- ZIP: 3.8 MB, 3,953,745 bytes
+
+
+
 ## v60.1.128 — PWA Install Manager (centrale popup-detectie) (18 jun 2026)
 
 ### Probleem
