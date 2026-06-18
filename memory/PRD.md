@@ -7,6 +7,60 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.120 — Shopify-only Premium + Variant-IDs + Boost button + Stripe verwijderd (18 jun 2026)
+
+### B2C Wallet Variant-IDs ingebakken (live)
+Shopify Variant-IDs voor B2C top-up producten (`pp-b2c-wallet-v1.js`):
+- €5  → `57532652224856`
+- €10 → `57532666642776`
+- €15 → `57532675227992` (nieuw bedrag)
+- €25 → `57532676768088`
+- €50 → `57532683321688`
+
+### Boost-knop DOM-injectie
+`pp-boost-v1.js` MutationObserver detecteert `.dy-sd-topnav-acties` met `.dy-sd-del-btn`
+(impliciete eigenaarscontrole) en injecteert 🚀-knop tussen Delen en Verwijder voor:
+- Verhaal-detail pagina (`DY.verwijderVerhaal('id', ...)`)
+- Look-detail pagina (`DY.verwijderLook('id')`)
+Post-ID wordt geëxtraheerd uit `onclick`-attribuut van delete-knop.
+
+### Stripe volledig verwijderd
+**Backend** (`/app/backend/server.py`):
+- Verwijderd: `from emergentintegrations.payments.stripe.checkout import ...`
+- Verwijderd: `PREMIUM_PACKAGES`, `_STRIPE_API_KEY`, `_get_stripe_checkout()`, `CheckoutSessionBody`, `TestCheckoutBody`
+- Verwijderd endpoints: `POST /api/checkout/session`, `GET /api/checkout/status/{sid}`, `POST /api/webhook/stripe`, `GET /api/admin/premium/stripe-status`, `POST /api/admin/premium/test-checkout`
+- Toegevoegd: `GET /api/admin/premium/payments-status` (Shopify-equivalent met shop_domain + webhook URL)
+- `/api/admin/premium/webhooks` leest nu `shopify_topup_log` i.p.v. `stripe_events`
+- `/api/admin/premium/entitlements` source-prioriteit comment: "Shopify-paid" i.p.v. "Stripe-paid"
+- `/api/billing/portal` retourneert 501 met Shopify-context
+
+**Environment** (`/app/backend/.env`):
+- Verwijderd: `STRIPE_API_KEY=sk_test_emergent`
+
+**Dependencies** (`/app/backend/requirements.txt`):
+- Verwijderd: `stripe==14.4.1` (ook pip uninstalled)
+
+**Frontend**:
+- `index.html`: DNS-prefetch `api.stripe.com` → `doubleyousmallandtall.nl`
+- `_headers`: CSP `connect-src` → Stripe-domeinen verwijderd; `frame-src` → `js.stripe.com`/`hooks.stripe.com` verwijderd
+- `premium-v1.js`: alle Stripe-strings vervangen door Shopify (modal fineprint, manage-screen plan-naam, factuur-tekst, opzeg-knoppen, `checkReturnFromStripe`→`checkReturnFromShopify`)
+- `voorwaarden/index.html`: Artikel F (facturering), S (betalingen), U (overmacht), Privacy sub-verwerkers tabel, Stripe-tokens → Shopify-tokens. Geheel Stripe-vrij.
+- Plan-detectie nu ook voor `premium_monthly_shopify` / `premium_yearly_shopify`
+
+### Cache bumped → `v60.1.120-shopify-only-stripe-removed`
+- `sw.js` VERSION → `v60.1.120-20260618-shopify-only-stripe-removed`
+- index.html: alle `?v=` strings ge-update
+- ZIP: `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.7 MB)
+
+### Backend gezond na deploy
+- `curl /api/wallet/health` → 200
+- `curl /api/premium/status` → 200
+- `curl /api/checkout/session` → 404 (correct verwijderd)
+- `curl /api/webhook/stripe` → 404 (correct verwijderd)
+- `curl /api/admin/premium/stripe-status` → 404 (correct verwijderd)
+
+
+
 ## v60.1.119 — B2C Klant Wallet + Mobile Profile Fix (18 jun 2026)
 
 ### B2C Klant Wallet (gescheiden van B2B Merken Wallet)

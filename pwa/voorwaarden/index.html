@@ -158,7 +158,7 @@
     <h3>F — Facturering &amp; BTW</h3>
     <ol>
       <li>Wallet-top-ups worden via Shopify gefactureerd op naam van Doubleyou. Het Merk ontvangt direct na betaling een Shopify-factuur incl. BTW.</li>
-      <li>Premium-abonnement wordt via Stripe maandelijks geïncasseerd; factuur in PDF binnen 24u in het Merkenportaal.</li>
+      <li>Premium-abonnement wordt via Shopify maandelijks geïncasseerd; factuur in PDF binnen 24u in het Merkenportaal.</li>
       <li>BTW wordt berekend volgens reverse-charge (B2B EU) of standaard NL-BTW (21%) afhankelijk van merkland en geldig BTW-nummer.</li>
       <li>Bezwaar tegen een factuur: binnen 14 dagen schriftelijk via info@doubleyousmallandtall.nl.</li>
     </ol>
@@ -233,11 +233,11 @@
     <h3>R — Refunds &amp; restituties</h3>
     <p>Wallet top-ups zijn <strong>niet</strong> restitueerbaar in cash. Bij aantoonbare technische storing aan zijde Doubleyou kan een credit-correctie worden toegekend in Wallet-saldo. Premium-abonnementen kennen géén pro-rata refund. Wettelijk herroepingsrecht is niet van toepassing op zakelijke (B2B) overeenkomsten.</p>
 
-    <h3>S — Shopify / Stripe betalingen &amp; Wallet</h3>
+    <h3>S — Shopify betalingen &amp; Wallet</h3>
     <ol>
       <li>Wallet top-ups verlopen uitsluitend via Shopify checkout (doubleyousmallandtall.nl).</li>
-      <li>Premium-abonnementen verlopen via Stripe.</li>
-      <li>Kaartgegevens worden nooit door Doubleyou opgeslagen — uitsluitend door PCI-DSS-gecertificeerde providers (Shopify, Stripe).</li>
+      <li>Premium-abonnementen verlopen eveneens via Shopify.</li>
+      <li>Kaartgegevens worden nooit door Doubleyou opgeslagen — uitsluitend door de PCI-DSS-gecertificeerde provider Shopify.</li>
       <li>Wallet-saldo wordt automatisch bijgeschreven na bevestigde Shopify-betaling (webhook-flow met HMAC-signature).</li>
       <li>Bij betaalfraude of chargeback wordt het saldo direct teruggeboekt en kan het account worden opgeschort.</li>
     </ol>
@@ -246,7 +246,7 @@
     <p>Actuele tarieven zijn zichtbaar in het Merkenportaal onder "Tarieven". Doubleyou kan tarieven aanpassen met 30 dagen aankondiging. Bij wezenlijke prijsverhoging (&gt;15%) heeft het Merk recht op kosteloze opzegging binnen 30 dagen.</p>
 
     <h3>U — Uptime, onderhoud &amp; overmacht</h3>
-    <p>Het Platform wordt op "best-effort"-basis geleverd zonder uptime-SLA tenzij schriftelijk overeengekomen. Geplande onderhoud wordt waar mogelijk 24u vooraf aangekondigd. Doubleyou is niet aansprakelijk voor uitval door overmacht (DDoS, infrastructure outages van Cloudflare/Firebase/Stripe/Shopify, oorlog, pandemie, etc.).</p>
+    <p>Het Platform wordt op "best-effort"-basis geleverd zonder uptime-SLA tenzij schriftelijk overeengekomen. Geplande onderhoud wordt waar mogelijk 24u vooraf aangekondigd. Doubleyou is niet aansprakelijk voor uitval door overmacht (DDoS, infrastructure outages van Cloudflare/Firebase/Shopify, oorlog, pandemie, etc.).</p>
 
     <h3>V — Vrijwaring &amp; aansprakelijkheid</h3>
     <ol>
@@ -361,7 +361,7 @@
 
     <h3>Welke gegevens verwerken wij?</h3>
     <p><strong>Van community-leden:</strong> naam, e-mail, profielfoto, posts, likes, opgeslagen items, AI-scores, IP-adres, device-info, sessietijden.</p>
-    <p><strong>Van merken:</strong> bedrijfsnaam, KvK, BTW, adres, contactgegevens, gehashed wachtwoord, logo, productafbeeldingen, campagne-data, Stripe-tokens (geen kaartdata).</p>
+    <p><strong>Van merken:</strong> bedrijfsnaam, KvK, BTW, adres, contactgegevens, gehashed wachtwoord, logo, productafbeeldingen, campagne-data, Shopify-tokens (geen kaartdata).</p>
     <p><strong>Van anonieme bezoekers:</strong> IP, browser-info, pageviews, anonieme session-ID (cookie).</p>
 
     <h3>Rechtsgronden</h3>
@@ -393,8 +393,7 @@
       <tbody>
         <tr><td>Google Firebase</td><td>Auth, database, opslag</td><td>EU (Belgium/Frankfurt)</td></tr>
         <tr><td>Cloudflare</td><td>CDN, beveiliging</td><td>EU/US (SCC's)</td></tr>
-        <tr><td>Stripe Ireland</td><td>Betalingen</td><td>Ierland</td></tr>
-        <tr><td>Shopify</td><td>Wallet top-ups</td><td>Ierland/Canada (SCC's)</td></tr>
+        <tr><td>Shopify</td><td>Wallet top-ups &amp; Premium-abonnementen</td><td>Ierland/Canada (SCC's)</td></tr>
         <tr><td>Emergent LLM (OpenAI/Anthropic/Google)</td><td>AI-functies</td><td>EU/US (SCC's + DPA)</td></tr>
       </tbody>
     </table>
@@ -433,7 +432,7 @@
     <h3>2. Diensten</h3>
     <p>Diensten geleverd op best-effort "as-is" basis. Geen uptime-SLA tenzij schriftelijk overeengekomen. Onderhoud kan zonder kennisgeving plaatsvinden.</p>
     <h3>3. Prijzen &amp; betaling</h3>
-    <ul><li>Prijzen excl. BTW, in EUR</li><li>Premium €4,99/mnd, automatische verlenging via Stripe</li><li>Wallet-saldo niet uitbetaalbaar</li><li>Bij niet-betaling kan dienstverlening worden opgeschort</li></ul>
+    <ul><li>Prijzen excl. BTW, in EUR</li><li>Premium €4,99/mnd, automatische verlenging via Shopify</li><li>Wallet-saldo niet uitbetaalbaar</li><li>Bij niet-betaling kan dienstverlening worden opgeschort</li></ul>
     <h3>4. Duur &amp; opzegging</h3>
     <p>Onbepaalde tijd, maandelijks opzegbaar via info@doubleyousmallandtall.nl met 1 maand opzegtermijn. Geen restitutie van betaalde periodes.</p>
     <h3>5. Aansprakelijkheid</h3>

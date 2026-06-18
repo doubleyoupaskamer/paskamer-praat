@@ -172,6 +172,70 @@
            '</button>';
   }
 
+  // ── Auto-inject in verhaal/look detail topnav ───────────────────────
+  // De legacy renderVerhaalDetail / renderLookDetail renderen een
+  // `<div class="dy-sd-topnav-acties">` met daarin de Delen-knop en
+  // (voor eigenaar) een Verwijder-knop. We injecteren een 🚀 Boost-knop
+  // tussen Delen en Verwijder ALS er een verwijder-knop aanwezig is
+  // (impliciete eigenaarscontrole — alleen eigenaars zien de delete-knop).
+  function _extractPostIdFromDelBtn(btn) {
+    try {
+      var onclick = btn.getAttribute('onclick') || '';
+      // Patronen: DY.verwijderVerhaal('xxxx', ...)  of  DY.verwijderLook('xxxx')
+      var m = onclick.match(/DY\.verwijder(Verhaal|Look)\(\s*['"]([^'"]+)['"]/);
+      if (m) return { id: m[2], type: m[1].toLowerCase() };
+    } catch (e) {}
+    return null;
+  }
+
+  function _injecteerBoostKnopInTopnav() {
+    try {
+      if (!uid()) return;
+      var topnavs = document.querySelectorAll('.dy-sd-topnav-acties');
+      topnavs.forEach(function (nav) {
+        if (nav.querySelector('.pp-boost-inline-btn')) return; // al geïnjecteerd
+        var del = nav.querySelector('.dy-sd-del-btn');
+        if (!del) return; // alleen tonen voor eigenaars
+        var meta = _extractPostIdFromDelBtn(del);
+        if (!meta) return;
+        var u = uid();
+        if (!u) return;
+        var btn = document.createElement('button');
+        btn.className = 'dy-sd-nav-btn pp-boost-inline-btn';
+        btn.title = 'Boost deze post';
+        btn.setAttribute('data-testid', 'post-boost-inline-btn-' + meta.id);
+        btn.setAttribute('aria-label', 'Boost post');
+        btn.innerHTML =
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>' +
+            '<path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>' +
+            '<path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>' +
+            '<path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>' +
+          '</svg>';
+        btn.onclick = function (e) {
+          e.preventDefault(); e.stopPropagation();
+          openModal(meta.id, u);
+        };
+        // Plaats vóór de delete-knop
+        nav.insertBefore(btn, del);
+      });
+    } catch (e) { /* noop */ }
+  }
+
+  // Start observer zodra DOM klaar is
+  function _startBoostObserver() {
+    try {
+      var obs = new MutationObserver(_injecteerBoostKnopInTopnav);
+      obs.observe(document.body, { childList: true, subtree: true });
+      _injecteerBoostKnopInTopnav();
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _startBoostObserver);
+  } else {
+    setTimeout(_startBoostObserver, 300);
+  }
+
   window.PP_Boost = {
     openModal:      openModal,
     closeModal:     closeModal,

@@ -20,15 +20,16 @@
   if (window.PP_B2CWallet) return;
 
   // ────────── B2C TOPUP CONFIG ──────────
-  // Vul Variant-IDs in zodra de 4 Shopify B2C top-up producten zijn aangemaakt.
+  // Shopify Variant-IDs voor B2C wallet top-up producten (live).
   // Override mogelijk via admin_settings/global.b2c_shopify_config (geen redeploy nodig).
   var PP_B2C_TOPUPS = {
     shop_domain: 'doubleyousmallandtall.nl',
     variants: {
-      '5':  '',   // €5 top-up Variant-ID
-      '10': '',   // €10 top-up Variant-ID
-      '25': '',   // €25 top-up Variant-ID
-      '50': ''    // €50 top-up Variant-ID
+      '5':  '57532652224856',   // €5 top-up
+      '10': '57532666642776',   // €10 top-up
+      '15': '57532675227992',   // €15 top-up
+      '25': '57532676768088',   // €25 top-up
+      '50': '57532683321688'    // €50 top-up
     },
     return_path: '/?pagina=b2c_wallet&topup=success'
   };
@@ -157,7 +158,7 @@
             '<h2 class="bp-section-titel" style="margin-top:18px">Kies een bedrag</h2>' +
             (topupEnabled
               ? '<div class="bp-topup-grid">' +
-                  [5, 10, 25, 50].filter(function (amt) {
+                  [5, 10, 15, 25, 50].filter(function (amt) {
                     return !!b2cCfg.variants[String(amt)];
                   }).map(function (amt) {
                     return '<button class="bp-topup-bedrag" onclick="PP_B2CWallet.topup(' + amt + ')" data-testid="b2c-wallet-topup-' + amt + '">€ ' + amt + '</button>';

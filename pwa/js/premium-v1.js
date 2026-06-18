@@ -184,7 +184,7 @@
         '<input id="dy-prem-email" type="email" placeholder="[email protected]" autocomplete="email" data-testid="premium-email-input">'
       ) +
       '  <button class="dy-prem-pay" data-testid="premium-pay-btn">Start Premium →</button>' +
-      '  <p class="dy-prem-fineprint">Veilige betaling via Stripe. Annuleer wanneer je wilt.</p>' +
+      '  <p class="dy-prem-fineprint">Veilige betaling via Shopify. Annuleer wanneer je wilt.</p>' +
       '  <div class="dy-prem-error" id="dy-prem-error" role="alert"></div>' +
       '</div>';
     document.body.appendChild(ov);
@@ -285,7 +285,7 @@
     setTimeout(function () { pollPremiumStatus(attempts + 1); }, 2500);
   }
 
-  // Behoud oude pollStatus voor backwards compat (Stripe-stijl) — verwijst nu naar nieuwe flow
+  // Behoud oude pollStatus voor backwards compat — verwijst nu naar nieuwe Shopify-flow
   async function pollStatus(sessionId, attempts) {
     return pollPremiumStatus(attempts);
   }
@@ -300,7 +300,7 @@
     setTimeout(function () { el.classList.remove('is-show'); setTimeout(function () { try { el.remove(); } catch (e) { /* ignore */ } }, 400); }, 5500);
   }
 
-  function checkReturnFromStripe() {
+  function checkReturnFromShopify() {
     var u = new URL(window.location.href);
     var sid = u.searchParams.get('session_id');
     var p = u.searchParams.get('premium');
@@ -395,7 +395,9 @@
     var src = isPrem
       ? (plan === 'premium_admin'  ? 'admin-toegang'
         : plan === 'premium_grant' ? 'handmatig toegekend'
-        : plan === 'premium_monthly' ? 'Stripe (€4,99/maand)'
+        : plan === 'premium_monthly' ? 'Shopify (€4,99/maand)'
+        : plan === 'premium_monthly_shopify' ? 'Shopify (€4,99/maand)'
+        : plan === 'premium_yearly_shopify' ? 'Shopify (jaar-abonnement)'
         : 'actief')
       : null;
     var activated = _formatDate(status && status.activated_at);
@@ -420,14 +422,13 @@
     var pillLabel = plan === 'premium_admin' ? 'Admin' : 'Actief';
 
     var manageBtns = '';
-    if (plan === 'premium_monthly') {
-      // Stripe-paid user: support email-based cancel until Customer Portal live
+    if (plan === 'premium_monthly' || plan === 'premium_monthly_shopify' || plan === 'premium_yearly_shopify') {
+      // Shopify-paid user: ondersteuning via e-mail tot Shopify Customer Portal live is
       var mailto = 'mailto:info@doubleyousmallandtall.nl?subject=' +
         encodeURIComponent('Opzeggen Premium - ' + (emailNow || '')) +
         '&body=' + encodeURIComponent('Hoi, ik wil mijn Premium abonnement opzeggen.\nE-mail: ' + (emailNow || ''));
       manageBtns =
-        '<a class="dy-prem-btn ghost" href="' + mailto + '" data-testid="prem-mailto-cancel">Opzeggen via e-mail</a>' +
-        '<button class="dy-prem-btn danger" data-testid="prem-info-portal" onclick="alert(\'De Stripe Customer Portal wordt binnenkort beschikbaar. Voor nu kun je opzeggen via e-mail - verwerking binnen 24u.\')">Annuleren via Stripe (binnenkort)</button>';
+        '<a class="dy-prem-btn ghost" href="' + mailto + '" data-testid="prem-mailto-cancel">Opzeggen via e-mail</a>';
     } else if (plan === 'premium_admin') {
       manageBtns = '<p class="dy-prem-sub" style="margin:0">Deze toegang is verleend via admin-override. Beheer via Admin → Premium.</p>';
     } else {
@@ -437,10 +438,11 @@
         '<a class="dy-prem-btn ghost" href="mailto:info@doubleyousmallandtall.nl?subject=Premium%20account%20vraag">Contact support</a>';
     }
 
-    // Volgende factuur datum: alleen tonen voor Stripe-betalende users.
+    // Volgende factuur datum: alleen tonen voor abonnement-gebaseerde Premium-users.
     // De expires_at vertegenwoordigt het einde van de huidige periode,
     // wat tegelijk de eerstvolgende incasso-datum is.
-    var volgendeFactuur = (plan === 'premium_monthly') ? _formatDate(status && status.expires_at) : null;
+    var isShopifySub = (plan === 'premium_monthly' || plan === 'premium_monthly_shopify' || plan === 'premium_yearly_shopify');
+    var volgendeFactuur = isShopifySub ? _formatDate(status && status.expires_at) : null;
 
     body.innerHTML =
       '<p class="dy-prem-sub">Bedankt dat je Premium gebruikt. Hier zie je je status, vervaldatum en beheeropties.</p>' +
@@ -448,8 +450,8 @@
         '<dt>Status</dt><dd><span class="dy-prem-pill ' + pillClass + '">' + pillLabel + '</span></dd>' +
         '<dt>Plan</dt><dd>' + _esc(src || ' - ') + '</dd>' +
         (activated ? '<dt>Sinds</dt><dd>' + _esc(activated) + '</dd>' : '') +
-        (expires   ? '<dt>' + (plan === 'premium_monthly' ? 'Periode tot' : 'Vervalt op') + '</dt><dd>' + _esc(expires) + '</dd>' : '') +
-        (volgendeFactuur ? '<dt>Volgende factuur</dt><dd data-testid="prem-volgende-factuur">' + _esc(volgendeFactuur) + ' (€4,99 via Stripe)</dd>' : '') +
+        (expires   ? '<dt>' + (isShopifySub ? 'Periode tot' : 'Vervalt op') + '</dt><dd>' + _esc(expires) + '</dd>' : '') +
+        (volgendeFactuur ? '<dt>Volgende factuur</dt><dd data-testid="prem-volgende-factuur">' + _esc(volgendeFactuur) + ' (€4,99 via Shopify)</dd>' : '') +
         '<dt>Account</dt><dd>' + _esc(emailNow || ' - ') + '</dd>' +
       '</div>' +
       '<ul class="dy-prem-feat" data-testid="prem-feat-list">' +
@@ -635,7 +637,7 @@
   // ─── Init ────────────────────────────────────────────────────────
   function init() {
     injectStyles();
-    checkReturnFromStripe();
+    checkReturnFromShopify();
     injectIntoCardHub();
     injectIntoGarderobe();
   }
