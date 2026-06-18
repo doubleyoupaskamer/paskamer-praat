@@ -354,8 +354,17 @@
       align-items: center; justify-content: center;
       gap: 16px;
       transition: opacity 0.3s ease;
+      /* v60.1.114 ROOT-CAUSE FIX: garandeer dat spinner verdwijnt
+         na 6.5s via pure CSS, los van JS-state of route-reloads.
+         pointer-events: none vanaf 6s zodat klikken werken vóór JS-hide. */
+      animation: dy-loader-autohide 6.5s ease-in 0s 1 normal forwards;
     }
-    #dy-initial-loader.verborgen { opacity: 0; pointer-events: none; }
+    @keyframes dy-loader-autohide {
+      0%, 92% { opacity: 1; visibility: visible; pointer-events: auto; }
+      96%     { opacity: 0; visibility: visible; pointer-events: none; }
+      100%    { opacity: 0; visibility: hidden;  pointer-events: none; }
+    }
+    #dy-initial-loader.verborgen { opacity: 0; pointer-events: none; visibility: hidden; }
     .dy-init-logo {
       font-family: 'Cormorant Garamond', Georgia, serif;
       font-size: 3rem; font-weight: 700;
