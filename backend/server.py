@@ -458,11 +458,13 @@ async def premium_status(user_key: str, email: Optional[str] = None):
 
 @api_router.post("/billing/portal")
 async def billing_portal(user_key: str):
-    # Shopify Customer Portal is niet via API beschikbaar — verwijs naar e-mail.
-    raise HTTPException(
-        status_code=501,
-        detail="Abonnement-beheer wordt binnenkort beschikbaar. Stuur ons een mail voor opzegging.",
-    )
+    # Shopify Customer Account portal — zelfservice voor abonnement-beheer.
+    shop_domain = os.environ.get("SHOPIFY_SHOP_DOMAIN") or "doubleyousmallandtall.nl"
+    return {
+        "url": f"https://{shop_domain}/account",
+        "provider": "shopify",
+        "note": "Log in met het e-mailadres waarmee de Premium-aankoop is gedaan.",
+    }
 
 
 # ════════════════════════════════════════════════════════════════════════

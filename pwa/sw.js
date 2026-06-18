@@ -10,7 +10,7 @@
 // Strategie is bewust simpel + bestand-naam-gebaseerd zodat een nieuwe deploy
 // (nieuwe versioned filename) automatisch niet uit cache komt.
 
-const VERSION       = 'v60.1.120-20260618-shopify-only-stripe-removed';
+const VERSION       = 'v60.1.121-20260618-shopify-customer-portal';
 const STATIC_CACHE  = 'pp-static-' + VERSION;
 const RUNTIME_CACHE = 'pp-runtime-' + VERSION;
 const IMG_CACHE     = 'pp-images-' + VERSION;

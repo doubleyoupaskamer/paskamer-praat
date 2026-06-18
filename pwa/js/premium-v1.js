@@ -423,12 +423,21 @@
 
     var manageBtns = '';
     if (plan === 'premium_monthly' || plan === 'premium_monthly_shopify' || plan === 'premium_yearly_shopify') {
-      // Shopify-paid user: ondersteuning via e-mail tot Shopify Customer Portal live is
+      // Shopify Customer Account portal: zelfservice — bekijk bestellingen,
+      // beheer abonnement (Shopify Subscriptions UI) en betaalgegevens.
+      var shopAccount = 'https://doubleyousmallandtall.nl/account';
       var mailto = 'mailto:info@doubleyousmallandtall.nl?subject=' +
         encodeURIComponent('Opzeggen Premium - ' + (emailNow || '')) +
         '&body=' + encodeURIComponent('Hoi, ik wil mijn Premium abonnement opzeggen.\nE-mail: ' + (emailNow || ''));
       manageBtns =
-        '<a class="dy-prem-btn ghost" href="' + mailto + '" data-testid="prem-mailto-cancel">Opzeggen via e-mail</a>';
+        '<a class="dy-prem-btn primary" href="' + shopAccount + '" target="_blank" rel="noopener noreferrer" data-testid="prem-shopify-portal">' +
+          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:6px"><path d="M3 9l9-6 9 6v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' +
+          'Beheer abonnement bij Shopify' +
+        '</a>' +
+        '<a class="dy-prem-btn ghost" href="' + mailto + '" data-testid="prem-mailto-cancel">Opzeggen via e-mail</a>' +
+        '<p class="dy-prem-sub" style="margin:8px 0 0;font-size:13px;opacity:0.75">' +
+          'Log in met het e-mailadres waarmee je hebt afgerekend. Daar zie je je bestellingen en kun je je abonnement zelf opzeggen.' +
+        '</p>';
     } else if (plan === 'premium_admin') {
       manageBtns = '<p class="dy-prem-sub" style="margin:0">Deze toegang is verleend via admin-override. Beheer via Admin → Premium.</p>';
     } else {
