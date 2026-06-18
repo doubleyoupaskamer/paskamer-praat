@@ -7,6 +7,34 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.134 — Brand Pakket Auto-Credit + Roadmap (18 jun 2026)
+
+### Nieuwe module: `pp-brand-pkg-activate-v1.js`
+End-to-end flow van pakket-selectie naar wallet-activatie:
+
+**Stap 1 - Persist** (op `merken_pakketten`)
+- MutationObserver hookt elke pakket-CTA klik
+- Schrijft naar `users/{uid}.pending_pkg_selection = {id, name, amount}` (Firestore, overleeft sessions)
+- localStorage banner blijft werken voor anonieme bezoekers via `pp-route-safety-v1.js`
+
+**Stap 2 - Activate** (op `brand_dashboard` na approval)
+- Detecteert `pending_pkg_selection` automatisch
+- Toont prominent banner met gouden gradient: "🎉 Welkom bij Doubleyou — Activeer je [pakket-naam]"
+- Klik knop → Firestore atomic transaction:
+  - `wallet_balance: FieldValue.increment(amount)`
+  - Clear `pending_pkg_selection`
+  - Set `pkg_activated_at` + `pkg_activated_name` + `pkg_activated_amount`
+- Schrijft naar `admin_logs` (action: `brand_pkg_activated`)
+- Schrijft naar `payments` collection (type: `pkg_activate`, source: `brand_pkg_activate`)
+- 24h idempotency-window voorkomt dubbele activatie
+
+### Cache bumped → `v60.1.134-brand-pkg-activate`
+- `sw.js` VERSION → `v60.1.134-20260618-brand-pkg-activate`
+- `index.html` 22× `?v=` (+1 nieuw script)
+- ZIP: 3.8 MB, 3,963,730 bytes
+
+
+
 ## v60.1.133 — Route Safety + Pre-selected Pakket flow (18 jun 2026)
 
 ### Nieuwe module: `pp-route-safety-v1.js`
