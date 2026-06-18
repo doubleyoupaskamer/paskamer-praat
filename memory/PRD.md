@@ -6,6 +6,42 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+
+## v60.1.119 — B2C Klant Wallet + Mobile Profile Fix (18 jun 2026)
+
+### B2C Klant Wallet (gescheiden van B2B Merken Wallet)
+- **Frontend nieuw** (`/app/pwa/extensions/payments/pp-b2c-wallet-v1.js` v1.0.0):
+  - Nieuwe route `b2c_wallet` (apart van B2B `wallet`)
+  - Leest `users/{uid}.b2c_wallet_balance` (NIET `wallet_balance`)
+  - Default topup-bedragen: €5 / €10 / €25 / €50 (Variant-IDs leeg, te configureren)
+  - Override via Firestore: `admin_settings/global.b2c_shopify_config`
+  - Shopify cart-attributes met `b2c_wallet_topup_*` prefix voor server-side detectie
+  - Injecteert "Mijn Wallet" knop in profiel-menu (alle ingelogde users) — ná Merkenportaal-knop
+- **Backend** (`/app/backend/shopify_wallet.py`):
+  - Nieuwe `_credit_b2c_firestore()` functie schrijft naar `b2c_wallet_balance`
+  - Webhook detecteert `b2c_wallet_topup_uid` attribute en routeert naar B2C credit
+  - Idempotency via `shopify_order_id + wallet_type=b2c`
+  - Mongo audit log krijgt `wallet_type` veld ("b2c" of "b2b")
+- **Boost flow update**: `pp-boost-v1.js` `openTopup()` navigeert nu naar `b2c_wallet` i.p.v. `wallet`
+
+### Mobile Profile UI Overflow Fix
+- **CSS verbetering** (`/app/pwa/extensions/profile/pp-profile-mobile-fit-v1.js`):
+  - `.dy-profiel-acties` nu ALTIJD `flex-direction:column` (op alle viewports)
+  - Knoppen (Privacy / Voorwaarden / Merkenportaal / Mijn Wallet / Uitloggen) stacken
+    netjes vertikaal i.p.v. clippen door horizontale flex-row
+  - `width:100%`, `min-width:0`, `text-overflow:ellipsis` voor lange labels
+  - Extra padding `16px` alleen op mobiel (<= 720px)
+
+### Wachten op user
+- 4 Shopify Variant-IDs voor B2C top-up producten (€5/€10/€25/€50)
+- Eenmaal beschikbaar → invullen in `PP_B2C_TOPUPS.variants` in `pp-b2c-wallet-v1.js`
+
+### Cache bumped naar `v60.1.119-b2c-wallet-mobile-fit`
+- `sw.js` VERSION → `v60.1.119-20260618-b2c-wallet-mobile-fit`
+- index.html: alle relevante `?v=` strings ge-update
+- ZIP: `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.7 MB)
+
+
 ## v60.1.103 — Shopify Wallet + A-Z Reglement (14 feb 2026)
 
 ### Shopify Wallet Top-up flow

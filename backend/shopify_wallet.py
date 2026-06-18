@@ -167,6 +167,68 @@ def _credit_firestore(uid: str, amount_eur: float, order_id: str, order: dict) -
     return {"status": "credited", "payment_id": payment_id, "new_balance": new_balance}
 
 
+def _credit_b2c_firestore(uid: str, amount_eur: float, order_id: str, order: dict) -> dict:
+    """
+    Atomic credit naar Firestore voor B2C wallet (gescheiden van B2B merken-wallet).
+    Schrijft naar users/{uid}.b2c_wallet_balance i.p.v. wallet_balance.
+    Idempotent via payments.shopify_order_id.
+    """
+    db = _init_firebase()
+    if db is None:
+        raise RuntimeError(f"Firestore niet beschikbaar: {_fb_init_error}")
+    from firebase_admin import firestore as _fs
+
+    payments_ref = db.collection("payments")
+    user_ref = db.collection("users").document(uid)
+
+    # Idempotency: check op shopify_order_id + wallet_type=b2c
+    existing = list(payments_ref
+                    .where("shopify_order_id", "==", str(order_id))
+                    .where("wallet_type", "==", "b2c")
+                    .limit(1).stream())
+    if existing:
+        doc = existing[0].to_dict() or {}
+        return {
+            "status": "already_processed",
+            "payment_id": existing[0].id,
+            "new_balance": doc.get("b2c_wallet_balance_after"),
+        }
+
+    # Increment B2C balance atomically
+    user_ref.set(
+        {
+            "b2c_wallet_balance": _fs.Increment(amount_eur),
+            "b2c_wallet_currency": (order.get("currency") or "EUR"),
+            "b2c_wallet_last_updated": _iso_now(),
+        },
+        merge=True,
+    )
+
+    snap = user_ref.get()
+    new_balance = (snap.to_dict() or {}).get("b2c_wallet_balance", 0) if snap.exists else amount_eur
+
+    pay_doc = {
+        "uid": uid,
+        "type": "topup",
+        "wallet_type": "b2c",
+        "amount_cents": int(round(amount_eur * 100)),
+        "currency": order.get("currency", "EUR"),
+        "status": "completed",
+        "source": "shopify_b2c",
+        "shopify_order_id": str(order_id),
+        "shopify_order_name": order.get("name") or order.get("order_number"),
+        "shopify_customer_email": (order.get("customer") or {}).get("email"),
+        "b2c_wallet_balance_after": new_balance,
+        "created_at": _fs.SERVER_TIMESTAMP,
+        "updated_at": _fs.SERVER_TIMESTAMP,
+        "idempotency_key": f"b2c-order-{order_id}",
+    }
+    pay_ref = payments_ref.add(pay_doc)
+    payment_id = pay_ref[1].id if isinstance(pay_ref, tuple) else pay_ref.id
+
+    return {"status": "credited", "payment_id": payment_id, "new_balance": new_balance}
+
+
 # ══════════════════════════════════════════════════════════════════════
 # ENDPOINTS
 # ══════════════════════════════════════════════════════════════════════
@@ -311,6 +373,16 @@ async def shopify_webhook(request: Request,
     uid = attrs.get("wallet_topup_uid") or attrs.get("uid")
     amount_cents_raw = attrs.get("wallet_topup_amount_cents") or attrs.get("amount_cents")
 
+    # ── B2C WALLET TOPUP DETECTIE ──────────────────────────────────────
+    # B2C top-up gebruikt aparte attribute-namen om B2C en B2B strikt
+    # gescheiden te houden. Detecteer en bewaar voor latere routing.
+    b2c_uid = attrs.get("b2c_wallet_topup_uid")
+    b2c_amount_cents_raw = attrs.get("b2c_wallet_topup_amount_cents")
+    is_b2c_topup = bool(b2c_uid)
+    if is_b2c_topup:
+        uid = b2c_uid
+        amount_cents_raw = b2c_amount_cents_raw or amount_cents_raw
+
     # ── PREMIUM SUBSCRIPTION FLOW ──────────────────────────────────────
     # Cart-attributes: premium_user_key, premium_email, premium_plan='monthly'
     premium_user_key = attrs.get("premium_user_key")
@@ -399,7 +471,10 @@ async def shopify_webhook(request: Request,
     # Probeer Firestore credit. Anders → queue in Mongo.
     mongo_db = getattr(request.app.state, "mongo_db", None)
     try:
-        result = _credit_firestore(uid, amount_eur, str(order_id), order)
+        if is_b2c_topup:
+            result = _credit_b2c_firestore(uid, amount_eur, str(order_id), order)
+        else:
+            result = _credit_firestore(uid, amount_eur, str(order_id), order)
         # Log óók in Mongo voor audit
         if mongo_db is not None:
             try:
@@ -407,6 +482,7 @@ async def shopify_webhook(request: Request,
                     "order_id":   str(order_id),
                     "uid":        uid,
                     "amount_eur": amount_eur,
+                    "wallet_type": "b2c" if is_b2c_topup else "b2b",
                     "status":     result.get("status", "credited"),
                     "received_at": _iso_now(),
                 })

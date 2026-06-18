@@ -29,6 +29,15 @@
     '.dy-profiel-hero{box-sizing:border-box;max-width:100%;' +
       'padding-left:max(16px,env(safe-area-inset-left,16px));' +
       'padding-right:max(16px,env(safe-area-inset-right,16px))}' +
+    // Acties-blok onder de hero (privacy/voorwaarden/merkenportaal/wallet/logout):
+    // ALTIJD kolom-stacking zodat geïnjecteerde knoppen (brand-portal, b2c-wallet)
+    // niet meer clippen door horizontale flex-row layout. Wordt op alle viewports
+    // toegepast omdat de inhoud bedoeld is als verticaal menu.
+    '.dy-profiel-acties{max-width:100%;box-sizing:border-box;' +
+      'display:flex;flex-direction:column;gap:8px;align-items:stretch}' +
+    '.dy-profiel-acties > .dy-btn,' +
+    '.dy-profiel-acties > button{width:100%;min-width:0;box-sizing:border-box;' +
+      'white-space:normal;overflow:hidden;text-overflow:ellipsis}' +
     '@media (max-width:720px){' +
       // Naam-wrap: laat lange namen wrappen ipv overflowen
       '.dy-profiel-naam-wrap{max-width:100%;flex-wrap:wrap;justify-content:center}' +
@@ -52,8 +61,8 @@
       // Badges wrap (de scrollbare strip): forceer horizontal scroll ipv overflow
       '.dy-profiel-badges-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}' +
       '.dy-profiel-badges-wrap::-webkit-scrollbar{display:none}' +
-      // Acties-blok onder de hero (logout, etc.)
-      '.dy-profiel-acties{max-width:100%;box-sizing:border-box;padding-left:16px;padding-right:16px}' +
+      // Extra padding op mobiel
+      '.dy-profiel-acties{padding-left:16px;padding-right:16px}' +
       // PS dropdown panels (Volgend / Volgers)
       '.dy-ps-dd-wrap{max-width:100%;box-sizing:border-box}' +
       // Niveau badge: laat wrappen

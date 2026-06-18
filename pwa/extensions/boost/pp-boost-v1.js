@@ -153,11 +153,11 @@
   }
 
   function openTopup() {
-    // Navigeer naar B2C wallet topup (gebruikt bestaande pp-wallet pattern)
+    // Navigeer naar B2C wallet topup (gescheiden van B2B merken-wallet)
     closeModal();
     try {
-      if (window.DY && DY.navigeer) DY.navigeer('wallet');
-      else window.location.hash = '#wallet';
+      if (window.DY && DY.navigeer) DY.navigeer('b2c_wallet');
+      else window.location.hash = '#b2c_wallet';
     } catch(e){}
   }
 
