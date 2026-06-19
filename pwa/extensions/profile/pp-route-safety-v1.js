@@ -23,20 +23,55 @@
   if (window.PP_RouteSafety) return;
 
   // BEKENDE ROUTES (whitelist) - alle routes die in de app gebruikt worden
+  // v1.0.1 (2026-02-19): uitgebreid met alle ontbrekende canonieke routes
+  // uit pwa-v463 toonPagina renders-map. Voorheen vielen Top leden (leaderboard),
+  // Post vd Week (ovdw), Ontwerp (configurator), Modegenoten (vrienden),
+  // Winkel, Review, Lookbook etc. onbedoeld terug naar feed/home.
   var KNOWN_ROUTES = {
-    feed:1, home:1, login:1, registreer:1, wachtwoord_vergeten:1,
-    profiel:1, gebruiker:1, kleuren_ai:1, detail:1, challenge_detail:1,
-    challenges:1, mijn_garderobe:1, weekly_stylist:1, wat_te_dragen:1,
-    notificaties:1, gesprekken:1, gesprek_detail:1, instellingen:1,
-    voorwaarden:1, privacybeleid:1, privacy:1,
+    // Core
+    feed:1, home:1, login:1, register:1, registreer:1, wachtwoord_vergeten:1,
+    onboarding:1, beta_pagina:1, voorwaarden:1, privacy:1, privacybeleid:1,
+    privacy_center:1, community_regels:1, account_verwijder:1,
+
+    // Profiel / Gebruikers
+    profiel:1, profiel_bewerken:1, body_profile:1, gebruiker:1, instellingen:1,
+
+    // Sociale / Community
+    vrienden:1, vind_mensen:1, leaderboard:1, dsp:1,
+
+    // Content - Feed / Stories / Looks
+    detail:1, nieuw:1, deel:1, story_poster:1,
+    lookbook:1, lookbook_nieuw:1, lookbook_detail:1,
+    ovdw:1, paskamer:1,
+
+    // Reviews / Winkel
+    reviews:1, reviews_nieuw:1, winkel:1, bestellingen:1,
+
+    // Challenges
+    challenges:1, challenge_detail:1, mijn_garderobe:1, weekly_stylist:1,
+    wat_te_dragen:1,
+
+    // AI / Configurator
+    kleuren_ai:1, configurator:1,
+
+    // Berichten / Meldingen (beide namen voor backwards compat)
+    berichten:1, gesprekken:1, bericht_detail:1, gesprek_detail:1,
+    meldingen:1, notificaties:1,
+
+    // Wallet / Premium
     wallet:1, b2c_wallet:1, premium:1, premium_status:1, betaling_resultaat:1,
-    merken:1, merken_aanmelden:1, merken_dashboard:1, merken_login:1,
-    merken_producten:1, merken_campagnes:1, merken_pakketten:1, brand_pending:1,
-    admin_brands:1, admin_campagnes:1, admin_campagne_diagnose:1,
+
+    // Brand portal
+    merken:1, merken_overzicht:1, merken_aanmelden:1, merken_dashboard:1,
+    merken_login:1, merken_producten:1, merken_campagnes:1, merken_pakketten:1,
+    brand_portal:1, brand_pending:1, brand_dashboard:1,
+    brand_campagnes:1, brand_campagne_nieuw:1,
+
+    // Admin
+    admin:1, admin_brands:1, admin_campagnes:1, admin_campagne_diagnose:1,
     admin_inkomsten:1, admin_wallet:1, admin_payments:1, admin_placements:1,
     admin_premium:1, admin_dashboard:1, admin_b2c_packages:1,
-    admin_b2b_packages:1, admin_boost_products:1,
-    brand_dashboard:1
+    admin_b2b_packages:1, admin_boost_products:1
   };
 
   var SELECTED_PKG_KEY = 'dy_selected_pkg';
@@ -66,6 +101,37 @@
   }
 
   // ────────── CATCH-ALL ROUTE GUARD ──────────
+  // v1.0.1: aanvullende dynamische check via DY.render<X> functie.
+  // Als route niet in whitelist staat MAAR er bestaat een corresponderende
+  // render-functie, accepteer alsnog (voorkomt false-positive fallbacks
+  // bij toekomstige routes).
+  function snakeToCamel(s) {
+    return s.replace(/_([a-z])/g, function (_, c) { return c.toUpperCase(); });
+  }
+  function isKnownRoute(pagina) {
+    if (KNOWN_ROUTES[pagina]) return true;
+    try {
+      var camel = snakeToCamel(pagina);
+      var rname = 'render' + camel.charAt(0).toUpperCase() + camel.slice(1);
+      if (window.DY && typeof window.DY[rname] === 'function') return true;
+      // Extra alternatieve namen waar pwa-v463 ze gebruikt
+      var ALIASES = {
+        leaderboard: 'renderLeaderboard',
+        ovdw: 'renderOvdwFeed',
+        configurator: 'renderConfigurator',
+        reviews: 'renderReviewsOverzicht',
+        vrienden: 'renderVrienden',
+        winkel: 'renderWinkel',
+        lookbook: 'renderLookbook',
+        meldingen: 'renderMeldingen',
+        berichten: 'renderBerichten',
+        kleuren_ai: 'renderKleurenAI'
+      };
+      if (ALIASES[pagina] && typeof window.DY[ALIASES[pagina]] === 'function') return true;
+    } catch (_) {}
+    return false;
+  }
+
   function wrapNavigeer() {
     if (!window.DY || typeof window.DY.navigeer !== 'function') return;
     if (window.DY._pp_route_safety_wrapped) return;
@@ -73,7 +139,7 @@
     var orig = window.DY.navigeer;
     window.DY.navigeer = function (pagina) {
       try {
-        if (pagina && typeof pagina === 'string' && !KNOWN_ROUTES[pagina]) {
+        if (pagina && typeof pagina === 'string' && !isKnownRoute(pagina)) {
           try { console.warn('[RouteSafety] unknown route:', pagina, '→ fallback to feed'); } catch (_) {}
           var fb = (window.DY && DY.user) ? 'feed' : 'home';
           return orig.call(this, fb);
