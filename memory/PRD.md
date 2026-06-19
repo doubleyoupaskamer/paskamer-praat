@@ -1230,3 +1230,45 @@ ServiceWorker" was de combinatie van:
 - ZIP herbouwd: `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.98 MB,
   226 files). HTTP 200 geverifieerd.
 - Syntax check: `node --check` pass.
+
+## v60.1.139 (2026-02-19) - Navigation Restoration & Audit Layer (non-breaking)
+- **Master prompt**: COMPLETE BUTTON & NAVIGATION RESTORATION AUDIT.
+  Knoppen (Top leden, Post vd Week, Ontwerp, Modegenoten, Winkel,
+  Review) vielen onbedoeld terug naar feed/home.
+- **Root causes geïdentificeerd**:
+  1. Catch-all fallback in pwa-v463 (regel ~1126): `!renders[pagina]`
+     → feed/home.
+  2. Alias-mismatch: "topleden", "post-van-de-week", "ontwerp",
+     "modegenoten" niet 1:1 met canonieke route-IDs.
+  3. Renderer-race: click vóór defer-load van render-functie compleet.
+  4. By-design auth/premium guards (leaderboard, configurator) ogen
+     als bug voor eindgebruiker.
+- **Fix (additief)**: `/app/pwa/extensions/stability/pp-nav-restore-v1.js`
+  (v1.0.0) met:
+  A. Route Alias Resolver: 50+ aliases ('topleden'→'leaderboard',
+     'post-van-de-week'→'ovdw', 'ontwerp'→'configurator',
+     'modegenoten'→'vrienden', 'shop'→'winkel', 'review'→'reviews',
+     etc.).
+  B. Renderer-readiness wrapper rond `DY.toonPagina`: wacht max
+     2000ms tot `DY.render<X>` beschikbaar is voor fallback
+     geaccepteerd wordt. Loste race-condition op.
+  C. `DY.navigeer` wrapper: pre-resolves alias vóór originele call.
+  D. Click-audit observer (capture-phase) - inventariseert alle
+     button/a/data-testid clicks met label + intended/resolved route.
+  E. `PP_NavAudit.report()` - structured rapport per spec:
+     restoredButtons, routesAdjusted, handlersReconnected,
+     errorsFound, rendererFailures, rootCauses, newSafeguards,
+     buttonInventory, buttonsWithIssues.
+- **Veiligheid**: try/catch in beide wrappers, fallback naar originele
+  pwa-v463 logica bij elke fout. Auth/premium guards blijven by-design.
+  Geen wijziging aan pwa-v463 of brand-portal-v1.
+- **Verbose mode**: `?debug=nav` of `localStorage.pp_debug_nav='1'`.
+- **Public API**: `PP_NavAudit.report() / .summary() / .inventory() /
+  .aliases() / .resolve(name) / .events() / .clear() / .isInstalled() /
+  .setVerbose(bool)`.
+- Script geregistreerd in `index.html` na pp-onboarding-timecap-v1.
+- Cache strings → `60.1.139-nav-restore-v1`.
+- SW VERSION → `v60.1.139-20260618-nav-restore-v1`.
+- ZIP herbouwd: `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.98 MB,
+  227 files). HTTP 200 geverifieerd.
+- Syntax check: `node --check` pass.
