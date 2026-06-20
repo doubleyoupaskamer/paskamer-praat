@@ -109,7 +109,7 @@ class TestCORS:
         # If origin is wildcard '*', credentials must NOT be 'true'
         if allow_origin == "*":
             assert creds.lower() != "true", \
-                f"CORS spec violation: ACA-Credentials='true' with ACA-Origin='*'"
+                "CORS spec violation: ACA-Credentials='true' with ACA-Origin='*'"
         # If echoing back origin, credentials MAY be true (still spec-compliant)
         # but per the v60.1.35 fix with CORS_ORIGINS='*', we expect ACA-Origin='*' and creds!=true.
 

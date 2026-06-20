@@ -23,7 +23,8 @@ Firestore writes (alle via firebase-admin):
 from fastapi import APIRouter, HTTPException, Header, Depends, Request
 from typing import Optional
 from datetime import datetime, timezone, timedelta
-import os, logging
+import os
+import logging
 
 logger = logging.getLogger("boost")
 boost_router = APIRouter(prefix="/api/boost", tags=["boost"])
