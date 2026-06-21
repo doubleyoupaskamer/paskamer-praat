@@ -271,7 +271,7 @@
   //   1. ingelogde gebruikers (DY.user.uid bestaat)
   //   2. gebruikers met voldoende opgeslagen outfit-data (>= MIN_LOOKS)
   // Niet-ingelogde bezoekers krijgen NOOIT de "stijlbrief is er" popup.
-  var MIN_LOOKS = 3;
+  var MIN_LOOKS = 1;
   function isAuthed() {
     try {
       if (window.DY && DY.user && DY.user.uid) return true;
