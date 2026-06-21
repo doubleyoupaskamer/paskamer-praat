@@ -1,0 +1,94 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * Doubleyou - Unified Back Button Styling (v1.0.0)
+ * ═══════════════════════════════════════════════════════════════════════
+ * Geeft alle terugknoppen een consistente, ronde/pill-vorm en uniforme
+ * afmetingen zonder bestaande markup of klassen te wijzigen.
+ *
+ * Werkt op:
+ *   .dy-back-btn      - hoofdklasse (text + pijl)
+ *   .dy-sd-back       - story-detail (al rond)
+ *   .dy-chat-terug    - chat (al rond)
+ *
+ * Pure CSS-overrides via cascade. Geen JS, geen HTML changes.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Tekst-pijl variant → pill-shape, ronde rand, subtiel achtergrond */
+.dy-back-btn {
+  /* Behoud bestaande color/font, voeg ronde achtergrond toe */
+  background: rgba(245, 233, 216, 0.06) !important;
+  border: 1px solid rgba(245, 233, 216, 0.10) !important;
+  border-radius: 999px !important;
+  padding: 8px 16px !important;
+  min-height: 40px !important;
+  min-width: 40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: background 180ms ease, border-color 180ms ease, transform 120ms ease !important;
+}
+
+.dy-back-btn:hover,
+.dy-back-btn:focus-visible {
+  background: rgba(245, 233, 216, 0.12) !important;
+  border-color: rgba(245, 233, 216, 0.20) !important;
+  opacity: 1 !important;
+  outline: none !important;
+}
+
+.dy-back-btn:active {
+  transform: scale(0.97);
+}
+
+/* Story-detail ronde knop - uniforme afmetingen */
+.dy-sd-back {
+  min-width: 40px !important;
+  min-height: 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 180ms ease, transform 120ms ease !important;
+}
+
+.dy-sd-back:active {
+  transform: scale(0.95);
+}
+
+/* Chat-terug ronde knop - uniforme afmetingen */
+.dy-chat-terug {
+  min-width: 40px !important;
+  min-height: 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 180ms ease, transform 120ms ease !important;
+}
+
+.dy-chat-terug:active {
+  transform: scale(0.95);
+}
+
+/* Dubbele terugknop verbergen (door pp-back-dedupe-v1.js gemarkeerd) */
+[data-pp-back-dedup="1"] {
+  display: none !important;
+}
+
+/* Veiligheidsmarge: terugknoppen mogen niet onder safe-area op iOS vallen */
+.dy-back-btn,
+.dy-sd-back,
+.dy-chat-terug {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Focus ring voor toegankelijkheid (keyboard nav) */
+.dy-back-btn:focus-visible,
+.dy-sd-back:focus-visible,
+.dy-chat-terug:focus-visible {
+  box-shadow: 0 0 0 2px rgba(245, 233, 216, 0.35) !important;
+}
