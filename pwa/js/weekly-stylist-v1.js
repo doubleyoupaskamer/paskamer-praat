@@ -266,6 +266,71 @@
     return parts.join(', ') || 'Geen profiel ingesteld';
   }
 
+  // ── Auth + Outfit-data Guard (v1.1, 2026-02-19) ─────────────────
+  // Stijlbrief mag ALLEEN beschikbaar zijn voor:
+  //   1. ingelogde gebruikers (DY.user.uid bestaat)
+  //   2. gebruikers met voldoende opgeslagen outfit-data (>= MIN_LOOKS)
+  // Niet-ingelogde bezoekers krijgen NOOIT de "stijlbrief is er" popup.
+  var MIN_LOOKS = 3;
+  function isAuthed() {
+    try {
+      if (window.DY && DY.user && DY.user.uid) return true;
+      if (typeof firebase !== 'undefined' && firebase.auth &&
+          firebase.auth().currentUser && !firebase.auth().currentUser.isAnonymous) return true;
+    } catch (e) {}
+    return false;
+  }
+  function hasEnoughOutfits(uid) {
+    return new Promise(function(resolve) {
+      if (!uid) return resolve(false);
+      try {
+        if (typeof firebase === 'undefined' || !firebase.firestore) return resolve(false);
+        // Combineer twee bronnen: 'looks' en 'lookbook' (beide kunnen voorkomen)
+        var fs = firebase.firestore();
+        var p1 = fs.collection('looks').where('userId', '==', uid).limit(MIN_LOOKS).get()
+          .then(function(s){ return s.size; }).catch(function(){ return 0; });
+        var p2 = fs.collection('lookbook').where('userId', '==', uid).limit(MIN_LOOKS).get()
+          .then(function(s){ return s.size; }).catch(function(){ return 0; });
+        Promise.all([p1, p2]).then(function(counts){
+          var total = (counts[0] || 0) + (counts[1] || 0);
+          resolve(total >= MIN_LOOKS);
+        }).catch(function(){ resolve(false); });
+      } catch (e) { resolve(false); }
+    });
+  }
+  function passesGuards() {
+    return new Promise(function(resolve) {
+      if (!isAuthed()) {
+        logEvent('weekly_skipped_not_authed', {});
+        return resolve(false);
+      }
+      var uid = getUid();
+      hasEnoughOutfits(uid).then(function(enough) {
+        if (!enough) logEvent('weekly_skipped_insufficient_outfits', { uid: uid });
+        resolve(enough);
+      });
+    });
+  }
+  function clearStaleCache() {
+    // Verwijder banner + modal uit DOM (na logout/account-switch)
+    try {
+      var b = document.getElementById(BANNER_ID); if (b) b.remove();
+      var m = document.getElementById(MODAL_ID);  if (m) m.remove();
+    } catch (e) {}
+  }
+  // Reset cache + DOM bij auth-state change (logout, account switch)
+  try {
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (!user || user.isAnonymous) {
+          clearStaleCache();
+          // Wis SEEN-marker zodat na re-login opnieuw guards draaien
+          try { localStorage.removeItem(SEEN_KEY); } catch (e) {}
+        }
+      });
+    }
+  } catch (e) {}
+
   // ── Init ──
   function init() {
     var week = currentWeek();
@@ -277,9 +342,14 @@
         : Promise.resolve(true);
       Promise.resolve(p).then(function(ok) {
         if (!ok) { logEvent('weekly_skipped_backend_offline', { week: week }); return; }
-        showBanner(week);
+        // v1.1 GUARD: alleen tonen voor ingelogde users met >= 3 opgeslagen outfits
+        passesGuards().then(function(allowed) {
+          if (!allowed) return;
+          showBanner(week);
+        });
       });
     }
+    // Geef auth-state tijd om te initialiseren (Firebase persist + token refresh)
     setTimeout(maybeShow, 4000);
   }
 
@@ -292,7 +362,16 @@
   // Public API - voor handmatige trigger uit hub-menu
   window.DY = window.DY || {};
   window.DY.weeklyStylist = {
-    open:  function() { openModal(currentWeek()); },
+    open:  function() {
+      // v1.1 GUARD: ook handmatige triggers respecteren auth + outfit-data
+      passesGuards().then(function(allowed) {
+        if (!allowed) {
+          try { console.warn('[weekly-stylist] open() geblokkeerd: guards niet pass'); } catch (e) {}
+          return;
+        }
+        openModal(currentWeek());
+      });
+    },
     close: closeModal,
     week:  currentWeek,
     clear: function() {
