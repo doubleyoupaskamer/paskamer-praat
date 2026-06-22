@@ -151,6 +151,18 @@
       '</div>';
     document.body.appendChild(ov);
     document.body.style.overflow = 'hidden';
+
+    // v1.1: vooraf fineprint vullen met lokale data zodat
+    // "undefined" nooit zichtbaar is tijdens loading.
+    try {
+      var preMetaEl = ov.querySelector('[data-meta]');
+      if (preMetaEl) {
+        var preSaved = getSaved().length;
+        preMetaEl.textContent = 'Week ' + isoWeek() +
+          ' · gebaseerd op ' + preSaved + ' opgeslagen look' + (preSaved === 1 ? '' : 's');
+      }
+    } catch (e) {}
+
     ov.addEventListener('click', function (e) {
       if (e.target.getAttribute('data-close') === '1') closeModal();
     });
@@ -192,9 +204,15 @@
           '</article>';
       }).join('');
 
-      var meta = 'Week ' + d.week + ' · gebaseerd op ' + d.based_on_saved + ' opgeslagen look' + (d.based_on_saved === 1 ? '' : 's');
-      if (!d.is_premium) meta += ' · nog ' + d.remaining_free_uses + ' gratis gebruik(en)';
-      else meta += ' · Premium ✓';
+      // v1.1 FIX: fallback-waarden voorkomen "undefined" in UI
+      var weekStr = d.week || isoWeek();
+      var savedCount = (typeof d.based_on_saved === 'number') ? d.based_on_saved : getSaved().length;
+      var meta = 'Week ' + weekStr + ' · gebaseerd op ' + savedCount + ' opgeslagen look' + (savedCount === 1 ? '' : 's');
+      if (d.is_premium === true) {
+        meta += ' · Premium ✓';
+      } else if (typeof d.remaining_free_uses === 'number') {
+        meta += ' · nog ' + d.remaining_free_uses + ' gratis gebruik(en)';
+      }
       metaEl.textContent = meta;
 
       // Markeer week als verbruikt
