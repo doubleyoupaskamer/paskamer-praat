@@ -28,11 +28,28 @@
     try { return (window.DY && window.DY.aiHealth && window.DY.aiHealth.apiBase()) || ''; } catch (e) { return ''; }
   }
 
+  // ─── Auth-guard (v1.1 fix, 2026-02-21) ───────────────────────────
+  // "Wat draag je deze week?" mag ALLEEN voor ingelogde gebruikers.
+  // Geen anonymous, geen gast. Voorkomt "Netwerkfout" bij backend
+  // rejection van anon user_key + voorkomt popup voor gasten.
+  function isAuthed() {
+    try {
+      if (window.DY && DY.user && DY.user.uid) return true;
+      if (typeof firebase !== 'undefined' && firebase.auth &&
+          firebase.auth().currentUser && !firebase.auth().currentUser.isAnonymous) return true;
+    } catch (e) {}
+    return false;
+  }
+
   function getUserKey() {
     if (window.DY && window.DY.premium && window.DY.premium.getUserKey) {
       try { return window.DY.premium.getUserKey(); } catch (e) {}
     }
-    try { return localStorage.getItem('dy_premium_userkey') || 'anon'; } catch (e) { return 'anon'; }
+    // v1.1: GEEN 'anon' fallback meer. Returns null als geen geldige key.
+    try {
+      var k = localStorage.getItem('dy_premium_userkey');
+      return (k && k !== 'anon') ? k : null;
+    } catch (e) { return null; }
   }
 
   function getSaved() {
@@ -63,6 +80,14 @@
 
   // ─── API call ────────────────────────────────────────────────────
   async function fetchRecommendation() {
+    // v1.1 GUARD: alleen ingelogde gebruikers
+    if (!isAuthed()) {
+      return { error: 'not_authed', message: 'Log in om je persoonlijk advies te zien.' };
+    }
+    var uk = getUserKey();
+    if (!uk) {
+      return { error: 'no_user_key', message: 'Account niet gevonden, herlaad de pagina.' };
+    }
     var saved = getSaved();
     if (!saved.length) {
       return { error: 'no_saved', message: 'Bewaar eerst 1 of meer looks via het kaart-menu.' };
@@ -75,7 +100,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_key: getUserKey(),
+          user_key: uk,
           saved_items: saved.slice(0, 30),
           recent_scores: getRecentScores().slice(0, 5),
           weather: weatherHint(),
@@ -87,12 +112,21 @@
       try { localStorage.setItem(LS_LAST_SUGGEST, JSON.stringify({ ts: Date.now(), data: d })); } catch (e) {}
       return { ok: true, data: d };
     } catch (e) {
-      return { error: 'network', message: 'Netwerkfout' };
+      return { error: 'network', message: 'Tijdelijke netwerkfout, probeer over enkele seconden opnieuw.' };
     }
   }
 
   // ─── Modal renderer ─────────────────────────────────────────────
   function openModal() {
+    // v1.1 GUARD: alleen ingelogde gebruikers
+    if (!isAuthed()) {
+      try { console.warn('[wardrobe-rec] open() geblokkeerd: niet ingelogd'); } catch (e) {}
+      // Trigger bestaande login-prompt indien beschikbaar (geen nieuwe UI)
+      if (window.DY && typeof DY.toonLoginPrompt === 'function') {
+        DY.toonLoginPrompt('Log in om je persoonlijke wekelijkse advies te zien.');
+      }
+      return;
+    }
     if (document.getElementById('dy-wardrobe-rec-modal')) return;
     var ov = document.createElement('div');
     ov.id = 'dy-wardrobe-rec-modal';
@@ -180,16 +214,21 @@
     });
   }
 
-  // ─── Auto Sunday trigger ────────────────────────────────────────
+  // ─── Auto Monday trigger (v1.1 fix: maandag 00:01-23:59, was zondag 17:00) ─
   function maybeAutoTrigger() {
     try {
+      // v1.1 GUARD: alleen voor ingelogde gebruikers
+      if (!isAuthed()) return;
       var now = new Date();
-      var dow = now.getDay(); // 0 = zondag
+      var dow = now.getDay(); // 1 = maandag
       var hour = now.getHours();
-      if (dow !== 0 || hour < 17) return; // alleen zondag na 17:00
+      var minute = now.getMinutes();
+      // Maandag vanaf 00:01 (rest van de dag) - aansluitend op weekly_winner cron
+      if (dow !== 1) return;
+      if (hour === 0 && minute < 1) return;
       var lastWeek = localStorage.getItem(LS_LAST_WEEK) || '';
       if (lastWeek === isoWeek()) return; // al deze week getoond
-      if (getSaved().length < 3) return; // niet genoeg context
+      if (getSaved().length < 1) return; // v1.1: min 1 saved item (was 3)
       showAutoBanner();
     } catch (e) {}
   }
@@ -232,6 +271,8 @@
       var body = ov.querySelector('[data-body]');
       var header = ov.querySelector('header');
       if (!header || !body) return;
+      // v1.1 GUARD: alleen voor ingelogde gebruikers
+      if (!isAuthed()) return;
       if (getSaved().length < 1) return;
       var btn = document.createElement('button');
       btn.type = 'button';
@@ -328,6 +369,20 @@
     injectGarderobeButton();
     // Wacht 6s om geen first-paint te blokkeren, dan auto-check
     setTimeout(maybeAutoTrigger, 6000);
+
+    // v1.1: bij logout, banner + modal verwijderen + cache wissen
+    try {
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().onAuthStateChanged(function (user) {
+          if (!user || user.isAnonymous) {
+            dismissBanner();
+            closeModal();
+            try { localStorage.removeItem(LS_LAST_WEEK); } catch (e) {}
+            try { localStorage.removeItem(LS_LAST_SUGGEST); } catch (e) {}
+          }
+        });
+      }
+    } catch (e) {}
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
