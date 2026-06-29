@@ -10,7 +10,7 @@
 // Strategie is bewust simpel + bestand-naam-gebaseerd zodat een nieuwe deploy
 // (nieuwe versioned filename) automatisch niet uit cache komt.
 
-const VERSION       = 'v60.1.159-20260623-direct-render-bypass';
+const VERSION       = 'v60.1.160-20260623-prod-img-contain';
 const STATIC_CACHE  = 'pp-static-' + VERSION;
 const RUNTIME_CACHE = 'pp-runtime-' + VERSION;
 const IMG_CACHE     = 'pp-images-' + VERSION;

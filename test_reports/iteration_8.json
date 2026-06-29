@@ -1,0 +1,32 @@
+{
+  "summary": "v60.1.160 product-image ratio/fit fix audited and verified. The pp-feedtabs-v1.js .pp-uitg-prod-img CSS now uses aspect-ratio:3/4 + object-fit:contain (portrait+letterbox) to display full-body fashion photos in proportion without head/feet cropping. All static audits, ZIP audits, cache-version bumps, and DOM-regression checks pass. Pytest suite grew from 91 → 100 assertions (added TestUitgelichtProductImageRatio with 9 tests, bumped TestCacheVersion + TestDeployZip cache-version assertions to v60.1.160). All 100 tests PASS. Backend /api/downloads/01-paskamerpraat-pwa-cloudflare.zip returns 200 OK application/zip 4,021,765 bytes (≈3.83MB, within 3–5MB). ZIP MD5 = f0507630e821affe32d958f8ef2192b5 (matches expected). ZIP-internal pp-feedtabs-v1.js confirmed: aspect-ratio:3/4 ×1, aspect-ratio:1/1 ×0, object-fit:contain ×1, object-fit:cover ×0. sw.js VERSION = 'v60.1.160-20260623-prod-img-contain' inside zip. index.html script tag carries v=60.1.160-prod-img-contain for pp-feedtabs-v1.js. No regressions in wallet/onboarding/popup code.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/iteration_8_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Fix scope is minimal and correct: 2 CSS string lines in pp-feedtabs-v1.js (lines 103-104). No JS/HTML/DOM changes. paintProductenOverview output unchanged.",
+    "object-fit:contain + neutral #0f0c08 background is the right call for fashion photography — letterbox bars blend invisibly with the dark theme. display:flex + align/justify center keep the contained image properly positioned.",
+    "Note (non-blocking): a 3/4 portrait aspect-ratio still forces a fixed box; if a brand uploads a 16/9 landscape or 1/1 square product image, it will be letterboxed horizontally. This is acceptable given fashion photography is dominantly portrait, and the letterbox is invisible against the dark theme. Optional future enhancement: dynamic aspect-ratio per image, but NOT required and explicitly out-of-scope per user 'geen andere wijzigingen'."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py (bumped cache version assertions 159→160, added FEEDTABS_FILE path, added TestUitgelichtProductImageRatio class with 9 tests)"
+  ],
+  "success_rate": {
+    "backend": "100% (100/100 pytest)",
+    "frontend": "n/a — PWA deployed externally to Cloudflare Pages, UI testing intentionally skipped per request"
+  },
+  "test_credentials": "n/a",
+  "seed_data_creation": "n/a",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Canonical pytest suite is /app/backend/tests/test_pwa_wallet_segmentation.py — now 100 assertions across TestB2BWallet, TestB2CWallet, TestIsolation, TestRouteSafety, TestOnboarding, TestCacheVersion (v60.1.160), TestDeployZip (v60.1.160), TestDownloadEndpoint, TestComingSoonInterceptRestored (v60.1.156), TestMerkenCampagneLayout (v60.1.157), TestMerkenLandingUnchanged, TestAmountSegregationStillIntact, TestBrandDashWalletCardHardened (v60.1.158), TestDirectRenderBypassOpenWallet (v60.1.159, PP_Wallet.openWallet), TestUitgelichtProductImageRatio (v60.1.160, NEW). When bumping iteration, update both TestCacheVersion assertions AND TestDeployZip::test_zip_contains_v60_1_XXX_sw to the new version. ZIP MD5 for v60.1.160 = f0507630e821affe32d958f8ef2192b5. Path constant FEEDTABS_FILE = /app/pwa/extensions/placements/pp-feedtabs-v1.js.",
+  "rca of the issue": "User report (Dutch): partner-product images on the Uitgelicht page were cropped at head/feet. RCA: the .pp-uitg-prod-img container in pp-feedtabs-v1.js was styled with aspect-ratio:1/1 (square box) and the inner <img> with object-fit:cover (fill box, crop overflow). Fashion photography is dominantly portrait (taller than wide), so a square box with cover forced cropping at top/bottom — exactly the head/feet cut-off the user observed. Mitigation (v60.1.160): switched container to aspect-ratio:3/4 (portrait orientation matching fashion photo proportions) and inner img to object-fit:contain (full image fits inside the box; sides are letterboxed with the neutral #0f0c08 background which blends invisibly with the dark theme). Reproduction is purely visual on the Cloudflare-deployed PWA; this audit verifies the source files + deploy bundle now contain the corrected CSS strings. Zero JS/HTML/DOM/logic changes — single-file, two-CSS-string-line fix."
+}

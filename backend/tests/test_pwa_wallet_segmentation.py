@@ -42,6 +42,8 @@ ONBOARDING = PWA / "extensions/profile/pp-brand-onboarding-checklist-v1.js"
 SW_FILE = PWA / "sw.js"
 INDEX_HTML = PWA / "index.html"
 ZIP_FILE = Path("/app/01-paskamerpraat-pwa-cloudflare.zip")
+# v60.1.160: Uitgelicht product-image ratio fix
+FEEDTABS_FILE = PWA / "extensions/placements/pp-feedtabs-v1.js"
 
 
 # ───────────────── Static audit: B2B wallet ─────────────────
@@ -217,13 +219,15 @@ class TestCacheVersion:
         # payments modules (b2c wallet, comingsoon, modal-router, isolation)
         # may still carry v60.1.156-restore-coming-soon-popup because their
         # source files were not modified in v60.1.157.
-        # v60.1.159: pp-wallet-v1.js script tag carries the new direct-render-bypass cache key
+        # v60.1.160: pp-feedtabs-v1.js script tag carries the new prod-img-contain cache key
+        # pp-wallet-v1.js script tag still carries v60.1.159 cache key (untouched in v60.1.160)
         assert "pp-wallet-v1.js?v=60.1.159-direct-render-bypass" in src
+        assert "pp-feedtabs-v1.js?v=60.1.160-prod-img-contain" in src
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
-        assert "VERSION       = 'v60.1.159-20260623-direct-render-bypass'" in src or \
-               "VERSION = 'v60.1.159-20260623-direct-render-bypass'" in src
+        assert "VERSION       = 'v60.1.160-20260623-prod-img-contain'" in src or \
+               "VERSION = 'v60.1.160-20260623-prod-img-contain'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
@@ -234,11 +238,11 @@ class TestDeployZip:
         assert 3 * 1024 * 1024 < size < 5 * 1024 * 1024, \
             f"zip should be between 3MB and 5MB, got {size} bytes"
 
-    def test_zip_contains_v60_1_159_sw(self):
+    def test_zip_contains_v60_1_160_sw(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "v60.1.159-20260623-direct-render-bypass" in content
+        assert "v60.1.160-20260623-prod-img-contain" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -994,3 +998,96 @@ class TestDirectRenderBypassOpenWallet:
         assert "pp-b2c-wallet-v1.js?v=60.1.159" not in src, (
             "Only pp-wallet was touched in v60.1.159; pp-b2c-wallet must not be re-cached"
         )
+
+
+# ───────── v60.1.160: UITGELICHT PRODUCT-IMAGE RATIO/FIT FIX ─────────
+class TestUitgelichtProductImageRatio:
+    """v60.1.160 user-reported bug fix (Dutch):
+    'de afbeeldingen op de uitgelicht pagina worden afgesneden, zorg dat de
+    afbeeldingen altijd volledig en in verhouding worden weergegeven'.
+
+    The .pp-uitg-prod-img container previously used aspect-ratio:1/1 with
+    object-fit:cover, which cropped portrait fashion photos at head/feet.
+    Fix: change container to aspect-ratio:3/4 (portrait) and the inner
+    <img> to object-fit:contain (full image letterboxed if needed). The
+    neutral #0f0c08 background blends with the dark theme so letterbox
+    bars are invisible. Only the two CSS string lines changed; the HTML
+    output of paintProductenOverview is IDENTICAL.
+    """
+
+    def test_aspect_ratio_3_4_exactly_once(self):
+        src = FEEDTABS_FILE.read_text()
+        # exactly one occurrence of the new portrait aspect-ratio
+        assert src.count("aspect-ratio:3/4") == 1, (
+            "pp-feedtabs-v1.js must contain `aspect-ratio:3/4` exactly once"
+        )
+
+    def test_no_legacy_aspect_ratio_1_1(self):
+        src = FEEDTABS_FILE.read_text()
+        assert "aspect-ratio:1/1" not in src, (
+            "v60.1.160: legacy `aspect-ratio:1/1` must be fully removed"
+        )
+
+    def test_object_fit_contain_exactly_once(self):
+        src = FEEDTABS_FILE.read_text()
+        assert src.count("object-fit:contain") == 1, (
+            "pp-feedtabs-v1.js must contain `object-fit:contain` exactly once"
+        )
+
+    def test_no_legacy_object_fit_cover(self):
+        src = FEEDTABS_FILE.read_text()
+        assert "object-fit:cover" not in src, (
+            "v60.1.160: legacy `object-fit:cover` must be fully removed"
+        )
+
+    def test_container_css_full_contract(self):
+        """The container must still be display:flex centered with the
+        neutral letterbox background and overflow:hidden + position:relative."""
+        src = FEEDTABS_FILE.read_text()
+        # Locate the .pp-uitg-prod-img selector block (NOT the inner img rule)
+        m = re.search(r"\.pp-uitg-prod-img\{([^}]+)\}", src)
+        assert m, "pp-uitg-prod-img CSS block must exist"
+        block = m.group(1)
+        assert "aspect-ratio:3/4" in block
+        assert "background:#0f0c08" in block
+        assert "display:flex" in block
+        assert "align-items:center" in block
+        assert "justify-content:center" in block
+        assert "overflow:hidden" in block
+        assert "position:relative" in block
+
+    def test_img_css_contract(self):
+        src = FEEDTABS_FILE.read_text()
+        m = re.search(r"\.pp-uitg-prod-img img\{([^}]+)\}", src)
+        assert m, "pp-uitg-prod-img img CSS block must exist"
+        block = m.group(1)
+        assert "width:100%" in block
+        assert "height:100%" in block
+        assert "object-fit:contain" in block
+        assert "display:block" in block
+
+    def test_index_html_carries_new_cache_version(self):
+        src = INDEX_HTML.read_text()
+        assert "pp-feedtabs-v1.js?v=60.1.160-prod-img-contain" in src, (
+            "index.html must carry v=60.1.160-prod-img-contain for pp-feedtabs-v1.js"
+        )
+
+    def test_paint_product_html_dom_structure_unchanged(self):
+        """Regression: HTML produced by paintProductenOverview must still wrap
+        .pp-uitg-prod-img + .pp-uitg-prod-body inside .pp-uitg-prod-kaart."""
+        src = FEEDTABS_FILE.read_text()
+        assert '<a class="pp-uitg-prod-kaart"' in src
+        assert '<div class="pp-uitg-prod-img">' in src
+        assert '<div class="pp-uitg-prod-body">' in src
+        # noimg fallback still present
+        assert "pp-uitg-prod-noimg" in src
+
+    def test_zip_contains_v60_1_160_feedtabs_css(self):
+        """The Cloudflare deploy zip must contain the corrected pp-feedtabs-v1.js."""
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("extensions/placements/pp-feedtabs-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert content.count("aspect-ratio:3/4") == 1
+        assert "aspect-ratio:1/1" not in content
+        assert content.count("object-fit:contain") == 1
+        assert "object-fit:cover" not in content

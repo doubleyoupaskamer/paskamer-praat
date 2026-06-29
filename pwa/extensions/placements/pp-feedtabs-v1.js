@@ -100,8 +100,8 @@
       '@media(min-width:1400px){.pp-uitg-feed-grid{grid-template-columns:repeat(5,1fr)}}' +
       '.pp-uitg-prod-kaart{display:flex;flex-direction:column;background:rgba(255,255,255,.03);border:1px solid rgba(252,248,239,.08);border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;transition:transform .15s ease,border-color .15s ease;cursor:pointer;-webkit-tap-highlight-color:transparent}' +
       '.pp-uitg-prod-kaart:hover,.pp-uitg-prod-kaart:focus-visible{transform:translateY(-2px);border-color:rgba(212,145,10,.4);outline:none}' +
-      '.pp-uitg-prod-img{aspect-ratio:1/1;background:#0f0c08;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}' +
-      '.pp-uitg-prod-img img{width:100%;height:100%;object-fit:cover;display:block}' +
+      '.pp-uitg-prod-img{aspect-ratio:3/4;background:#0f0c08;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}' +
+      '.pp-uitg-prod-img img{width:100%;height:100%;object-fit:contain;display:block}' +
       '.pp-uitg-prod-noimg{font-size:32px;color:rgba(252,248,239,.3);background:linear-gradient(135deg,rgba(212,145,10,.06),rgba(255,255,255,.02))}' +
       '.pp-uitg-prod-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px}' +
       '.pp-uitg-prod-brand{font:600 .68rem/1 "DM Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#d4910a;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
