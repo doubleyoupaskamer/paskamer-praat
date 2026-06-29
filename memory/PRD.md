@@ -6,6 +6,27 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.171 — Gesponsorde Product-afbeeldingen in Feed (29 jun 2026)
+
+### Probleem (gebruiker)
+"Alleen de product afbeeldingen moeten meedraaien in de feed als daarvoor betaald is net als een normale feedpost." Geen header-strip, gewoon mee in de scroll-flow.
+
+### Fix (nieuwe additieve module, géén legacy raakvlak)
+- **`/app/pwa/extensions/placements/pp-sponsored-products-v1.js` v1.0.0**:
+  - Subscribe op `campaigns` waar `status='live'` + `plaatsingen` bevat `'feed'`. Verzamelt unieke `brandId`s. `startDatum` strikt; `eindDatum` soft (status-supreme conform v60.1.169).
+  - Per merk: load max 5 `brand_products` waar `status='actief'` met afbeelding. Shuffle resultaat voor variatie. TTL-cache 5 min.
+  - Bouwt kaarten met EXACT dezelfde `.dy-reel-item` DOM-structuur als `DY.verhaalKaart()` (blurred bg + scherpe contain-img, dy-reel-content layout, dy-reel-meer CTA). Zo werken snap-scroll, IntersectionObservers (signalen), en alle CSS 1:1 mee.
+  - Markering: `.pp-sponsored-product` class + kleine "Gesponsord" pil-badge naast merknaam. Actiebar (like/comment) is verborgen voor sponsored items.
+  - MutationObserver telt organische items in `#dy-verhalen` en injecteert na elke 5e organisch item een sponsored card (cyclisch door queue). Anchors gemarkeerd met `data-sp-anchor="1"` om dubbele injectie te voorkomen.
+  - Brand-logo hydration via `PP_NavContext.brandLogoFor()`. Klik op kaart of CTA → opent product-URL (extern target=_blank) en logt `events`-record met `subtype='sponsored_product'` voor billing.
+  - Alleen actief op `pagina === 'feed'` of `'home'`.
+
+### Delivery
+- `index.html` cache → `?v=60.1.171-sponsored-feed`
+- `sw.js` VERSION → `v60.1.171-20260629-sponsored-feed`
+- Zip md5 `ab23f5809ac7f2c8bd04858dd515c56b`
+
+
 ## v60.1.169 — Paid Campaign Render Fix (29 jun 2026)
 
 ### Probleem (gebruiker, diagnose-screenshot)
