@@ -6,6 +6,29 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.165 — Phase B: Merken Discoverability (23 feb 2026)
+
+### Probleem (gebruiker)
+1. Uitgelicht-pagina mist "Ontdek merken die speciaal voor de Tall & Plus Size community ontworpen zijn" intro + 0-9 A-Z chooser
+2. Merken-pagina heeft geen ← terug knop / fallback
+
+### Fix (nieuwe additieve module, geen wijziging aan legacy)
+- **`pp-merken-discoverability-v1.js` v1.0.0**:
+  - `injectUitgelichtTeaser()` — MutationObserver injecteert `#pp-merken-teaser-uitg` BEFORE `.pp-uitg-feed-grid` met intro-tekst + 27-button A-Z chooser (0-9, A-Z). Klik → `gotoMerken(letter)` → `PP_NavContext.openMerken()` + sessionStorage `pp-merken-az-prefill=<letter>` voor toekomstige filter-consumptie.
+  - `injectMerkenBackBtn()` — alleen op `DY.pagina === 'merken'`, plaatst `#pp-merken-back-btn` BEFORE `.bp-header`. Klik → `backFromMerken()` → `history.back()` met `DY.navigeer('feed')` als safe fallback.
+  - CSS-injection (eenmalig, `<style id="pp-merken-disc-css">`) voor subtiele goud-gradient teaser + pil-style back-knop.
+  - Idempotency via `window.__ppMerkenDiscInit`.
+
+### Testing
+- **204/204 pytest assertions PASS** (164 → 204, +40 nieuwe TestMerkenDiscoverability + TestPhaseBRegressionUnchanged + TestMerkenDiscZip).
+- Backend `/api/downloads/...` → 200 OK.
+
+### Delivery (Phase B)
+- `index.html` link toegevoegd `?v=60.1.165-merken-disc`
+- `sw.js` VERSION → `v60.1.165-20260623-merken-disc`
+- Zip md5 `34540873dab708c0a2cede432105e9c6`
+
+
 ## v60.1.164 — Phase A: Nav-Context + Brand-Logo Universalizer (23 feb 2026)
 
 ### Probleem (gebruiker master prompt)
