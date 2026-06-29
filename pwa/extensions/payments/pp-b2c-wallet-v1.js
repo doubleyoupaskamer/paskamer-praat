@@ -318,13 +318,34 @@
   }
 
   // ── TOPUP ──────────────────────────────────────────────────────────
-  // v1.2.0 (2026-02-23): COMING-SOON INTERCEPT VERWIJDERD.
-  // Spiegelt de fix in pp-wallet-v1.js v1.4.0. De B2C Shopify topup-
-  // pakketten (€5/€10/€15/€25/€50) zijn live met valide variant-IDs.
-  // PP_B2CWallet.topup(amount) routeert nu direct naar de B2C Shopify
-  // checkout met `b2c_wallet_topup_*` note-attributes, zodat de webhook
-  // de juiste `b2c_wallet_balance` credit (NIET wallet_balance).
+  // v1.3.0 (2026-02-23): COMING-SOON POPUP HERSTELD met B2C CONTEXT EYEBROW.
+  // Spiegel van pp-wallet-v1.js v1.5.0. Source 'b2c' wordt expliciet
+  // meegegeven zodat de popup visueel labelt als consumenten-context.
   async function topup(amount) {
+    try {
+      if (window.PP_TopupComingSoon && PP_TopupComingSoon.show) {
+        // Defense-in-depth amount-guard
+        if (!B2C_ALLOWED_AMOUNTS[Number(amount)]) {
+          toast('Ongeldig bedrag voor klant-wallet. Kies €5, €10, €15, €25 of €50.', true);
+          try { console.warn('[b2c-wallet] B2C blocked invalid amount:', amount); } catch (_) {}
+          return;
+        }
+        var pkgName = null;
+        try {
+          var defaults = PP_B2C_PACKAGES_DEFAULT.filter(function (p) {
+            return p && p.amount === Number(amount);
+          });
+          if (defaults.length) pkgName = defaults[0].name;
+        } catch (_) {}
+        PP_TopupComingSoon.show({
+          naam: pkgName || ('Mijn Wallet €' + amount),
+          prijs: Number(amount),
+          source: 'b2c'
+        });
+        return;
+      }
+    } catch (e) { /* fallthrough naar bestaande flow */ }
+
     try {
       var u = uid();
       if (!u) { toast('Log eerst in', true); return; }
@@ -530,6 +551,6 @@
     refresh:      refresh,
     switchTab:    switchTab,
     B2C_ALLOWED_AMOUNTS: B2C_ALLOWED_AMOUNTS,
-    VERSION:      '1.2.0'
+    VERSION:      '1.3.0'
   };
 })();

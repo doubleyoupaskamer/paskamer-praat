@@ -50,6 +50,18 @@
         'display:flex;align-items:center;justify-content:center;margin:0 auto 14px;' +
         'box-shadow:0 6px 20px rgba(212,145,10,0.3)}' +
       '.pp-topup-cs-icon svg{width:28px;height:28px;color:#0a0806}' +
+      // v1.1.0: Source-eyebrow (B2B vs B2C context-isolatie)
+      '.pp-topup-cs-eyebrow{display:inline-block;font-size:10.5px;font-weight:700;' +
+        'text-transform:uppercase;letter-spacing:0.14em;padding:5px 10px;' +
+        'border-radius:999px;margin:0 auto 14px;text-align:center;' +
+        'border:1px solid rgba(212,145,10,0.45);background:rgba(212,145,10,0.10);' +
+        'color:#d4910a}' +
+      '.pp-topup-cs-eyebrow-b2b{border-color:rgba(212,145,10,0.6);' +
+        'background:linear-gradient(135deg,rgba(212,145,10,0.18),rgba(168,107,0,0.08));' +
+        'color:#f0b340}' +
+      '.pp-topup-cs-eyebrow-b2c{border-color:rgba(245,233,216,0.32);' +
+        'background:rgba(245,233,216,0.06);color:rgba(245,233,216,0.85)}' +
+      '.pp-topup-cs-dialog .pp-topup-cs-eyebrow{display:block;width:max-content}' +
       '.pp-topup-cs-titel{font-size:22px;font-weight:700;color:#f5e9d8;' +
         'text-align:center;margin:0 0 10px;letter-spacing:-0.01em}' +
       '.pp-topup-cs-tekst{font-size:15px;line-height:1.55;color:rgba(245,233,216,0.8);' +
@@ -153,6 +165,26 @@
         '<p class="pp-topup-cs-progress-sub">We zijn ' + progressPct + '% klaar. Launch verwacht binnenkort</p>' +
       '</div>';
 
+    // v1.1.0 (2026-02-23): Source-aware eyebrow voor expliciete context-
+    // isolatie tussen B2B merken-wallet en B2C klant-wallet. Voorkomt
+    // dat een merk-gebruiker denkt dat hij de consumenten-popup ziet
+    // (zelfde basis-component, andere label).
+    var sourceLower = String(c.source || '').toLowerCase();
+    var eyebrowLabel = '';
+    var eyebrowClass = '';
+    if (sourceLower === 'b2b') {
+      eyebrowLabel = 'Merken Campagne Wallet';
+      eyebrowClass = ' pp-topup-cs-eyebrow-b2b';
+    } else if (sourceLower === 'b2c') {
+      eyebrowLabel = 'Mijn Wallet';
+      eyebrowClass = ' pp-topup-cs-eyebrow-b2c';
+    }
+    var eyebrowBlock = eyebrowLabel
+      ? '<div class="pp-topup-cs-eyebrow' + eyebrowClass + '" data-testid="topup-cs-eyebrow-' + sourceLower + '">' +
+          esc(eyebrowLabel) +
+        '</div>'
+      : '';
+
     var ov = document.createElement('div');
     ov.id = 'pp-topup-cs-overlay';
     ov.className = 'pp-topup-cs-overlay';
@@ -166,6 +198,7 @@
       '<div class="pp-topup-cs-dialog" data-testid="topup-comingsoon-dialog">' +
         '<button class="pp-topup-cs-close" type="button" aria-label="Sluiten" ' +
           'data-testid="topup-cs-close-x">&times;</button>' +
+        eyebrowBlock +
         '<div class="pp-topup-cs-icon" aria-hidden="true">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
             '<circle cx="12" cy="12" r="10"/>' +
@@ -174,8 +207,9 @@
         '</div>' +
         '<h2 class="pp-topup-cs-titel" id="pp-topup-cs-titel">Binnenkort beschikbaar</h2>' +
         '<p class="pp-topup-cs-tekst">' +
-          'Opwaarderen is op dit moment nog niet actief. We zetten de laatste puntjes ' +
-          'op de i, heel binnenkort kun je je wallet opwaarderen en posts boosten.' +
+          'Opwaarderen is pas mogelijk na de officiële lancering. ' +
+          'We zetten op dit moment de laatste puntjes op de i — heel binnenkort ' +
+          'kun je hier je wallet opwaarderen.' +
         '</p>' +
         progressBlock +
         pakketLabel +
@@ -252,6 +286,6 @@
   window.PP_TopupComingSoon = {
     show:    show,
     close:   close,
-    VERSION: '1.0.0'
+    VERSION: '1.1.0'
   };
 })();

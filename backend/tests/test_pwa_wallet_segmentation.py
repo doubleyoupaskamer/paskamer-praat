@@ -2,11 +2,12 @@
 Backend + static-audit tests for PWA wallet segmentation.
 
 Originally added for v60.1.154 (amount-whitelist hardening). Updated for
-v60.1.155 (COMING-SOON INTERCEPT REMOVAL) — the previous fix routed both
-B2B and B2C topup() through a shared PP_TopupComingSoon.show popup,
-which made B2B users perceive a redirect to the B2C "binnenkort" screen.
-v60.1.155 removes that intercept so topup() goes straight to Shopify
-with the correct (segregated) note_attributes.
+v60.1.155 (intercept removal) and then v60.1.156 (COMING-SOON INTERCEPT
+RESTORED with context-aware eyebrow). The user clarified the popup
+itself was wanted; the actual bug was the *shared* popup looking like
+the wrong context. v60.1.156 restores the intercept in both wallets
+but now passes an explicit source ('b2b' / 'b2c') so the popup renders
+a context-aware eyebrow ("Merken Campagne Wallet" vs "Mijn Wallet").
 
 The PWA itself is a Vanilla JS app deployed to Cloudflare Pages from /app/pwa/.
 The Emergent preview URL only exposes the FastAPI /api/* routes (it does NOT
@@ -208,14 +209,15 @@ class TestOnboarding:
 class TestCacheVersion:
     def test_index_html_bumped(self):
         src = INDEX_HTML.read_text()
-        # v60.1.155 bumped from v60.1.154 → both wallet script tags must use the new cache key
-        assert "pp-wallet-v1.js?v=60.1.155-remove-coming-soon-intercept" in src
-        assert "pp-b2c-wallet-v1.js?v=60.1.155-remove-coming-soon-intercept" in src
+        # v60.1.156: both wallets + comingsoon module bumped to the same key
+        assert "pp-wallet-v1.js?v=60.1.156-restore-coming-soon-popup" in src
+        assert "pp-b2c-wallet-v1.js?v=60.1.156-restore-coming-soon-popup" in src
+        assert "pp-topup-comingsoon-v1.js?v=60.1.156-restore-coming-soon-popup" in src
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
-        assert "VERSION       = 'v60.1.155-20260623-remove-coming-soon-intercept'" in src or \
-               "VERSION = 'v60.1.155-20260623-remove-coming-soon-intercept'" in src
+        assert "VERSION       = 'v60.1.156-20260623-restore-coming-soon-popup'" in src or \
+               "VERSION = 'v60.1.156-20260623-restore-coming-soon-popup'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
@@ -224,11 +226,11 @@ class TestDeployZip:
         assert ZIP_FILE.exists()
         assert ZIP_FILE.stat().st_size > 3 * 1024 * 1024, "zip should be > 3MB"
 
-    def test_zip_contains_v60_1_155_sw(self):
+    def test_zip_contains_v60_1_156_sw(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "v60.1.155-20260623-remove-coming-soon-intercept" in content
+        assert "v60.1.156-20260623-restore-coming-soon-popup" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -275,56 +277,97 @@ class TestDownloadEndpoint:
 
 
 
-# ───────────── v60.1.155: COMING-SOON INTERCEPT REMOVAL ─────────────
-class TestComingSoonInterceptRemoved:
-    """The bug: both PP_Wallet.topup (B2B) and PP_B2CWallet.topup (B2C)
-    called PP_TopupComingSoon.show() before routing to Shopify. Both
-    wallets shared the popup, so B2B users saw what looked like the
-    B2C "binnenkort" screen. v60.1.155 removes those calls."""
+# ───────────── v60.1.156: COMING-SOON INTERCEPT RESTORED ─────────────
+class TestComingSoonInterceptRestored:
+    """v60.1.155 removed the intercept entirely, but the user clarified
+    that the popup IS wanted (just with context-aware labelling). v60.1.156
+    restores the intercept in both wallets and passes an explicit source
+    ('b2b' / 'b2c') so the shared popup renders a context-aware eyebrow.
+    These tests assert the INVERSE of the v60.1.155 expectations."""
 
-    def test_b2b_topup_has_no_coming_soon_call(self):
+    def test_b2b_topup_calls_coming_soon_with_b2b_source(self):
         src = B2B_FILE.read_text()
-        assert "PP_TopupComingSoon.show" not in src, (
-            "pp-wallet-v1.js must NOT call PP_TopupComingSoon.show (v60.1.155)"
+        assert "PP_TopupComingSoon.show" in src, (
+            "pp-wallet-v1.js MUST call PP_TopupComingSoon.show (v60.1.156)"
+        )
+        assert re.search(r"source:\s*'b2b'", src), (
+            "B2B intercept must pass source: 'b2b'"
+        )
+        # The defense-in-depth amount-guard must run BEFORE the popup call
+        intercept_block = src.split("PP_TopupComingSoon.show(")[0]
+        assert "if (!B2B_ALLOWED_AMOUNTS[Number(amount)])" in intercept_block, (
+            "B2B amount-whitelist must be applied BEFORE the popup call"
         )
 
-    def test_b2c_topup_has_no_coming_soon_call(self):
+    def test_b2c_topup_calls_coming_soon_with_b2c_source(self):
         src = B2C_FILE.read_text()
-        assert "PP_TopupComingSoon.show" not in src, (
-            "pp-b2c-wallet-v1.js must NOT call PP_TopupComingSoon.show (v60.1.155)"
+        assert "PP_TopupComingSoon.show" in src, (
+            "pp-b2c-wallet-v1.js MUST call PP_TopupComingSoon.show (v60.1.156)"
+        )
+        assert re.search(r"source:\s*'b2c'", src), (
+            "B2C intercept must pass source: 'b2c'"
+        )
+        intercept_block = src.split("PP_TopupComingSoon.show(")[0]
+        assert "if (!B2C_ALLOWED_AMOUNTS[Number(amount)])" in intercept_block, (
+            "B2C amount-whitelist must be applied BEFORE the popup call"
         )
 
-    def test_b2b_version_bumped_to_1_4_0(self):
+    def test_b2b_version_bumped_to_1_5_0(self):
         src = B2B_FILE.read_text()
-        assert re.search(r"VERSION\s*:\s*'1\.4\.0'", src), "B2B wallet VERSION must be 1.4.0"
+        assert re.search(r"VERSION\s*:\s*'1\.5\.0'", src), "B2B wallet VERSION must be 1.5.0"
 
-    def test_b2c_version_bumped_to_1_2_0(self):
+    def test_b2c_version_bumped_to_1_3_0(self):
         src = B2C_FILE.read_text()
-        assert re.search(r"VERSION\s*:\s*'1\.2\.0'", src), "B2C wallet VERSION must be 1.2.0"
+        assert re.search(r"VERSION\s*:\s*'1\.3\.0'", src), "B2C wallet VERSION must be 1.3.0"
 
-    def test_b2b_topup_routes_directly_to_shopify(self):
-        """After the intercept removal, topup() must hit the Shopify cart URL
-        with the B2B-prefixed note-attribute (wallet_topup_uid, NOT b2c_*)."""
+    def test_comingsoon_module_version_1_1_0(self):
+        src = (PWA / "extensions/payments/pp-topup-comingsoon-v1.js").read_text()
+        assert re.search(r"VERSION\s*:\s*'1\.1\.0'", src), "ComingSoon module VERSION must be 1.1.0"
+
+    def test_comingsoon_eyebrow_b2b_present(self):
+        src = (PWA / "extensions/payments/pp-topup-comingsoon-v1.js").read_text()
+        assert "Merken Campagne Wallet" in src
+        assert "pp-topup-cs-eyebrow-b2b" in src
+        assert "topup-cs-eyebrow-" in src  # data-testid prefix
+
+    def test_comingsoon_eyebrow_b2c_present(self):
+        src = (PWA / "extensions/payments/pp-topup-comingsoon-v1.js").read_text()
+        assert "Mijn Wallet" in src
+        assert "pp-topup-cs-eyebrow-b2c" in src
+
+    def test_comingsoon_message_text_updated(self):
+        src = (PWA / "extensions/payments/pp-topup-comingsoon-v1.js").read_text()
+        # New phrasing must be present
+        assert re.search(r"pas mogelijk na.*lancering", src), (
+            "Popup must say 'Opwaarderen is pas mogelijk na de officiële lancering'"
+        )
+        # Old phrasing must be gone
+        assert "op dit moment nog niet actief" not in src, (
+            "Old 'op dit moment nog niet actief' string must be removed"
+        )
+
+    def test_b2b_shopify_fallback_still_present(self):
+        """The Shopify checkout code MUST still exist below the intercept
+        so removing the intercept at launch is enough to enable real topup."""
         src = B2B_FILE.read_text()
         assert "attributes%5Bwallet_topup_uid%5D=" in src
-        assert "attributes%5Bwallet_topup_amount_cents%5D=" in src
-        # cart URL pattern
         assert "/cart/' + encodeURIComponent(variantId)" in src
 
-    def test_b2c_topup_routes_directly_to_shopify_with_b2c_prefix(self):
+    def test_b2c_shopify_fallback_still_present(self):
         src = B2C_FILE.read_text()
         assert "attributes%5Bb2c_wallet_topup_uid%5D=" in src
-        assert "attributes%5Bb2c_wallet_topup_amount_cents%5D=" in src
-        # cart URL pattern
         assert "/cart/' + encodeURIComponent(variantId)" in src
 
     def test_only_three_allowed_callers_of_coming_soon_show(self):
         """Acceptable callers of PP_TopupComingSoon.show: the module
-        itself + 2 wrappers. Any other file referencing it is a regression."""
+        itself + 2 wrappers + both wallets (B2B/B2C intercept). Any
+        other file referencing it is a regression."""
         allowed = {
             PWA / "extensions/payments/pp-topup-comingsoon-v1.js",
             PWA / "extensions/payments/pp-topup-modal-router-v1.js",
             PWA / "extensions/payments/pp-brand-wallet-isolation-v1.js",
+            PWA / "extensions/payments/pp-wallet-v1.js",
+            PWA / "extensions/payments/pp-b2c-wallet-v1.js",
         }
         offenders = []
         for path in PWA.rglob("*.js"):
@@ -337,16 +380,29 @@ class TestComingSoonInterceptRemoved:
                 pass
         assert not offenders, f"Unexpected PP_TopupComingSoon.show callers: {offenders}"
 
-    def test_zip_b2b_wallet_has_no_intercept(self):
+    def test_zip_b2b_wallet_has_intercept(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("extensions/payments/pp-wallet-v1.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "PP_TopupComingSoon.show" not in content
-        assert "VERSION:      '1.4.0'" in content or re.search(r"VERSION\s*:\s*'1\.4\.0'", content)
+        assert "PP_TopupComingSoon.show" in content
+        assert re.search(r"source:\s*'b2b'", content)
+        assert re.search(r"VERSION\s*:\s*'1\.5\.0'", content)
 
-    def test_zip_b2c_wallet_has_no_intercept(self):
+    def test_zip_b2c_wallet_has_intercept(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("extensions/payments/pp-b2c-wallet-v1.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "PP_TopupComingSoon.show" not in content
-        assert "VERSION:      '1.2.0'" in content or re.search(r"VERSION\s*:\s*'1\.2\.0'", content)
+        assert "PP_TopupComingSoon.show" in content
+        assert re.search(r"source:\s*'b2c'", content)
+        assert re.search(r"VERSION\s*:\s*'1\.3\.0'", content)
+
+    def test_zip_comingsoon_module_has_eyebrow(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("extensions/payments/pp-topup-comingsoon-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert re.search(r"VERSION\s*:\s*'1\.1\.0'", content)
+        assert "pp-topup-cs-eyebrow-b2b" in content
+        assert "pp-topup-cs-eyebrow-b2c" in content
+        assert "Merken Campagne Wallet" in content
+        assert "Mijn Wallet" in content
+

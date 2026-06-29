@@ -308,21 +308,46 @@
   }
 
   // ── TOPUP ──────────────────────────────────────────────────────────
-  // Bouwt een directe Shopify checkout-URL:
-  //   https://{shop_domain}/cart/{variant_id}:1?attributes[wallet_topup_uid]=...&attributes[wallet_topup_amount_cents]=...&return_to=...
-  // Hierdoor slaat de gebruiker de storefront over en gaat direct naar checkout.
-  // De cart-attributes komen na betaling als `note_attributes` in de Shopify Order webhook.
+  // v1.5.0 (2026-02-23): COMING-SOON POPUP HERSTELD met BRAND-CONTEXT EYEBROW.
+  // Klik op een B2B-pakket → toont contextuele popup met eyebrow
+  // "MERKEN CAMPAGNE WALLET" + meldtekst "Opwaarderen pas mogelijk na
+  // lancering". Géén directe checkout-flow tot launch.
   //
-  // v1.4.0 (2026-02-23): COMING-SOON INTERCEPT VERWIJDERD.
-  // De Shopify B2B campagne-pakketten (€25/€50/€100/€250) zijn live met
-  // valide variant-IDs. De oude intercept toonde de generieke
-  // PP_TopupComingSoon popup, waardoor het visueel leek alsof B2B-clicks
-  // naar de B2C "binnenkort beschikbaar" werden doorgestuurd. De intercept
-  // werd toegevoegd vóór de Shopify go-live en is nu obsoleet.
-  // Effect: PP_Wallet.topup(amount) routeert direct naar de B2B Shopify
-  // checkout met `wallet_topup_*` note-attributes (NIET b2c_wallet_topup_*),
-  // zodat de webhook het juiste `wallet_balance` veld credit.
+  // De onderliggende Shopify-checkout-code blijft intact (na de popup-
+  // branch) zodat verwijderen van de intercept genoeg is om opwaarderen
+  // live te zetten zodra de officiële launch-datum bekend is.
+  //
+  // CONTEXT-ISOLATIE: source 'b2b' wordt expliciet meegegeven aan
+  // PP_TopupComingSoon zodat de popup visueel labelt als merken-context;
+  // dit voorkomt verwarring met de B2C wallet popup (zelfde basis-
+  // component, andere eyebrow + naam).
   async function topup(amount) {
+    try {
+      if (window.PP_TopupComingSoon && PP_TopupComingSoon.show) {
+        // v1.3.0 amount-guard ook hier toepassen (defense-in-depth):
+        // zelfs als de popup-laag uit staat, een verkeerd bedrag
+        // mag NOOIT een B2B-checkout triggeren.
+        if (!B2B_ALLOWED_AMOUNTS[Number(amount)]) {
+          toast('Ongeldig bedrag voor merken-wallet. Kies €25, €50, €100 of €250.', true);
+          try { console.warn('[wallet] B2B blocked invalid amount:', amount); } catch (_) {}
+          return;
+        }
+        var b2bPkgName = null;
+        try {
+          var defs = PP_B2B_PACKAGES_DEFAULT.filter(function (p) {
+            return p && p.amount === Number(amount);
+          });
+          if (defs.length) b2bPkgName = defs[0].name;
+        } catch (_) {}
+        PP_TopupComingSoon.show({
+          naam: b2bPkgName || ('Merken Campagne Wallet €' + amount),
+          prijs: Number(amount),
+          source: 'b2b'
+        });
+        return;
+      }
+    } catch (e) { /* fallthrough naar bestaande flow */ }
+
     try {
       var u = uid();
       if (!u) { toast('Log eerst in', true); return; }
@@ -549,6 +574,6 @@
     refresh:      refresh,
     switchTab:    switchTab,
     B2B_ALLOWED_AMOUNTS: B2B_ALLOWED_AMOUNTS,
-    VERSION:      '1.4.0'
+    VERSION:      '1.5.0'
   };
 })();

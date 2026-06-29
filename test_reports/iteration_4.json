@@ -1,0 +1,42 @@
+{
+  "summary": "v60.1.156 (coming-soon popup RESTORED with B2B/B2C context-aware eyebrow) verification: 49/49 pytest assertions pass. All 14 static audits in the task list confirmed. PP_Wallet.topup (B2B v1.5.0) and PP_B2CWallet.topup (B2C v1.3.0) now intercept FIRST via PP_TopupComingSoon.show(...) with explicit source 'b2b' / 'b2c'. Defense-in-depth amount-guard (B2B_ALLOWED_AMOUNTS / B2C_ALLOWED_AMOUNTS) runs BEFORE the popup call so an invalid amount can't even reach the popup. Shopify-checkout fallback code is intact below the intercept in both wallets (wallet_topup_uid for B2B, b2c_wallet_topup_uid for B2C) so removing the intercept at launch flips topup to live. Coming-soon module v1.1.0 renders source-aware eyebrow with classes pp-topup-cs-eyebrow-b2b / pp-topup-cs-eyebrow-b2c, data-testid topup-cs-eyebrow-b2b / topup-cs-eyebrow-b2c, labels 'Merken Campagne Wallet' / 'Mijn Wallet', and the updated message 'Opwaarderen is pas mogelijk na de officiële lancering' (old 'op dit moment nog niet actief' string removed). All three cache-bust query strings in index.html (lines 975, 977, 979) carry v=60.1.156-restore-coming-soon-popup; sw.js VERSION = 'v60.1.156-20260623-restore-coming-soon-popup'. Cloudflare zip (3197258eabf85dea8046f12ad0a0b6ef, 4020208 bytes) contains the v60.1.156 versions of all three files. Backend GET /api/downloads/01-paskamerpraat-pwa-cloudflare.zip → 200 OK / application/zip / 4020208 bytes. Route segregation intact: pp-wallet-v1.js wraps only 'wallet' route + injectDashboardCard → navigeer('wallet'); pp-b2c-wallet-v1.js wraps only 'b2c_wallet' route + injecteerProfielKnop (gated on DY.pagina === 'profiel') → navigeer('b2c_wallet'). No 5/10/15 leaks in B2B file, no 100/250 leaks in B2C file.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/iter4_seg.xml"
+  ],
+  "action_items": [
+    "No action items — v60.1.156 is verified end-to-end. The Cloudflare zip is already in sync with the source tree (MD5 3197258eabf85dea8046f12ad0a0b6ef). Safe to deploy.",
+    "When launch date is set, simply delete the `if (window.PP_TopupComingSoon && PP_TopupComingSoon.show) { ... return; }` branch in both topup() functions; the Shopify-checkout fallback below it will activate automatically with no other changes required."
+  ],
+  "critical_code_review_comments": [
+    "v60.1.156 design is clean: intercept branch is wrapped in try/catch with a `fallthrough` comment, so if PP_TopupComingSoon fails to load for any reason the Shopify flow still works (graceful degradation).",
+    "Defense-in-depth amount-guard duplicated in both the intercept branch AND the Shopify branch is correct — it means a future code-removal of one block can't accidentally bypass the whitelist.",
+    "Source-aware eyebrow is rendered via data-testid 'topup-cs-eyebrow-b2b' / 'topup-cs-eyebrow-b2c' so it's automation-friendly for future Playwright tests once the PWA is wired into the Emergent preview.",
+    "Defensive isolation layer pp-brand-wallet-isolation-v1.js still wraps PP_TopupComingSoon.show — that's harmless and acts as a final amount-guard at the popup boundary. Consider removing in a future cleanup once team confidence in the per-file guards is high (LOW priority).",
+    "MINOR DRIFT: pp-brand-wallet-isolation-v1.js + pp-topup-modal-router-v1.js are still pinned to ?v=60.1.151-brand-routes-fix in index.html (lines 981/983) instead of the v60.1.156 cache key. Not blocking because their source files were not modified in v60.1.156, but bumping them to the same key would simplify forensics on the next cache-bust audit (LOW priority).",
+    "MINOR DRIFT: pp-b2c-wallet-v1.js still has header comment 'B2C Klant Wallet Module (v1.0.0)' at the very top while the VERSION constant inside is correctly '1.3.0'. Cosmetic only — does not affect runtime — but the top-of-file banner should be aligned with VERSION on next touch (LOW priority).",
+    "Routing whitelist (pp-route-safety-v1.js) and onboarding-checklist wallet step (navigeer('wallet') → B2B) remain correct and unchanged from iteration_3."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py (inverted TestComingSoonInterceptRemoved → TestComingSoonInterceptRestored with 13 assertions; bumped TestCacheVersion + TestDeployZip expectations to v60.1.156; suite expanded 44 → 49 tests, all green)"
+  ],
+  "success_rate": {
+    "backend": "100% (49/49 pytest assertions pass; /api/downloads/* endpoint returns 200 with correct content-type and size)",
+    "frontend": "n/a (PWA is served externally via Cloudflare Pages; no in-Emergent UI surface to test — task explicitly scoped to backend-only)"
+  },
+  "test_credentials": "none required",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Suite now has 49 assertions and is the canonical regression guard. TestComingSoonInterceptRestored is the inverse of the v60.1.155 TestComingSoonInterceptRemoved class — if a future iteration removes the intercept again for launch, that class needs to be either deleted or re-inverted back to the v60.1.155 style. The Shopify-checkout fallback assertions in test_b2b_shopify_fallback_still_present / test_b2c_shopify_fallback_still_present will continue to pass either way and remain the long-term safety net. ZIP MD5 currently 3197258eabf85dea8046f12ad0a0b6ef (4020208 bytes).",
+  "rca of the issue": "User-reported bug RCA: original symptom was B2B users clicking 'Opwaarderen' and perceiving a redirect to a B2C-looking 'binnenkort' popup. Mis-diagnosed in iteration_3 as 'popup must be removed entirely' → v60.1.155 routed both wallets straight to Shopify. User clarified the popup itself was desired (launch hasn't happened, real checkout would be premature); the REAL bug was that the *shared* PP_TopupComingSoon popup had no visual context to distinguish B2B from B2C, so a B2B click felt like landing in B2C territory. Mitigation v60.1.156: (a) restore the intercept in both topup() functions with try/catch and amount-guard upfront; (b) pass an explicit source label ('b2b' / 'b2c') to PP_TopupComingSoon.show; (c) coming-soon module v1.1.0 reads ctx.source and renders a colour-themed eyebrow above the icon ('Merken Campagne Wallet' for b2b, 'Mijn Wallet' for b2c) so the user instantly knows which wallet context the popup belongs to; (d) update the body copy from 'op dit moment nog niet actief' → 'Opwaarderen is pas mogelijk na de officiële lancering' to set a clearer expectation; (e) keep the Shopify-checkout code below the intercept intact so a single block-deletion at launch flips topup live with no other code changes. Cache-bust + sw.js VERSION bumped uniformly to v60.1.156-restore-coming-soon-popup so every end-user gets the new files on next service-worker activation. Verification: 49 pytest assertions all green, ZIP contents match source tree, /api/downloads returns the updated zip."
+}
