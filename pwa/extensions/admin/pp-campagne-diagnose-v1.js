@@ -310,8 +310,9 @@
           '<button class="bp-back" onclick="window.DY.navigeer(\'admin_campagnes\')">&larr; Admin</button>' +
           '<h1>Campagne diagnose</h1>' +
           '<p class="bp-sub">Live debug-overzicht: zie WAAROM campagnes wel/niet renderen op publieke views.</p>' +
-          '<div class="pp-diag-export-bar" style="margin:10px 0 18px">' +
+          '<div class="pp-diag-export-bar" style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 18px">' +
             '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.exportCSV()" data-testid="diag-export-csv">📥 Export totaal overzicht (alle campagnes × alle plaatsingen)</button>' +
+            '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.backfillEmails()" data-testid="diag-backfill-emails">📧 Backfill emails (brands + campagnes)</button>' +
           '</div>' +
 
           '<div class="bp-stat-grid" style="margin-top:16px">' +
@@ -394,6 +395,36 @@
     }
   }
 
+  // v1.5.0: Backfill emails op brands + campaigns uit users.email.
+  async function backfillEmails() {
+    try {
+      var dry = !confirm('Backfill ontbrekende email-velden op brands + campaigns?\n\nOK = écht schrijven\nAnnuleer = dry-run (preview)');
+      var user = window.firebase && firebase.auth && firebase.auth().currentUser;
+      if (!user) { alert('Niet ingelogd.'); return; }
+      var token = await user.getIdToken();
+      var base = window.location.origin;
+      var resp = await fetch(base + '/api/admin/weekly-reports/backfill-emails?dry_run=' + (dry ? 'true' : 'false'), {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      var data = await resp.json();
+      if (!resp.ok) { alert('Fout: ' + (data.detail || resp.statusText)); return; }
+      var emoji = data.dry_run ? '👀 DRY-RUN preview:' : '✅ Backfill voltooid:';
+      var msg = emoji + '\n\n' +
+        '• Merken gescand: ' + data.brands_scanned + '\n' +
+        '• Merken bijgewerkt: ' + data.brands_updated + '\n' +
+        '• Merken zonder gebruiker-email: ' + data.brands_no_user_email + '\n\n' +
+        '• Campagnes gescand: ' + data.campaigns_scanned + '\n' +
+        '• Campagnes bijgewerkt: ' + data.campaigns_updated + '\n' +
+        '• Campagnes zonder merk-email: ' + data.campaigns_no_brand_email + '\n\n' +
+        (data.examples && data.examples.length ? 'Voorbeelden: ' + JSON.stringify(data.examples, null, 2) : '');
+      alert(msg);
+      if (!data.dry_run && data.brands_updated + data.campaigns_updated > 0) render();
+    } catch (e) {
+      alert('Fout: ' + e.message);
+    }
+  }
+
   function registerRoute() {
     if (!window.DY || typeof window.DY.toonPagina !== 'function') return;
     if (window.DY._pp_diag_wrapped) return;
@@ -423,5 +454,5 @@
     setTimeout(registerRoute, 100);
   }
 
-  window.PP_Diag = { render: render, fixPlacements: fixPlacements, goLive: goLive, exportCSV: exportCSV, testWeeklyEmail: testWeeklyEmail };
+  window.PP_Diag = { render: render, fixPlacements: fixPlacements, goLive: goLive, exportCSV: exportCSV, testWeeklyEmail: testWeeklyEmail, backfillEmails: backfillEmails };
 })();

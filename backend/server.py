@@ -1111,3 +1111,84 @@ async def admin_send_one_weekly_report(
     if not cid:
         raise HTTPException(status_code=400, detail="cid query param verplicht")
     return weekly_reports.run_weekly_for_all_campaigns(force=force, only_campaign_id=cid)
+
+
+@app.post("/api/admin/weekly-reports/backfill-emails")
+async def admin_backfill_emails(
+    authorization: Optional[str] = Header(None),
+    dry_run: bool = True
+):
+    """
+    Backfill ontbrekende `email` velden op brands/campaigns op basis van:
+      • brands/{brandId}.email  ← users/{brandId}.email  (brandId === auth uid)
+      • campaigns/{cid}.email   ← brands/{brandId}.email
+    Met ?dry_run=false écht schrijven.
+    """
+    _verify_admin_token(authorization)
+    if weekly_reports is None:
+        raise HTTPException(status_code=500, detail="weekly_reports module niet geladen")
+    from shopify_wallet import _init_firebase
+    db = _init_firebase()
+    if db is None:
+        raise HTTPException(503, "Firestore niet beschikbaar")
+
+    summary = {
+        "dry_run": dry_run,
+        "brands_scanned": 0, "brands_updated": 0, "brands_no_user_email": 0,
+        "campaigns_scanned": 0, "campaigns_updated": 0, "campaigns_no_brand_email": 0,
+        "examples": []
+    }
+
+    # 1) Brands ophalen — vul email uit users.email als brand.email leeg is
+    try:
+        for bd in db.collection("brands").limit(500).stream():
+            summary["brands_scanned"] += 1
+            b = bd.to_dict() or {}
+            existing = (b.get("email") or "").strip()
+            if existing and "@" in existing:
+                continue
+            try:
+                user_snap = db.collection("users").document(bd.id).get()
+                if not user_snap.exists:
+                    summary["brands_no_user_email"] += 1
+                    continue
+                u = user_snap.to_dict() or {}
+                user_email = (u.get("email") or "").strip()
+                if not user_email or "@" not in user_email:
+                    summary["brands_no_user_email"] += 1
+                    continue
+                if not dry_run:
+                    db.collection("brands").document(bd.id).update({"email": user_email})
+                summary["brands_updated"] += 1
+                if len(summary["examples"]) < 5:
+                    summary["examples"].append({"brand": bd.id, "email": user_email})
+            except Exception as e:
+                logger.warning("backfill brand %s: %s", bd.id, e)
+    except Exception as e:
+        raise HTTPException(500, f"brand-scan mislukte: {e}")
+
+    # 2) Campaigns — vul email uit brands.email als campaign.email leeg is
+    try:
+        brand_emails = {}
+        for bd in db.collection("brands").limit(500).stream():
+            b = bd.to_dict() or {}
+            if (b.get("email") or "").strip():
+                brand_emails[bd.id] = b["email"].strip()
+        for cd in db.collection("campaigns").limit(500).stream():
+            summary["campaigns_scanned"] += 1
+            c = cd.to_dict() or {}
+            existing = (c.get("email") or "").strip()
+            if existing and "@" in existing:
+                continue
+            bid = c.get("brandId")
+            be = brand_emails.get(bid)
+            if not be:
+                summary["campaigns_no_brand_email"] += 1
+                continue
+            if not dry_run:
+                db.collection("campaigns").document(cd.id).update({"email": be})
+            summary["campaigns_updated"] += 1
+    except Exception as e:
+        raise HTTPException(500, f"campaign-scan mislukte: {e}")
+
+    return summary
