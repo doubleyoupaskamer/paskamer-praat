@@ -31,7 +31,16 @@
   var TAG = '[brand-analytics]';
 
   function db() { return window.firebase && firebase.firestore && firebase.firestore(); }
-  function uid() { return (window.DY && DY.user && DY.user.uid) || null; }
+  function uid() {
+    // Robust: probeer firebase.auth eerst (DY.user kan lazy zijn op deze pagina)
+    try {
+      if (window.firebase && firebase.auth) {
+        var u = firebase.auth().currentUser;
+        if (u && u.uid) return u.uid;
+      }
+    } catch (_) {}
+    return (window.DY && DY.user && DY.user.uid) || null;
+  }
   function fmtNum(n) { return (n || 0).toLocaleString('nl-NL'); }
 
   // ────────── ENGAGEMENT LOADER ──────────
@@ -47,28 +56,43 @@
 
   async function loadBrandEngagement(brandUid, campaignIds) {
     var perCamp = {};       // campId → { impr, click, byPlc }
-    var brandTotalLikes = 0;
+    // v1.2.0: brand-totals tellen ALLE brand-events (incl. sponsored_product
+    // zonder campaignId) — dat is de echte engagement voor het merk.
+    var brandTotals = { impr: 0, click: 0, likes: 0, byPlc: emptyPlcMap() };
     campaignIds.forEach(function (cid) {
       perCamp[cid] = { impr: 0, click: 0, byPlc: emptyPlcMap() };
     });
 
-    // 1) events filtered op brandId — minimaliseert reads via brandId where-clause
+    // 1) events filtered op brandId
     try {
       var d = db();
-      if (!d || !brandUid) return { perCamp: perCamp, likes: 0 };
+      if (!d || !brandUid) return { perCamp: perCamp, brandTotals: brandTotals };
       var evSnap = await d.collection('events')
         .where('brandId', '==', brandUid)
         .limit(2000).get();
+      try { console.log(TAG, 'events for brand', brandUid, ':', evSnap.size); } catch (_) {}
       evSnap.forEach(function (ev) {
         var e = ev.data() || {};
+        var etype = e.type;
         var cid = e.campaignId;
-        if (!cid || !perCamp[cid]) return;
-        if (e.type === 'impression') perCamp[cid].impr++;
-        else if (e.type === 'campaign_click') perCamp[cid].click++;
         var plc = e.plaatsing;
-        if (plc && perCamp[cid].byPlc[plc]) {
-          if (e.type === 'impression') perCamp[cid].byPlc[plc].impr++;
-          else if (e.type === 'campaign_click') perCamp[cid].byPlc[plc].click++;
+
+        // Brand-level totals — alle brand-events tellen
+        if (etype === 'impression') brandTotals.impr++;
+        else if (etype === 'campaign_click') brandTotals.click++;
+        if (plc && brandTotals.byPlc[plc]) {
+          if (etype === 'impression') brandTotals.byPlc[plc].impr++;
+          else if (etype === 'campaign_click') brandTotals.byPlc[plc].click++;
+        }
+
+        // Per-campaign — alleen events met matching campaignId
+        if (cid && perCamp[cid]) {
+          if (etype === 'impression') perCamp[cid].impr++;
+          else if (etype === 'campaign_click') perCamp[cid].click++;
+          if (plc && perCamp[cid].byPlc[plc]) {
+            if (etype === 'impression') perCamp[cid].byPlc[plc].impr++;
+            else if (etype === 'campaign_click') perCamp[cid].byPlc[plc].click++;
+          }
         }
       });
     } catch (e) {
@@ -85,14 +109,14 @@
         prodSnap.forEach(function (pd) {
           var p = pd.data() || {};
           var likesObj = (p.likes && typeof p.likes === 'object') ? p.likes : {};
-          brandTotalLikes += Object.keys(likesObj).length;
+          brandTotals.likes += Object.keys(likesObj).length;
         });
       }
     } catch (e) {
       try { console.warn(TAG, 'products fetch:', e && e.code); } catch (_) {}
     }
 
-    return { perCamp: perCamp, likes: brandTotalLikes };
+    return { perCamp: perCamp, brandTotals: brandTotals };
   }
 
   // ────────── PER-PLACEMENT CSV EXPORT ──────────
@@ -292,26 +316,23 @@
       var BP = window.DY && window.DY.brandPortal;
       if (!BP) return;
       var brandUid = uid();
-      if (!brandUid) return;
+      if (!brandUid) {
+        try { console.warn(TAG, 'geen brandUid (firebase.auth + DY.user beide leeg)'); } catch (_) {}
+        return;
+      }
       var rows = BP._analyticsRows || [];
       var campIds = rows.map(function (r) { return r.id; }).filter(Boolean);
-      if (!campIds.length) return;
+
+      try { console.log(TAG, 'enhance start — brandUid=' + brandUid + ' campaigns=' + campIds.length); } catch (_) {}
 
       var data = await loadBrandEngagement(brandUid, campIds);
 
-      // Totals
-      var totals = { impr: 0, click: 0, likes: data.likes };
-      campIds.forEach(function (cid) {
-        var pc = data.perCamp[cid] || { impr: 0, click: 0 };
-        totals.impr += pc.impr;
-        totals.click += pc.click;
-      });
-
-      patchStats(totals);
+      // Brand-level totals (incl. sponsored_product events zonder campaignId)
+      patchStats(data.brandTotals);
       patchTable(data.perCamp, rows);
 
-      // Sla totals + perCamp op voor CSV-export
-      BP._ppLiveAnalytics = { totals: totals, perCamp: data.perCamp };
+      // Sla op voor CSV-export
+      BP._ppLiveAnalytics = { totals: data.brandTotals, perCamp: data.perCamp };
       renderExportBar();
     } catch (e) {
       try { console.warn(TAG, 'enhance failed:', e); } catch (_) {}

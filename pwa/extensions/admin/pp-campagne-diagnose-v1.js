@@ -293,6 +293,7 @@
             '<td data-testid="diag-likes-' + esc(d.id) + '" style="text-align:right">' + totLikes + '</td>' +
             '<td>' +
               '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.exportCSV(\'' + esc(d.id) + '\')" data-testid="diag-export-camp-' + esc(d.id) + '" title="Download totaaloverzicht voor deze campagne">📥</button>' +
+              '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.testWeeklyEmail(\'' + esc(d.id) + '\')" data-testid="diag-test-email-' + esc(d.id) + '" title="Verstuur testrapport naar campagne-email">📧</button>' +
               (!plaats.length
                 ? '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.fixPlacements(\'' + esc(d.id) + '\')" data-testid="diag-fix-' + esc(d.id) + '">+ feed</button>'
                 : '') +
@@ -366,6 +367,33 @@
     }
   }
 
+  // v1.4.0: Verstuur testrapport naar gekoppelde campagne-email.
+  async function testWeeklyEmail(campId) {
+    try {
+      if (!confirm('Verstuur test-weekrapport voor deze campagne?\n\nNB: gebruikt SMTP uit backend .env. In DRY-RUN modus wordt alleen gelogd.')) return;
+      var user = window.firebase && firebase.auth && firebase.auth().currentUser;
+      if (!user) { alert('Niet ingelogd.'); return; }
+      var token = await user.getIdToken();
+      var base = window.location.origin;
+      var resp = await fetch(base + '/api/admin/weekly-reports/send-one?cid=' + encodeURIComponent(campId) + '&force=true', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+      });
+      var data = await resp.json();
+      if (!resp.ok) {
+        alert('Fout: ' + (data.detail || resp.statusText));
+        return;
+      }
+      var msg = 'Resultaat:\n' + JSON.stringify(data, null, 2);
+      if (data.dry_run) msg = '⚠️ DRY-RUN modus actief (geen echte email verstuurd).\n\n' + msg;
+      else if (data.sent) msg = '✅ Email verzonden!\n\n' + msg;
+      else if (data.skipped_no_email) msg = '⚠️ Geen email gevonden voor deze campagne/merk.\n\n' + msg;
+      alert(msg);
+    } catch (e) {
+      alert('Fout: ' + e.message);
+    }
+  }
+
   function registerRoute() {
     if (!window.DY || typeof window.DY.toonPagina !== 'function') return;
     if (window.DY._pp_diag_wrapped) return;
@@ -395,5 +423,5 @@
     setTimeout(registerRoute, 100);
   }
 
-  window.PP_Diag = { render: render, fixPlacements: fixPlacements, goLive: goLive, exportCSV: exportCSV };
+  window.PP_Diag = { render: render, fixPlacements: fixPlacements, goLive: goLive, exportCSV: exportCSV, testWeeklyEmail: testWeeklyEmail };
 })();

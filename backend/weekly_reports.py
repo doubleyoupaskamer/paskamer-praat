@@ -240,9 +240,14 @@ def _smtp_send(to_email: str, subject: str, html: str, csv_bytes: bytes, csv_nam
 
 
 # ──────────────────────── HOOFDPROCES ─────────────────────────────────
-def run_weekly_for_all_campaigns(force: bool = False) -> dict:
-    """Itereert live campagnes, aggregeert + verstuurt. Idempotent via `last_weekly_report_sent` flag."""
-    if not WEEKLY_ENABLED and not force:
+def run_weekly_for_all_campaigns(force: bool = False, only_campaign_id: str | None = None) -> dict:
+    """Itereert live campagnes, aggregeert + verstuurt. Idempotent via `last_weekly_report_sent` flag.
+
+    Args:
+      force: ook verzenden als laatste send <6 dagen geleden was
+      only_campaign_id: indien gegeven, alleen die ene campagne verwerken (voor handmatige test)
+    """
+    if not WEEKLY_ENABLED and not force and not only_campaign_id:
         return {"skipped": "WEEKLY_REPORTS_ENABLED=false"}
 
     db = _firestore()
@@ -257,9 +262,15 @@ def run_weekly_for_all_campaigns(force: bool = False) -> dict:
     no_email_count = 0
 
     try:
-        live_campaigns = list(db.collection("campaigns").where("status", "==", "live").limit(500).stream())
+        if only_campaign_id:
+            snap = db.collection("campaigns").document(only_campaign_id).get()
+            if not snap.exists:
+                return {"error": f"campaign {only_campaign_id} niet gevonden"}
+            live_campaigns = [snap]
+        else:
+            live_campaigns = list(db.collection("campaigns").where("status", "==", "live").limit(500).stream())
     except Exception as e:
-        logger.exception("Kon live campagnes niet ophalen: %s", e)
+        logger.exception("Kon campagnes niet ophalen: %s", e)
         return {"error": str(e)}
 
     for snap in live_campaigns:

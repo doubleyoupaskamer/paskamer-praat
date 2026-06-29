@@ -1071,3 +1071,43 @@ async def admin_run_weekly_reports(
     if weekly_reports is None:
         raise HTTPException(status_code=500, detail="weekly_reports module niet geladen")
     return weekly_reports.run_weekly_for_all_campaigns(force=force)
+
+
+def _verify_admin_token(authorization: Optional[str]) -> str:
+    """Verifieer Bearer JWT en check admin-email. Returns uid."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401, "Missing Bearer token")
+    try:
+        from firebase_admin import auth as fb_auth
+        from shopify_wallet import _init_firebase, _fb_app  # noqa: F401
+        _init_firebase()
+        import shopify_wallet
+        token = authorization[7:]
+        # shopify_wallet uses a NAMED app ('dy-wallet'); verify_id_token must use that app
+        decoded = fb_auth.verify_id_token(token, app=shopify_wallet._fb_app)
+        email = (decoded.get("email") or "").lower().strip()
+        admin_emails = (os.environ.get("ADMIN_USER_EMAIL", "") + "," +
+                        os.environ.get("ADMIN_PREMIUM_EMAILS", "")).lower()
+        admin_set = {e.strip() for e in admin_emails.split(",") if e.strip()}
+        if email not in admin_set:
+            raise HTTPException(403, f"forbidden: {email} is geen admin")
+        return decoded["uid"]
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(401, f"Invalid token: {e}")
+
+
+@app.post("/api/admin/weekly-reports/send-one")
+async def admin_send_one_weekly_report(
+    cid: str,
+    authorization: Optional[str] = Header(None),
+    force: bool = True
+):
+    """Verstuur testrapport voor 1 specifieke campagne. Vereist admin Bearer token."""
+    _verify_admin_token(authorization)
+    if weekly_reports is None:
+        raise HTTPException(status_code=500, detail="weekly_reports module niet geladen")
+    if not cid:
+        raise HTTPException(status_code=400, detail="cid query param verplicht")
+    return weekly_reports.run_weekly_for_all_campaigns(force=force, only_campaign_id=cid)
