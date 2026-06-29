@@ -6,6 +6,39 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.153 — "Voltooid binnen 7 dagen" Achievement Badge (23 feb 2026)
+
+### Doel
+Lichte gamification-hook bovenop de onboarding-checklist: merken die alle 4 onboarding-stappen binnen 7 dagen na registratie afronden krijgen automatisch een achievement-badge op hun merkprofiel.
+
+### Nieuwe modules
+- **`pp-brand-7days-badge-v1.js`** v1.0.0
+  - Hergebruikt `PP_BrandOnboarding.evaluate()` (fallback inline) voor de 4 stap-checks.
+  - Award-condities: alle 4 stappen ✓ EN (`now - brand.aangemaakt`) ≤ 7 dagen EN nog niet eerder uitgereikt.
+  - Schrijft idempotent met `set({merge:true})` naar `brands/{uid}.onboarding_badge_7d = { awarded:true, awarded_at:serverTimestamp, days_taken:N }`.
+  - Toont in 2 plekken:
+    1. **brand_profiel** → hero-strip onder `<h1>Merkprofiel</h1>` (full-width, donker thema + goud accent + trofee-icoon).
+    2. **brand_dashboard** → kleine goud-gradient pil in de header.
+  - Eenmaal uitgereikt blijft de badge zichtbaar (uit Firestore gelezen) — ook ná de 7-dagen-window.
+  - Buiten 7-dagen-window zonder award → badge niet meer haalbaar (geen retroactieve toekenning).
+  - Data-testids: `brand-profiel-7d-badge`, `brand-dash-7d-badge`.
+  - Debug: `window.__ppBrand7dBadge` + Public API `PP_Brand7DaysBadge.evaluate()` / `.refresh()`.
+
+- **`pp-brand-7days-badge.css`** v1.0.0
+  - Hero-strip met radial gradient & inset shadow op icoon-circle.
+  - Pil voor dashboard header met goud→bruin gradient.
+  - Responsive (≤480px: titel kleiner).
+
+### Firestore rules
+Geen aanpassing nodig: `brands/{brandId}` allow update voor brand-owner staat alle velden toe behalve admin-only (status/moderatedBy/etc.). `onboarding_badge_7d` is niet in die blocklist → schrijfbaar door de brand-owner zelf. ✅
+
+### Delivery
+- `index.html` cache → `?v=60.1.153-7d-badge`
+- `sw.js` VERSION → `v60.1.153-20260623-7d-badge`
+- Zip vernieuwd op `/app/01-paskamerpraat-pwa-cloudflare.zip` (~3.9MB)
+- Download endpoint geverifieerd: `GET /api/downloads/01-paskamerpraat-pwa-cloudflare.zip` → 200 OK
+
+
 ## v60.1.152 — Brand Onboarding Checklist Widget (23 feb 2026)
 
 ### Doel
