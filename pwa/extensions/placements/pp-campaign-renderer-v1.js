@@ -123,12 +123,21 @@
     var pagina = window.DY && window.DY.pagina;
     var placement = routeToPlacement(pagina);
     if (!placement) return;
-    // v1.0.13 (29-jun-2026): feed-placement opnieuw HELEMAAL overgeslagen.
-    // Gebruiker wil GEEN campagnes/gesponsorde posts bovenaan de standaard
-    // feed-pagina — alleen op de Uitgelicht-tab (pp-feedtabs-v1.js) en op
-    // /merken (legacy bp-campagne-feed). Andere placements (stories,
-    // review, ai_assist, similar_items) blijven gewoon werken.
+    // v1.0.13 (29-jun-2026): voorheen werd 'feed' placement HELEMAAL
+    // overgeslagen. Gevolg: paid feed-campagnes verschenen alleen in
+    // de Uitgelicht-TAB en op /merken — maar NIET in de hoofd-feed-
+    // scroll waar gebruikers daadwerkelijk doorheen scrollen. Klanten
+    // betaalden voor 'feed' en zagen niets. Nu skippen we feed-injectie
+    // alleen op /merken (daar rendert legacy `bp-campagne-feed` al).
     if (placement === 'feed') return;
+    // v1.0.14 (29-jun-2026): honoreer admin master kill-switches.
+    // Als de admin in /admin → Placements control een placement uitzet,
+    // moet de strip onmiddellijk stoppen met renderen.
+    try {
+      if (window.PP_Placements && typeof PP_Placements.isPlacementActive === 'function') {
+        if (!PP_Placements.isPlacementActive(placement)) return;
+      }
+    } catch (_) {}
     var main = document.getElementById('dy-main');
     if (!main) return;
     injectStrip(placement, main, 'Aangeboden');

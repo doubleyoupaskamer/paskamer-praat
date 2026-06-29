@@ -150,6 +150,13 @@
     var pid = p._id || '';
     var bid = p.brandId || '';
 
+    // ── Likes-state ophalen uit product-doc (legacy-compatible: likes map)
+    var likesObj = (p.likes && typeof p.likes === 'object') ? p.likes : {};
+    var likeCount = Object.keys(likesObj).length;
+    var currentUid = null;
+    try { currentUid = (window.firebase && firebase.auth().currentUser || {}).uid || null; } catch (_) {}
+    var liked = !!(currentUid && likesObj[currentUid] === true);
+
     var el = document.createElement('div');
     el.className = 'dy-reel-item pp-sponsored-product';
     el.setAttribute('data-product-id', pid);
@@ -182,11 +189,25 @@
         '<span class="dy-reel-meer pp-sp-cta" ' +
           'onclick="event.stopPropagation();PP_SponsoredProducts.openProduct(\'' +
             escAttr(pid) + '\',\'' + escAttr(url) + '\',\'' + escAttr(bid) + '\')">Bekijk product →</span>' +
+      '</div>' +
+      // ── Action bar (like-knop, zelfde pattern als legacy verhaalKaart)
+      '<div class="dy-reel-actions pp-sp-actions">' +
+        '<button class="dy-reel-action-btn dy-reel-like' + (liked ? ' liked' : '') + '" ' +
+          'data-testid="pp-sp-like-' + esc(pid) + '" ' +
+          'onclick="event.stopPropagation();PP_SponsoredProducts.toggleLike(this,\'' + escAttr(pid) + '\')" ' +
+          'aria-label="Like">' +
+          '<svg class="dy-reel-action-icon" viewBox="0 0 24 24" fill="' + (liked ? 'currentColor' : 'none') + '" ' +
+            'stroke="currentColor" stroke-width="2">' +
+            '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' +
+          '</svg>' +
+          '<span class="dy-reel-action-count">' + (likeCount > 0 ? likeCount : '') + '</span>' +
+        '</button>' +
       '</div>';
 
-    // Klik op kaart-zelf opent ook product
+    // Klik op kaart-zelf opent ook product (maar niet op like/CTA)
     el.addEventListener('click', function (e) {
-      if (e.target.closest('.pp-sp-cta')) return; // CTA handelt al
+      if (e.target.closest('.pp-sp-cta')) return;
+      if (e.target.closest('.dy-reel-actions')) return;
       openProduct(pid, url, bid);
     });
 
@@ -223,6 +244,12 @@
     // Alleen op /feed of /home
     var pagina = window.DY && window.DY.pagina;
     if (pagina && pagina !== 'feed' && pagina !== 'home') return;
+    // v1.1.0: honoreer admin master kill-switch (Placements control → 'feed')
+    try {
+      if (window.PP_Placements && typeof PP_Placements.isPlacementActive === 'function') {
+        if (!PP_Placements.isPlacementActive('feed')) return;
+      }
+    } catch (_) {}
 
     var organic = container.querySelectorAll('.dy-reel-item:not(.pp-sponsored-product):not(.dy-reel-empty):not([data-sp-anchor])');
     var organicArr = Array.prototype.slice.call(organic);
@@ -292,6 +319,50 @@
     }
   }
 
+  // ────────── LIKE TOGGLE ──────────
+  // Spiegelt DY.reelToggleLike logica maar tegen brand_products/{pid}.likes map.
+  function toggleLike(btn, pid) {
+    try {
+      if (!window.DY || !DY.user) {
+        if (DY && DY.toonLoginPrompt) DY.toonLoginPrompt('Like producten en steun je favoriete merken.');
+        return;
+      }
+      var d = db();
+      if (!d) return;
+      var uid = DY.user.uid;
+      var ref = d.collection('brand_products').doc(pid);
+      var wasLiked = btn.classList.contains('liked');
+
+      // Optimistic UI
+      btn.classList.toggle('liked', !wasLiked);
+      var icon = btn.querySelector('svg');
+      var countEl = btn.querySelector('.dy-reel-action-count');
+      if (icon) icon.setAttribute('fill', wasLiked ? 'none' : 'currentColor');
+      btn.style.transform = 'scale(1.4)';
+      setTimeout(function () { btn.style.transform = ''; }, 200);
+
+      var update = {};
+      update['likes.' + uid] = wasLiked
+        ? window.firebase.firestore.FieldValue.delete()
+        : true;
+      ref.update(update).then(function () {
+        return ref.get();
+      }).then(function (snap) {
+        if (snap && snap.exists) {
+          var l = (snap.data() || {}).likes || {};
+          var c = Object.keys(l).length;
+          if (countEl) countEl.textContent = c > 0 ? c : '';
+        }
+      }).catch(function () {
+        // Rollback bij rules-error
+        btn.classList.toggle('liked', wasLiked);
+        if (icon) icon.setAttribute('fill', wasLiked ? 'currentColor' : 'none');
+      });
+    } catch (e) {
+      try { console.warn(TAG, 'toggleLike failed:', e); } catch (_) {}
+    }
+  }
+
   // ────────── CSS INJECTION ──────────
   function ensureCSS() {
     if (document.getElementById('pp-sp-style')) return;
@@ -306,8 +377,9 @@
       '}' +
       '.pp-sp-titel{font-style:normal !important}' +
       '.pp-sp-prijs{font-weight:600;color:#fcf8ef}' +
-      '.pp-sp-cta{cursor:pointer}' +
-      '.pp-sponsored-product .dy-reel-actions{display:none !important}'; // geen like/comment op sponsored
+      '.pp-sp-cta{cursor:pointer}';
+      // v1.1.0: actiebar wordt NIET meer verborgen — likes blijven zichtbaar
+      // op gesponsorde posts (klant betaalt voor engagement).
     document.head.appendChild(s);
   }
 
@@ -382,6 +454,7 @@
   window.PP_SponsoredProducts = {
     refresh: refresh,
     openProduct: openProduct,
-    VERSION: '1.0.0'
+    toggleLike: toggleLike,
+    VERSION: '1.1.0'
   };
 })();

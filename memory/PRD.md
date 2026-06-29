@@ -6,6 +6,38 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.172 — Likes op Sponsored + Kill-switch Honoring (29 jun 2026)
+
+### Probleem (gebruiker, screenshot Placements control)
+1. "Likes op een gesponsorde post moeten wel zichtbaar zijn" — actie-bar werd verstopt via `display:none`.
+2. "Worden alle andere placement-opties doorgevoerd voor betaalde klanten?" — de admin master kill-switches (Placements control: feed / stories / outfit_review / ai_assist / similar_items) waren niet aangesloten op de renderers; toggle uitzetten had geen effect.
+
+### Fix (puur in eigen extensions)
+- **`pp-sponsored-products-v1.js` v1.1.0**:
+  - Action-bar verschijnt op gesponsorde kaarten met functionele like-knop. `toggleLike()` spiegelt `DY.reelToggleLike()` pattern: optimistic UI + Firestore update naar `brand_products/{pid}.likes[uid] = true`, rollback bij rules-error, bounce-animatie.
+  - Like count rendert direct uit de bestaande `likes` map (zelfde shape als legacy `stories.likes`).
+  - Master kill-switch gate: voor injectie wordt `PP_Placements.isPlacementActive('feed')` gecontroleerd — toggle uitzetten in admin stopt onmiddellijk de feed-injectie.
+  - CSS-regel die actiebar verstopte (`.pp-sponsored-product .dy-reel-actions{display:none}`) verwijderd.
+- **`pp-campaign-renderer-v1.js` v1.0.14**:
+  - Master kill-switch gate in `tryInject()`: voor elke placement (stories / outfit_review / ai_assist / similar_items) wordt `PP_Placements.isPlacementActive(placement)` gecontroleerd vóór de strip wordt geïnjecteerd.
+  - Toggle uitzetten in Placements control stopt onmiddellijk alle weergave per placement-type.
+
+### Effect voor betalende klanten
+Een merk dat een campagne koopt met `plaatsingen=['feed','stories','outfit_review','ai_assist','similar_items']` krijgt nu daadwerkelijk:
+- 📱 **feed**: producten mee-scrollend in `#dy-verhalen` (sponsored-products) — inclusief zichtbare + functionele likes
+- 🎬 **stories**: "Aangeboden" strip via campaign-renderer
+- 👗 **outfit_review**: idem
+- 🤖 **ai_assist**: idem
+- 🔍 **similar_items**: idem
+
+Admin kan elk placement-type centraal uitzetten via Placements control voor onderhoud / incidenten — kill-switch heeft nu echt effect.
+
+### Delivery
+- `index.html` cache → `?v=60.1.172-likes-killsw` (renderer + sponsored beide gebumpt)
+- `sw.js` VERSION → `v60.1.172-20260629-likes-killsw`
+- Zip md5 `d41a09d421f9dcb4feb46de6d23504d8`
+
+
 ## v60.1.171 — Gesponsorde Product-afbeeldingen in Feed (29 jun 2026)
 
 ### Probleem (gebruiker)
