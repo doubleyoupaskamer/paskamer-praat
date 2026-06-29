@@ -6,6 +6,32 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.163 — Brand-Profile Product Image Ratio Fix (23 feb 2026)
+
+### Probleem (gebruiker-gerapporteerd + screenshot)
+Op de "Merken" tab van een brand-profile pagina (bv. `← Terug naar merken` view via brand-portal-v1.js bp-prod-grid) werden product-foto's afgesneden — hoofd van het fashion-model werd weggesneden.
+
+### Root cause
+`brand-portal-v1.js` regel 473 rendert `<div class="bp-prod-img"><img...>` zonder expliciete `aspect-ratio`/`object-fit`. De legacy `brand-portal.css` heeft default crop-gedrag dat fashion-portraits aansnijdt.
+
+### Fix (additieve CSS-override, geen wijziging aan legacy)
+- **Nieuw bestand**: `/app/pwa/extensions/profile/pp-brand-prod-img-fix.css` v1.0.0
+- `.bp-prod-img { aspect-ratio: 3 / 4; background: #0f0c08; display: flex; align/justify: center; overflow: hidden; }` (portret-container, neutrale dark letterbox)
+- `.bp-prod-img img { width: 100%; height: 100%; object-fit: contain; }` (volledige afbeelding past in box)
+- Geladen in `index.html` NA `/brand-portal.css` zodat de override via CSS-volgorde/specificity wint.
+- **Brand-portal-v1.js volledig ongewijzigd** (legacy file architectuur-regel gehandhaafd).
+
+### Testing
+- **138/138 pytest assertions PASS** (123 → 138, +15 nieuwe `TestBrandProdImgFix` assertions).
+- Geen kritieke issues.
+- Backend `/api/downloads/...` → 200 OK.
+
+### Delivery
+- `index.html` cache → `?v=60.1.163-brand-prod-img-fix` voor pp-brand-prod-img-fix.css
+- `sw.js` VERSION → `v60.1.163-20260623-brand-prod-img-fix`
+- Zip md5 `6087fca10e683c71e854cef497538a3e`
+
+
 ## v60.1.162 — Uitgelicht "Gesponsord door onze partners" Campagne Visibility Fix (23 feb 2026)
 
 ### Probleem (gebruiker-gerapporteerd + screenshot)
