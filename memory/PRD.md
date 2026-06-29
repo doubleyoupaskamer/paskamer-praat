@@ -6,6 +6,28 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.161 — Onboarding-Checklist "Wallet opgeladen" Bypass (23 feb 2026)
+
+### Probleem (gebruiker-gerapporteerd + screenshot)
+De "Wallet opgeladen" knop in de brand-dashboard onboarding-checklist (`data-testid="onb-go-wallet"`) opende B2C pakketten i.p.v. B2B campagne-pakketten.
+
+### Root cause
+`pp-brand-onboarding-checklist-v1.js` wallet step.route gebruikte `window.DY.navigeer('wallet')` welke werd geabsorbeerd door `brand-portal-v1.js` `_renderLock` guard (zelfde absorptie-bug die v60.1.159 voor de brand-dash-wallet card oploste). De `PP_Wallet.openWallet()` direct-render bypass uit v60.1.159 was nog niet toegepast op deze knop.
+
+### Fix (1 function, fully backwards-compat)
+- `pp-brand-onboarding-checklist-v1.js` v1.1.0 — wallet step.route roept nu eerst `PP_Wallet.openWallet()` aan (direct-render bypass), met fallback naar `DY.brandPortal._renderLock=false` + `DY.navigeer('wallet')` als PP_Wallet niet geladen is.
+- De 3 andere stappen (profiel/producten/campagne) blijven `DY.navigeer('brand_*')` gebruiken — die routes zitten in `BP_PAGES` en worden natief door brand-portal afgehandeld zonder absorptie-risico.
+
+### Testing
+- **100% pytest assertions PASS** (testing agent rapport iteration_9).
+- Nieuwe `TestOnboardingChecklistWalletBypass` class als permanente regression-guard.
+
+### Delivery
+- `index.html` cache → `?v=60.1.161-onb-wallet-bypass` voor pp-brand-onboarding-checklist-v1.js
+- `sw.js` VERSION → `v60.1.161-20260623-onb-wallet-bypass`
+- Zip md5 `f1c8907bc8f1d468a2b78338eb036088`
+
+
 ## v60.1.160 — Uitgelicht Product-Afbeeldingen Volledig & In Verhouding (23 feb 2026)
 
 ### Probleem (gebruiker-gerapporteerd + screenshot)
