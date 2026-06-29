@@ -35,10 +35,22 @@
   function fmtNum(n) { return (n || 0).toLocaleString('nl-NL'); }
 
   // ────────── ENGAGEMENT LOADER ──────────
+  function emptyPlcMap() {
+    return {
+      feed:           { impr: 0, click: 0 },
+      stories:        { impr: 0, click: 0 },
+      outfit_review:  { impr: 0, click: 0 },
+      ai_assist:      { impr: 0, click: 0 },
+      similar_items:  { impr: 0, click: 0 }
+    };
+  }
+
   async function loadBrandEngagement(brandUid, campaignIds) {
-    var perCamp = {};       // campId → { impr, click }
+    var perCamp = {};       // campId → { impr, click, byPlc }
     var brandTotalLikes = 0;
-    campaignIds.forEach(function (cid) { perCamp[cid] = { impr: 0, click: 0 }; });
+    campaignIds.forEach(function (cid) {
+      perCamp[cid] = { impr: 0, click: 0, byPlc: emptyPlcMap() };
+    });
 
     // 1) events filtered op brandId — minimaliseert reads via brandId where-clause
     try {
@@ -53,6 +65,11 @@
         if (!cid || !perCamp[cid]) return;
         if (e.type === 'impression') perCamp[cid].impr++;
         else if (e.type === 'campaign_click') perCamp[cid].click++;
+        var plc = e.plaatsing;
+        if (plc && perCamp[cid].byPlc[plc]) {
+          if (e.type === 'impression') perCamp[cid].byPlc[plc].impr++;
+          else if (e.type === 'campaign_click') perCamp[cid].byPlc[plc].click++;
+        }
       });
     } catch (e) {
       try { console.warn(TAG, 'events fetch:', e && e.code); } catch (_) {}
@@ -76,6 +93,107 @@
     }
 
     return { perCamp: perCamp, likes: brandTotalLikes };
+  }
+
+  // ────────── PER-PLACEMENT CSV EXPORT ──────────
+  function csvCell(v) {
+    var s = (v == null ? '' : String(v));
+    if (/[";\n\r]/.test(s) || s.indexOf(';') !== -1) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  }
+
+  function exportCSV(placement) {
+    try {
+      var BP = window.DY && window.DY.brandPortal;
+      if (!BP || !BP._ppLiveAnalytics) {
+        if (BP && window.DY && DY.toast) DY.toast('Laad analytics eerst.');
+        return;
+      }
+      var rows = BP._analyticsRows || [];
+      var perCamp = BP._ppLiveAnalytics.perCamp || {};
+      var headers = ['Campagne','Status','Plaatsing','Impressies','Kliks','CTR_%','CampagneId'];
+      var lines = [headers.join(';')];
+      var totalRows = 0;
+      rows.forEach(function (r) {
+        var live = perCamp[r.id] || { impr: 0, click: 0, byPlc: {} };
+        if (placement) {
+          var pc = (live.byPlc && live.byPlc[placement]) || { impr: 0, click: 0 };
+          // Skip campagnes die deze placement niet gekocht hebben
+          if ((r.plaatsingen || []).indexOf && r.plaatsingen.indexOf(placement) === -1) {
+            // Als de array niet aanwezig is in _analyticsRows: alleen tonen als er events zijn
+            if (!pc.impr && !pc.click) return;
+          }
+          var ctr = pc.impr > 0 ? ((pc.click / pc.impr) * 100).toFixed(2) : '0.00';
+          lines.push([
+            csvCell(r.naam || ''),
+            csvCell(r.status || ''),
+            csvCell(placement),
+            pc.impr, pc.click, ctr,
+            csvCell(r.id || '')
+          ].join(';'));
+          totalRows++;
+        } else {
+          var ctrAll = live.impr > 0 ? ((live.click / live.impr) * 100).toFixed(2) : '0.00';
+          lines.push([
+            csvCell(r.naam || ''),
+            csvCell(r.status || ''),
+            csvCell('ALLE'),
+            live.impr, live.click, ctrAll,
+            csvCell(r.id || '')
+          ].join(';'));
+          totalRows++;
+        }
+      });
+      if (!totalRows) {
+        if (window.DY && DY.toast) DY.toast('Geen data voor "' + (placement || 'alle') + '".');
+        return;
+      }
+      var csv = '\ufeff' + lines.join('\r\n');
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var nu = new Date();
+      var stamp = nu.getFullYear() + '-' +
+                  String(nu.getMonth()+1).padStart(2,'0') + '-' +
+                  String(nu.getDate()).padStart(2,'0') + '_' +
+                  String(nu.getHours()).padStart(2,'0') + String(nu.getMinutes()).padStart(2,'0');
+      var brandName = (BP._brandCache && BP._brandCache.naam) || 'merk';
+      var safeBrand = brandName.replace(/[^a-z0-9\-]/gi, '_').toLowerCase();
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'analytics_' + safeBrand + '_' + (placement || 'alle') + '_' + stamp + '.csv';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () {
+        try { document.body.removeChild(a); } catch (_) {}
+        try { URL.revokeObjectURL(url); } catch (_) {}
+      }, 100);
+      if (window.DY && DY.toast) DY.toast('CSV "' + (placement || 'alle') + '" geëxporteerd (' + totalRows + ' rijen).');
+    } catch (e) {
+      try { alert('Export fout: ' + e.message); } catch (_) {}
+    }
+  }
+
+  function renderExportBar() {
+    var main = document.getElementById('dy-main');
+    if (!main) return;
+    var grid = main.querySelector('.bp-stat-grid');
+    if (!grid) return;
+    if (main.querySelector('[data-testid="pp-ba-export-bar"]')) return;
+    var bar = document.createElement('div');
+    bar.setAttribute('data-testid', 'pp-ba-export-bar');
+    bar.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px';
+    bar.innerHTML =
+      '<div style="font-size:13px;color:#9b8775;width:100%;margin-bottom:2px">📥 Download je rapport per plaatsing:</div>' +
+      '<button class="bp-btn bp-btn-ghost" onclick="PP_BrandAnalytics.exportCSV()" data-testid="pp-ba-exp-all">Alle</button>' +
+      '<button class="bp-btn bp-btn-ghost" onclick="PP_BrandAnalytics.exportCSV(\'feed\')" data-testid="pp-ba-exp-feed">Feed</button>' +
+      '<button class="bp-btn bp-btn-ghost" onclick="PP_BrandAnalytics.exportCSV(\'stories\')" data-testid="pp-ba-exp-stories">Stories</button>' +
+      '<button class="bp-btn bp-btn-ghost" onclick="PP_BrandAnalytics.exportCSV(\'outfit_review\')" data-testid="pp-ba-exp-review">Outfit review</button>' +
+      '<button class="bp-btn bp-btn-ghost" onclick="PP_BrandAnalytics.exportCSV(\'ai_assist\')" data-testid="pp-ba-exp-ai">AI assistent</button>' +
+      '<button class="bp-btn bp-btn-ghost" onclick="PP_BrandAnalytics.exportCSV(\'similar_items\')" data-testid="pp-ba-exp-similar">Vergelijkbaar</button>';
+    grid.parentNode.insertBefore(bar, grid.nextSibling);
   }
 
   // ────────── DOM PATCHER ──────────
@@ -192,8 +310,9 @@
       patchStats(totals);
       patchTable(data.perCamp, rows);
 
-      // Sla totals + perCamp op voor CSV-export hook (toekomst)
+      // Sla totals + perCamp op voor CSV-export
       BP._ppLiveAnalytics = { totals: totals, perCamp: data.perCamp };
+      renderExportBar();
     } catch (e) {
       try { console.warn(TAG, 'enhance failed:', e); } catch (_) {}
     }
@@ -223,6 +342,7 @@
 
   window.PP_BrandAnalytics = {
     refresh: enhance,
-    VERSION: '1.0.0'
+    exportCSV: exportCSV,
+    VERSION: '1.1.0'
   };
 })();
