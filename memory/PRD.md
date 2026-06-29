@@ -6,6 +6,29 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.167 — Phase C: Universele Contextuele Fallback (23 feb 2026)
+
+### Probleem (gebruiker)
+Back-knoppen en empty-states in PWA vielen blind terug op `/feed` in plaats van de logische parent-route (bv. brand_detail → merken, wallet_topup → wallet, admin_users → admin). Master Prompt: "Universele contextuele fallback optimalisatie voor alle app-pagina's".
+
+### Fix (additieve uitbreiding `pp-nav-context-v1.js` v1.2.0)
+- **`navStack[]`** — history-stack (max 25, gedeudupliceerd) die elke `DY.navigeer()` call shadowt zonder hem te breken.
+- **`installNavTracker()`** — hookt `DY.navigeer` 1× idempotent; seed met huidige route, sla referrer op.
+- **`PARENT_MAP`** — 19 keys: `brand_detail/merken_detail/campagne_detail/product_detail → merken`, `brand_campaigns/products/wallet/settings/onboarding → brand_dashboard`, `wallet/pakketten/instellingen → profiel`, `wallet_topup/wallet_history → wallet`, `admin_users/transactions/boosts → admin`, etc.
+- **`goBack(opts)`** — prioriteit: 1) navStack pop+previous, 2) PARENT_MAP, 3) `history.back()`, 4) feed (last resort).
+- **`pushRoute(page,id)`** — externe API om manueel routes te tracken (voor toekomstige features).
+- **Universal-back delegator** vangt `[data-testid=universal-back]` en `[data-pp-back="1"]` naast bestaande specifieke handlers.
+
+### Testing (`testing_agent_v3_fork` — iteration_15)
+- **7/7 PASS** (100%): no JS errors, API-surface (`openMerken/resolveBackRoute/goBack/pushRoute/getStack/PARENT_MAP/brandLogoFor/VERSION='1.2.0'`), brand_detail → merken (geen blinde feed), PARENT_MAP keys, navTracker hook, sw.js VERSION.
+- Validatie via runtime-injectie in headless Chromium met mock `window.DY` (preview-omgeving serveert geen PWA — productie nog op v60.1.166).
+
+### Delivery
+- `index.html` cache → `?v=60.1.167-nav-fallback`
+- `sw.js` VERSION → `v60.1.167-20260623-nav-fallback`
+- Zip: `/app/01-paskamerpraat-pwa-cloudflare.zip` (4.0 MB)
+
+
 ## v60.1.166 — Teaser Anchor verplaatst naar "Gesponsord door onze partners" (23 feb 2026)
 
 ### Probleem (gebruiker)
