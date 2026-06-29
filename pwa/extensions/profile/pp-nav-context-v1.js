@@ -190,10 +190,13 @@
   // ────────── INIT ──────────
   function init() {
     setupBackButtonDelegator();
+    installNavTracker();
+    setupUniversalBackDelegator();
     var obs = new MutationObserver(function () {
       try {
         patchUitgelichtCards();
         injectLogos();
+        installNavTracker(); // probeer opnieuw als DY pas later geladen wordt
       } catch (_) {}
     });
     obs.observe(document.body, { childList: true, subtree: true });
@@ -209,11 +212,35 @@
     init();
   }
 
+  // ────────── UNIVERSAL BACK BUTTON DELEGATOR (v1.2.0) ──────────
+  // Vangt elke knop met data-testid="universal-back" of [data-pp-back="1"]
+  // en routeert via context-aware goBack(). Bestaande specifieke
+  // handlers (brand-detail-back, merken-back-btn) blijven intact en
+  // voorrang houden — deze delegator is een net-vanger voor nieuwe
+  // back-knoppen die geen specifieke handler hebben.
+  function setupUniversalBackDelegator() {
+    document.addEventListener('click', function (e) {
+      try {
+        var target = e.target;
+        if (!target || target.nodeType !== 1) return;
+        var btn = target.closest('[data-testid="universal-back"], [data-pp-back="1"]');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        goBack();
+      } catch (_) {}
+    }, true);
+  }
+
   window.PP_NavContext = {
     openMerken:        openMerken,
     resolveBackRoute:  resolveBackRoute,
     brandLogoFor:      brandLogoFor,
     injectLogos:       injectLogos,
-    VERSION:           '1.0.0'
+    goBack:            goBack,
+    pushRoute:         pushRoute,
+    getStack:          function () { return navStack.slice(); },
+    PARENT_MAP:        PARENT_MAP,
+    VERSION:           '1.2.0'
   };
 })();
