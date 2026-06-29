@@ -6,6 +6,37 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.175 — Per-Placement CSV + Brand Analytics Live Data (29 jun 2026)
+
+### Probleem (gebruiker)
+1. "Per plaatsing een apart CSV-bestand kunnen downloaden die ik direct naar een klant kan sturen."
+2. "Geef de gebruiker ook inzage in Impr/Kliks/Likes/Actie in hun individuele gebruikersaccount bij analytics."
+
+### Fix 1 — Admin per-placement CSV (`pp-campagne-diagnose-v1.js` v1.3.0)
+- `loadEngagementMaps()` houdt nu een per-placement breakdown bij: `byPlc.feed/stories/outfit_review/ai_assist/similar_items → {impr, click}`.
+- `exportCSV(placement)` filtert rows op campagnes waarvan `plaatsingen` die placement bevat, en gebruikt **placement-specifieke** impr/click-tellers i.p.v. cumulatief.
+- Header `Plaatsing` toegevoegd zodat de CSV self-documenting is.
+- Export-bar bovenaan de pagina met 6 knoppen: Alle / Feed / Stories / Outfit review / AI assistent / Vergelijkbaar.
+- Bestandsnaam patroon: `campagne_diagnose_<placement>_<YYYY-MM-DD_HHMM>.csv` — meteen klantklaar.
+
+### Fix 2 — Brand Analytics Live Data (`pp-brand-analytics-live-v1.js` v1.0.0)
+- Nieuw additieve module die `BP.renderAnalytics` *wrapt* zonder legacy `brand-portal-v1.js` te wijzigen.
+- Na legacy render:
+  - Query `events` waar `brandId === currentUserUid` (limit 2000) → aggregeert per `campaignId`.
+  - Query `brand_products` waar `brandId === currentUserUid` (limit 200) → telt likes uit `likes` map.
+  - DOM-patcher overschrijft de stale `Impressies`/`Clicks`/`CTR` cellen met live cijfers.
+  - Voegt nieuwe stat-tegel "Likes" toe en kolommen "Likes" (merk-niveau indicator) + "Actie" (Bekijk →).
+- Failure-tolerant: bij rules-error → console.warn, geen crash, legacy DOM blijft staan.
+
+### Géén legacy code aangeraakt
+Beide fixes zijn pure additieve uitbreidingen in `/app/pwa/extensions/`. Geen wijziging aan `brand-portal-v1.js`, `pwa-v463-*.js`, of enig ander legacy bestand.
+
+### Delivery
+- `index.html` cache → `?v=60.1.175-csv-plc-analytics` (beide files)
+- `sw.js` VERSION → `v60.1.175-20260629-csv-plc-analytics`
+- Zip md5 `d260589b6d5924ff85fd1bf2a1bdfc2c`
+
+
 ## v60.1.172 — Likes op Sponsored + Kill-switch Honoring (29 jun 2026)
 
 ### Probleem (gebruiker, screenshot Placements control)
