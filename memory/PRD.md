@@ -6,6 +6,41 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.160 — Uitgelicht Product-Afbeeldingen Volledig & In Verhouding (23 feb 2026)
+
+### Probleem (gebruiker-gerapporteerd + screenshot)
+Op de Uitgelicht-pagina ("Producten van onze partners" sectie) werden product-afbeeldingen afgesneden: typisch het hoofd en/of de voeten van het fashion-model werden weggeknipt.
+
+### Root cause
+In `pp-feedtabs-v1.js` regel 103-104 had `.pp-uitg-prod-img`:
+- `aspect-ratio:1/1` (vierkante container)
+- `object-fit:cover` op `<img>` (vul container, snij overflow weg)
+
+Fashion-fotografie is overwegend portret-georiënteerd → een vierkante box met `cover` forceert cropping aan boven/onderkant.
+
+### Fix (minimaal-invasief, alleen 2 CSS regels)
+- `.pp-uitg-prod-img { aspect-ratio: 1/1 → 3/4 }` (portret container, match met fashion-foto proportie)
+- `.pp-uitg-prod-img img { object-fit: cover → contain }` (volledige afbeelding past in box, eventuele zij-letterbox in neutrale #0f0c08 die onzichtbaar blendt met dark theme)
+- Container blijft `display:flex` + `align-items/justify-content:center` zodat de gecontainde afbeelding gecentreerd is.
+
+### Geen andere wijzigingen
+- Geen JS/HTML/DOM-wijzigingen
+- `paintProductenOverview()` output identiek
+- partner-campagne grid boven de producten ongewijzigd
+- Wallet/onboarding/popup code uit v60.1.156–159 100% intact
+- B2C wallet ongewijzigd
+
+### Testing
+- **100/100 pytest assertions PASS** (91 → 100, +9 nieuwe `TestUitgelichtProductImageRatio`).
+- 11 statische audits groen (CSS-string match, ZERO oude waarden, ZIP-regression MD5 match, regressie-check van alle vorige iterations).
+- Backend `/api/downloads/...` → 200 OK, 4.021.765 bytes.
+
+### Delivery
+- `index.html` cache → `?v=60.1.160-prod-img-contain` voor pp-feedtabs-v1.js
+- `sw.js` VERSION → `v60.1.160-20260623-prod-img-contain`
+- Zip: `/app/01-paskamerpraat-pwa-cloudflare.zip` (~3.83MB, md5 `f0507630e821affe32d958f8ef2192b5`)
+
+
 ## v60.1.159 — Direct Render Bypass via PP_Wallet.openWallet() (23 feb 2026)
 
 ### Probleem (gebruiker-gerapporteerd + DevTools screenshot)
