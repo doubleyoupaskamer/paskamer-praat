@@ -1,0 +1,184 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * Doubleyou - Brand Onboarding Checklist - Stijl (v1.0.0)
+ * Donker thema (matchend met bp-page achtergrond #0a0806)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+.pp-onboarding-card {
+  margin: 18px 0 14px;
+  padding: 18px 18px 14px;
+  background: linear-gradient(155deg, rgba(212, 145, 10, 0.10) 0%, rgba(20, 16, 12, 0.85) 70%);
+  border: 1px solid rgba(212, 145, 10, 0.32);
+  border-radius: 16px;
+  color: #f5ece0;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.32);
+}
+
+.pp-onboarding-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.pp-onboarding-head-text { flex: 1; min-width: 200px; }
+
+.pp-onboarding-eyebrow {
+  display: inline-block;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #d4910a;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.pp-onboarding-titel {
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: #fff;
+}
+
+.pp-onboarding-sub {
+  font-size: 12.5px;
+  color: rgba(245, 236, 224, 0.72);
+  margin: 0;
+}
+
+/* Progress ring (SVG) */
+.pp-onboarding-progress {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+.pp-onboarding-progress svg {
+  transform: rotate(-90deg);
+}
+.pp-onboarding-progress path {
+  fill: none;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+.pp-onboarding-track { stroke: rgba(255, 255, 255, 0.10); }
+.pp-onboarding-bar   {
+  stroke: #d4910a;
+  transition: stroke-dasharray 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.pp-onboarding-pct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #d4910a;
+}
+
+/* Steps */
+.pp-onboarding-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.pp-onboarding-step { margin: 0; }
+
+.pp-onboarding-step-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+.pp-onboarding-step.open .pp-onboarding-step-btn:hover {
+  background: rgba(212, 145, 10, 0.12);
+  border-color: rgba(212, 145, 10, 0.45);
+  transform: translateY(-1px);
+}
+.pp-onboarding-step.done .pp-onboarding-step-btn {
+  cursor: default;
+  background: rgba(34, 134, 58, 0.10);
+  border-color: rgba(34, 134, 58, 0.30);
+}
+
+.pp-onboarding-mark {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.55);
+}
+.pp-onboarding-step.done .pp-onboarding-mark {
+  background: #22863a;
+  border-color: #22863a;
+  color: #fff;
+}
+
+.pp-onboarding-step-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.pp-onboarding-step-text strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+.pp-onboarding-step-hint {
+  font-size: 11px;
+  color: rgba(245, 236, 224, 0.55);
+}
+
+.pp-onboarding-arrow {
+  flex-shrink: 0;
+  color: rgba(212, 145, 10, 0.85);
+  font-weight: 700;
+  font-size: 14px;
+  transition: transform 0.18s ease;
+}
+.pp-onboarding-step.open .pp-onboarding-step-btn:hover .pp-onboarding-arrow {
+  transform: translateX(3px);
+}
+
+/* Skeleton */
+.pp-onboarding-skeleton .pp-onboarding-titel {
+  color: rgba(255, 255, 255, 0.55);
+}
+.pp-onboarding-skeleton {
+  animation: pp-onb-pulse 1.2s ease-in-out infinite;
+}
+@keyframes pp-onb-pulse {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1; }
+}
+
+/* Mobile (≤ 480px): forceer 2 cols voor stappen */
+@media (max-width: 480px) {
+  .pp-onboarding-steps { grid-template-columns: 1fr 1fr; }
+  .pp-onboarding-step-hint { display: none; }
+}

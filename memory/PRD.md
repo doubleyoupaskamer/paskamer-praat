@@ -6,6 +6,37 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.152 — Brand Onboarding Checklist Widget (23 feb 2026)
+
+### Doel
+Lichte progress-strip aan het brand_dashboard om merken een duidelijk volgende-stap signaal te geven en activatie te verhogen — strict additief, geen wijziging aan `brand-portal-v1.js`.
+
+### Nieuwe modules
+- **`pp-brand-onboarding-checklist-v1.js`** v1.0.0
+  - MutationObserver detecteert render van brand_dashboard.
+  - Injecteert widget tussen `bp-dash-header` en `bp-stat-grid`.
+  - 4 stappen, parallel Firestore-checks:
+    1. **Profiel** → `brands/{uid}.logo` && `omschrijving` aanwezig
+    2. **Producten** → `brand_products` heeft ≥1 doc met `brandId == uid` (limit:1)
+    3. **Eerste campagne** → `campaigns` heeft ≥1 doc met `brandId == uid` (limit:1)
+    4. **Wallet opgeladen** → `users/{uid}.wallet_balance > 0`
+  - Klik op open stap → routes naar respectievelijk `brand_profiel`, `brand_producten`, `brand_campagnes`, `wallet`.
+  - Afgeronde stappen tonen ✓ (niet meer klikbaar).
+  - Skeleton placeholder tijdens loading.
+  - Public API: `PP_BrandOnboarding.refresh()`, `PP_BrandOnboarding.evaluate()`.
+  - Debug: `window.__ppOnboardingChecklist`.
+
+- **`pp-brand-onboarding-checklist.css`** v1.0.0
+  - Donker thema, SVG progress-ring (56×56), responsive grid (mobile 2-col).
+  - Past in bestaand donker `bp-page` design (#0a0806 + accent #d4910a).
+
+### Delivery
+- `index.html` cache → `?v=60.1.152-onboarding-widget`
+- `sw.js` VERSION → `v60.1.152-20260623-onboarding-widget`
+- Zip vernieuwd op `/app/01-paskamerpraat-pwa-cloudflare.zip` (~3.9MB)
+- Endpoint geverifieerd: `GET /api/downloads/01-paskamerpraat-pwa-cloudflare.zip` → 200 OK
+
+
 ## v60.1.151 — Merkenportaal Routes & Brand-Wallet Isolation (23 feb 2026)
 
 ### Probleem
