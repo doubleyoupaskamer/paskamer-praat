@@ -6,6 +6,47 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.159 — Direct Render Bypass via PP_Wallet.openWallet() (23 feb 2026)
+
+### Probleem (gebruiker-gerapporteerd + DevTools screenshot)
+Na v60.1.158 deploy: inline onclick attribuut van Wallet-knop is correct (`onclick="try{...DY.brandPortal._renderLock=false}}...navigeer('wallet')"`), maar user zag NOG STEEDS B2C pakketten na klik.
+
+### Root cause (deep-dive)
+Legacy wrappers absorberen mogelijk de `DY.navigeer('wallet')` call:
+- **`brand-portal-v1.js` _renderLock guard** (regel 211-215): silent return voor non-BP_PAGES routes binnen 2s render window
+- **`pp-nav-fix-v1.js` wrapNavigeer**: extra navigatie-laag die state kan corrupten
+- **Cloudflare service worker**: kan oude pp-wallet-v1.js serven met stale render-logica
+
+### Fix (architecturele bypass)
+- **`pp-wallet-v1.js` v1.8.0** — Nieuwe geëxporteerde functie `PP_Wallet.openWallet()`:
+  - Muteert directly `DY.pagina='wallet'`, `DY._laatstGerenderd=null`, `DY.brandPortal._renderLock=false`
+  - Push `history.pushState(...?pagina=wallet)` voor deeplink-consistentie
+  - Roept **lokaal** `renderWallet()` aan — geen `DY.navigeer`/`DY.toonPagina` chain
+  - Try/catch fallback naar `DY.navigeer('wallet')` als directe render faalt
+  
+- **Inline onclick** roept eerst `PP_Wallet.openWallet();return false` aan, daarna pas de oude `DY.navigeer('wallet')` fallback chain (backwards-compat).
+
+- **Document-level capture-phase delegator** krijgt `e.preventDefault()` + `e.stopPropagation()` + roept ook eerst `PP_Wallet.openWallet()` aan. Vangt elke click op `[data-testid="brand-dash-wallet"]` vóór alle andere handlers.
+
+### Defense-in-depth (3 lagen)
+1. **Inline onclick** → `PP_Wallet.openWallet()` (direct render)
+2. **Capture-phase delegator** → `PP_Wallet.openWallet()` (vóór bubble-handlers)
+3. **Backwards-compat fallback** → `DY.navigeer('wallet')` met `_renderLock=false` clear
+
+Beide eerste-lagen omzeilen brand-portal `_renderLock` guard en pp-nav-fix wrapNavigeer volledig.
+
+### Testing
+- **91/91 pytest assertions PASS** (78 → 91 uitgebreid, +13 nieuwe `TestDirectRenderBypassOpenWallet` assertions).
+- 12 statische audits allen groen.
+- ZIP MD5 verified, backend `/api/downloads/...` → 200 OK, 4.021.764 bytes.
+- B2C wallet, brand-portal-v1.js, pp-nav-fix-v1.js: 100% ongewijzigd.
+
+### Delivery
+- `index.html` cache → `?v=60.1.159-direct-render-bypass` voor pp-wallet-v1.js
+- `sw.js` VERSION → `v60.1.159-20260623-direct-render-bypass`
+- Zip: `/app/01-paskamerpraat-pwa-cloudflare.zip` (~3.83MB, md5 `37d21622ce6c36e6c42898c68d9c8782`)
+
+
 ## v60.1.158 — Brand-Dashboard Wallet Card Hardened (23 feb 2026)
 
 ### Probleem (gebruiker-gerapporteerd + screenshot)
