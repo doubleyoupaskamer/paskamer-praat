@@ -6,6 +6,43 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.154 — B2B/B2C Wallet Segmentation Hardening (23 feb 2026)
+
+### Probleem
+User rapporteerde dat "Merkenportaal → Wallet → Opwaarderen" nog steeds B2C-content / consumentenpakketten kon tonen. Ondanks dat de routes (`wallet` vs `b2c_wallet`) en stores (`wallet_balance` vs `b2c_wallet_balance`) al gescheiden waren, kon een misconfigured Firestore-override (`admin_settings/global.shopify_config.variants`) in theorie B2C-bedragen in de B2B variant-map lekken.
+
+### Hardening
+- **`pp-wallet-v1.js`** v1.3.0
+  - Nieuwe const `B2B_ALLOWED_AMOUNTS = { 25:1, 50:1, 100:1, 250:1 }`
+  - `_renderB2BPackagesHTML` filtert `availableAmounts` op de whitelist — Firestore-overrides die andere bedragen toevoegen worden genegeerd.
+  - `topup(amount)` blokt onmiddellijk met toast + `console.warn` bij niet-toegestaan bedrag.
+  - Publieke API exposeert `B2B_ALLOWED_AMOUNTS` voor inspectie.
+
+- **`pp-b2c-wallet-v1.js`** v1.1.0
+  - Nieuwe const `B2C_ALLOWED_AMOUNTS = { 5:1, 10:1, 15:1, 25:1, 50:1 }`
+  - Spiegelt de B2B hardening in `_renderPackagesHTML` en `topup()`.
+  - Doc-string drift gefixed (€15 toegevoegd aan header-comment).
+
+### Defense-in-depth lagen (3 onafhankelijke checks)
+1. **Render-laag**: `_renderB2BPackagesHTML` / `_renderPackagesHTML` filteren whitelist
+2. **Action-laag**: `PP_Wallet.topup` / `PP_B2CWallet.topup` guards bij call
+3. **Wrapper-laag**: `pp-brand-wallet-isolation-v1.js` wrapt beide topup-functies + `PP_TopupComingSoon.show` met source-detectie
+
+Bewust 3 sources of truth voor defense-in-depth (gedocumenteerd).
+
+### Testing
+- 35/35 pytest assertions PASS (zie `/app/backend/tests/test_pwa_wallet_segmentation.py`)
+- Backend curl checks: download-endpoint 200 OK + path-traversal blocks
+- Static code audits: B2B isolatie, B2C isolatie, route-segregatie, Shopify variant-ID separation, storage field separation, version bumps
+- Geen kritieke issues. Minor: path-traversal multi-segment vectoren geven 404 i.p.v. 400 (FastAPI router rejects voor de explicit guard runs — nog steeds veilig).
+
+### Delivery
+- `index.html` cache → `?v=60.1.154-wallet-segmentation-hardening`
+- `sw.js` VERSION → `v60.1.154-20260623-wallet-segmentation-hardening`
+- Zip vernieuwd op `/app/01-paskamerpraat-pwa-cloudflare.zip` (~3.9MB, md5 `0035fc176f740960db7ab9b19255ffe5`)
+- Download endpoint geverifieerd
+
+
 ## v60.1.153 — "Voltooid binnen 7 dagen" Achievement Badge (23 feb 2026)
 
 ### Doel

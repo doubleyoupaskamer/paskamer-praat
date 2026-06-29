@@ -9,7 +9,7 @@
  * Functionaliteit:
  *   - Nieuwe route 'b2c_wallet' via DY.toonPagina wrapper
  *   - "Mijn Wallet" knop in profiel-menu (auto-inject voor alle ingelogde users)
- *   - Toont saldo (b2c_wallet_balance) + topup-knoppen €5/€10/€25/€50
+ *   - Toont saldo (b2c_wallet_balance) + topup-knoppen €5/€10/€15/€25/€50
  *   - Topup via directe Shopify checkout (variant-IDs te configureren)
  *
  * Variant-IDs: zie PP_B2C_TOPUPS hieronder. Vul in zodra Shopify producten zijn aangemaakt.
