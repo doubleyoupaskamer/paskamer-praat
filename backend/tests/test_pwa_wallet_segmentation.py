@@ -87,7 +87,10 @@ class TestB2BWallet:
 
     def test_b2b_section_title(self):
         src = B2B_FILE.read_text()
-        assert "Kies een campagne-pakket" in src
+        # v60.1.157: old <h2 class="bp-section-titel">Kies een campagne-pakket</h2>
+        # was replaced by the new hero block "Voor merken / Campagne-pakketten".
+        assert "Kies een campagne-pakket" not in src, \
+            "v60.1.157: old 'Kies een campagne-pakket' title must be REMOVED"
         assert "Kies een boost-pakket" not in src, "B2B file must not contain boost-pakket title"
 
     def test_b2b_shopify_variant_ids(self):
@@ -209,28 +212,32 @@ class TestOnboarding:
 class TestCacheVersion:
     def test_index_html_bumped(self):
         src = INDEX_HTML.read_text()
-        # v60.1.156: both wallets + comingsoon module bumped to the same key
-        assert "pp-wallet-v1.js?v=60.1.156-restore-coming-soon-popup" in src
-        assert "pp-b2c-wallet-v1.js?v=60.1.156-restore-coming-soon-popup" in src
-        assert "pp-topup-comingsoon-v1.js?v=60.1.156-restore-coming-soon-popup" in src
+        # v60.1.157: only pp-wallet-v1.js was modified for the merken-campagne
+        # layout — its script tag must carry the new cache key. The other
+        # payments modules (b2c wallet, comingsoon, modal-router, isolation)
+        # may still carry v60.1.156-restore-coming-soon-popup because their
+        # source files were not modified in v60.1.157.
+        assert "pp-wallet-v1.js?v=60.1.157-merken-campagne-layout" in src
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
-        assert "VERSION       = 'v60.1.156-20260623-restore-coming-soon-popup'" in src or \
-               "VERSION = 'v60.1.156-20260623-restore-coming-soon-popup'" in src
+        assert "VERSION       = 'v60.1.157-20260623-merken-campagne-layout'" in src or \
+               "VERSION = 'v60.1.157-20260623-merken-campagne-layout'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
 class TestDeployZip:
     def test_zip_exists_and_size(self):
         assert ZIP_FILE.exists()
-        assert ZIP_FILE.stat().st_size > 3 * 1024 * 1024, "zip should be > 3MB"
+        size = ZIP_FILE.stat().st_size
+        assert 3 * 1024 * 1024 < size < 5 * 1024 * 1024, \
+            f"zip should be between 3MB and 5MB, got {size} bytes"
 
-    def test_zip_contains_v60_1_156_sw(self):
+    def test_zip_contains_v60_1_157_sw(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "v60.1.156-20260623-restore-coming-soon-popup" in content
+        assert "v60.1.157-20260623-merken-campagne-layout" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -312,9 +319,9 @@ class TestComingSoonInterceptRestored:
             "B2C amount-whitelist must be applied BEFORE the popup call"
         )
 
-    def test_b2b_version_bumped_to_1_5_0(self):
+    def test_b2b_version_bumped_to_1_6_0(self):
         src = B2B_FILE.read_text()
-        assert re.search(r"VERSION\s*:\s*'1\.5\.0'", src), "B2B wallet VERSION must be 1.5.0"
+        assert re.search(r"VERSION\s*:\s*'1\.6\.0'", src), "B2B wallet VERSION must be 1.6.0 in v60.1.157"
 
     def test_b2c_version_bumped_to_1_3_0(self):
         src = B2C_FILE.read_text()
@@ -386,7 +393,7 @@ class TestComingSoonInterceptRestored:
                 content = f.read().decode("utf-8", errors="ignore")
         assert "PP_TopupComingSoon.show" in content
         assert re.search(r"source:\s*'b2b'", content)
-        assert re.search(r"VERSION\s*:\s*'1\.5\.0'", content)
+        assert re.search(r"VERSION\s*:\s*'1\.6\.0'", content)
 
     def test_zip_b2c_wallet_has_intercept(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -405,4 +412,171 @@ class TestComingSoonInterceptRestored:
         assert "pp-topup-cs-eyebrow-b2c" in content
         assert "Merken Campagne Wallet" in content
         assert "Mijn Wallet" in content
+
+
+# ───────── v60.1.157: MERKEN CAMPAGNE-PAKKETTEN LAYOUT ─────────
+class TestMerkenCampagneLayout:
+    """v60.1.157 adds the public Campagne-pakketten hero layout INSIDE the
+    B2B Merken wallet Opwaarderen tab so it matches the public landing
+    pp-merken-pakketten-v1.js 1-to-1 (eyebrow 'Voor merken' + h2
+    'Campagne-pakketten' + intro + 4 cards Starter/Groei/Pro/Ultimate).
+    CTA text changed from 'Wallet opwaarderen' → 'Opwaarderen'."""
+
+    def test_b2b_opwaarderen_hero_present(self):
+        src = B2B_FILE.read_text()
+        assert 'wallet-campagne-hero' in src, \
+            "Opwaarderen tab must contain hero with data-testid 'wallet-campagne-hero'"
+        assert 'pp-b2b-campagne-hero' in src, \
+            "Hero must carry the pp-b2b-campagne-hero class for visual parity with public landing"
+
+    def test_b2b_opwaarderen_hero_h2_literal(self):
+        src = B2B_FILE.read_text()
+        assert '<h2>Campagne-pakketten</h2>' in src, \
+            "Opwaarderen hero must contain literal '<h2>Campagne-pakketten</h2>'"
+
+    def test_b2b_opwaarderen_eyebrow_voor_merken(self):
+        src = B2B_FILE.read_text()
+        # The eyebrow 'Voor merken' must appear inside the new hero block
+        assert '<span class="bp-header-eyebrow">Voor merken</span>' in src, \
+            "Opwaarderen hero must contain eyebrow 'Voor merken'"
+
+    def test_b2b_opwaarderen_intro_text(self):
+        src = B2B_FILE.read_text()
+        assert "Kies het pakket dat past bij je doelen" in src, \
+            "Opwaarderen hero must contain the intro paragraph"
+        assert "Saldo wordt gebruikt voor advertenties, placements en boosts" in src
+
+    def test_b2b_pkg_grid_present(self):
+        src = B2B_FILE.read_text()
+        assert 'data-testid="wallet-pkg-grid"' in src
+        assert 'pp-b2c-pkg-grid' in src  # reused grid class for visual consistency
+
+    def test_b2b_cta_text_is_opwaarderen_not_wallet_opwaarderen(self):
+        src = B2B_FILE.read_text()
+        # The string 'Wallet opwaarderen' must be FULLY REMOVED from the file.
+        assert "Wallet opwaarderen" not in src, \
+            "v60.1.157: 'Wallet opwaarderen' must be removed; CTA text is now 'Opwaarderen'"
+        # And the new CTA text 'Opwaarderen' is rendered next to the topup() onclick.
+        assert re.search(
+            r"PP_Wallet\.topup\([^)]+\)\"[^>]*data-testid=\"wallet-topup-[^\"]+\"\s*>\s*'\s*\+\s*\n?\s*'Opwaarderen'",
+            src,
+        ) or "'Opwaarderen'" in src, "CTA must render 'Opwaarderen' label"
+
+    def test_old_section_title_removed(self):
+        src = B2B_FILE.read_text()
+        # The OLD '<h2 class="bp-section-titel">Kies een campagne-pakket</h2>'
+        # must be GONE — replaced by the new hero block.
+        assert 'bp-section-titel' not in src or 'Kies een campagne-pakket' not in src
+        assert 'Kies een campagne-pakket' not in src, \
+            "Old 'Kies een campagne-pakket' title must be removed in v60.1.157"
+
+    def test_b2b_packages_default_match_screenshot(self):
+        src = B2B_FILE.read_text()
+        # Starter
+        assert "id: 'starter-25'" in src
+        assert "'Starter Campagne'" in src
+        assert "Beperkte testronde voor één campagne of placement." in src
+        # Groei (with popular:true)
+        assert "id: 'groei-50'" in src
+        assert "'Groei Campagne'" in src
+        assert "Meer campagne-impressies en ruimte voor A/B-testing." in src
+        # Pro
+        assert "id: 'pro-100'" in src
+        assert "'Pro Campagne'" in src
+        assert "Sterke aanwezigheid en hogere kans op brand-recognition." in src
+        # Ultimate
+        assert "id: 'ultimate-250'" in src
+        assert "'Ultimate Campagne'" in src
+        assert "Maximale campagne-impact en langlopende zichtbaarheid." in src
+
+    def test_only_groei_has_popular_true(self):
+        src = B2B_FILE.read_text()
+        # Exactly one occurrence of `popular: true` in PP_B2B_PACKAGES_DEFAULT
+        popular_count = len(re.findall(r"popular:\s*true", src))
+        assert popular_count == 1, \
+            f"Exactly one B2B package must be popular:true (groei-50), found {popular_count}"
+
+    def test_topup_data_testids_per_card(self):
+        src = B2B_FILE.read_text()
+        # Each card CTA must carry data-testid=wallet-topup-<amount>
+        assert 'data-testid="wallet-topup-' in src
+        # And call PP_Wallet.topup(<amount>)
+        assert 'onclick="PP_Wallet.topup(' in src
+
+    def test_top_level_saldo_hero_preserved(self):
+        """The top-level wallet hero (eyebrow 'Merken wallet' + h1 'Saldo')
+        must still be rendered BEFORE the tabs — so the page hierarchy
+        is: Saldo hero → tabs → Opwaarderen tab with NEW Campagne hero."""
+        src = B2B_FILE.read_text()
+        assert '<span class="bp-header-eyebrow">Merken wallet</span>' in src, \
+            "Top-level Saldo hero eyebrow 'Merken wallet' must remain"
+        # Two hero blocks total
+        assert src.count('bp-wallet-hero') >= 2, \
+            "Two hero blocks expected: top-level Saldo + nested Campagne-pakketten"
+
+    # ───── ZIP-level verification ─────
+    def test_zip_b2b_wallet_contains_new_hero(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("extensions/payments/pp-wallet-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "wallet-campagne-hero" in content
+        assert "<h2>Campagne-pakketten</h2>" in content
+        assert '<span class="bp-header-eyebrow">Voor merken</span>' in content
+        assert "Wallet opwaarderen" not in content, \
+            "ZIP must not contain old 'Wallet opwaarderen' string"
+        assert "Kies een campagne-pakket" not in content, \
+            "ZIP must not contain old 'Kies een campagne-pakket' h2"
+
+    def test_zip_b2b_wallet_version_1_6_0(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("extensions/payments/pp-wallet-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert re.search(r"VERSION\s*:\s*'1\.6\.0'", content), \
+            "ZIP'd pp-wallet-v1.js must be VERSION 1.6.0"
+
+
+# ───────── v60.1.157: Public landing UNCHANGED (regression) ─────────
+class TestMerkenLandingUnchanged:
+    """The original public Campagne-pakketten landing page
+    /app/pwa/extensions/admin/pp-merken-pakketten-v1.js (for non-logged-in
+    visitors) must be UNCHANGED in v60.1.157 — it is the visual reference
+    for the new wallet layout, not a copy target."""
+
+    MERKEN_LANDING = PWA / "extensions/admin/pp-merken-pakketten-v1.js"
+
+    def test_landing_file_exists(self):
+        assert self.MERKEN_LANDING.exists(), \
+            "Public Campagne-pakketten landing must still exist"
+
+    def test_landing_cta_logged_in_and_out(self):
+        src = self.MERKEN_LANDING.read_text()
+        assert "Naar merkenportaal" in src, \
+            "Logged-in CTA 'Naar merkenportaal' must remain on public landing"
+        assert "Aanmelden als merk" in src, \
+            "Logged-out CTA 'Aanmelden als merk' must remain on public landing"
+
+
+# ───────── v60.1.157: amount-segregation regression ─────────
+class TestAmountSegregationStillIntact:
+    """Defense-in-depth: v60.1.157 only touched layout in pp-wallet-v1.js;
+    the amount-whitelist constants must be unchanged. B2B = {25,50,100,250}
+    only; no 5/10/15 keys; B2C = {5,10,15,25,50} only; no 100/250 keys."""
+
+    def test_b2b_no_5_10_15_keys_in_allowed_amounts(self):
+        src = B2B_FILE.read_text()
+        m = re.search(r"B2B_ALLOWED_AMOUNTS\s*=\s*\{([^}]+)\}", src)
+        assert m, "B2B_ALLOWED_AMOUNTS missing"
+        body = m.group(1)
+        # Use word-boundary regex to avoid matching '5: 1' inside '25: 1'.
+        for forbidden in ("5", "10", "15"):
+            assert not re.search(rf"(?<!\d){forbidden}\s*:\s*1", body), \
+                f"B2B_ALLOWED_AMOUNTS must not contain key '{forbidden}'"
+
+    def test_b2b_render_filter_still_present(self):
+        src = B2B_FILE.read_text()
+        # _renderB2BPackagesHTML must still filter on B2B_ALLOWED_AMOUNTS
+        assert re.search(
+            r"_renderB2BPackagesHTML[\s\S]*?B2B_ALLOWED_AMOUNTS",
+            src,
+        ), "_renderB2BPackagesHTML must still filter on B2B_ALLOWED_AMOUNTS"
 

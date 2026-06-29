@@ -145,7 +145,7 @@
               '</div>'
             : '') +
           '<button class="bp-btn bp-btn-primair pp-b2c-pkg-cta" onclick="PP_Wallet.topup(' + amt + ')" data-testid="wallet-topup-' + amt + '">' +
-            'Wallet opwaarderen' +
+            'Opwaarderen' +
           '</button>' +
         '</article>'
       );
@@ -274,14 +274,23 @@
           '</div>' +
 
           // Tab content: Opwaarderen
+          // v1.6.0 (2026-02-23): Layout afgestemd op publieke Campagne-pakketten
+          // landingspagina (pp-merken-pakketten-v1.js) zodat het merkenportaal
+          // EXACT dezelfde visuele identiteit gebruikt — "VOOR MERKEN" eyebrow,
+          // hero-blok "Campagne-pakketten", intro-tekst en dezelfde 4 cards
+          // (Starter/Groei/Pro/Ultimate met VERWACHTING blokken en POPULAR badge).
+          // CTA op iedere card roept PP_Wallet.topup(amount) aan → coming-soon popup.
           '<div class="bp-wallet-tabpanel" data-panel="opwaarderen" style="display:none" data-testid="wallet-panel-opwaarderen">' +
-            '<h2 class="bp-section-titel" style="margin-top:18px">Kies een campagne-pakket</h2>' +
             (topupEnabled
-              ? '<div class="pp-b2c-pkg-grid" data-testid="wallet-pkg-grid">' +
+              ? '<div class="bp-wallet-hero pp-b2b-campagne-hero" data-testid="wallet-campagne-hero">' +
+                  '<span class="bp-header-eyebrow">Voor merken</span>' +
+                  '<h2>Campagne-pakketten</h2>' +
+                  '<p class="bp-sub">Kies het pakket dat past bij je doelen. Saldo wordt gebruikt voor advertenties, placements en boosts binnen Paskamerpraat.</p>' +
+                '</div>' +
+                '<div class="pp-b2c-pkg-grid" data-testid="wallet-pkg-grid">' +
                   _renderB2BPackagesHTML(shopCfg, settings) +
                 '</div>' +
-                '<p class="pp-b2c-disclosure" data-testid="wallet-disclosure">' + esc(PP_B2B_DISCLOSURE) + '</p>' +
-                '<p class="bp-mini" style="margin-top:10px">Je wordt doorgestuurd naar de Shopify checkout op <strong>' + esc(shopCfg.shop_domain) + '</strong>. Het saldo wordt automatisch bijgeschreven zodra de betaling is bevestigd.</p>'
+                '<p class="pp-b2c-disclosure" data-testid="wallet-disclosure">' + esc(PP_B2B_DISCLOSURE) + '</p>'
               : '<div class="bp-empty"><div class="bp-empty-titel">Opwaarderen tijdelijk uit</div>' +
                 '<div>De Shopify-koppeling wordt op dit moment geconfigureerd. Probeer later opnieuw of neem contact op met support voor handmatige opwaardering.</div></div>'
             ) +
@@ -574,6 +583,6 @@
     refresh:      refresh,
     switchTab:    switchTab,
     B2B_ALLOWED_AMOUNTS: B2B_ALLOWED_AMOUNTS,
-    VERSION:      '1.5.0'
+    VERSION:      '1.6.0'
   };
 })();
