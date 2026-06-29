@@ -1,0 +1,43 @@
+{
+  "summary": "PP_NavContext v1.2.0 universele contextuele fallback gevalideerd via static-file checks + runtime-injectie van het script in headless Chromium. Alle 7 test punten uit de review-request slagen. PWA is NIET via de preview-URL bereikbaar (preview serveert de standaard React Emergent fullstack-app, niet /app/pwa), en productie (paskamerpraat.nl) draait nog op v60.1.166 — daarom is de validatie uitgevoerd door de actuele /app/pwa/extensions/profile/pp-nav-context-v1.js bron in een echte browser te injecteren en de API te exercise-en.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_results": {
+    "1_no_js_errors_on_load": "PASS — script eval throws geen ReferenceError/exceptions. page errors=0, console errors=0.",
+    "2_pp_navcontext_api_surface": "PASS — Object.keys(window.PP_NavContext) = [openMerken, resolveBackRoute, brandLogoFor, injectLogos, goBack, pushRoute, getStack, PARENT_MAP, VERSION]. VERSION === '1.2.0'. Alle functies hebben typeof === 'function'.",
+    "3_brand_detail_back_to_merken": "PASS (runtime via mock DY) — navStack [feed,merken,brand_detail] → goBack() roept DY.navigeer('merken', null) aan. DY.pagina === 'merken' na back. Geen blinde fallback naar feed.",
+    "4_goBack_via_PARENT_MAP": "PASS — goBack() volgt prioriteit navStack > PARENT_MAP > history.back > feed. Code-pad expliciet geverifieerd in lines 248-285.",
+    "5_PARENT_MAP_keys": "PASS — brand_detail→merken, wallet_topup→wallet, admin_users→admin alle 3 aanwezig. PARENT_MAP heeft 19 keys incl. brand_campaigns, brand_products, brand_wallet, brand_settings, brand_onboarding, admin_transactions, admin_boosts, campagne_detail, product_detail, merken_detail, wallet_history, pakketten, instellingen, notificaties, zoeken.",
+    "6_navTracker_hooks_DY": "PASS — Na DY.navigeer('merken') + DY.navigeer('brand_detail','brand-123') retourneert PP_NavContext.getStack() = [{feed}, {merken}, {brand_detail,id:'brand-123'}]. installNavTracker() seed-t initial route en dedupe-t correct.",
+    "7_sw_version": "PASS — /app/pwa/sw.js line 13: const VERSION = 'v60.1.167-20260623-nav-fallback'. /app/pwa/index.html line 1008 laadt pp-nav-context-v1.js?v=60.1.167-nav-fallback."
+  },
+  "test_environment_notes": [
+    "Preview-URL (REACT_APP_BACKEND_URL = paskamer-stability.preview.emergentagent.com) serveert NIET de PWA — root, /sw.js en /extensions/profile/*.js geven allemaal de React SPA index.html (SPA fallback) terug.",
+    "Backend /api/downloads/{filename} accepteert geen slashes/paden, dus kan extensions/profile/*.js niet via de preview API serveren.",
+    "Productie paskamerpraat.nl /sw.js retourneert nog VERSION='v60.1.166-20260623-teaser-anchor' en /extensions/profile/pp-nav-context-v1.js bevat nog géén PARENT_MAP/navStack/installNavTracker — de nieuwe v60.1.167 build is dus nog NIET gedeployed naar Cloudflare. De code in /app/pwa is wel volledig en correct.",
+    "Validatie is daarom uitgevoerd door de bron uit /app/pwa/extensions/profile/pp-nav-context-v1.js te injecteren in een Chromium-pagina (about:blank) met een mock window.DY, conform de notitie in de review-request: 'JS-runtime validation is the must-pass'."
+  ],
+  "test_report_links": [
+    "/app/tests/test_pp_nav_context_runtime.py"
+  ],
+  "action_items": [
+    "Deploy v60.1.167 build (sw.js + pp-nav-context-v1.js) naar Cloudflare zodat paskamerpraat.nl de nieuwe nav-fallback krijgt. De lokale /app/pwa bron is volledig en correct.",
+    "Optioneel: documenteer dat de preview-omgeving géén PWA serveert — toekomstige PWA-tests moeten lokaal injecteren of via productie/staging."
+  ],
+  "critical_code_review_comments": [
+    "goBack() catch-block valt terug naar feed bij exceptions — overweeg ook hier PARENT_MAP te raadplegen voor consistentere UX.",
+    "pushRoute() dedupe vergelijkt (page,id) maar slaat geen referrer/from op; voor toekomstige analytics kan een 'from' veld nuttig zijn.",
+    "navStack max=50 (NAV_MAX) is shift-FIFO — prima voor geheugen, maar bij intensieve scrolling kan oude root afgesneden worden. Niet kritisch."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "n/a", "frontend": "100% (7/7 test points)" },
+  "test_credentials": "Brand: mozenlow2023@gmail.com / Newnewnetmedia84! — niet gebruikt omdat de PWA niet via preview bereikbaar is en productie nog op oude versie draait; runtime-injectie van het bronscript was voldoende voor de must-pass JS-validatie.",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Wanneer de v60.1.167 build naar productie/Cloudflare is gedeployed, herhaal dan stap 3 (Feed→Merken→brand_detail→back) tegen paskamerpraat.nl met de brand-test-credentials om de end-to-end UI-flow te bevestigen. Preview-omgeving serveert geen PWA — gebruik óf productie óf de injectie-techniek uit /app/test_reports/iteration_15.json (script content base64 → page.evaluate). PARENT_MAP/navStack/goBack/installNavTracker/VERSION '1.2.0' zijn allemaal geverifieerd in de lokale bron én runtime."
+}

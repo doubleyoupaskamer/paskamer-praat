@@ -187,6 +187,103 @@
     });
   }
 
+  // ────────── HISTORY STACK & PARENT MAP (v1.2.0) ──────────
+  // Tracked route stack die DY.navigeer() shadowt zonder hem te breken.
+  // navStack[i] = { page: 'merken_detail', id: 'brandId', ts: 12345 }
+  var navStack = [];
+  var NAV_MAX = 25;
+
+  // Parent-map: child page → logische parent route bij ontbrekende history.
+  // Voorkomt dat empty states blindelings naar /feed vallen.
+  var PARENT_MAP = {
+    // Brand portal
+    'brand_detail':       { page: 'merken' },
+    'merken_detail':      { page: 'merken' },
+    'brand_campaigns':    { page: 'brand_dashboard' },
+    'brand_products':     { page: 'brand_dashboard' },
+    'brand_wallet':       { page: 'brand_dashboard' },
+    'brand_settings':     { page: 'brand_dashboard' },
+    'brand_onboarding':   { page: 'brand_dashboard' },
+    'campagne_detail':    { page: 'merken' },
+    'product_detail':     { page: 'merken' },
+    // B2C
+    'wallet':             { page: 'profiel' },
+    'wallet_topup':       { page: 'wallet' },
+    'wallet_history':     { page: 'wallet' },
+    'pakketten':          { page: 'profiel' },
+    'instellingen':       { page: 'profiel' },
+    'notificaties':       { page: 'feed' },
+    'zoeken':             { page: 'feed' },
+    // Admin
+    'admin_users':        { page: 'admin' },
+    'admin_transactions': { page: 'admin' },
+    'admin_boosts':       { page: 'admin' }
+  };
+
+  function pushRoute(page, id) {
+    try {
+      if (!page) return;
+      var last = navStack[navStack.length - 1];
+      if (last && last.page === page && last.id === (id || null)) return; // dedupe
+      navStack.push({ page: page, id: id || null, ts: Date.now() });
+      if (navStack.length > NAV_MAX) navStack.shift();
+    } catch (_) {}
+  }
+
+  // Hook DY.navigeer om elke route te tracken
+  function installNavTracker() {
+    try {
+      if (!window.DY || typeof DY.navigeer !== 'function' || DY.__ppNavTrackerInstalled) return;
+      var orig = DY.navigeer.bind(DY);
+      DY.navigeer = function (page, id) {
+        try { pushRoute(page, id); } catch (_) {}
+        return orig(page, id);
+      };
+      DY.__ppNavTrackerInstalled = true;
+      // Seed initial route
+      try { pushRoute(DY.pagina || 'feed', DY.huidigeId || null); } catch (_) {}
+    } catch (_) {}
+  }
+
+  // Context-aware back: probeer 1) navStack (skip current), 2) PARENT_MAP, 3) history.back, 4) feed.
+  function goBack(opts) {
+    opts = opts || {};
+    try {
+      var current = (window.DY && DY.pagina) || '';
+      // 1) Pop current uit stack, neem previous
+      while (navStack.length && navStack[navStack.length - 1].page === current) {
+        navStack.pop();
+      }
+      var prev = navStack[navStack.length - 1];
+      if (prev && prev.page) {
+        // Bypass voor merken/brand portal — gebruik openMerken() helper
+        if (prev.page === 'merken') return openMerken();
+        if (window.DY && typeof DY.navigeer === 'function') {
+          return DY.navigeer(prev.page, prev.id || undefined);
+        }
+      }
+      // 2) PARENT_MAP fallback
+      var parent = PARENT_MAP[current];
+      if (parent && parent.page) {
+        if (parent.page === 'merken') return openMerken();
+        if (window.DY && typeof DY.navigeer === 'function') {
+          return DY.navigeer(parent.page, parent.id || undefined);
+        }
+      }
+      // 3) Browser history (geen blinde /feed)
+      if (window.history && history.length > 1) {
+        try { history.back(); return; } catch (_) {}
+      }
+      // 4) Last resort: feed
+      if (window.DY && typeof DY.navigeer === 'function') {
+        DY.navigeer('feed');
+      }
+    } catch (e) {
+      try { console.warn(TAG, 'goBack failed:', e); } catch (_) {}
+      if (window.DY && typeof DY.navigeer === 'function') DY.navigeer('feed');
+    }
+  }
+
   // ────────── INIT ──────────
   function init() {
     setupBackButtonDelegator();
