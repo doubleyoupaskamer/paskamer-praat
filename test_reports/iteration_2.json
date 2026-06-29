@@ -1,0 +1,42 @@
+{
+  "summary": "Backend + static audit for PWA v60.1.154 wallet segmentation hardening. 35/35 pytest tests pass. Verified strict B2B/B2C wallet segregation across constants, render helpers, topup guards, route wrapping, storage fields, Shopify variant IDs, headers, section titles, isolation wrapper (PP_BrandWalletIsolation), brand-route whitelist, onboarding checklist, cache-busting versions, sw.js VERSION, and the Cloudflare deploy zip. Download endpoint /api/downloads/01-paskamerpraat-pwa-cloudflare.zip returns 200 application/zip (~3.83 MB).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "/api/downloads/{filename}",
+        "issue": "Path traversal patterns containing '/' or '..' as path separators (e.g. '../etc/passwd', 'foo/bar.zip') are blocked with HTTP 404 by FastAPI's path-routing (the {filename} param does not capture slashes) instead of the 400 from the explicit guard at server.py L107-108. Defense holds (file is never served) but the 400 guard branch is effectively unreachable for the multi-segment cases the spec lists. Single-segment cases like '..hidden.zip', '....zip', 'test.exe', 'no_extension' DO return 400 as expected. Consider declaring the parameter as `{filename:path}` if the spec literally requires 400 for the multi-segment traversal vectors."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/pytest_pwa_wallet_segmentation.xml"
+  ],
+  "action_items": [
+    "(optional) If the user spec requires HTTP 400 (not 404) for slash/.. traversal vectors on /api/downloads/{filename}, change the route to `{filename:path}` so the existing guard at server.py L107-108 actually runs for those inputs. Currently router rejects them first with 404 — still safe, just a different status code."
+  ],
+  "critical_code_review_comments": [
+    "pp-b2c-wallet-v1.js line 12 comment says 'topup-knoppen €5/€10/€25/€50' — missing €15 in the doc-string while the actual B2C_ALLOWED_AMOUNTS set correctly includes 15. Cosmetic doc drift only.",
+    "B2B_ALLOWED_AMOUNTS / B2C_ALLOWED_AMOUNTS are duplicated in three places: pp-wallet-v1.js, pp-b2c-wallet-v1.js, and pp-brand-wallet-isolation-v1.js. This is intentional defense-in-depth but introduces a triple-source-of-truth maintenance risk: future amount changes must be applied to all three. Consider documenting this invariant prominently or using a shared frozen constant module.",
+    "Download endpoint guard order (server.py L107) checks extension first then path-traversal — fine, but the FastAPI route signature `{filename}` (not `{filename:path}`) makes the '/' guard dead-code for any URL containing '/'. Cosmetic only."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py"
+  ],
+  "success_rate": {
+    "backend": "100% (35/35 pytest, incl. 7 backend-curl assertions for /api/downloads)",
+    "frontend": "skipped per request (Vanilla JS PWA served from Cloudflare, not from preview URL)"
+  },
+  "test_credentials": "none required",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "v60.1.154 wallet segmentation hardening is fully verified at code level and in the deploy zip /app/01-paskamerpraat-pwa-cloudflare.zip (~3.83 MB). The Emergent preview URL only serves the FastAPI backend; the PWA itself is deployed externally to Cloudflare Pages. Do NOT attempt Playwright tests on the preview URL for PWA UI flows. The pytest file /app/backend/tests/test_pwa_wallet_segmentation.py is reusable as a regression guard — re-run it after every wallet/route/version change.",
+  "rca of the issue": "User reported B2C content leaking into B2B wallet. Static audit confirms the v60.1.154 fix is in place: (1) two separate wallet modules with disjoint AMOUNT whitelists ({25,50,100,250} vs {5,10,15,25,50}); (2) topup() guards reject out-of-set amounts with toast + console.warn; (3) DY.toonPagina wrappers are route-exclusive ('wallet' vs 'b2c_wallet'); (4) storage fields are disjoint (wallet_balance vs b2c_wallet_balance, confirmed by grep — no cross-references in code, only in doc comments); (5) Shopify variant-IDs are distinct even for overlapping €25/€50 (B2B 57524873855320/57524878410072 vs B2C 57532676768088/57532683321688); (6) defensive wrapper PP_BrandWalletIsolation re-enforces the whitelist around PP_Wallet.topup, PP_B2CWallet.topup and PP_TopupComingSoon.show; (7) cache-busting is bumped in index.html (?v=60.1.154-wallet-segmentation-hardening) AND in sw.js (VERSION = 'v60.1.154-20260623-wallet-segmentation-hardening') AND in the Cloudflare deploy zip, so users will pick up the new code on next page-load."
+}

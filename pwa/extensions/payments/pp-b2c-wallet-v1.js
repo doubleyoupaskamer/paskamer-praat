@@ -34,6 +34,12 @@
     return_path: '/?pagina=b2c_wallet&topup=success'
   };
 
+  // v1.1.0 (2026-02-23): HARD AMOUNT WHITELIST voor B2C Klant Wallet.
+  // Strikte tegenhanger van B2B_ALLOWED_AMOUNTS in pp-wallet-v1.js. Hier
+  // zijn ALLEEN consumenten-boost-bedragen toegestaan; B2B campagne-bedragen
+  // (€100/€250) mogen NOOIT in de B2C-checkout terechtkomen.
+  var B2C_ALLOWED_AMOUNTS = { 5: 1, 10: 1, 15: 1, 25: 1, 50: 1 };
+
   // ────────── B2C WALLET BOOST PAKKETTEN ──────────
   // Centraal beheerd: één bron van waarheid voor naam, omschrijving en
   // verwachte impact per opwaardeer-bedrag. Override mogelijk via Firestore
@@ -261,8 +267,10 @@
 
   function _renderPackagesHTML(b2cCfg, settings) {
     var packages = _resolvePackages(settings);
+    // v1.1.0: STRICT whitelist filter - alleen B2C-toegestane bedragen
+    // (€5/€10/€15/€25/€50) renderen, ook bij Firestore-override.
     var availableAmounts = Object.keys(b2cCfg.variants).filter(function (k) {
-      return !!b2cCfg.variants[k];
+      return !!b2cCfg.variants[k] && B2C_ALLOWED_AMOUNTS[Number(k)];
     }).map(function (k) { return Number(k); });
 
     // Index pakketten op amount voor snelle lookup
@@ -337,6 +345,15 @@
       var u = uid();
       if (!u) { toast('Log eerst in', true); return; }
       if (!amount) { toast('Geen bedrag gekozen', true); return; }
+
+      // v1.1.0: STRICT amount-guard. Klant-wallet accepteert UITSLUITEND
+      // €5/€10/€15/€25/€50. Voorkomt dat een B2B campagne-bedrag (€100/€250)
+      // door de B2C-checkout glipt.
+      if (!B2C_ALLOWED_AMOUNTS[Number(amount)]) {
+        toast('Ongeldig bedrag voor klant-wallet. Kies €5, €10, €15, €25 of €50.', true);
+        try { console.warn('[b2c-wallet] B2C blocked invalid amount:', amount); } catch (_) {}
+        return;
+      }
 
       var cfg = window.PP_B2C_TOPUPS_RESOLVED;
       if (!cfg) {
@@ -528,6 +545,7 @@
     openTopup:    openTopup,
     refresh:      refresh,
     switchTab:    switchTab,
-    VERSION:      '1.0.0'
+    B2C_ALLOWED_AMOUNTS: B2C_ALLOWED_AMOUNTS,
+    VERSION:      '1.1.0'
   };
 })();

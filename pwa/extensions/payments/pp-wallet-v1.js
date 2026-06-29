@@ -43,6 +43,13 @@
   };
   // ───────────────────────────────────────────────────────────────
 
+  // v1.3.0 (2026-02-23): HARD AMOUNT WHITELIST voor B2B Merken Campagnewallet.
+  // Voorkomt dat per-ongeluk B2C-bedragen via Firestore-override
+  // (admin_settings/global.shopify_config.variants) lekken in de
+  // merken-checkout. Iedere amount die NIET in deze set zit wordt
+  // genegeerd, ook al staat hij in de variant-map.
+  var B2B_ALLOWED_AMOUNTS = { 25: 1, 50: 1, 100: 1, 250: 1 };
+
   // ────────── B2B MERKEN WALLET PAKKETTEN ──────────
   // Centraal beheerd: één bron van waarheid voor naam, omschrijving en
   // verwachte impact per opwaardeer-bedrag. Override mogelijk via Firestore
@@ -101,8 +108,10 @@
       ? settings.b2b_packages
       : PP_B2B_PACKAGES_DEFAULT;
     var packages = override.filter(function (p) { return p && p.active !== false; });
+    // v1.3.0: STRICT whitelist filter - alleen B2B-toegestane bedragen
+    // (€25/€50/€100/€250) renderen, ook bij Firestore-override of typo.
     var availableAmounts = Object.keys(shopCfg.variants).filter(function (k) {
-      return !!shopCfg.variants[k];
+      return !!shopCfg.variants[k] && B2B_ALLOWED_AMOUNTS[Number(k)];
     }).map(function (k) { return Number(k); });
 
     var byAmount = {};
@@ -330,6 +339,15 @@
       if (!u) { toast('Log eerst in', true); return; }
       if (!amount) { toast('Geen bedrag gekozen', true); return; }
 
+      // v1.3.0: STRICT amount-guard. Merken-wallet accepteert UITSLUITEND
+      // €25/€50/€100/€250. Voorkomt dat een Firestore-override of UI-fout
+      // een B2C-bedrag (€5/€10/€15) door de B2B-checkout pusht.
+      if (!B2B_ALLOWED_AMOUNTS[Number(amount)]) {
+        toast('Ongeldig bedrag voor merken-wallet. Kies €25, €50, €100 of €250.', true);
+        try { console.warn('[wallet] B2B blocked invalid amount:', amount); } catch (_) {}
+        return;
+      }
+
       // Probeer eerst de resolved config (gevuld door renderWallet). Anders herlees uit Firestore.
       var cfg = window.PP_SHOPIFY_TOPUPS_RESOLVED;
       if (!cfg) {
@@ -541,6 +559,7 @@
     openTopup:    openTopup,
     refresh:      refresh,
     switchTab:    switchTab,
-    VERSION:      '1.2.0'
+    B2B_ALLOWED_AMOUNTS: B2B_ALLOWED_AMOUNTS,
+    VERSION:      '1.3.0'
   };
 })();
