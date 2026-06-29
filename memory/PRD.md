@@ -6,6 +6,41 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.157 — Merken Campagne-Pakketten Layout in B2B Wallet Opwaarderen tab (23 feb 2026)
+
+### Probleem (gebruiker-gerapporteerd + screenshot)
+B2B-gebruiker zag in Merkenportaal → Wallet → Opwaarderen alleen een simpele `<h2>Kies een campagne-pakket</h2>` + kaart-grid. Visueel identiek aan een generieke shoplist, zonder de distinctieve "VOOR MERKEN / Campagne-pakketten" hero-treatment van de publieke landing (pp-merken-pakketten-v1.js). User wilde dezelfde mooie layout uit de screenshot direct in de wallet zien.
+
+### Fix
+- **`pp-wallet-v1.js` v1.6.0** — Opwaarderen tab krijgt nieuwe hero binnen de bestaande Saldo-pagina:
+  - `<div class="bp-wallet-hero pp-b2b-campagne-hero" data-testid="wallet-campagne-hero">`
+  - `<span class="bp-header-eyebrow">Voor merken</span>`
+  - `<h2>Campagne-pakketten</h2>`
+  - intro `<p class="bp-sub">Kies het pakket dat past bij je doelen. Saldo wordt gebruikt voor advertenties, placements en boosts binnen Paskamerpraat.</p>`
+  - Daaronder onverwijderd: bestaande `pp-b2c-pkg-grid` met `_renderB2BPackagesHTML()` → 4 cards (Starter€25, Groei€50 met POPULAIR badge, Pro€100, Ultimate€250) met VERWACHTING-blokken.
+- CTA-text per kaart: `'Wallet opwaarderen'` → `'Opwaarderen'` (consistent met publieke landing).
+- OLD `<h2 class="bp-section-titel">Kies een campagne-pakket</h2>` regel verwijderd.
+- Top-level Saldo hero ("Merken wallet" eyebrow + h1) ongewijzigd vóór de tabs.
+
+### Pagina-hiërarchie (na fix)
+1. **Saldo-hero** (eyebrow "Merken wallet") - bovenaan, toont actuele balance
+2. **Tabs** - Overzicht | Opwaarderen | Transacties
+3. **Opwaarderen-content**:
+   a. NIEUW Campagne-pakketten-hero (eyebrow "Voor merken" + h2 + intro)
+   b. 4-card grid met VERWACHTING + POPULAIR badge
+   c. Disclosure paragraph
+
+### Testing
+- **66/66 pytest assertions PASS** (49 → 66 toegevoegd: TestMerkenCampagneLayout 13 assertions, TestMerkenLandingUnchanged 2, TestAmountSegregationStillIntact 2).
+- Visuele pariteit gegarandeerd "by construction" — `_renderB2BPackagesHTML` is dezelfde render-path als de publieke landing gebruikt.
+- B2C wallet ongewijzigd (v1.3.0). Public landing pp-merken-pakketten-v1.js ongewijzigd. Zero regressie.
+
+### Delivery
+- `index.html` cache → `?v=60.1.157-merken-campagne-layout` voor pp-wallet-v1.js
+- `sw.js` VERSION → `v60.1.157-20260623-merken-campagne-layout`
+- Zip: `/app/01-paskamerpraat-pwa-cloudflare.zip` (~3.83MB, md5 `25d58946704e0e95c0cdceab37e06cf9`)
+
+
 ## v60.1.156 — Coming-Soon Popup HERSTELD met B2B/B2C Context-Aware Eyebrow (23 feb 2026)
 
 ### Probleem (gebruiker-gerapporteerd)
