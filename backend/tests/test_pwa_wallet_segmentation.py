@@ -44,6 +44,10 @@ INDEX_HTML = PWA / "index.html"
 ZIP_FILE = Path("/app/01-paskamerpraat-pwa-cloudflare.zip")
 # v60.1.160: Uitgelicht product-image ratio fix
 FEEDTABS_FILE = PWA / "extensions/placements/pp-feedtabs-v1.js"
+# v60.1.164: Nav-Context & Brand-Logo Universalizer
+NAV_CONTEXT = PWA / "extensions/profile/pp-nav-context-v1.js"
+BRAND_PORTAL = PWA / "js/brand-portal-v1.js"
+WALLET_FILE = PWA / "extensions/payments/pp-wallet-v1.js"
 
 
 # ───────────────── Static audit: B2B wallet ─────────────────
@@ -220,18 +224,20 @@ class TestCacheVersion:
         # may still carry v60.1.156-restore-coming-soon-popup because their
         # source files were not modified in v60.1.157.
         # v60.1.160: pp-feedtabs-v1.js script tag carries the prod-img-contain cache key
-        # pp-wallet-v1.js script tag still carries v60.1.159 cache key (untouched in v60.1.160/161/162)
+        # pp-wallet-v1.js script tag still carries v60.1.159 cache key (untouched in v60.1.160/161/162/163/164)
         # v60.1.161: pp-brand-onboarding-checklist-v1.js script tag carries the new onb-wallet-bypass key
-        # v60.1.162: pp-feedtabs-v1.js bumped to uitgelicht-no-date-filter
+        # v60.1.162: pp-feedtabs-v1.js bumped to uitgelicht-no-date-filter (UNCHANGED in v60.1.164)
+        # v60.1.164: pp-nav-context-v1.js NEW module added with nav-context cache key
         assert "pp-wallet-v1.js?v=60.1.159-direct-render-bypass" in src
         assert "pp-feedtabs-v1.js?v=60.1.162-uitgelicht-no-date-filter" in src
         assert "pp-brand-onboarding-checklist-v1.js?v=60.1.161-onb-wallet-bypass" in src
+        assert "pp-nav-context-v1.js?v=60.1.164-nav-context" in src
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
-        # v60.1.163: SW VERSION bumped to brand-prod-img-fix
-        assert "VERSION       = 'v60.1.163-20260623-brand-prod-img-fix'" in src or \
-               "VERSION = 'v60.1.163-20260623-brand-prod-img-fix'" in src
+        # v60.1.164: SW VERSION bumped to nav-context
+        assert "VERSION       = 'v60.1.164-20260623-nav-context'" in src or \
+               "VERSION = 'v60.1.164-20260623-nav-context'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
@@ -246,8 +252,8 @@ class TestDeployZip:
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        # v60.1.163: SW VERSION bumped to brand-prod-img-fix
-        assert "v60.1.163-20260623-brand-prod-img-fix" in content
+        # v60.1.164: SW VERSION bumped to nav-context
+        assert "v60.1.164-20260623-nav-context" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -1249,7 +1255,7 @@ class TestOnboardingChecklistWalletBypass:
         with open(ZIP_FILE, "rb") as f:
             for chunk in iter(lambda: f.read(1 << 20), b""):
                 h.update(chunk)
-        assert h.hexdigest() == "6087fca10e683c71e854cef497538a3e", \
+        assert h.hexdigest() == "d42fb737ea0ae065ffcac66e1b232852", \
             f"deploy zip MD5 mismatch: got {h.hexdigest()}"
 
 
@@ -1327,9 +1333,9 @@ class TestUitgelichtNoDateFilter:
 
     def test_sw_version_bumped(self):
         src = SW_FILE.read_text()
-        # v60.1.163: sw.js bumped to brand-prod-img-fix (post-v60.1.162)
-        assert "v60.1.163-20260623-brand-prod-img-fix" in src, \
-            "sw.js VERSION must be bumped to v60.1.163"
+        # v60.1.164: sw.js bumped to nav-context (post-v60.1.163)
+        assert "v60.1.164-20260623-nav-context" in src, \
+            "sw.js VERSION must be bumped to v60.1.164"
 
     def test_zip_no_to_millis_in_paint_uitgelicht(self):
         """Critical: deployed Cloudflare bundle must not contain the
@@ -1544,11 +1550,12 @@ class TestV60_163Regression:
     def test_only_additive_changes_in_v60_163(self):
         """v60.1.163 should only add 1 new CSS file + 1 line in index.html
         + sw.js VERSION bump. Verify by checking the new css link is
-        present and the legacy brand-portal-v1.js is untouched."""
+        present and the legacy brand-portal-v1.js is untouched.
+        v60.1.164: sw.js VERSION bumped further to nav-context."""
         index_src = INDEX_HTML.read_text()
         assert index_src.count("pp-brand-prod-img-fix.css") == 1
-        # sw.js carries v60.1.163 marker
-        assert "v60.1.163-20260623-brand-prod-img-fix" in SW_FILE.read_text()
+        # sw.js carries v60.1.164 marker (post v60.1.163)
+        assert "v60.1.164-20260623-nav-context" in SW_FILE.read_text()
 
 
 # ───────── v60.1.163: backend download endpoint smoke ─────────
@@ -1569,3 +1576,252 @@ class TestV60_163Download:
         assert 3 * 1024 * 1024 < size < 5 * 1024 * 1024, \
             f"Downloaded zip size {size} not within 3-5MB"
 
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# v60.1.164: NAV-CONTEXT & BRAND-LOGO UNIVERSALIZER
+# ═══════════════════════════════════════════════════════════════════════
+class TestNavContext:
+    """v60.1.164 static audit for the new pp-nav-context-v1.js module:
+    (1) "Terug naar merken" capture-phase delegator that bypasses brand-portal
+        _renderLock by calling DY.brandPortal.renderMerken() directly.
+    (2) brandLogoFor() Promise resolver with 5-min TTL cache reading
+        brands/{uid}.logo from Firestore.
+    (3) MutationObserver that patches .pp-uitg-kaart cards with data-brand-id
+        extracted from openCamp() onclick handler and replaces .pp-uitg-logo
+        innerHTML with real <img> tags.
+    """
+
+    def test_module_file_exists(self):
+        assert NAV_CONTEXT.exists(), "pp-nav-context-v1.js must exist"
+
+    def test_version_1_0_0(self):
+        src = NAV_CONTEXT.read_text()
+        assert "VERSION:           '1.0.0'" in src or \
+               "VERSION: '1.0.0'" in src, \
+               "PP_NavContext.VERSION must be '1.0.0' in v60.1.164"
+
+    def test_iife_idempotent_guard(self):
+        src = NAV_CONTEXT.read_text()
+        assert "window.__ppNavContextInit" in src, \
+               "Module must guard against double-init via __ppNavContextInit"
+
+    def test_public_api_exports(self):
+        src = NAV_CONTEXT.read_text()
+        # Must expose PP_NavContext with all 4 documented functions
+        assert "window.PP_NavContext" in src
+        for fn in ("openMerken", "resolveBackRoute", "brandLogoFor", "injectLogos"):
+            assert fn in src, f"PP_NavContext public API must export {fn}"
+
+    def test_openMerken_clears_renderLock_and_renders_directly(self):
+        """openMerken() must clear _renderLock and call BP.renderMerken()
+        directly — bypasses brand-portal absorption (analoog v60.1.159
+        PP_Wallet.openWallet pattern)."""
+        src = NAV_CONTEXT.read_text()
+        assert "DY.brandPortal._renderLock = false" in src, \
+               "openMerken must clear brand-portal _renderLock"
+        assert "DY._laatstGerenderd = null" in src or \
+               "window.DY._laatstGerenderd = null" in src, \
+               "openMerken must clear DY._laatstGerenderd"
+        assert "DY.pagina = 'merken'" in src or \
+               "window.DY.pagina = 'merken'" in src, \
+               "openMerken must set DY.pagina = 'merken'"
+        assert "DY.brandPortal.renderMerken()" in src, \
+               "openMerken must call DY.brandPortal.renderMerken() directly"
+
+    def test_openMerken_pushState_pagina_merken(self):
+        src = NAV_CONTEXT.read_text()
+        assert "searchParams.set('pagina', 'merken')" in src, \
+               "openMerken must set ?pagina=merken via pushState"
+        assert "searchParams.delete('id')" in src, \
+               "openMerken must delete &id from URL"
+        assert "history.pushState" in src
+
+    def test_openMerken_no_feed_fallback(self):
+        """openMerken() must NOT contain a hardcoded navigeer('feed')
+        call — feed is only allowed as last fallback in resolveBackRoute."""
+        src = NAV_CONTEXT.read_text()
+        # Extract the openMerken function block
+        m = re.search(r"function openMerken\(\)\s*\{(.*?)\n  \}\n", src, re.S)
+        assert m, "openMerken function not found"
+        body = m.group(1)
+        assert "navigeer('feed')" not in body, \
+               "openMerken must NOT call navigeer('feed') — that's the bug being fixed"
+
+    def test_capture_phase_back_button_delegator(self):
+        """setupBackButtonDelegator MUST install a document-level capture-phase
+        listener (3rd arg = true) on click events targeting
+        [data-testid='brand-detail-back'] via .closest()."""
+        src = NAV_CONTEXT.read_text()
+        assert "[data-testid=\"brand-detail-back\"]" in src, \
+               "Delegator must target [data-testid='brand-detail-back']"
+        # Capture-phase: addEventListener( 'click', fn, true );
+        assert re.search(r"addEventListener\(\s*['\"]click['\"][\s\S]+?,\s*true\s*\)", src), \
+               "Click listener must be installed in capture phase (3rd arg true)"
+        assert "preventDefault" in src and "stopPropagation" in src, \
+               "Delegator must call preventDefault + stopPropagation"
+        assert ".closest(" in src, "Delegator must use .closest() to match button"
+
+    def test_brandLogoFor_promise_signature(self):
+        src = NAV_CONTEXT.read_text()
+        assert "function brandLogoFor(brandId)" in src
+        # Falsy brandId → Promise.resolve(null)
+        assert "if (!brandId) return Promise.resolve(null)" in src
+        # No db → Promise.resolve(null)
+        assert "if (!d) return Promise.resolve(null)" in src
+
+    def test_brandLogoFor_5min_ttl_cache(self):
+        src = NAV_CONTEXT.read_text()
+        assert "LOGO_CACHE" in src
+        assert "5 * 60 * 1000" in src, "TTL must be 5*60*1000 ms (5 minutes)"
+        assert "LOGO_TTL_MS" in src
+
+    def test_brandLogoFor_reads_firestore_brands_logo(self):
+        src = NAV_CONTEXT.read_text()
+        assert "firebase.firestore()" in src
+        assert ".collection('brands').doc(brandId).get()" in src, \
+               "brandLogoFor must read from brands/{brandId} Firestore doc"
+        assert "data.logo" in src, "Must read .logo field from doc data"
+
+    def test_brandLogoFor_caches_failures(self):
+        """Cache must store both success and failure results so we don't
+        re-fetch on every render."""
+        src = NAV_CONTEXT.read_text()
+        # Both .then and .catch should populate LOGO_CACHE
+        catch_block = re.search(r"\.catch\(function[\s\S]+?\}\)", src)
+        assert catch_block, "brandLogoFor must have .catch handler"
+        assert "LOGO_CACHE[brandId]" in catch_block.group(0), \
+               "Failure path must also cache (url:null) to avoid repeated fetches"
+
+    def test_patchUitgelichtCards_extracts_brandId_from_onclick(self):
+        src = NAV_CONTEXT.read_text()
+        assert "data-pp-brand-id-set" in src, \
+               "patchUitgelichtCards must use [data-pp-brand-id-set] guard attribute"
+        assert ".pp-uitg-kaart" in src
+        # Regex extracting 2nd arg of openCamp('cid','bid')
+        assert "openCamp" in src
+        assert re.search(r"openCamp\\\('\[\^'\]\*','\(\[\^'\]\*\)'", src), \
+               "Must extract brandId via regex on openCamp('cid','bid') onclick"
+
+    def test_injectLogos_replaces_innerHTML_with_img(self):
+        src = NAV_CONTEXT.read_text()
+        assert "data-pp-logo-checked" in src, \
+               "injectLogos must use [data-pp-logo-checked] guard attribute"
+        assert "[data-brand-id]" in src
+        assert ".pp-uitg-logo" in src
+        assert "document.createElement('img')" in src
+        assert "object-fit:cover" in src, "img must use object-fit:cover styling"
+        assert "img.onerror" in src, "Must have onerror fallback for broken images"
+
+    def test_resolveBackRoute_brand_detail_returns_merken(self):
+        """brand_*, merken_detail, brand_detail contexts return
+        {route:'merken', handler:openMerken}. Wallet returns
+        brand_dashboard. Fallback is history.back(), NOT hardcoded feed."""
+        src = NAV_CONTEXT.read_text()
+        assert "function resolveBackRoute" in src
+        assert "/^brand_/" in src or "^brand_" in src
+        assert "merken_detail" in src
+        assert "brand_detail" in src
+        assert "route: 'merken'" in src
+        assert "brand_dashboard" in src, "wallet context must return brand_dashboard"
+        assert "history.back()" in src, "fallback must use history.back() not feed"
+
+    def test_resolveBackRoute_feed_only_as_last_fallback(self):
+        """navigeer('feed') is allowed ONLY inside the history-fallback
+        branch (when history.length <= 1). It must NOT appear in the
+        brand_/merken_detail branch."""
+        src = NAV_CONTEXT.read_text()
+        # Count occurrences — should be exactly 1 (history fallback)
+        feed_count = src.count("navigeer('feed')")
+        assert feed_count == 1, \
+               f"navigeer('feed') should appear exactly once (last fallback), got {feed_count}"
+
+    def test_init_uses_mutation_observer(self):
+        """MutationObserver must observe document.body subtree and call
+        patchUitgelichtCards + injectLogos on every mutation."""
+        src = NAV_CONTEXT.read_text()
+        assert "new MutationObserver" in src
+        assert "obs.observe(document.body" in src or "observe(document.body" in src
+        assert "subtree: true" in src
+        assert "childList: true" in src
+        assert "patchUitgelichtCards" in src
+        assert "injectLogos" in src
+
+    def test_index_html_links_after_route_safety(self):
+        """pp-nav-context-v1.js must be loaded AFTER pp-route-safety-v1.js
+        so route-safety guards register first."""
+        src = INDEX_HTML.read_text()
+        rs_pos = src.find("pp-route-safety-v1.js")
+        nc_pos = src.find("pp-nav-context-v1.js")
+        assert rs_pos > 0 and nc_pos > 0, \
+               "Both pp-route-safety-v1.js and pp-nav-context-v1.js must be linked"
+        assert nc_pos > rs_pos, \
+               "pp-nav-context-v1.js must be loaded AFTER pp-route-safety-v1.js"
+
+    def test_index_html_cache_key(self):
+        src = INDEX_HTML.read_text()
+        assert "pp-nav-context-v1.js?v=60.1.164-nav-context" in src
+
+    def test_brand_portal_unchanged_back_button(self):
+        """brand-portal-v1.js is the LEGACY file (UNCHANGED in v60.1.164).
+        It still contains the [data-testid='brand-detail-back'] button
+        — the delegator in pp-nav-context-v1.js handles it via capture-phase."""
+        src = BRAND_PORTAL.read_text()
+        assert 'data-testid="brand-detail-back"' in src, \
+               "brand-portal-v1.js must still emit the back button"
+        # The legacy onclick is still navigeer('merken') — that's fine because
+        # capture-phase delegator pre-empts it.
+        assert "DY.navigeer(\\'merken\\')" in src or \
+               "DY.navigeer('merken')" in src
+
+    def test_wallet_v1_8_0_unchanged(self):
+        """pp-wallet-v1.js v1.8.0 must remain UNCHANGED — its openWallet
+        bypass pattern is the reference for the new openMerken bypass."""
+        src = WALLET_FILE.read_text()
+        assert "VERSION:      '1.8.0'" in src or "VERSION: '1.8.0'" in src
+        assert "openWallet" in src
+
+    def test_feedtabs_v60_162_unchanged(self):
+        """pp-feedtabs-v1.js (v60.1.162) remains UNCHANGED — it still emits
+        the .pp-uitg-kaart cards with openCamp onclick which our patcher
+        post-processes."""
+        src = FEEDTABS_FILE.read_text()
+        assert "pp-uitg-kaart" in src
+        assert "openCamp" in src
+
+    def test_only_additive_changes_in_v60_164(self):
+        """v60.1.164 must be purely additive: 1 new module file + 1 new
+        script tag in index.html + sw.js VERSION bump. No changes to
+        brand-portal, wallet, feedtabs, onboarding."""
+        # Exactly one script tag for pp-nav-context-v1.js
+        assert INDEX_HTML.read_text().count("pp-nav-context-v1.js") == 1
+        # sw.js carries v60.1.164 marker
+        assert "v60.1.164-20260623-nav-context" in SW_FILE.read_text()
+
+
+# ─── v60.1.164: ZIP bundle audit for nav-context module ───
+class TestNavContextZip:
+    def test_zip_contains_nav_context_module(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            names = z.namelist()
+            assert "extensions/profile/pp-nav-context-v1.js" in names, \
+                   "ZIP must bundle the new pp-nav-context-v1.js module"
+            with z.open("extensions/profile/pp-nav-context-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "PP_NavContext" in content
+        assert "openMerken" in content
+        assert "brandLogoFor" in content
+        # Capture-phase delegator (3rd arg true)
+        assert re.search(r"addEventListener\(\s*['\"]click['\"][\s\S]+?,\s*true\s*\)", content)
+
+    def test_zip_index_html_links_nav_context(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("index.html") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "pp-nav-context-v1.js?v=60.1.164-nav-context" in content
+
+    def test_zip_sw_has_v60_164_version(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("sw.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "v60.1.164-20260623-nav-context" in content

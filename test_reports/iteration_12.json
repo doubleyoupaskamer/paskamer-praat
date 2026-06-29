@@ -1,0 +1,29 @@
+{
+  "summary": "v60.1.164 Phase A (Nav-Context & Brand-Logo Universalizer) backend-only static audit + pytest + curl verification. ALL 164/164 tests PASS. New module pp-nav-context-v1.js v1.0.0 verified additive — no changes to brand-portal, wallet, feedtabs, onboarding. ZIP MD5 matches d42fb737ea0ae065ffcac66e1b232852. Backend /api/downloads endpoint returns 200 + application/zip + 4026558 bytes. Added 26 new assertions covering all 11 static-audit acceptance criteria from the master prompt.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/iteration_12.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "pp-nav-context-v1.js IIFE-wrapped, idempotent via __ppNavContextInit, exposes clean public API (openMerken, resolveBackRoute, brandLogoFor, injectLogos, VERSION). Pattern mirrors v60.1.159 PP_Wallet.openWallet bypass — consistent with codebase conventions.",
+    "Capture-phase delegator (3rd arg true on document.addEventListener) correctly pre-empts brand-portal _renderLock absorption before inline onclick=DY.navigeer('merken') fires. preventDefault + stopPropagation guarantee single execution path.",
+    "openMerken() defensively wraps each DY mutation in try/catch and pushes ?pagina=merken with id deleted via history.pushState — correct for SPA URL hygiene.",
+    "brandLogoFor() caches BOTH success and failure (url:null), preventing repeated Firestore reads for brands without logos. 5-min TTL is reasonable for brand-logo data.",
+    "patchUitgelichtCards regex /openCamp\\('[^']*','([^']*)'/ correctly extracts brandId without modifying pp-feedtabs source — clean separation of concerns.",
+    "MutationObserver observes document.body with childList+subtree — broad scope is acceptable here since the cost (patchUitgelichtCards + injectLogos) is dominated by data-pp-* guard attributes. Suggest debouncing in a future iteration if profiler shows hotspots.",
+    "MINOR (not blocking): The MutationObserver fires patchUitgelichtCards + injectLogos on every DOM mutation; consider rAF-debouncing in a future revision if performance regressions show up under high-frequency rerenders.",
+    "MINOR (not blocking): brandLogoFor reads brands/{brandId}.logo but does not validate it's a URL string — relies on the type-check `typeof data.logo === 'string'`. OK for trusted Firestore data."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py (added TestNavContext + TestNavContextZip classes (26 assertions); bumped v60.1.163→v60.1.164 cache/SW/MD5 expectations in TestCacheVersion, TestDeployZip, TestOnboardingChecklistWalletBypass, TestUitgelichtNoDateFilter, TestV60_163Regression)"
+  ],
+  "success_rate": {"backend": "100% (164/164)", "frontend": "n/a (Cloudflare-deployed PWA, UI skipped per request)"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "v60.1.164 Phase A landed cleanly. Test suite grew from 138 → 164 (26 new). All assertions in master prompt's STATIC AUDIT bullets are now codified: module file existence + VERSION '1.0.0', idempotent IIFE guard, public API exports, openMerken's _renderLock clearance + direct BP.renderMerken() call + pushState(?pagina=merken) + no feed fallback, capture-phase click delegator with preventDefault/stopPropagation + .closest(), brandLogoFor Promise signature (falsy/no-db→null) + 5*60*1000ms TTL + Firestore brands/{uid}.logo read + caches failures, patchUitgelichtCards regex + data-pp-brand-id-set guard, injectLogos data-pp-logo-checked guard + object-fit:cover + onerror, resolveBackRoute (brand_/merken_detail/brand_detail→openMerken, wallet→brand_dashboard, history.back() fallback, feed only as last resort with count==1), MutationObserver scope, index.html ordering (nav-context AFTER route-safety) + cache key v=60.1.164-nav-context, sw.js VERSION v60.1.164-20260623-nav-context, brand-portal/wallet/feedtabs unchanged, ZIP MD5 d42fb737ea0ae065ffcac66e1b232852 + bundle contents (PP_NavContext, openMerken, brandLogoFor, capture-phase listener). Future phases B/C/D (pretty URLs, schema markup, sitemap) NOT in this iteration. Backend curl: GET /api/downloads/01-paskamerpraat-pwa-cloudflare.zip → 200 + application/zip + 4,026,558 bytes.",
+  "rca of the issue": "N/A — this is a feature-addition iteration verification, not a bug-fix RCA. The original user-reported issue ('Terug naar merken viel terug naar /feed') is structurally addressed by the capture-phase delegator: brand-portal's inline onclick=DY.navigeer('merken') was being absorbed by _renderLock guards inside renderMerken(); the new pp-nav-context delegator runs FIRST (capture phase), clears _renderLock + _laatstGerenderd, then calls renderMerken() directly — bypassing the absorption. The brand-logo initials problem is addressed by the MutationObserver-driven post-render patcher that injects data-brand-id from openCamp() onclick handlers and replaces .pp-uitg-logo innerHTML with real <img> tags fetched (and cached for 5 min) from brands/{uid}.logo."
+}
