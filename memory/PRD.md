@@ -6,6 +6,44 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.155 — Coming-Soon Intercept Verwijderd (23 feb 2026) — FINALE FIX
+
+### Probleem (gebruiker-gerapporteerd)
+"Als ik nu in het B2B merkenportaal op wallet saldo → opwaarderen → opwaarderen klik wordt ik nog steeds doorgestuurd naar de B2C wallet en pakketten."
+
+### Root cause (deep-dive uitkomst)
+Beide topup-functies bevatten een "coming-soon intercept" die — VÓÓR de Shopify-checkout-flow — de gedeelde `PP_TopupComingSoon.show()` popup toonde. Omdat dit component identiek is voor B2B en B2C, ervoeren B2B-gebruikers dat ze naar de B2C "binnenkort beschikbaar"-popup werden doorgestuurd, terwijl de eigenlijke Shopify-flow nooit werd bereikt.
+
+```js
+// VOORHEEN (pp-wallet-v1.js + pp-b2c-wallet-v1.js):
+async function topup(amount) {
+  if (window.PP_TopupComingSoon && PP_TopupComingSoon.show) {
+    PP_TopupComingSoon.show({ ... });  // ← INTERCEPT, kortsluit Shopify
+    return;
+  }
+  // ↓ Onbereikbare echte Shopify-checkout code
+}
+```
+
+De intercept was bedoeld voor de pre-Shopify-go-live periode. Shopify variant-IDs zijn nu live → intercept is obsoleet.
+
+### Fix
+- **`pp-wallet-v1.js`** v1.4.0 — Intercept compleet verwijderd. `topup()` gaat direct naar Shopify checkout met `wallet_topup_*` note-attributes.
+- **`pp-b2c-wallet-v1.js`** v1.2.0 — Spiegel-fix. `topup()` gaat direct naar Shopify met `b2c_wallet_topup_*` prefix. Webhook credits het correcte veld (`wallet_balance` vs `b2c_wallet_balance`).
+- Amount-whitelist guards en variant-ID separation blijven intact (v60.1.154 hardening).
+- Geen wijzigingen aan `pp-topup-comingsoon-v1.js` (de module zelf blijft, alleen niet meer aangeroepen door de wallets).
+
+### Testing
+- **44/44 pytest assertions PASS** (regression suite uitgebreid van 35 → 44).
+- Nieuwe `TestComingSoonInterceptRemoved` class met 9 assertions die heropduiken van de bug voorkomt.
+- Testing agent eerst-pass vond een partial-cache-bust bug (line 977 van index.html miste de bump voor pp-b2c-wallet-v1.js) — direct gefixed in dezelfde release.
+
+### Delivery
+- `index.html` cache → `?v=60.1.155-remove-coming-soon-intercept` (beide wallet-scripts)
+- `sw.js` VERSION → `v60.1.155-20260623-remove-coming-soon-intercept`
+- Zip: `/app/01-paskamerpraat-pwa-cloudflare.zip` (~3.9MB, md5 `06efff3257225946fd706cf2e6ea1ffc`)
+
+
 ## v60.1.154 — B2B/B2C Wallet Segmentation Hardening (23 feb 2026)
 
 ### Probleem
