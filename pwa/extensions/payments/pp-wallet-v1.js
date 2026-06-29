@@ -521,6 +521,17 @@
   }
 
   // Injecteer Wallet card in brand_dashboard quick-grid (na Merkprofiel)
+  // v1.7.0 (2026-02-23): Hardened tegen rerouting naar B2C wallet.
+  //   - <button> i.p.v. <a href="javascript:void(0)"> voor 1-op-1 parity
+  //     met de andere bp-quick knoppen in brand-portal-v1.js (consistente
+  //     CSS-grid plaatsing).
+  //   - Inline onclick attribuut zodat de DOM-inspector DE ROUTE TOONT en
+  //     het attribuut robuust is tegen re-renders die DOM-properties
+  //     wegblazen. Voorheen: alleen .onclick = fn → onzichtbaar in DOM
+  //     en kwetsbaar voor renderlocks die het element vervangen.
+  //   - Verzilvert _renderLock proactief vlak vóór navigatie zodat
+  //     concurrent brand-portal renders de wallet-call niet kunnen
+  //     absorberen.
   function injectDashboardCard() {
     try {
       if (!window.DY || window.DY.pagina !== 'brand_dashboard') return;
@@ -528,11 +539,18 @@
       if (!grid) return;
       if (grid.querySelector('[data-testid="brand-dash-wallet"]')) return;
 
-      var card = document.createElement('a');
-      card.href = 'javascript:void(0)';
+      var card = document.createElement('button');
+      card.type = 'button';
       card.className = 'bp-quick';
       card.setAttribute('data-testid', 'brand-dash-wallet');
-      card.onclick = function() { window.DY.navigeer('wallet'); };
+      // Inline onclick: identiek patroon als de andere knoppen in
+      // brand-portal-v1.js (regels 999-1005). Side-effect: clear de
+      // render-lock zodat de wallet-route altijd doorgaat.
+      card.setAttribute(
+        'onclick',
+        "try{if(window.DY&&DY.brandPortal){DY.brandPortal._renderLock=false;}}catch(e){};" +
+        "window.DY.navigeer('wallet');"
+      );
       card.innerHTML =
         '<div class="bp-quick-icon">💰</div>' +
         '<div class="bp-quick-titel">Wallet</div>' +
@@ -541,8 +559,36 @@
     } catch(e) { /* noop */ }
   }
 
+  // v1.7.0: Document-level capture-phase click delegator als defense-in-depth.
+  // Vangt ELKE klik op [data-testid="brand-dash-wallet"] (of nested children)
+  // en forceert navigeer('wallet') OOK als de inline-onclick verloren is
+  // (bv. door een re-render race condition tussen brand-portal en pp-wallet).
+  // Capture phase = vóór alle bubbling listeners → onomzeilbaar door
+  // andere event handlers.
+  function setupWalletClickDelegator() {
+    if (window.__ppWalletDelegatorInstalled) return;
+    window.__ppWalletDelegatorInstalled = true;
+    document.addEventListener('click', function (e) {
+      try {
+        var target = e.target;
+        if (!target || target.nodeType !== 1) return;
+        var btn = target.closest('[data-testid="brand-dash-wallet"]');
+        if (!btn) return;
+        // Forceer de juiste route - altijd B2B wallet, nooit B2C
+        try { if (window.DY && DY.brandPortal) DY.brandPortal._renderLock = false; } catch (_) {}
+        try { if (window.DY && DY._laatstGerenderd) window.DY._laatstGerenderd = null; } catch (_) {}
+        if (window.DY && typeof DY.navigeer === 'function') {
+          // Geen preventDefault: laat de inline onclick óók draaien (idempotent).
+          // Als de inline onclick mist, deze call is de redding.
+          DY.navigeer('wallet');
+        }
+      } catch (_) { /* noop */ }
+    }, true); // capture phase = onomzeilbaar
+  }
+
   function init() {
     registerRoute();
+    setupWalletClickDelegator();
     // Observer voor late-loaded hamburger menu
     var obs = new MutationObserver(injectMenuLink);
     obs.observe(document.body, { childList: true, subtree: true });
@@ -583,6 +629,6 @@
     refresh:      refresh,
     switchTab:    switchTab,
     B2B_ALLOWED_AMOUNTS: B2B_ALLOWED_AMOUNTS,
-    VERSION:      '1.6.0'
+    VERSION:      '1.7.0'
   };
 })();

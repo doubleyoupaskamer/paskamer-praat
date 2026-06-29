@@ -1,0 +1,32 @@
+{
+  "summary": "v60.1.158 brand-dashboard Wallet card hardening verified. Static audit of /app/pwa/extensions/payments/pp-wallet-v1.js confirms the rewrite: <button> element with type='button' + className='bp-quick' + data-testid='brand-dash-wallet' + inline onclick attribute (via setAttribute) containing literal navigeer('wallet') AND _renderLock=false cleanup. New setupWalletClickDelegator() installed in init() between registerRoute() and MutationObserver, uses addEventListener('click', fn, true) capture-phase, targets [data-testid=\"brand-dash-wallet\"] via .closest(), idempotent via window.__ppWalletDelegatorInstalled, proactively clears DY.brandPortal._renderLock and DY._laatstGerenderd. OLD anchor patterns (createElement('a'), card.href, card.onclick = function) fully removed from injectDashboardCard. v60.1.157 regressions intact (B2B campagne layout, _renderB2BPackagesHTML with {25,50,100,250}, COMING-SOON popup intercept). B2C wallet pp-b2c-wallet-v1.js v1.3.0 unchanged - no brand-dash-wallet injection, no 'wallet' route registration. Cache versioning correct: index.html script tag carries v=60.1.158-wallet-card-hardened, sw.js VERSION='v60.1.158-20260623-wallet-card-hardened'. Cloudflare deploy zip MD5 47555fd0a835bcd01bad32c30d81b2ef confirmed, 4021232 bytes (3.83MB). Backend curl GET /api/downloads/01-paskamerpraat-pwa-cloudflare.zip returns 200 application/zip with byte-perfect MD5 match. Pytest suite grown from 66 → 78 assertions, ALL 78 PASSING.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Inline onclick uses string-concatenation rather than a multi-line template literal; readable but easy to introduce a syntax error if extended. Consider a small helper that JSON.stringifies the inline source to guarantee escaping if more cleanup snippets are ever added.",
+    "The document-level capture-phase delegator does NOT call e.preventDefault() / e.stopPropagation() — intentional per inline comment (lets inline onclick also run for idempotency). If a future card variant inside .bp-quick-grid ever gets a competing handler, this becomes a foot-gun. Worth a note in the function header.",
+    "setupWalletClickDelegator is registered on document for the entire SPA lifetime; on every click anywhere in the app it runs target.closest('[data-testid=\"brand-dash-wallet\"]'). Negligible cost, but if more such delegators are added a single shared delegator with a switch on data-testid would scale better."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py (bumped TestCacheVersion + TestDeployZip + TestComingSoonInterceptRestored + TestMerkenCampagneLayout to v60.1.158/1.7.0; added new TestBrandDashWalletCardHardened class with 12 assertions covering button element, inline onclick attribute, navigeer('wallet') literal, _renderLock=false cleanup, removal of old anchor patterns, delegator definition+call ordering, capture-phase, brand-dash-wallet .closest() target, idempotency guard, card DOM contract, ZIP regression, and B2C non-injection)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "n/a (UI testing skipped per request - PWA is on Cloudflare Pages)"},
+  "test_credentials": "n/a (no auth flows tested)",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Canonical regression suite is /app/backend/tests/test_pwa_wallet_segmentation.py (78 assertions). For future PWA iterations: (a) bump VERSION/cache strings in TestCacheVersion + TestDeployZip + TestComingSoonInterceptRestored::test_b2b_version_bumped_to_X + TestMerkenCampagneLayout::test_zip_b2b_wallet_version_X_Y_Z; (b) confirm /app/01-paskamerpraat-pwa-cloudflare.zip MD5 matches the live one; (c) backend curl on /api/downloads/<filename>.zip still returns 200 application/zip. The TestBrandDashWalletCardHardened class anchors the v60.1.158 contract — do not loosen these assertions in future iterations unless the injection strategy intentionally changes.",
+  "rca of the issue": "Two pre-existing assertions (test_zip_b2b_wallet_has_intercept, test_zip_b2b_wallet_version_1_6_0) still hardcoded VERSION 1.6.0 inside the ZIP from the previous iteration. Since v60.1.158 bumps the B2B wallet module to 1.7.0, these became stale. Mitigation: updated both to 1.7.0 with rename of the second test to test_zip_b2b_wallet_version_1_7_0 to mirror the actual semver. Final run: 78/78 green."
+}

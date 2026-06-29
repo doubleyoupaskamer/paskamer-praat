@@ -217,12 +217,13 @@ class TestCacheVersion:
         # payments modules (b2c wallet, comingsoon, modal-router, isolation)
         # may still carry v60.1.156-restore-coming-soon-popup because their
         # source files were not modified in v60.1.157.
-        assert "pp-wallet-v1.js?v=60.1.157-merken-campagne-layout" in src
+        # v60.1.158: pp-wallet-v1.js script tag carries the new hardened cache key
+        assert "pp-wallet-v1.js?v=60.1.158-wallet-card-hardened" in src
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
-        assert "VERSION       = 'v60.1.157-20260623-merken-campagne-layout'" in src or \
-               "VERSION = 'v60.1.157-20260623-merken-campagne-layout'" in src
+        assert "VERSION       = 'v60.1.158-20260623-wallet-card-hardened'" in src or \
+               "VERSION = 'v60.1.158-20260623-wallet-card-hardened'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
@@ -233,11 +234,11 @@ class TestDeployZip:
         assert 3 * 1024 * 1024 < size < 5 * 1024 * 1024, \
             f"zip should be between 3MB and 5MB, got {size} bytes"
 
-    def test_zip_contains_v60_1_157_sw(self):
+    def test_zip_contains_v60_1_158_sw(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "v60.1.157-20260623-merken-campagne-layout" in content
+        assert "v60.1.158-20260623-wallet-card-hardened" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -319,9 +320,9 @@ class TestComingSoonInterceptRestored:
             "B2C amount-whitelist must be applied BEFORE the popup call"
         )
 
-    def test_b2b_version_bumped_to_1_6_0(self):
+    def test_b2b_version_bumped_to_1_7_0(self):
         src = B2B_FILE.read_text()
-        assert re.search(r"VERSION\s*:\s*'1\.6\.0'", src), "B2B wallet VERSION must be 1.6.0 in v60.1.157"
+        assert re.search(r"VERSION\s*:\s*'1\.7\.0'", src), "B2B wallet VERSION must be 1.7.0 in v60.1.158"
 
     def test_b2c_version_bumped_to_1_3_0(self):
         src = B2C_FILE.read_text()
@@ -393,7 +394,8 @@ class TestComingSoonInterceptRestored:
                 content = f.read().decode("utf-8", errors="ignore")
         assert "PP_TopupComingSoon.show" in content
         assert re.search(r"source:\s*'b2b'", content)
-        assert re.search(r"VERSION\s*:\s*'1\.6\.0'", content)
+        # v60.1.158: B2B wallet module bumped to 1.7.0 (wallet-card hardened)
+        assert re.search(r"VERSION\s*:\s*'1\.7\.0'", content)
 
     def test_zip_b2c_wallet_has_intercept(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -527,12 +529,14 @@ class TestMerkenCampagneLayout:
         assert "Kies een campagne-pakket" not in content, \
             "ZIP must not contain old 'Kies een campagne-pakket' h2"
 
-    def test_zip_b2b_wallet_version_1_6_0(self):
+    def test_zip_b2b_wallet_version_1_7_0(self):
+        # v60.1.158 bumps the B2B wallet module to 1.7.0 (brand-dashboard
+        # Wallet card hardened against renderLock race conditions).
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("extensions/payments/pp-wallet-v1.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert re.search(r"VERSION\s*:\s*'1\.6\.0'", content), \
-            "ZIP'd pp-wallet-v1.js must be VERSION 1.6.0"
+        assert re.search(r"VERSION\s*:\s*'1\.7\.0'", content), \
+            "ZIP'd pp-wallet-v1.js must be VERSION 1.7.0"
 
 
 # ───────── v60.1.157: Public landing UNCHANGED (regression) ─────────
@@ -579,4 +583,192 @@ class TestAmountSegregationStillIntact:
             r"_renderB2BPackagesHTML[\s\S]*?B2B_ALLOWED_AMOUNTS",
             src,
         ), "_renderB2BPackagesHTML must still filter on B2B_ALLOWED_AMOUNTS"
+
+
+# ───────── v60.1.158: BRAND-DASHBOARD WALLET CARD HARDENED ─────────
+class TestBrandDashWalletCardHardened:
+    """v60.1.158 rewrites the brand-dashboard Wallet card injection so it is
+    bulletproof against race conditions with brand-portal-v1.js's _renderLock.
+
+    Changes:
+      * <button> instead of <a href="javascript:void(0)"> for grid parity
+        with the other bp-quick buttons.
+      * Inline onclick attribute (visible in DOM-inspector) instead of a
+        DOM-property .onclick (invisible + lost on re-render).
+      * The onclick clears DY.brandPortal._renderLock before calling
+        DY.navigeer('wallet') so concurrent brand-portal renders cannot
+        absorb the navigation.
+      * NEW document-level capture-phase click delegator
+        (setupWalletClickDelegator) as defense-in-depth: catches ANY click
+        on [data-testid="brand-dash-wallet"] even when the inline onclick
+        was wiped by a re-render.
+    """
+
+    # Extract the injectDashboardCard function body once for laser-focused
+    # assertions; using string-search on the whole file is too lenient.
+    @staticmethod
+    def _inject_body():
+        src = B2B_FILE.read_text()
+        m = re.search(
+            r"function\s+injectDashboardCard\s*\(\s*\)\s*\{([\s\S]*?)\n  \}\s*\n",
+            src,
+        )
+        assert m, "injectDashboardCard function not found in pp-wallet-v1.js"
+        return m.group(1)
+
+    # (a) <button> element
+    def test_uses_button_element(self):
+        body = self._inject_body()
+        assert "createElement('button')" in body, (
+            "injectDashboardCard must use createElement('button') in v60.1.158"
+        )
+        assert re.search(r"\.type\s*=\s*'button'", body), (
+            "Card must set .type = 'button'"
+        )
+
+    # (b) Inline onclick attribute via setAttribute('onclick', ...)
+    def test_inline_onclick_attribute(self):
+        body = self._inject_body()
+        assert re.search(
+            r"setAttribute\(\s*['\"]onclick['\"]\s*,",
+            body,
+        ), "Card must set inline 'onclick' attribute via setAttribute"
+
+    # (c) Inline onclick contains literal navigeer('wallet')
+    def test_inline_onclick_contains_navigeer_wallet(self):
+        body = self._inject_body()
+        # the literal string within the onclick attribute value
+        assert "navigeer('wallet')" in body, (
+            "Inline onclick must contain literal navigeer('wallet')"
+        )
+
+    # (d) Inline onclick contains _renderLock=false cleanup
+    def test_inline_onclick_clears_render_lock(self):
+        body = self._inject_body()
+        # tolerate optional whitespace around '='
+        assert re.search(r"_renderLock\s*=\s*false", body), (
+            "Inline onclick must clear brandPortal._renderLock = false"
+        )
+
+    # (e) OLD anchor patterns removed
+    def test_old_anchor_pattern_gone(self):
+        body = self._inject_body()
+        assert "createElement('a')" not in body, (
+            "OLD createElement('a') must be removed from injectDashboardCard"
+        )
+        assert "javascript:void(0)" not in body, (
+            "OLD href='javascript:void(0)' must be removed"
+        )
+        assert not re.search(r"\.href\s*=", body), (
+            "Card must not set .href anymore"
+        )
+        assert not re.search(r"\.onclick\s*=\s*function", body), (
+            "Card must not use DOM-property .onclick = function() anymore"
+        )
+
+    # (f) setupWalletClickDelegator exists + called from init()
+    def test_setup_wallet_click_delegator_defined_and_called(self):
+        src = B2B_FILE.read_text()
+        assert re.search(
+            r"function\s+setupWalletClickDelegator\s*\(\s*\)\s*\{",
+            src,
+        ), "setupWalletClickDelegator function must be defined"
+        # init() must call setupWalletClickDelegator after registerRoute()
+        m = re.search(
+            r"function\s+init\s*\(\s*\)\s*\{([\s\S]*?)\n  \}\s*\n",
+            src,
+        )
+        assert m, "init() function not found"
+        init_body = m.group(1)
+        # ordering: registerRoute → setupWalletClickDelegator → new MutationObserver
+        reg_idx = init_body.find("registerRoute()")
+        del_idx = init_body.find("setupWalletClickDelegator()")
+        obs_idx = init_body.find("new MutationObserver")
+        assert reg_idx != -1, "init() must call registerRoute()"
+        assert del_idx != -1, "init() must call setupWalletClickDelegator()"
+        assert obs_idx != -1, "init() must instantiate MutationObserver"
+        assert reg_idx < del_idx < obs_idx, (
+            "Call order must be registerRoute → setupWalletClickDelegator → MutationObserver"
+        )
+
+    # (g) Delegator uses capture-phase = true
+    def test_delegator_uses_capture_phase(self):
+        src = B2B_FILE.read_text()
+        # extract setupWalletClickDelegator body
+        m = re.search(
+            r"function\s+setupWalletClickDelegator\s*\(\s*\)\s*\{([\s\S]*?)\n  \}\s*\n",
+            src,
+        )
+        assert m, "setupWalletClickDelegator body not found"
+        deleg = m.group(1)
+        # capture=true: trailing 'true' after listener fn → optional whitespace
+        assert re.search(
+            r"addEventListener\(\s*['\"]click['\"]\s*,[\s\S]+?,\s*true\s*\)",
+            deleg,
+        ), "Delegator must register click listener with capture=true"
+
+    # (h) Delegator targets [data-testid="brand-dash-wallet"] via .closest()
+    def test_delegator_targets_brand_dash_wallet(self):
+        src = B2B_FILE.read_text()
+        m = re.search(
+            r"function\s+setupWalletClickDelegator\s*\(\s*\)\s*\{([\s\S]*?)\n  \}\s*\n",
+            src,
+        )
+        assert m
+        deleg = m.group(1)
+        assert re.search(
+            r"\.closest\(\s*['\"]\[data-testid=[\"']brand-dash-wallet[\"']\]['\"]",
+            deleg,
+        ), "Delegator must detect target via .closest('[data-testid=\"brand-dash-wallet\"]')"
+        assert "DY.navigeer('wallet')" in deleg, (
+            "Delegator must call DY.navigeer('wallet') for B2B route"
+        )
+        assert "_renderLock" in deleg, (
+            "Delegator must proactively clear _renderLock"
+        )
+
+    # Idempotency guard
+    def test_delegator_idempotency_guard(self):
+        src = B2B_FILE.read_text()
+        assert "__ppWalletDelegatorInstalled" in src, (
+            "Delegator must use window.__ppWalletDelegatorInstalled idempotency guard"
+        )
+
+    # Card DOM contract: 3 inner divs (icon, title, sub)
+    def test_card_inner_dom_contract(self):
+        body = self._inject_body()
+        assert "bp-quick-icon" in body and "💰" in body
+        assert "bp-quick-titel" in body and ">Wallet<" in body
+        assert "bp-quick-sub" in body and "Saldo &amp; opwaarderen" in body or \
+               "Saldo & opwaarderen" in body
+        assert "data-testid" in body and "brand-dash-wallet" in body
+        assert "bp-quick" in body
+
+    # ZIP regression: deploy zip carries the new hardened module
+    def test_zip_contains_button_injection_and_delegator(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("extensions/payments/pp-wallet-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "createElement('button')" in content, (
+            "Deploy zip must contain new <button> injection"
+        )
+        assert "createElement('a')" not in content, (
+            "Deploy zip must NOT contain old <a> injection"
+        )
+        assert "setupWalletClickDelegator" in content, (
+            "Deploy zip must contain setupWalletClickDelegator"
+        )
+        assert "brand-dash-wallet" in content
+        assert "navigeer('wallet')" in content
+
+    # B2C wallet unchanged: no brand-dash-wallet injection there
+    def test_b2c_wallet_does_not_inject_brand_dash_card(self):
+        src = B2C_FILE.read_text()
+        assert "brand-dash-wallet" not in src, (
+            "B2C wallet must NOT inject the brand-dashboard Wallet card"
+        )
+        # And it must not register the 'wallet' route (only 'b2c_wallet')
+        assert not re.search(r"pagina\s*===\s*'wallet'", src), (
+            "B2C wallet must not intercept the 'wallet' route"
+        )
 
