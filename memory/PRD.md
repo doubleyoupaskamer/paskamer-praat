@@ -6,6 +6,51 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.180 — Fase D: SEO Indexation (29 jun 2026)
+
+### Probleem (gebruiker)
+"Fase D — SEO/canonical/sitemap" — entity-pagina's (`brand_detail`, `campagne_detail`, `product_detail`, `profiel`) hadden geen dynamische meta-tags, geen structured data, geen canonical URLs, en de sitemap dekte alleen statische routes. Private pages waren niet expliciet noindex.
+
+### Fix — PWA + backend (additief, geen legacy raakvlak)
+
+**1) `pp-seo-entity-v1.js` v1.0.0 (NIEUW)**
+- Wrapt `DY.navigeer` idempotent → na elke navigatie wordt `applyForPage(pagina, id)` aangeroepen.
+- **Entity-pagina's** (brand/campagne/product/profiel): laadt data uit Firestore (TTL cache), bouwt:
+  - `<title>` + `<meta name="description">`
+  - `<link rel="canonical">` met pretty-URL pattern `/bedrijf/{slug}?id=...`, `/campagne/{slug}?id=...`, etc.
+  - Open Graph + Twitter tags (`og:title|og:description|og:url|og:type|og:image`)
+  - **JSON-LD structured data** (`Organization` / `Article` / `Product` / `Person` schema)
+- **Private pages** (admin*, brand_dashboard, brand_wallet, wallet, instellingen, notificaties, login, etc.): zet `<meta name="robots" content="noindex,nofollow">` zodat Google ze niet indexeert.
+- **Public pages**: verwijdert noindex.
+
+**2) `backend/sitemap_router.py` (NIEUW)**
+- `GET /api/sitemap.xml` — dynamische sitemap met:
+  - 12 statische routes (home, feed, looks, reviews, winkel, challenges, ovdw, kleuren_ai, voorwaarden, privacy, community_regels, beta)
+  - Alle brands met `naam` → `/bedrijf/{slug}?id=...`
+  - Live campagnes (`status='live'`) → `/campagne/{slug}?id=...`
+  - Actieve brand_products (`status='actief'`) → `/product/{slug}?id=...`
+  - Publieke user-profielen (`publiekProfiel=true`) → `/profiel/{slug}?id=...`
+  - Per URL: `lastmod`, `changefreq`, `priority`
+- `GET /api/robots.txt` — `Disallow:` voor alle private pages + dual sitemap-links.
+- Cache-headers: 1 uur voor sitemap, 24 uur voor robots.
+
+### Smoke test (29 jun 2026)
+```
+GET /api/sitemap.xml → 200 OK, 19 URLs (3 brands + 2 campagnes + 2 producten + 12 static)
+GET /api/robots.txt  → 200 OK
+```
+
+### Cloudflare-rewrite (eenmalig, gebruiker)
+Voor pretty URLs `paskamerpraat.nl/sitemap.xml` en `paskamerpraat.nl/robots.txt`:
+- Cloudflare Page Rule of Worker: rewrite `/sitemap.xml` → `/api/sitemap.xml`, `/robots.txt` → `/api/robots.txt`. (Of voeg ze toe in de Cloudflare-functions config.)
+
+### Delivery
+- `index.html` cache → `?v=60.1.180-seo-d` (nav-context + nieuwe seo-entity script)
+- `sw.js` VERSION → `v60.1.180-20260629-seo-d`
+- Backend: `sitemap_router.py` nieuw + `server.py` include
+- Zip md5 `dc90876a71dcf1056eea48a4d9974632`
+
+
 ## v60.1.177 — Hiërarchische CSV + Weekly Report Cron (29 jun 2026)
 
 ### Probleem (gebruiker)

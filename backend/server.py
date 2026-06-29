@@ -62,6 +62,14 @@ except Exception as _e:
     logger.exception("weekly_reports niet geladen: %s", _e)
     weekly_reports = None  # type: ignore
 
+# ── SEO Sitemap.xml + robots.txt (Fase D) ──────────────────────────
+try:
+    from sitemap_router import sitemap_router as _sitemap_router
+    app.include_router(_sitemap_router)
+    logger.info("sitemap router geladen op /api/sitemap.xml + /api/robots.txt")
+except Exception as _e:
+    logger.exception("sitemap router niet geladen: %s", _e)
+
 
 # Define Models
 class StatusCheck(BaseModel):
