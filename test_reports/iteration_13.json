@@ -1,0 +1,49 @@
+{
+  "summary": "v60.1.165 Phase B (Merken Discoverability) backend/static audit complete. Added TestMerkenDiscoverability (29 assertions), TestPhaseBRegressionUnchanged (6), TestMerkenDiscZip (5) — 40 new assertions in total. Updated stale SW VERSION/MD5 assertions across prior classes. All 204 tests pass.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/iteration_13.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Module pp-merken-discoverability-v1.js is well-scoped (~146 lines), idempotent (window.__ppMerkenDiscInit + per-injector early-returns), and additive. Uses MutationObserver(childList+subtree on body) + setTimeout(500ms) initial — same pattern as other PP extensions. PP_NavContext.openMerken is tried before DY.navigeer('merken') fallback (correct Phase A bypass priority). history.back() is gated by history.length>1 before falling back to DY.navigeer('feed').",
+    "Note: review-request grep expectations '#pp-merken-teaser-uitg' and '#pp-merken-back-btn' (with leading '#') return 0/0 in the deployed JS because CSS rules are built via string concatenation ('#' + TEASER_ID + ...). The literal IDs without '#' DO appear (1x each, plus runtime injection). This is functionally correct — flagging only as a discrepancy with the review-request grep expectation, not a code defect.",
+    "All required data-testid attributes present: uitg-merken-teaser, uitg-az-<letter> (27x), merken-back-btn."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py"
+  ],
+  "success_rate": {
+    "backend": "100% (204/204)",
+    "frontend": "N/A (PWA deployed externally to Cloudflare — static-audit + curl only per review-request)"
+  },
+  "test_credentials": "none required",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Suite now at 204 assertions (was 164 in iteration_12). New v60.1.165 classes: TestMerkenDiscoverability, TestPhaseBRegressionUnchanged, TestMerkenDiscZip. Existing classes updated to expect SW VERSION 'v60.1.165-20260623-merken-disc' and ZIP MD5 34540873dab708c0a2cede432105e9c6. brand-portal-v1.js / pp-feedtabs-v1.js / pp-nav-context-v1.js / pp-wallet-v1.js confirmed UNCHANGED (regression-clean).",
+  "verification_summary": {
+    "static_audit_module_exists": "PASS (/app/pwa/extensions/profile/pp-merken-discoverability-v1.js, 146 lines, VERSION 1.0.0)",
+    "letters_array_27": "PASS (0-9 first, Z last, all A-Z present)",
+    "inject_teaser": "PASS (queries .pp-uitg-feed-grid, idempotent, insertBefore grid, intro literal present, 27 buttons with data-letter, delegated click → gotoMerken)",
+    "inject_back_btn": "PASS (DY.pagina==='merken' guard, #dy-main .bp-page scope, idempotent, insertBefore .bp-header, data-testid='merken-back-btn', &larr; + Terug)",
+    "gotoMerken_priority": "PASS (PP_NavContext.openMerken first → DY.navigeer('merken') fallback; sessionStorage['pp-merken-az-prefill'] set)",
+    "backFromMerken_priority": "PASS (history.back() with history.length>1 guard → DY.navigeer('feed') fallback; no direct feed routing as primary)",
+    "inject_css": "PASS (style id='pp-merken-disc-css', idempotent; teaser margin/padding/gradient/border + back-btn display:inline-flex border-radius:999px)",
+    "init_flow": "PASS (MutationObserver on body childList+subtree + setTimeout 500ms; window.__ppMerkenDiscInit guard)",
+    "index_html_wiring": "PASS (1 script tag with ?v=60.1.165-merken-disc, positioned AFTER pp-nav-context-v1.js)",
+    "sw_version_bump": "PASS (v60.1.165-20260623-merken-disc)",
+    "regression_legacy_unchanged": "PASS (brand-portal renderMerken intact + no back-btn reference; pp-feedtabs emits .pp-uitg-feed-grid; pp-nav-context Phase A intact; pp-wallet B2B_ALLOWED_AMOUNTS intact)",
+    "zip_audit": "PASS (MD5=34540873dab708c0a2cede432105e9c6; module bundled with all required literals; sw.js carries new VERSION; nav-context Phase A still bundled)",
+    "backend_curl": "PASS (GET /api/downloads/01-paskamerpraat-pwa-cloudflare.zip → 200, 4029304 bytes, application/zip, MD5 matches)"
+  }
+}

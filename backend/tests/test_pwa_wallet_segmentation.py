@@ -232,12 +232,14 @@ class TestCacheVersion:
         assert "pp-feedtabs-v1.js?v=60.1.162-uitgelicht-no-date-filter" in src
         assert "pp-brand-onboarding-checklist-v1.js?v=60.1.161-onb-wallet-bypass" in src
         assert "pp-nav-context-v1.js?v=60.1.164-nav-context" in src
+        # v60.1.165: pp-merken-discoverability-v1.js NEW additive module
+        assert "pp-merken-discoverability-v1.js?v=60.1.165-merken-disc" in src
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
-        # v60.1.164: SW VERSION bumped to nav-context
-        assert "VERSION       = 'v60.1.164-20260623-nav-context'" in src or \
-               "VERSION = 'v60.1.164-20260623-nav-context'" in src
+        # v60.1.165: SW VERSION bumped to merken-disc (Phase B)
+        assert "VERSION       = 'v60.1.165-20260623-merken-disc'" in src or \
+               "VERSION = 'v60.1.165-20260623-merken-disc'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
@@ -252,8 +254,8 @@ class TestDeployZip:
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        # v60.1.164: SW VERSION bumped to nav-context
-        assert "v60.1.164-20260623-nav-context" in content
+        # v60.1.165: SW VERSION bumped to merken-disc
+        assert "v60.1.165-20260623-merken-disc" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -1255,7 +1257,7 @@ class TestOnboardingChecklistWalletBypass:
         with open(ZIP_FILE, "rb") as f:
             for chunk in iter(lambda: f.read(1 << 20), b""):
                 h.update(chunk)
-        assert h.hexdigest() == "d42fb737ea0ae065ffcac66e1b232852", \
+        assert h.hexdigest() == "34540873dab708c0a2cede432105e9c6", \
             f"deploy zip MD5 mismatch: got {h.hexdigest()}"
 
 
@@ -1333,9 +1335,9 @@ class TestUitgelichtNoDateFilter:
 
     def test_sw_version_bumped(self):
         src = SW_FILE.read_text()
-        # v60.1.164: sw.js bumped to nav-context (post-v60.1.163)
-        assert "v60.1.164-20260623-nav-context" in src, \
-            "sw.js VERSION must be bumped to v60.1.164"
+        # v60.1.165: sw.js bumped to merken-disc (Phase B; supersedes v60.1.164)
+        assert "v60.1.165-20260623-merken-disc" in src, \
+            "sw.js VERSION must be bumped to v60.1.165 (merken-disc)"
 
     def test_zip_no_to_millis_in_paint_uitgelicht(self):
         """Critical: deployed Cloudflare bundle must not contain the
@@ -1554,8 +1556,8 @@ class TestV60_163Regression:
         v60.1.164: sw.js VERSION bumped further to nav-context."""
         index_src = INDEX_HTML.read_text()
         assert index_src.count("pp-brand-prod-img-fix.css") == 1
-        # sw.js carries v60.1.164 marker (post v60.1.163)
-        assert "v60.1.164-20260623-nav-context" in SW_FILE.read_text()
+        # sw.js carries v60.1.165 marker (Phase B; supersedes v60.1.163/164)
+        assert "v60.1.165-20260623-merken-disc" in SW_FILE.read_text()
 
 
 # ───────── v60.1.163: backend download endpoint smoke ─────────
@@ -1795,8 +1797,8 @@ class TestNavContext:
         brand-portal, wallet, feedtabs, onboarding."""
         # Exactly one script tag for pp-nav-context-v1.js
         assert INDEX_HTML.read_text().count("pp-nav-context-v1.js") == 1
-        # sw.js carries v60.1.164 marker
-        assert "v60.1.164-20260623-nav-context" in SW_FILE.read_text()
+        # sw.js carries v60.1.165 marker (superseded by Phase B; nav-context module still v60.1.164 cache key)
+        assert "v60.1.165-20260623-merken-disc" in SW_FILE.read_text()
 
 
 # ─── v60.1.164: ZIP bundle audit for nav-context module ───
@@ -1824,4 +1826,306 @@ class TestNavContextZip:
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "v60.1.164-20260623-nav-context" in content
+        assert "v60.1.165-20260623-merken-disc" in content
+
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# v60.1.165 Phase B: Merken Discoverability (Uitgelicht A-Z teaser + Merken
+#                    ← Terug knop)
+# ═══════════════════════════════════════════════════════════════════════════
+MERKEN_DISC = PWA / "extensions/profile/pp-merken-discoverability-v1.js"
+
+
+class TestMerkenDiscoverability:
+    """Static audit of /app/pwa/extensions/profile/pp-merken-discoverability-v1.js"""
+
+    def test_module_file_exists(self):
+        assert MERKEN_DISC.exists(), \
+            "pp-merken-discoverability-v1.js must exist (Phase B v60.1.165)"
+
+    def test_module_version(self):
+        src = MERKEN_DISC.read_text()
+        assert "VERSION:" in src and "'1.0.0'" in src, \
+            "PP_MerkenDiscoverability.VERSION must be '1.0.0'"
+
+    def test_window_export_surface(self):
+        src = MERKEN_DISC.read_text()
+        assert "window.PP_MerkenDiscoverability" in src, \
+            "Must export window.PP_MerkenDiscoverability namespace"
+        assert "gotoMerken" in src
+        assert "backFromMerken" in src
+
+    def test_letters_array_27_elements(self):
+        """LETTERS must be exactly ['0-9','A',...,'Z'] (27 items)."""
+        src = MERKEN_DISC.read_text()
+        m = re.search(r"LETTERS\s*=\s*'([^']+)'\s*\.split\(','\)", src)
+        assert m, "LETTERS const must be defined as comma-joined string .split(',')"
+        items = m.group(1).split(",")
+        assert len(items) == 27, f"LETTERS must have 27 entries (0-9 + A-Z), got {len(items)}"
+        assert items[0] == "0-9", "First LETTERS entry must be '0-9'"
+        assert items[-1] == "Z", "Last LETTERS entry must be 'Z'"
+        # All A-Z uppercase letters present
+        for ch in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+            assert ch in items, f"LETTERS missing uppercase '{ch}'"
+
+    # ─────── injectUitgelichtTeaser ───────
+    def test_inject_teaser_targets_uitg_feed_grid(self):
+        src = MERKEN_DISC.read_text()
+        assert "querySelector('.pp-uitg-feed-grid')" in src, \
+            "injectUitgelichtTeaser must query .pp-uitg-feed-grid (emitted by pp-feedtabs-v1.js)"
+
+    def test_inject_teaser_idempotent_skip(self):
+        src = MERKEN_DISC.read_text()
+        assert "getElementById(TEASER_ID)" in src, \
+            "injectUitgelichtTeaser must skip when teaser already present (idempotency)"
+
+    def test_inject_teaser_insert_before_grid(self):
+        src = MERKEN_DISC.read_text()
+        assert "grid.parentNode.insertBefore(box, grid)" in src, \
+            "teaser must be inserted BEFORE the .pp-uitg-feed-grid via parentNode.insertBefore"
+
+    def test_inject_teaser_intro_string_literal(self):
+        src = MERKEN_DISC.read_text()
+        assert "Ontdek merken die speciaal voor de Tall &amp; Plus Size community ontworpen zijn." in src, \
+            "Dutch intro string must be present (escaped &amp; for HTML safety)"
+
+    def test_inject_teaser_27_buttons_data_letter(self):
+        src = MERKEN_DISC.read_text()
+        # Buttons constructed via LETTERS.map → <button data-letter='X'>
+        assert "data-letter=" in src
+        assert "LETTERS.map" in src
+        # Delegated click handler reads data-letter
+        assert "closest('button[data-letter]')" in src
+        assert "btn.getAttribute('data-letter')" in src
+
+    def test_inject_teaser_delegated_click_calls_gotoMerken(self):
+        src = MERKEN_DISC.read_text()
+        # Within the addEventListener handler we must invoke gotoMerken with the letter
+        assert re.search(r"gotoMerken\(\s*btn\.getAttribute\(\s*['\"]data-letter['\"]\s*\)\s*\)", src), \
+            "delegated click handler must invoke gotoMerken with the data-letter value"
+
+    # ─────── injectMerkenBackBtn ───────
+    def test_inject_back_btn_guard_pagina_merken(self):
+        src = MERKEN_DISC.read_text()
+        assert "DY.pagina !== 'merken'" in src or "DY.pagina!=='merken'" in src, \
+            "injectMerkenBackBtn must guard with DY.pagina === 'merken'"
+
+    def test_inject_back_btn_targets_dy_main_bp_page(self):
+        src = MERKEN_DISC.read_text()
+        assert "querySelector('#dy-main .bp-page')" in src, \
+            "back-btn injector must scope to #dy-main .bp-page"
+
+    def test_inject_back_btn_idempotent(self):
+        src = MERKEN_DISC.read_text()
+        assert "querySelector('#' + BACK_BTN_ID)" in src, \
+            "back-btn injector must early-return when button already exists"
+
+    def test_inject_back_btn_inserted_before_header(self):
+        src = MERKEN_DISC.read_text()
+        assert "querySelector('.bp-header')" in src
+        assert "page.insertBefore(btn, header)" in src, \
+            "back btn must be inserted BEFORE .bp-header via parent.insertBefore"
+
+    def test_back_btn_dom_attributes(self):
+        src = MERKEN_DISC.read_text()
+        assert "'merken-back-btn'" in src and "data-testid" in src, \
+            "back-btn must carry data-testid='merken-back-btn'"
+        assert "&larr;" in src, "back-btn must render '&larr;' (left arrow entity)"
+        assert "Terug" in src, "back-btn label must contain 'Terug'"
+
+    def test_back_btn_id_constant(self):
+        src = MERKEN_DISC.read_text()
+        assert "BACK_BTN_ID" in src and "'pp-merken-back-btn'" in src
+        assert "TEASER_ID" in src and "'pp-merken-teaser-uitg'" in src
+
+    # ─────── gotoMerken (NavContext bypass) ───────
+    def test_gotoMerken_prefers_PP_NavContext(self):
+        src = MERKEN_DISC.read_text()
+        # PP_NavContext.openMerken must be attempted first
+        ctx_pos = src.find("PP_NavContext.openMerken")
+        dy_pos  = src.find("DY.navigeer('merken')")
+        assert ctx_pos > 0, "gotoMerken must attempt PP_NavContext.openMerken (Phase A bypass)"
+        assert dy_pos  > 0, "gotoMerken must have DY.navigeer('merken') fallback"
+        assert ctx_pos < dy_pos, \
+            "PP_NavContext.openMerken must be tried BEFORE DY.navigeer('merken') fallback"
+
+    def test_gotoMerken_sessionStorage_prefill(self):
+        src = MERKEN_DISC.read_text()
+        assert "sessionStorage.setItem('pp-merken-az-prefill'" in src, \
+            "selected letter must be stored at sessionStorage['pp-merken-az-prefill']"
+
+    # ─────── backFromMerken (history.back priority) ───────
+    def test_backFromMerken_history_first(self):
+        src = MERKEN_DISC.read_text()
+        hist_pos = src.find("history.back()")
+        feed_pos = src.find("DY.navigeer('feed')")
+        assert hist_pos > 0, "backFromMerken must invoke history.back() as primary path"
+        assert feed_pos > 0, "backFromMerken must fall back to DY.navigeer('feed')"
+        assert hist_pos < feed_pos, \
+            "history.back() MUST appear BEFORE feed fallback (correct priority)"
+        # history.length guard present
+        assert "history.length" in src, \
+            "must guard history.back() with history.length > 1 check"
+
+    def test_no_direct_feed_routing_as_primary(self):
+        """Ensures backFromMerken doesn't hardcode feed routing before history.back()."""
+        src = MERKEN_DISC.read_text()
+        # Slice from start of backFromMerken to the start of injectUitgelichtTeaser
+        start = src.index("function backFromMerken")
+        end = src.index("function injectUitgelichtTeaser", start)
+        body = src[start:end]
+        assert "history.back()" in body and "DY.navigeer('feed')" in body, \
+            "backFromMerken must reference both history.back() and DY.navigeer('feed')"
+        assert body.index("history.back()") < body.index("DY.navigeer('feed')"), \
+            "Inside backFromMerken, history.back() must precede DY.navigeer('feed')"
+
+    # ─────── injectCss ───────
+    def test_inject_css_idempotent_and_id(self):
+        src = MERKEN_DISC.read_text()
+        assert "getElementById('pp-merken-disc-css')" in src, \
+            "injectCss must early-return when <style id='pp-merken-disc-css'> already present"
+        assert "id = 'pp-merken-disc-css'" in src or "s.id = 'pp-merken-disc-css'" in src
+
+    def test_inject_css_rules_teaser_and_back_btn(self):
+        src = MERKEN_DISC.read_text()
+        # Teaser styling
+        assert "margin:8px 0 18px" in src or "padding:14px 16px" in src, \
+            "teaser CSS rule must define margin/padding"
+        assert "linear-gradient(" in src, "teaser must use linear-gradient background"
+        assert "border:1px solid rgba(212,145,10" in src or "border-radius:14px" in src, \
+            "teaser border styling missing"
+        # Back-btn styling
+        assert "display:inline-flex" in src, "back-btn must use display:inline-flex"
+        assert "border-radius:999px" in src, "back-btn must use border-radius:999px (pill)"
+
+    # ─────── Init flow ───────
+    def test_init_uses_mutation_observer(self):
+        src = MERKEN_DISC.read_text()
+        assert "new MutationObserver(" in src
+        assert "obs.observe(document.body" in src
+        assert "childList: true" in src and "subtree: true" in src, \
+            "observer must watch childList+subtree on document.body"
+
+    def test_init_has_setTimeout_500ms(self):
+        src = MERKEN_DISC.read_text()
+        assert re.search(r"setTimeout\(\s*function[\s\S]+?,\s*500\s*\)", src), \
+            "init must call setTimeout(..., 500) as initial injection attempt"
+
+    def test_init_idempotency_guard(self):
+        src = MERKEN_DISC.read_text()
+        assert "window.__ppMerkenDiscInit" in src, \
+            "module must guard with window.__ppMerkenDiscInit to prevent double-init"
+
+    # ─────── index.html & sw.js wiring ───────
+    def test_index_html_script_tag(self):
+        src = INDEX_HTML.read_text()
+        assert "pp-merken-discoverability-v1.js?v=60.1.165-merken-disc" in src, \
+            "index.html must include pp-merken-discoverability-v1.js with v60.1.165 cache key"
+
+    def test_index_html_script_tag_after_nav_context(self):
+        """pp-merken-discoverability-v1.js depends on PP_NavContext (Phase A v60.1.164);
+        the script tag must appear AFTER pp-nav-context-v1.js in document order."""
+        src = INDEX_HTML.read_text()
+        nav_pos  = src.find("pp-nav-context-v1.js")
+        disc_pos = src.find("pp-merken-discoverability-v1.js")
+        assert nav_pos > 0 and disc_pos > 0
+        assert nav_pos < disc_pos, \
+            "pp-merken-discoverability-v1.js script tag must come AFTER pp-nav-context-v1.js"
+
+    def test_index_html_only_one_script_tag(self):
+        src = INDEX_HTML.read_text()
+        assert src.count("pp-merken-discoverability-v1.js") == 1, \
+            "index.html must include the new module exactly once"
+
+    def test_sw_version_bumped_v60_165(self):
+        src = SW_FILE.read_text()
+        assert "v60.1.165-20260623-merken-disc" in src, \
+            "sw.js VERSION must be bumped to v60.1.165-20260623-merken-disc"
+
+
+# ─── v60.1.165 REGRESSION: legacy files MUST be UNCHANGED ───
+class TestPhaseBRegressionUnchanged:
+    def test_brand_portal_renderMerken_intact(self):
+        src = BRAND_PORTAL.read_text()
+        assert "BP.renderMerken" in src, \
+            "brand-portal-v1.js must still define BP.renderMerken (legacy preserved)"
+
+    def test_brand_portal_no_back_button_added(self):
+        """Phase B MUST NOT modify brand-portal-v1.js to add a back button —
+        the back button is injected via the new module's MutationObserver."""
+        src = BRAND_PORTAL.read_text()
+        assert "pp-merken-back-btn" not in src, \
+            "brand-portal-v1.js must NOT reference pp-merken-back-btn (legacy untouched)"
+
+    def test_feedtabs_unchanged_uitg_grid(self):
+        src = FEEDTABS_FILE.read_text()
+        # The new module hooks .pp-uitg-feed-grid emitted by pp-feedtabs
+        assert ".pp-uitg-feed-grid" in src, \
+            "pp-feedtabs-v1.js must still emit .pp-uitg-feed-grid (untouched)"
+        # And it must NOT contain the new teaser/back ids
+        assert "pp-merken-teaser-uitg" not in src
+        assert "pp-merken-back-btn" not in src
+
+    def test_nav_context_phase_a_unchanged(self):
+        src = NAV_CONTEXT.read_text()
+        assert "PP_NavContext" in src
+        assert "openMerken" in src
+        # No back-btn / teaser logic leaked into Phase A module
+        assert "pp-merken-teaser-uitg" not in src
+        assert "pp-merken-back-btn" not in src
+
+    def test_wallet_unchanged(self):
+        src = WALLET_FILE.read_text()
+        assert "B2B_ALLOWED_AMOUNTS" in src, \
+            "pp-wallet-v1.js untouched in Phase B (still has B2B amounts)"
+        assert "pp-merken-teaser-uitg" not in src
+
+    def test_phase_b_additive_only_in_index_html(self):
+        src = INDEX_HTML.read_text()
+        # Exactly one new script tag, no rewrite of other tags
+        assert src.count("pp-merken-discoverability-v1.js") == 1
+        # Phase A v60.1.164 nav-context tag still at its existing key
+        assert "pp-nav-context-v1.js?v=60.1.164-nav-context" in src
+
+
+# ─── v60.1.165 ZIP bundle audit ───
+class TestMerkenDiscZip:
+    EXPECTED_MD5 = "34540873dab708c0a2cede432105e9c6"
+
+    def test_zip_md5(self):
+        import hashlib
+        h = hashlib.md5(ZIP_FILE.read_bytes()).hexdigest()
+        assert h == self.EXPECTED_MD5, \
+            f"ZIP MD5 mismatch: expected {self.EXPECTED_MD5}, got {h}"
+
+    def test_zip_bundles_new_module(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            names = z.namelist()
+            assert "extensions/profile/pp-merken-discoverability-v1.js" in names, \
+                "ZIP must bundle the new pp-merken-discoverability-v1.js module"
+            with z.open("extensions/profile/pp-merken-discoverability-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        # Required literals from the request
+        assert "PP_MerkenDiscoverability" in content
+        assert "pp-merken-teaser-uitg" in content
+        assert "pp-merken-back-btn" in content
+        assert "Ontdek merken" in content
+
+    def test_zip_index_html_links_new_module(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("index.html") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "pp-merken-discoverability-v1.js?v=60.1.165-merken-disc" in content
+
+    def test_zip_sw_version_v60_165(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("sw.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "v60.1.165-20260623-merken-disc" in content
+
+    def test_zip_still_contains_nav_context_phase_a(self):
+        """Phase B did NOT remove Phase A — nav-context module must still be present."""
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            names = z.namelist()
+            assert "extensions/profile/pp-nav-context-v1.js" in names
