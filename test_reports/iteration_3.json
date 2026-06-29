@@ -1,0 +1,53 @@
+{
+  "summary": "v60.1.155 (coming-soon intercept removal) verification: 12/12 static audits passed for code-level fix. Both PP_Wallet.topup (B2B v1.4.0) and PP_B2CWallet.topup (B2C v1.2.0) now route DIRECTLY to Shopify with segregated note_attributes (wallet_topup_* vs b2c_wallet_topup_*). Zero PP_TopupComingSoon.show occurrences in either wallet file (both source and zip). Only the 3 expected files reference PP_TopupComingSoon.show. Backend /api/downloads/01-paskamerpraat-pwa-cloudflare.zip returns 200/application/zip (4019352 bytes, MD5 657a9d9b9e9f469fb1a5db0629b68f33 ✓). Regression suite expanded from 35 → 44 tests; 43 pass, 1 fails revealing a NEW BUG: the B2C wallet <script> cache-busting query string in /app/pwa/index.html line 977 was NOT bumped from v60.1.154 → v60.1.155, while pp-wallet-v1.js (line 975) WAS bumped. This causes a partial cache bust — B2C users with cached v60.1.154 will continue running the OLD pp-b2c-wallet-v1.js (with the intercept) and reproduce the exact bug the user reported.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "pp-b2c-wallet-v1.js cache-bust query string in /app/pwa/index.html line 977",
+        "issue": "B2C wallet <script> tag still carries v=60.1.154-wallet-segmentation-hardening while the B2B tag (line 975) was correctly bumped to v=60.1.155-remove-coming-soon-intercept. Result: end users with a cached v60.1.154 copy of pp-b2c-wallet-v1.js will NOT pull the new v1.2.0 file (which removes the intercept). For those users the exact reported bug (popup shown on B2C topup) will persist after deploy. Quick-fix: change '?v=60.1.154-wallet-segmentation-hardening' to '?v=60.1.155-remove-coming-soon-intercept' on line 977 of /app/pwa/index.html, then REBUILD the Cloudflare zip.",
+        "selector": "/app/pwa/index.html#L977",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/iter3_seg.xml"
+  ],
+  "action_items": [
+    "Bump pp-b2c-wallet-v1.js cache-bust query in /app/pwa/index.html line 977 from v60.1.154-wallet-segmentation-hardening to v60.1.155-remove-coming-soon-intercept (single one-line change).",
+    "Rebuild /app/01-paskamerpraat-pwa-cloudflare.zip so the deployed bundle contains the corrected index.html (current zip still ships the partial-bust index.html).",
+    "Re-run pytest backend/tests/test_pwa_wallet_segmentation.py — expected 44/44 pass after the line-977 fix."
+  ],
+  "critical_code_review_comments": [
+    "v60.1.155 source-fix is correct and complete in pp-wallet-v1.js (1.4.0) and pp-b2c-wallet-v1.js (1.2.0): coming-soon intercept removed, Shopify URL construction intact, B2B uses wallet_topup_* prefix and B2C uses b2c_wallet_topup_* prefix → backend webhook routing to correct collection (wallet_balance vs b2c_wallet_balance) is preserved.",
+    "Amount-guard whitelists intact: B2B {25,50,100,250}, B2C {5,10,15,25,50}, called BEFORE Shopify URL build → blocks toast+return on invalid amount.",
+    "Shopify variant IDs all match the spec (B2B: 57524873855320/57524878410072/57524916879704/57524918616408; B2C: 57532652224856/57532666642776/57532675227992/57532676768088/57532683321688).",
+    "sw.js VERSION = 'v60.1.155-20260623-remove-coming-soon-intercept' ✓",
+    "Route-safety whitelist still contains all required brand routes + wallet + b2c_wallet ✓",
+    "Brand onboarding-checklist wallet step still navigates to 'wallet' (B2B), not b2c_wallet ✓",
+    "7-days badge still writes to brands/{uid}.onboarding_badge_7d ✓",
+    "DEPLOY BUG: index.html line 977 missed the cache-bust bump for pp-b2c-wallet-v1.js → partial cache-bust → B2C users on the cached old file will still see the bug. Trivial one-character-block fix but MUST be done + zip rebuilt.",
+    "Defensive isolation layer (pp-brand-wallet-isolation-v1.js) still wraps PP_TopupComingSoon.show — harmless since neither wallet now calls it, but consider removing the wrap in a future cleanup to reduce code-noise (low priority).",
+    "Pytest suite updated and expanded from 35 → 44 cases (new TestComingSoonInterceptRemoved class with 9 assertions specifically guarding against intercept reintroduction; regression-safe)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py (updated v60.1.154 assertions → v60.1.155 + added TestComingSoonInterceptRemoved class with 9 new assertions)"
+  ],
+  "success_rate": {
+    "backend": "100% (download endpoint OK; all static audits pass)",
+    "frontend": "97.7% (43/44 pytest assertions; 1 failure surfaces a real deploy bug on index.html line 977)"
+  },
+  "test_credentials": "none required",
+  "seed_data_creation": "none",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "After main agent fixes line 977 of /app/pwa/index.html (cache-bust bump for pp-b2c-wallet-v1.js) and rebuilds the zip, simply re-run `pytest /app/backend/tests/test_pwa_wallet_segmentation.py -v` — expect 44/44 green. The new TestComingSoonInterceptRemoved class is the canonical guard against the user-reported bug being reintroduced. ZIP MD5 will change after rebuild (current: 657a9d9b9e9f469fb1a5db0629b68f33).",
+  "rca of the issue": "Original user-reported bug RCA: both PP_Wallet.topup() and PP_B2CWallet.topup() contained a 'coming-soon intercept' that called the SHARED PP_TopupComingSoon.show() popup BEFORE routing to Shopify. Because the popup module is shared between B2B and B2C, B2B users perceived they were being redirected to the B2C 'binnenkort' screen. Mitigation v60.1.155: intercept calls removed from both wallets; topup() now goes straight to Shopify with the correct segregated note-attribute prefix. NEW deploy-side issue found in this iteration: index.html cache-bust was bumped for pp-wallet-v1.js (line 975) but NOT for pp-b2c-wallet-v1.js (line 977). Reproduction: any B2C end-user whose browser/SW cached pp-b2c-wallet-v1.js at v60.1.154 will continue to execute the OLD code containing the intercept → identical symptom to original bug. Mitigation: one-line cache-bust bump on line 977 + zip rebuild."
+}

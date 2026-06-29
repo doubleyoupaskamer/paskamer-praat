@@ -1,11 +1,18 @@
 """
-Backend + static-audit tests for PWA v60.1.154 wallet segmentation hardening.
+Backend + static-audit tests for PWA wallet segmentation.
+
+Originally added for v60.1.154 (amount-whitelist hardening). Updated for
+v60.1.155 (COMING-SOON INTERCEPT REMOVAL) — the previous fix routed both
+B2B and B2C topup() through a shared PP_TopupComingSoon.show popup,
+which made B2B users perceive a redirect to the B2C "binnenkort" screen.
+v60.1.155 removes that intercept so topup() goes straight to Shopify
+with the correct (segregated) note_attributes.
 
 The PWA itself is a Vanilla JS app deployed to Cloudflare Pages from /app/pwa/.
 The Emergent preview URL only exposes the FastAPI /api/* routes (it does NOT
 serve the PWA), so these tests:
   1. Static-audit the PWA source in /app/pwa/ for B2B/B2C segregation.
-  2. Static-audit the Cloudflare zip bundle to ensure it contains v60.1.154.
+  2. Static-audit the Cloudflare zip bundle to ensure it contains v60.1.155.
   3. Backend curl checks for /api/downloads/{filename}.
 """
 import os
@@ -201,13 +208,14 @@ class TestOnboarding:
 class TestCacheVersion:
     def test_index_html_bumped(self):
         src = INDEX_HTML.read_text()
-        assert "pp-wallet-v1.js?v=60.1.154-wallet-segmentation-hardening" in src
-        assert "pp-b2c-wallet-v1.js?v=60.1.154-wallet-segmentation-hardening" in src
+        # v60.1.155 bumped from v60.1.154 → both wallet script tags must use the new cache key
+        assert "pp-wallet-v1.js?v=60.1.155-remove-coming-soon-intercept" in src
+        assert "pp-b2c-wallet-v1.js?v=60.1.155-remove-coming-soon-intercept" in src
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
-        assert "VERSION       = 'v60.1.154-20260623-wallet-segmentation-hardening'" in src or \
-               "VERSION = 'v60.1.154-20260623-wallet-segmentation-hardening'" in src
+        assert "VERSION       = 'v60.1.155-20260623-remove-coming-soon-intercept'" in src or \
+               "VERSION = 'v60.1.155-20260623-remove-coming-soon-intercept'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
@@ -216,11 +224,11 @@ class TestDeployZip:
         assert ZIP_FILE.exists()
         assert ZIP_FILE.stat().st_size > 3 * 1024 * 1024, "zip should be > 3MB"
 
-    def test_zip_contains_v60_1_154_sw(self):
+    def test_zip_contains_v60_1_155_sw(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "v60.1.154-20260623-wallet-segmentation-hardening" in content
+        assert "v60.1.155-20260623-remove-coming-soon-intercept" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -264,3 +272,81 @@ class TestDownloadEndpoint:
         r = api_client.get(f"{BASE_URL}/api/downloads/{bad}")
         assert r.status_code in (400, 404), f"expected 400/404 for {bad!r}, got {r.status_code}"
         assert r.status_code != 200
+
+
+
+# ───────────── v60.1.155: COMING-SOON INTERCEPT REMOVAL ─────────────
+class TestComingSoonInterceptRemoved:
+    """The bug: both PP_Wallet.topup (B2B) and PP_B2CWallet.topup (B2C)
+    called PP_TopupComingSoon.show() before routing to Shopify. Both
+    wallets shared the popup, so B2B users saw what looked like the
+    B2C "binnenkort" screen. v60.1.155 removes those calls."""
+
+    def test_b2b_topup_has_no_coming_soon_call(self):
+        src = B2B_FILE.read_text()
+        assert "PP_TopupComingSoon.show" not in src, (
+            "pp-wallet-v1.js must NOT call PP_TopupComingSoon.show (v60.1.155)"
+        )
+
+    def test_b2c_topup_has_no_coming_soon_call(self):
+        src = B2C_FILE.read_text()
+        assert "PP_TopupComingSoon.show" not in src, (
+            "pp-b2c-wallet-v1.js must NOT call PP_TopupComingSoon.show (v60.1.155)"
+        )
+
+    def test_b2b_version_bumped_to_1_4_0(self):
+        src = B2B_FILE.read_text()
+        assert re.search(r"VERSION\s*:\s*'1\.4\.0'", src), "B2B wallet VERSION must be 1.4.0"
+
+    def test_b2c_version_bumped_to_1_2_0(self):
+        src = B2C_FILE.read_text()
+        assert re.search(r"VERSION\s*:\s*'1\.2\.0'", src), "B2C wallet VERSION must be 1.2.0"
+
+    def test_b2b_topup_routes_directly_to_shopify(self):
+        """After the intercept removal, topup() must hit the Shopify cart URL
+        with the B2B-prefixed note-attribute (wallet_topup_uid, NOT b2c_*)."""
+        src = B2B_FILE.read_text()
+        assert "attributes%5Bwallet_topup_uid%5D=" in src
+        assert "attributes%5Bwallet_topup_amount_cents%5D=" in src
+        # cart URL pattern
+        assert "/cart/' + encodeURIComponent(variantId)" in src
+
+    def test_b2c_topup_routes_directly_to_shopify_with_b2c_prefix(self):
+        src = B2C_FILE.read_text()
+        assert "attributes%5Bb2c_wallet_topup_uid%5D=" in src
+        assert "attributes%5Bb2c_wallet_topup_amount_cents%5D=" in src
+        # cart URL pattern
+        assert "/cart/' + encodeURIComponent(variantId)" in src
+
+    def test_only_three_allowed_callers_of_coming_soon_show(self):
+        """Acceptable callers of PP_TopupComingSoon.show: the module
+        itself + 2 wrappers. Any other file referencing it is a regression."""
+        allowed = {
+            PWA / "extensions/payments/pp-topup-comingsoon-v1.js",
+            PWA / "extensions/payments/pp-topup-modal-router-v1.js",
+            PWA / "extensions/payments/pp-brand-wallet-isolation-v1.js",
+        }
+        offenders = []
+        for path in PWA.rglob("*.js"):
+            if path in allowed:
+                continue
+            try:
+                if "PP_TopupComingSoon.show" in path.read_text(encoding="utf-8", errors="ignore"):
+                    offenders.append(str(path.relative_to(PWA)))
+            except Exception:
+                pass
+        assert not offenders, f"Unexpected PP_TopupComingSoon.show callers: {offenders}"
+
+    def test_zip_b2b_wallet_has_no_intercept(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("extensions/payments/pp-wallet-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "PP_TopupComingSoon.show" not in content
+        assert "VERSION:      '1.4.0'" in content or re.search(r"VERSION\s*:\s*'1\.4\.0'", content)
+
+    def test_zip_b2c_wallet_has_no_intercept(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("extensions/payments/pp-b2c-wallet-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "PP_TopupComingSoon.show" not in content
+        assert "VERSION:      '1.2.0'" in content or re.search(r"VERSION\s*:\s*'1\.2\.0'", content)
