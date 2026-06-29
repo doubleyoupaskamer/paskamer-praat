@@ -6,6 +6,24 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.166 — Teaser Anchor verplaatst naar "Gesponsord door onze partners" (23 feb 2026)
+
+### Probleem (gebruiker)
+Het "Ontdek merken..." teaser-blok stond bovenaan de volledige Uitgelicht-pagina, maar moest EXACT boven de "Gesponsord door onze partners" header verschijnen.
+
+### Fix (1 function tweak, geen andere wijzigingen)
+- `pp-merken-discoverability-v1.js` v1.1.0 — `injectUitgelichtTeaser` zoekt nu alle `.pp-uitg-header` elementen, filtert op het exemplaar met `.pp-uitg-titel` matching `/Gesponsord door onze partners/i`, en plaatst de teaser via `anchor.parentNode.insertBefore(box, anchor)`. OLD `.pp-uitg-feed-grid` anchor verwijderd.
+
+### Testing
+- **204/204 pytest PASS** (TestMerkenDiscoverability assertions geüpdate naar nieuwe anchor).
+- Geen wijziging aan andere bestanden.
+
+### Delivery
+- `index.html` cache → `?v=60.1.166-teaser-anchor`
+- `sw.js` VERSION → `v60.1.166-20260623-teaser-anchor`
+- Zip md5 `140eb3aa24ecc4145e755b0aedf9d95f`
+
+
 ## v60.1.165 — Phase B: Merken Discoverability (23 feb 2026)
 
 ### Probleem (gebruiker)
