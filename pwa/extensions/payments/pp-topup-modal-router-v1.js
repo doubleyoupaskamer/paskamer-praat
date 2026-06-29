@@ -35,6 +35,15 @@
   var AUDIT_MAX = 50;
   window.__ppTopupAudit = window.__ppTopupAudit || [];
 
+  // v1.2 (2026-02-22): console-log default OFF om productie-noise weg te
+  // halen. Audit-data blijft volledig in window.__ppTopupAudit beschikbaar.
+  // Activeer verbose mode via ?debug=topup of localStorage.pp_debug_topup='1'.
+  var TOPUP_VERBOSE = false;
+  try {
+    if (new URLSearchParams(location.search).get('debug') === 'topup') TOPUP_VERBOSE = true;
+    if (localStorage.getItem('pp_debug_topup') === '1') TOPUP_VERBOSE = true;
+  } catch (_) {}
+
   function audit(entry) {
     try {
       entry.ts = new Date().toISOString();
@@ -42,7 +51,12 @@
       if (window.__ppTopupAudit.length > AUDIT_MAX) {
         window.__ppTopupAudit.splice(0, window.__ppTopupAudit.length - AUDIT_MAX);
       }
-      try { console.log(TAG, entry.decision || 'event', entry); } catch (_) {}
+      // Alleen warnings/errors loggen in productie; happy-path silent.
+      var isError = entry.decision && (entry.decision.indexOf('fallback') === 0 ||
+                                       entry.decision.indexOf('error') >= 0);
+      if (TOPUP_VERBOSE || isError) {
+        try { console.log(TAG, entry.decision || 'event', entry); } catch (_) {}
+      }
     } catch (_) {}
   }
 
