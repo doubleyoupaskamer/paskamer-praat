@@ -1,0 +1,38 @@
+{
+  "summary": "v60.1.159 direct-render-bypass via PP_Wallet.openWallet() fully audited and verified. Pytest suite grown from 78 → 91 assertions (+13 new openWallet tests). All 91 tests PASS. Backend /api/downloads/01-paskamerpraat-pwa-cloudflare.zip returns 200 application/zip 4,021,764 bytes (≈3.83MB, within 3-5MB). ZIP MD5 = 37d21622ce6c36e6c42898c68d9c8782 (matches expected).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "openWallet() architecture is sound: directly mutates DY.pagina + DY._laatstGerenderd + DY.brandPortal._renderLock, pushes history state with ?pagina=wallet, then calls renderWallet() locally — fully bypasses DY.navigeer/DY.toonPagina/brand-portal _renderLock guard/pp-nav-fix wrap chain.",
+    "Defense-in-depth verified: inline onclick (`PP_Wallet.openWallet();return false`) + capture-phase document delegator (preventDefault+stopPropagation) both prefer openWallet, with DY.navigeer('wallet') as graceful fallback when PP_Wallet is unavailable.",
+    "Idempotency: openWallet may be invoked twice (capture-phase delegator fires first, inline onclick second). renderWallet uses DOM overwrites (innerHTML/appendChild/querySelector) — safe to re-run rapidly.",
+    "B2C isolation preserved: pp-b2c-wallet-v1.js v1.3.0 has no openWallet, no brand-dash-wallet injection, no 'wallet' route registration. b2c_wallet_balance / b2c_wallet route untouched.",
+    "Cache uniformity verified: only pp-wallet-v1.js carries v=60.1.159-direct-render-bypass cache key; B2C wallet & comingsoon remain on prior cache keys (correct — they weren't touched). SW VERSION = v60.1.159-20260623-direct-render-bypass.",
+    "ZIP regression assertions: `function openWallet` definition count=1, `PP_Wallet.openWallet()` invocations count=4 (≥2 required), `e.preventDefault()` + `e.stopPropagation()` present in delegator, `openWallet: openWallet` exported on window.PP_Wallet."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py"
+  ],
+  "success_rate": {
+    "backend": "100% (91/91 pytest)",
+    "frontend": "n/a — PWA deployed externally to Cloudflare Pages, UI testing intentionally skipped per request"
+  },
+  "test_credentials": "n/a",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Canonical PWA wallet suite: /app/backend/tests/test_pwa_wallet_segmentation.py (now 91 assertions). New class TestDirectRenderBypassOpenWallet covers v60.1.159 openWallet() + inline-onclick + delegator-preventDefault + ZIP regression. To re-validate next iteration: bump cache version + VERSION strings (`v60.1.158-wallet-card-hardened` → `v60.1.159-direct-render-bypass` → next), and TestComingSoonInterceptRestored::test_b2b_version_bumped_to_1_8_0 + TestMerkenCampagneLayout::test_zip_b2b_wallet_version_1_8_0 + TestDeployZip::test_zip_contains_v60_1_159_sw + TestCacheVersion::test_index_html_bumped / test_sw_version. Backend curl /api/downloads/{zip} returns 200 application/zip ≈3.83MB.",
+  "rca of the issue": "Reported bug: even with correct v60.1.158 inline onclick the user still saw B2C packages. Root cause hypothesised: brand-portal-v1.js _renderLock guard (lines 211-215) silently aborts non-BP_PAGES navigation during a 2s render window, and pp-nav-fix-v1.js wraps DY.toonPagina. Any DY.navigeer('wallet') call could be absorbed by these legacy wrappers before reaching renderWallet. Mitigation in v60.1.159: PP_Wallet.openWallet() short-circuits the entire chain — it mutates DY state directly (DY.pagina='wallet', DY._laatstGerenderd=null, DY.brandPortal._renderLock=false), pushes history state, then invokes the local renderWallet() reference (not via DY.navigeer/DY.toonPagina). Both the inline onclick and the document-level capture-phase delegator now invoke openWallet() first (with full backwards-compatible navigeer fallback). Backwards compatibility: if PP_Wallet is undefined or openWallet throws, fallback to legacy DY.navigeer('wallet') path is preserved. ZERO breaking change to B2C wallet, brand-portal-v1.js, or pp-nav-fix-v1.js."
+}

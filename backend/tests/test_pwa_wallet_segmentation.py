@@ -217,13 +217,13 @@ class TestCacheVersion:
         # payments modules (b2c wallet, comingsoon, modal-router, isolation)
         # may still carry v60.1.156-restore-coming-soon-popup because their
         # source files were not modified in v60.1.157.
-        # v60.1.158: pp-wallet-v1.js script tag carries the new hardened cache key
-        assert "pp-wallet-v1.js?v=60.1.158-wallet-card-hardened" in src
+        # v60.1.159: pp-wallet-v1.js script tag carries the new direct-render-bypass cache key
+        assert "pp-wallet-v1.js?v=60.1.159-direct-render-bypass" in src
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
-        assert "VERSION       = 'v60.1.158-20260623-wallet-card-hardened'" in src or \
-               "VERSION = 'v60.1.158-20260623-wallet-card-hardened'" in src
+        assert "VERSION       = 'v60.1.159-20260623-direct-render-bypass'" in src or \
+               "VERSION = 'v60.1.159-20260623-direct-render-bypass'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
@@ -234,11 +234,11 @@ class TestDeployZip:
         assert 3 * 1024 * 1024 < size < 5 * 1024 * 1024, \
             f"zip should be between 3MB and 5MB, got {size} bytes"
 
-    def test_zip_contains_v60_1_158_sw(self):
+    def test_zip_contains_v60_1_159_sw(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "v60.1.158-20260623-wallet-card-hardened" in content
+        assert "v60.1.159-20260623-direct-render-bypass" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -320,9 +320,9 @@ class TestComingSoonInterceptRestored:
             "B2C amount-whitelist must be applied BEFORE the popup call"
         )
 
-    def test_b2b_version_bumped_to_1_7_0(self):
+    def test_b2b_version_bumped_to_1_8_0(self):
         src = B2B_FILE.read_text()
-        assert re.search(r"VERSION\s*:\s*'1\.7\.0'", src), "B2B wallet VERSION must be 1.7.0 in v60.1.158"
+        assert re.search(r"VERSION\s*:\s*'1\.8\.0'", src), "B2B wallet VERSION must be 1.8.0 in v60.1.159"
 
     def test_b2c_version_bumped_to_1_3_0(self):
         src = B2C_FILE.read_text()
@@ -394,8 +394,8 @@ class TestComingSoonInterceptRestored:
                 content = f.read().decode("utf-8", errors="ignore")
         assert "PP_TopupComingSoon.show" in content
         assert re.search(r"source:\s*'b2b'", content)
-        # v60.1.158: B2B wallet module bumped to 1.7.0 (wallet-card hardened)
-        assert re.search(r"VERSION\s*:\s*'1\.7\.0'", content)
+        # v60.1.159: B2B wallet module bumped to 1.8.0 (direct-render-bypass)
+        assert re.search(r"VERSION\s*:\s*'1\.8\.0'", content)
 
     def test_zip_b2c_wallet_has_intercept(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -529,14 +529,14 @@ class TestMerkenCampagneLayout:
         assert "Kies een campagne-pakket" not in content, \
             "ZIP must not contain old 'Kies een campagne-pakket' h2"
 
-    def test_zip_b2b_wallet_version_1_7_0(self):
-        # v60.1.158 bumps the B2B wallet module to 1.7.0 (brand-dashboard
-        # Wallet card hardened against renderLock race conditions).
+    def test_zip_b2b_wallet_version_1_8_0(self):
+        # v60.1.159 bumps the B2B wallet module to 1.8.0 (direct-render-bypass
+        # via PP_Wallet.openWallet() to skip legacy navigation wrappers).
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("extensions/payments/pp-wallet-v1.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert re.search(r"VERSION\s*:\s*'1\.7\.0'", content), \
-            "ZIP'd pp-wallet-v1.js must be VERSION 1.7.0"
+        assert re.search(r"VERSION\s*:\s*'1\.8\.0'", content), \
+            "ZIP'd pp-wallet-v1.js must be VERSION 1.8.0"
 
 
 # ───────── v60.1.157: Public landing UNCHANGED (regression) ─────────
@@ -772,3 +772,225 @@ class TestBrandDashWalletCardHardened:
             "B2C wallet must not intercept the 'wallet' route"
         )
 
+
+# ───────── v60.1.159: DIRECT RENDER BYPASS via PP_Wallet.openWallet() ─────────
+class TestDirectRenderBypassOpenWallet:
+    """v60.1.159 introduces PP_Wallet.openWallet() that bypasses the entire
+    DY.navigeer → DY.toonPagina → brand-portal._renderLock → pp-nav-fix chain
+    by directly setting DY state and invoking renderWallet() locally. Both
+    the inline onclick and the document-level capture-phase delegator now
+    prefer openWallet over navigeer, with a graceful fallback if PP_Wallet
+    is not loaded."""
+
+    # (a) openWallet function defined
+    def test_openwallet_function_exists(self):
+        src = B2B_FILE.read_text()
+        assert re.search(r"function\s+openWallet\s*\(\s*\)\s*\{", src), (
+            "openWallet() function must be defined in v60.1.159"
+        )
+
+    # (b) openWallet exported on window.PP_Wallet
+    def test_openwallet_exported_on_pp_wallet(self):
+        src = B2B_FILE.read_text()
+        m = re.search(r"window\.PP_Wallet\s*=\s*\{([\s\S]*?)\}\s*;", src)
+        assert m, "window.PP_Wallet export block missing"
+        export_body = m.group(1)
+        for fn in ("renderWallet", "openWallet", "topup", "openTopup", "refresh", "switchTab"):
+            assert fn in export_body, f"PP_Wallet must export {fn}"
+
+    # (c) openWallet body: sets pagina='wallet', clears _laatstGerenderd + _renderLock,
+    # pushState, calls renderWallet() DIRECTLY
+    def test_openwallet_body_direct_render(self):
+        src = B2B_FILE.read_text()
+        m = re.search(
+            r"function\s+openWallet\s*\(\s*\)\s*\{([\s\S]*?)\n  \}\s*\n",
+            src,
+        )
+        assert m, "openWallet body not found"
+        body = m.group(1)
+        # B2B route literal
+        assert re.search(r"DY\.pagina\s*=\s*['\"]wallet['\"]", body), \
+            "openWallet must set DY.pagina='wallet'"
+        # Force re-render flag cleared
+        assert re.search(r"DY\._laatstGerenderd\s*=\s*null", body), \
+            "openWallet must clear DY._laatstGerenderd"
+        # brand-portal lock cleared
+        assert re.search(r"_renderLock\s*=\s*false", body), \
+            "openWallet must clear brandPortal._renderLock"
+        # history.pushState with ?pagina=wallet
+        assert "history.pushState" in body, \
+            "openWallet must push to history"
+        assert re.search(r"searchParams\.set\(\s*['\"]pagina['\"]\s*,\s*['\"]wallet['\"]\s*\)", body), \
+            "openWallet must update ?pagina=wallet in URL"
+        # Direct call to renderWallet (NOT via DY.navigeer / DY.toonPagina)
+        assert re.search(r"\brenderWallet\s*\(\s*\)", body), \
+            "openWallet must DIRECTLY call renderWallet()"
+
+    # (d) openWallet has try/catch fallback to DY.navigeer('wallet')
+    def test_openwallet_has_navigeer_fallback(self):
+        src = B2B_FILE.read_text()
+        m = re.search(
+            r"function\s+openWallet\s*\(\s*\)\s*\{([\s\S]*?)\n  \}\s*\n",
+            src,
+        )
+        assert m
+        body = m.group(1)
+        # There must be a catch block that calls DY.navigeer('wallet')
+        assert re.search(r"catch[\s\S]*?DY\.navigeer\(\s*['\"]wallet['\"]\s*\)", body), \
+            "openWallet must have a try/catch fallback to DY.navigeer('wallet')"
+
+    # (e) openWallet does NOT call DY.toonPagina (the wrapped one)
+    def test_openwallet_does_not_call_toonpagina(self):
+        src = B2B_FILE.read_text()
+        m = re.search(
+            r"function\s+openWallet\s*\(\s*\)\s*\{([\s\S]*?)\n  \}\s*\n",
+            src,
+        )
+        assert m
+        body = m.group(1)
+        assert "DY.toonPagina" not in body, (
+            "openWallet must NOT call DY.toonPagina (wrapped by pp-nav-fix)"
+        )
+
+    # (f) openWallet does NOT touch B2C state
+    def test_openwallet_does_not_touch_b2c_state(self):
+        src = B2B_FILE.read_text()
+        m = re.search(
+            r"function\s+openWallet\s*\(\s*\)\s*\{([\s\S]*?)\n  \}\s*\n",
+            src,
+        )
+        assert m
+        body = m.group(1)
+        assert "b2c_wallet_balance" not in body, \
+            "openWallet must NOT touch b2c_wallet_balance"
+        assert "b2c_wallet" not in body, \
+            "openWallet must NOT reference b2c_wallet route"
+        assert "PP_B2CWallet" not in body, \
+            "openWallet must NOT reference PP_B2CWallet"
+
+    # (g) Inline onclick first calls PP_Wallet.openWallet() with return false
+    def test_inline_onclick_calls_openwallet(self):
+        src = B2B_FILE.read_text()
+        # Find the setAttribute('onclick', ...) call in injectDashboardCard
+        m = re.search(
+            r"setAttribute\(\s*['\"]onclick['\"]\s*,\s*([\s\S]*?)\)\s*;\s*\n",
+            src,
+        )
+        assert m, "inline onclick setAttribute not found"
+        onclick_args = m.group(1)
+        # Must literally call PP_Wallet.openWallet() with return false
+        assert "PP_Wallet.openWallet();return false" in onclick_args, (
+            "Inline onclick must contain literal `PP_Wallet.openWallet();return false`"
+        )
+        # Must still have the navigeer fallback chain
+        assert "DY.brandPortal._renderLock=false" in onclick_args or \
+               re.search(r"_renderLock\s*=\s*false", onclick_args), (
+            "Inline onclick must still clear _renderLock in fallback"
+        )
+        assert "DY.navigeer('wallet')" in onclick_args or \
+               'navigeer("wallet")' in onclick_args, (
+            "Inline onclick must still have DY.navigeer('wallet') as fallback"
+        )
+
+    # (h) Delegator now prevents default AND stops propagation
+    def test_delegator_now_prevents_default(self):
+        src = B2B_FILE.read_text()
+        m = re.search(
+            r"function\s+setupWalletClickDelegator\s*\(\s*\)\s*\{([\s\S]*?)\n  \}\s*\n",
+            src,
+        )
+        assert m
+        deleg = m.group(1)
+        assert "e.preventDefault()" in deleg, (
+            "v60.1.159: delegator must call e.preventDefault()"
+        )
+        assert "e.stopPropagation()" in deleg, (
+            "v60.1.159: delegator must call e.stopPropagation()"
+        )
+
+    # (i) Delegator first calls PP_Wallet.openWallet(), then falls back
+    def test_delegator_calls_openwallet(self):
+        src = B2B_FILE.read_text()
+        m = re.search(
+            r"function\s+setupWalletClickDelegator\s*\(\s*\)\s*\{([\s\S]*?)\n  \}\s*\n",
+            src,
+        )
+        assert m
+        deleg = m.group(1)
+        # Must check PP_Wallet first
+        assert re.search(
+            r"window\.PP_Wallet\s*&&\s*typeof\s+PP_Wallet\.openWallet\s*===\s*['\"]function['\"]",
+            deleg,
+        ), "Delegator must guard `window.PP_Wallet && typeof PP_Wallet.openWallet === 'function'`"
+        assert "PP_Wallet.openWallet()" in deleg, (
+            "Delegator must call PP_Wallet.openWallet()"
+        )
+        # Hard fallback still calls DY.navigeer('wallet')
+        assert "DY.navigeer('wallet')" in deleg, (
+            "Delegator must keep DY.navigeer('wallet') hard fallback"
+        )
+        # Capture phase still true
+        assert re.search(
+            r"addEventListener\(\s*['\"]click['\"]\s*,[\s\S]+?,\s*true\s*\)",
+            deleg,
+        ), "Delegator must remain in capture phase (true)"
+
+    # (j) Idempotency: renderWallet only writes DOM, no accumulating state
+    def test_renderwallet_idempotent_shape(self):
+        """openWallet may be called twice (capture delegator + inline onclick).
+        renderWallet must be idempotent. Smoke-check: it should overwrite a
+        container (innerHTML / appendChild on a known root) rather than
+        push to a growing array or counter."""
+        src = B2B_FILE.read_text()
+        m = re.search(
+            r"function\s+renderWallet\s*\(\s*\)\s*\{([\s\S]*?)\n  \}\s*\n",
+            src,
+        )
+        # Don't require an exact body, just ensure it exists and either
+        # writes innerHTML on a container or queries an existing root.
+        assert m, "renderWallet body must be defined"
+        body = m.group(1)
+        assert ("innerHTML" in body) or ("appendChild" in body) or ("querySelector" in body), \
+            "renderWallet must perform DOM writes/queries (idempotent overwrite, not accumulate)"
+
+    # (k) ZIP regression: openWallet present in deployed bundle
+    def test_zip_contains_openwallet(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("extensions/payments/pp-wallet-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        # function definition exactly once
+        assert len(re.findall(r"function\s+openWallet\s*\(\s*\)\s*\{", content)) == 1, (
+            "ZIP'd pp-wallet-v1.js must define openWallet() exactly once"
+        )
+        # PP_Wallet.openWallet() called at least twice (inline onclick + delegator)
+        assert content.count("PP_Wallet.openWallet()") >= 2, (
+            "ZIP must contain ≥2 invocations of PP_Wallet.openWallet() "
+            "(inline onclick + capture delegator)"
+        )
+        # preventDefault in delegator
+        assert "e.preventDefault()" in content, (
+            "ZIP delegator must call e.preventDefault()"
+        )
+        assert "e.stopPropagation()" in content, (
+            "ZIP delegator must call e.stopPropagation()"
+        )
+        # PP_Wallet export block contains openWallet
+        assert re.search(r"openWallet:\s*openWallet", content), (
+            "ZIP'd PP_Wallet export must expose openWallet"
+        )
+
+    # (l) B2C wallet remains UNCHANGED — no openWallet there
+    def test_b2c_wallet_has_no_openwallet(self):
+        src = B2C_FILE.read_text()
+        assert "openWallet" not in src, (
+            "B2C wallet must NOT define or export openWallet (B2B-only API)"
+        )
+
+    # (m) Cache-bust uniformity — only pp-wallet bumped this iteration
+    def test_only_pp_wallet_cache_bumped_to_159(self):
+        src = INDEX_HTML.read_text()
+        assert "pp-wallet-v1.js?v=60.1.159-direct-render-bypass" in src
+        # B2C wallet & comingsoon NOT bumped to 159 (only pp-wallet was touched)
+        assert "pp-b2c-wallet-v1.js?v=60.1.159" not in src, (
+            "Only pp-wallet was touched in v60.1.159; pp-b2c-wallet must not be re-cached"
+        )

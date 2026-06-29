@@ -457,6 +457,39 @@
     } catch(e) {}
   }
 
+  // v1.8.0 (2026-02-23): openWallet() = DIRECTE wallet-render bypass.
+  // Schakelt de hele navigatie-chain (DY.navigeer → DY.toonPagina →
+  // pp-wallet wrap → renderWallet) uit en rendert IMMEDIATE de B2B
+  // wallet. Defense against ALLE absorptie-mechanismen in legacy code:
+  //   - brand-portal-v1.js _renderLock (2s window absorbeert non-BP routes)
+  //   - pp-nav-fix-v1.js wrapNavigeer (kan stale-state cleanup blokkeren)
+  //   - Cloudflare service worker die OUDE pp-wallet cached
+  // Bijwerkingen die we ZELF doen (anders zou de SPA in inconsistente
+  // state komen):
+  //   - DY.pagina = 'wallet' (zodat injectMenuLink en andere observers
+  //     weten dat we op de wallet zijn)
+  //   - DY._laatstGerenderd = null (force re-render)
+  //   - BP._renderLock = false (cleared)
+  //   - history.pushState met ?pagina=wallet (deep-link werkt)
+  function openWallet() {
+    try {
+      if (window.DY) {
+        try { window.DY.pagina = 'wallet'; } catch (_) {}
+        try { window.DY._laatstGerenderd = null; } catch (_) {}
+        try { if (window.DY.brandPortal) window.DY.brandPortal._renderLock = false; } catch (_) {}
+      }
+      try {
+        var url = new URL(window.location.href);
+        url.searchParams.set('pagina', 'wallet');
+        history.pushState(null, '', url.toString());
+      } catch (_) {}
+      renderWallet();
+    } catch (e) {
+      try { console.warn('[wallet] openWallet faalde, fallback naar navigeer:', e); } catch (_) {}
+      try { if (window.DY && DY.navigeer) DY.navigeer('wallet'); } catch (_) {}
+    }
+  }
+
   function refresh() { renderWallet(); }
 
   // Open de Opwaarderen-tab vanuit elke knop
@@ -543,11 +576,14 @@
       card.type = 'button';
       card.className = 'bp-quick';
       card.setAttribute('data-testid', 'brand-dash-wallet');
-      // Inline onclick: identiek patroon als de andere knoppen in
-      // brand-portal-v1.js (regels 999-1005). Side-effect: clear de
-      // render-lock zodat de wallet-route altijd doorgaat.
+      // v1.8.0: Inline onclick roept PP_Wallet.openWallet() aan voor
+      // DIRECTE render-bypass. Skipt DY.navigeer / DY.toonPagina chain
+      // volledig, dus geen enkele wrap (brand-portal _renderLock,
+      // pp-nav-fix, etc.) kan de call absorberen. Fallback naar navigeer
+      // staat IN openWallet() voor het geval pp-wallet niet geladen is.
       card.setAttribute(
         'onclick',
+        "try{if(window.PP_Wallet&&PP_Wallet.openWallet){PP_Wallet.openWallet();return false;}}catch(e){};" +
         "try{if(window.DY&&DY.brandPortal){DY.brandPortal._renderLock=false;}}catch(e){};" +
         "window.DY.navigeer('wallet');"
       );
@@ -574,12 +610,18 @@
         if (!target || target.nodeType !== 1) return;
         var btn = target.closest('[data-testid="brand-dash-wallet"]');
         if (!btn) return;
-        // Forceer de juiste route - altijd B2B wallet, nooit B2C
+        // v1.8.0: Direct PP_Wallet.openWallet() i.p.v. navigeer chain.
+        // Bypass ALLE legacy wrappers. Capture-phase + idempotent.
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.PP_Wallet && typeof PP_Wallet.openWallet === 'function') {
+          PP_Wallet.openWallet();
+          return;
+        }
+        // Hard fallback als pp-wallet niet geladen
         try { if (window.DY && DY.brandPortal) DY.brandPortal._renderLock = false; } catch (_) {}
         try { if (window.DY && DY._laatstGerenderd) window.DY._laatstGerenderd = null; } catch (_) {}
         if (window.DY && typeof DY.navigeer === 'function') {
-          // Geen preventDefault: laat de inline onclick óók draaien (idempotent).
-          // Als de inline onclick mist, deze call is de redding.
           DY.navigeer('wallet');
         }
       } catch (_) { /* noop */ }
@@ -624,11 +666,12 @@
 
   window.PP_Wallet = {
     renderWallet: renderWallet,
+    openWallet:   openWallet,
     topup:        topup,
     openTopup:    openTopup,
     refresh:      refresh,
     switchTab:    switchTab,
     B2B_ALLOWED_AMOUNTS: B2B_ALLOWED_AMOUNTS,
-    VERSION:      '1.7.0'
+    VERSION:      '1.8.0'
   };
 })();
