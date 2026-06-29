@@ -6,6 +6,26 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.168 — Brand Name Sync op Uitgelicht (23 feb 2026)
+
+### Probleem (gebruiker)
+"Als ik een bedrijfsnaam verander in het merken profiel veranderd deze niet op de uitgelicht pagina." Oorzaak: `campaigns/{cid}.brandNaam` en `brand_products/{pid}.brandNaam` zijn gecachede string-velden die niet cascaden wanneer `brands/{uid}.naam` wordt bijgewerkt.
+
+### Fix (nieuw additieve module, geen wijziging aan legacy of pp-feedtabs)
+- **`/app/pwa/extensions/brand/pp-brand-name-sync-v1.js` v1.0.0**:
+  - `brandNameFor(brandId)` — TTL-cached (2 min) lookup van `brands/{id}.naam`.
+  - `MutationObserver` scant `.pp-uitg-kaart` (campagne) en `.pp-uitg-prod-kaart` (product) en hydrateert `.pp-uitg-merk` / `.pp-uitg-prod-brand` met de live naam wanneer deze afwijkt.
+  - Campaign card brandId-extractie via `onclick="PP_FeedTabs.openCamp('cid','bid')"` regex (zelfde patroon als pp-nav-context-v1).
+  - Product card brandId-resolver via `brand_products/{pid}.brandId` (eenmalige read per product, gecached).
+  - `visibilitychange` → re-scan zodat naam ook ververst wanneer gebruiker terugkeert naar tab.
+  - `PP_BrandNameSync.refresh(brandId)` publieke API voor toekomstige expliciete invalidation.
+
+### Delivery
+- `index.html` cache → `?v=60.1.168-name-sync`
+- `sw.js` VERSION → `v60.1.168-20260623-brand-name-sync`
+- Zip md5 `611e0061101949d132ae70fee5d820a7`
+
+
 ## v60.1.167 — Phase C: Universele Contextuele Fallback (23 feb 2026)
 
 ### Probleem (gebruiker)
