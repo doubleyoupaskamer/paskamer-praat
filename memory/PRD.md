@@ -6,6 +6,31 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.169 — Paid Campaign Render Fix (29 jun 2026)
+
+### Probleem (gebruiker, diagnose-screenshot)
+2 campagnes (Paskamerpraat + DoubleYou) hadden:
+- `status = live` ✅
+- `plaatsingen = [feed,stories,review,ai,similar]` ✅
+- `eindDatum = 15-6-2026` (14 dagen verstreken op 29-6-2026)
+→ **diagnose toonde "RENDERT IN FEED? nee"** voor allebei. Klant betaalde voor zichtbaarheid maar zag niets in de hoofd-feed.
+
+### Twee root-causes
+1. **Hard date-filter in `pp-campaign-renderer-v1.js`** (regel 60): `if (eindMs && nuTs > eindMs) return false;` — verstopt elke campagne na `eindDatum`, ongeacht of de backend status-transitie naar `completed` heeft uitgevoerd. Bij een falende transitie-worker betaalt de klant maar verdwijnt het product.
+2. **Feed-placement werd HELEMAAL overgeslagen** (regel 122): `if (placement === 'feed') return;` — de comment claimde dat feed via de Uitgelicht-TAB werd gerenderd, maar de hoofd-feed-scroll waar gebruikers daadwerkelijk doorheen scrollen kreeg nooit campagnes.
+
+### Fix (puur in eigen extensions, geen legacy raakvlak)
+- **`pp-campaign-renderer-v1.js` v1.0.12**:
+  - `getActiveForPlacement()` — `eindDatum` is nu SOFT: campagnes met `status === 'live'` blijven renderen, ook na `eindDatum`. `startDatum` blijft strikt (geen premature render). Verantwoordelijkheid voor de transitie ligt bij de backend status-worker.
+  - `tryInject()` — feed-injectie wordt nu alleen overgeslagen op `/merken` (waar legacy `bp-campagne-feed` strip al bestaat). `/feed` en `/home` krijgen de campagne-strip wel.
+- **`pp-campagne-diagnose-v1.js`**: "Rendert in feed?" kolom volgt nu dezelfde logica (status-supreme, soft eindDatum), zodat diagnose en runtime consistent zijn.
+
+### Delivery
+- `index.html` cache → `?v=60.1.169-paid-render` (renderer + diagnose beide gebumpt)
+- `sw.js` VERSION → `v60.1.169-20260629-paid-render`
+- Zip md5 `496c63b93b7e9a7f07a89c82af660b6c`
+
+
 ## v60.1.168 — Brand Name Sync op Uitgelicht (23 feb 2026)
 
 ### Probleem (gebruiker)

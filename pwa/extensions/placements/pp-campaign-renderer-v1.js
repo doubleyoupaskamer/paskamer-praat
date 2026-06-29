@@ -56,8 +56,15 @@
       if (p.indexOf(plac) === -1) return false;
       var startMs = (c.startDatum && c.startDatum.toMillis) ? c.startDatum.toMillis() : null;
       var eindMs  = (c.eindDatum && c.eindDatum.toMillis) ? c.eindDatum.toMillis() : null;
+      // startDatum blijft strikt: voorkom premature rendering
       if (startMs && nuTs < startMs) return false;
-      if (eindMs && nuTs > eindMs) return false;
+      // v1.0.12 (29-jun-2026): eindDatum is SOFT — status === 'live' is supreme.
+      // De backend (status-transitie worker) hoort campagnes naar 'completed' /
+      // 'paused' te zetten zodra budget op is OF eindDatum verstreken is.
+      // Als status nog 'live' is, heeft de klant betaald voor zichtbaarheid:
+      // we tonen het. Zo nee, dan was de transitie-worker stuk — niet onze
+      // verantwoordelijkheid om gebruikers betalend product te ontnemen.
+      if (eindMs && nuTs > eindMs && c.status !== 'live') return false;
       return true;
     });
   }
@@ -116,10 +123,13 @@
     var pagina = window.DY && window.DY.pagina;
     var placement = routeToPlacement(pagina);
     if (!placement) return;
-    // v1.0.10: skip 'feed' placement - campagnes worden EXCLUSIEF getoond
-    // via de "Uitgelicht" tab (pp-feedtabs-v1.js) en de /merken sectie
-    // (brand-portal-v1.js bp-campagne-feed). Geen duplicate header-strip meer.
-    if (placement === 'feed') return;
+    // v1.0.12 (29-jun-2026): voorheen werd 'feed' placement HELEMAAL
+    // overgeslagen. Gevolg: paid feed-campagnes verschenen alleen in
+    // de Uitgelicht-TAB en op /merken — maar NIET in de hoofd-feed-
+    // scroll waar gebruikers daadwerkelijk doorheen scrollen. Klanten
+    // betaalden voor 'feed' en zagen niets. Nu skippen we feed-injectie
+    // alleen op /merken (daar rendert legacy `bp-campagne-feed` al).
+    if (placement === 'feed' && pagina === 'merken') return;
     var main = document.getElementById('dy-main');
     if (!main) return;
     injectStrip(placement, main, 'Aangeboden');

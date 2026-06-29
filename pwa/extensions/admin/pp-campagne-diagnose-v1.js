@@ -59,7 +59,12 @@
         var inWindow = (!startMs || nuTs >= startMs) && (!eindMs || nuTs <= eindMs);
         if (inWindow) stats.binnen_window++;
 
-        var rendersInFeed = (c.status === 'live') && (plaats.indexOf('feed') !== -1 || !plaats.length) && inWindow;
+        // v1.0.12: status='live' is supreme. eindDatum is soft — backend
+        // hoort transitie te doen. Als status nog live is, rendert het.
+        var statusLive = (c.status === 'live');
+        var heeftFeed = (plaats.indexOf('feed') !== -1 || !plaats.length);
+        var startMsOk = (!startMs || nuTs >= startMs);
+        var rendersInFeed = statusLive && heeftFeed && startMsOk;
 
         rows.push(
           '<tr data-testid="diag-camp-' + esc(d.id) + '">' +
