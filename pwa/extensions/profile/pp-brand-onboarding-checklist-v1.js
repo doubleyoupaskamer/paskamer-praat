@@ -95,7 +95,19 @@
       { key: 'profiel',   label: 'Profiel',         hint: 'Logo & omschrijving',  route: function () { window.DY.navigeer('brand_profiel'); } },
       { key: 'producten', label: 'Producten',       hint: 'Voeg je eerste toe',   route: function () { window.DY.navigeer('brand_producten'); } },
       { key: 'campagne',  label: 'Eerste campagne', hint: 'Plan & start',         route: function () { window.DY.navigeer('brand_campagnes'); } },
-      { key: 'wallet',    label: 'Wallet opgeladen', hint: '€25 / €50 / €100 / €250', route: function () { window.DY.navigeer('wallet'); } }
+      { key: 'wallet',    label: 'Wallet opgeladen', hint: '€25 / €50 / €100 / €250', route: function () {
+        // v1.1.0 (2026-02-23): Gebruik PP_Wallet.openWallet() direct-render
+        // bypass (v60.1.159). DY.navigeer('wallet') werd geabsorbeerd door
+        // brand-portal _renderLock guard waardoor user stale B2C-state zag.
+        try {
+          if (window.PP_Wallet && typeof PP_Wallet.openWallet === 'function') {
+            PP_Wallet.openWallet();
+            return;
+          }
+        } catch (_) {}
+        try { if (window.DY && DY.brandPortal) DY.brandPortal._renderLock = false; } catch (_) {}
+        if (window.DY && typeof DY.navigeer === 'function') DY.navigeer('wallet');
+      } }
     ];
     var doneCount = steps.filter(function (s) { return !!state[s.key]; }).length;
     var pct = Math.round((doneCount / steps.length) * 100);
@@ -224,7 +236,7 @@
   }
 
   window.PP_BrandOnboarding = {
-    VERSION: '1.0.0',
+    VERSION: '1.1.0',
     evaluate: evaluateSteps,
     refresh: function () {
       // Force re-render door bestaande widget te verwijderen

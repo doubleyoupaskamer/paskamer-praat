@@ -1,0 +1,47 @@
+{
+  "summary": "v60.1.161 onboarding-checklist wallet bypass: ALL static audits + backend curl + pytest GREEN. The 'Wallet opgeladen' step (data-testid='onb-go-wallet') now calls PP_Wallet.openWallet() first (direct-render bypass) with backwards-compat fallback to DY.navigeer('wallet'). Module VERSION bumped to '1.1.0'. The 3 other onboarding steps (profiel/producten/campagne) remain unchanged (DY.navigeer('brand_xxx')). Cache-bust v60.1.161-onb-wallet-bypass applied in index.html script tag AND sw.js VERSION. Deploy zip MD5 matches f1c8907bc8f1d468a2b78338eb036088 and zip contains all v60.1.161 artifacts. All previous fixes (v60.1.156 → v60.1.160) intact. Test suite grew 100 → 111 assertions; all pass in 1.00s.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "verification_evidence": {
+    "onboarding_checklist_openWallet_count_src": 1,
+    "onboarding_checklist_openWallet_count_zip": 2,
+    "onboarding_module_VERSION": "1.1.0",
+    "index_html_cache_bust": "pp-brand-onboarding-checklist-v1.js?v=60.1.161-onb-wallet-bypass",
+    "sw_VERSION": "v60.1.161-20260623-onb-wallet-bypass",
+    "zip_md5": "f1c8907bc8f1d468a2b78338eb036088 (MATCHES expected)",
+    "zip_size_bytes": 4021974,
+    "curl_status": "200",
+    "curl_content_type": "application/zip",
+    "curl_content_length": 4021974,
+    "pytest_result": "111 passed in 1.00s (100 → 111 grew by +11 new TestOnboardingChecklistWalletBypass assertions; zero regressions)",
+    "other_steps_unchanged": {
+      "brand_profiel": "DY.navigeer('brand_profiel') still present",
+      "brand_producten": "DY.navigeer('brand_producten') still present",
+      "brand_campagnes": "DY.navigeer('brand_campagnes') still present"
+    },
+    "regression_checks_passed": [
+      "v60.1.159 PP_Wallet.openWallet() exported on window.PP_Wallet (B2B v1.8.0)",
+      "v60.1.160 pp-feedtabs-v1.js aspect-ratio:3/4 + object-fit:contain",
+      "v60.1.158 brand-dash-wallet card uses button element + inline onclick + delegator",
+      "v60.1.157 Campagne hero present + 'Kies een campagne-pakket' removed",
+      "v60.1.156 PP_TopupComingSoon.show called with source='b2b'/'b2c' in both wallets",
+      "pp-b2c-wallet-v1.js still VERSION 1.3.0, no PP_BrandOnboarding/onb-go-wallet refs"
+    ]
+  },
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Wallet step.route is well-implemented: try/catch around PP_Wallet.openWallet(), defensive _renderLock clear, and DY.navigeer fallback. Pattern mirrors v60.1.159 brand-dash-wallet card.",
+    "Consider extracting the (openWallet-or-navigeer) pattern into a tiny shared util (e.g. window.PP_Wallet.safeOpen()) — it's now duplicated in pp-wallet-v1.js inline onclick, the delegator, and the onboarding-checklist. Not a bug, only a DRY suggestion."
+  ],
+  "updated_files": ["/app/backend/tests/test_pwa_wallet_segmentation.py"],
+  "success_rate": {"backend": "100%", "frontend": "N/A (PWA hosted externally on Cloudflare Pages; backend-only review per request)"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Canonical PWA test suite is /app/backend/tests/test_pwa_wallet_segmentation.py (now 111 assertions covering v60.1.154 → v60.1.161). For future PWA fixes: (1) bump SW VERSION + script-tag cache key in /app/pwa/index.html for the modified module, (2) update the relevant TestCacheVersion + TestDeployZip assertion, (3) add a new TestXxx class scoped to the new version, (4) verify zip MD5 still matches the value the user reports. PWA is Vanilla JS deployed to Cloudflare Pages; Emergent preview only exposes /api/* (no PWA serving), so all UI verification is static-audit + zip-contents + /api/downloads curl.",
+  "rca_of_the_issue": "Original bug: 'Wallet opgeladen' button in brand-dashboard onboarding-checklist (data-testid='onb-go-wallet') opened B2C topup packages instead of B2B campagne-pakketten. Root cause: step.route function called only window.DY.navigeer('wallet'), which was absorbed by brand-portal-v1.js _renderLock guard (the same class of bug v60.1.159 fixed for the brand-dash-wallet card). Mitigation in v60.1.161: wallet step.route now first invokes PP_Wallet.openWallet() (the v60.1.159 direct-render bypass that sets DY.pagina='wallet', clears _renderLock, and re-renders the brand-portal wallet view directly), then falls back to clearing _renderLock + DY.navigeer('wallet') only if PP_Wallet is not yet loaded. Backwards-compatible and surgical: only the wallet step changed; the 3 other onboarding steps remain unchanged."
+}

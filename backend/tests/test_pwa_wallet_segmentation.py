@@ -219,15 +219,17 @@ class TestCacheVersion:
         # payments modules (b2c wallet, comingsoon, modal-router, isolation)
         # may still carry v60.1.156-restore-coming-soon-popup because their
         # source files were not modified in v60.1.157.
-        # v60.1.160: pp-feedtabs-v1.js script tag carries the new prod-img-contain cache key
-        # pp-wallet-v1.js script tag still carries v60.1.159 cache key (untouched in v60.1.160)
+        # v60.1.160: pp-feedtabs-v1.js script tag carries the prod-img-contain cache key
+        # pp-wallet-v1.js script tag still carries v60.1.159 cache key (untouched in v60.1.160/161)
+        # v60.1.161: pp-brand-onboarding-checklist-v1.js script tag carries the new onb-wallet-bypass key
         assert "pp-wallet-v1.js?v=60.1.159-direct-render-bypass" in src
         assert "pp-feedtabs-v1.js?v=60.1.160-prod-img-contain" in src
+        assert "pp-brand-onboarding-checklist-v1.js?v=60.1.161-onb-wallet-bypass" in src
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
-        assert "VERSION       = 'v60.1.160-20260623-prod-img-contain'" in src or \
-               "VERSION = 'v60.1.160-20260623-prod-img-contain'" in src
+        assert "VERSION       = 'v60.1.161-20260623-onb-wallet-bypass'" in src or \
+               "VERSION = 'v60.1.161-20260623-onb-wallet-bypass'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
@@ -242,7 +244,8 @@ class TestDeployZip:
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "v60.1.160-20260623-prod-img-contain" in content
+        # v60.1.161: SW VERSION bumped to onb-wallet-bypass
+        assert "v60.1.161-20260623-onb-wallet-bypass" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -1091,3 +1094,155 @@ class TestUitgelichtProductImageRatio:
         assert "aspect-ratio:1/1" not in content
         assert content.count("object-fit:contain") == 1
         assert "object-fit:cover" not in content
+
+
+
+# ───────── v60.1.161: ONBOARDING CHECKLIST WALLET BYPASS ─────────
+class TestOnboardingChecklistWalletBypass:
+    """v60.1.161 fixes the brand-dashboard onboarding-checklist 'Wallet
+    opgeladen' step (data-testid='onb-go-wallet').
+
+    Before the fix, step.route called only window.DY.navigeer('wallet'),
+    which was absorbed by brand-portal-v1.js _renderLock guard — leaving
+    the user on a stale B2C-flavoured wallet view instead of the B2B
+    campagne-pakketten.
+
+    The fix mirrors v60.1.159 brand-dash-wallet-card: call
+    PP_Wallet.openWallet() FIRST (direct-render bypass), then fall back to
+    DY.navigeer('wallet') only if PP_Wallet is not loaded.
+
+    The other 3 onboarding steps (profiel/producten/campagne) navigate to
+    brand_* routes that brand-portal-v1.js handles natively and must
+    remain UNCHANGED.
+    """
+
+    def test_onboarding_module_version_bumped(self):
+        """PP_BrandOnboarding.VERSION must be '1.1.0' in v60.1.161."""
+        src = ONBOARDING.read_text()
+        assert re.search(r"VERSION:\s*'1\.1\.0'", src), \
+            "PP_BrandOnboarding.VERSION must be '1.1.0' in v60.1.161"
+
+    def test_wallet_step_uses_pp_wallet_openwallet_bypass(self):
+        """The wallet step.route MUST call PP_Wallet.openWallet() — the
+        v60.1.159 direct-render bypass — to avoid being absorbed by the
+        brand-portal _renderLock guard."""
+        src = ONBOARDING.read_text()
+        assert "PP_Wallet.openWallet()" in src, \
+            "Wallet step.route must call PP_Wallet.openWallet() (v60.1.161 bypass)"
+
+    def test_wallet_step_falls_back_to_dy_navigeer(self):
+        """Backwards-compat fallback: if PP_Wallet is not loaded, the
+        wallet step still must navigate via DY.navigeer('wallet')."""
+        src = ONBOARDING.read_text()
+        # Extract the wallet step block (key: 'wallet')
+        m = re.search(r"key:\s*'wallet'.*?route:\s*function\s*\(\)\s*\{(.*?)\}\s*\}", src, re.DOTALL)
+        assert m, "Could not isolate wallet step.route block"
+        wallet_route = m.group(1)
+        assert "PP_Wallet.openWallet()" in wallet_route, \
+            "wallet step.route block must contain PP_Wallet.openWallet()"
+        assert "DY.navigeer('wallet')" in wallet_route, \
+            "wallet step.route must retain DY.navigeer('wallet') fallback"
+        # Ensure openWallet appears BEFORE navigeer in the function body
+        idx_open = wallet_route.index("PP_Wallet.openWallet()")
+        idx_nav = wallet_route.index("DY.navigeer('wallet')")
+        assert idx_open < idx_nav, \
+            "PP_Wallet.openWallet() must be called BEFORE DY.navigeer('wallet') fallback"
+
+    def test_wallet_step_clears_render_lock(self):
+        """Defensive: the step also clears DY.brandPortal._renderLock so
+        the navigeer fallback path isn't absorbed if PP_Wallet missing."""
+        src = ONBOARDING.read_text()
+        m = re.search(r"key:\s*'wallet'.*?route:\s*function\s*\(\)\s*\{(.*?)\}\s*\}", src, re.DOTALL)
+        assert m
+        assert "_renderLock" in m.group(1), \
+            "wallet step.route must defensively clear DY.brandPortal._renderLock"
+
+    def test_other_onboarding_steps_unchanged(self):
+        """The 3 other onboarding steps (profiel/producten/campagne) must
+        still use window.DY.navigeer('brand_xxx') — those routes are
+        handled natively by brand-portal-v1.js without renderLock
+        absorption, so no bypass is needed."""
+        src = ONBOARDING.read_text()
+        assert "window.DY.navigeer('brand_profiel')" in src, \
+            "Profiel step must still use DY.navigeer('brand_profiel')"
+        assert "window.DY.navigeer('brand_producten')" in src, \
+            "Producten step must still use DY.navigeer('brand_producten')"
+        assert "window.DY.navigeer('brand_campagnes')" in src, \
+            "Campagne step must still use DY.navigeer('brand_campagnes')"
+        # And those 3 steps must NOT call PP_Wallet.openWallet()
+        for key in ("brand_profiel", "brand_producten", "brand_campagnes"):
+            block_re = re.compile(
+                r"key:\s*'(?:profiel|producten|campagne)'.*?route:\s*function\s*\(\)\s*\{[^}]*"
+                + re.escape(key) + r"[^}]*\}", re.DOTALL)
+            for m in block_re.finditer(src):
+                assert "PP_Wallet" not in m.group(0), \
+                    f"Step targeting {key} must NOT call PP_Wallet"
+
+    def test_index_html_cache_bust(self):
+        """index.html script tag for the onboarding checklist must carry
+        the v60.1.161 cache key."""
+        src = INDEX_HTML.read_text()
+        assert "pp-brand-onboarding-checklist-v1.js?v=60.1.161-onb-wallet-bypass" in src, \
+            "index.html must cache-bust pp-brand-onboarding-checklist-v1.js to v60.1.161"
+
+    def test_pp_wallet_openwallet_still_exported(self):
+        """Regression: v60.1.159 PP_Wallet.openWallet() must still be
+        exported on window.PP_Wallet. The onboarding-checklist depends
+        on it."""
+        src = B2B_FILE.read_text()
+        assert re.search(r"function\s+openWallet\s*\(", src), \
+            "openWallet() function must be defined in pp-wallet-v1.js"
+        assert "window.PP_Wallet" in src, \
+            "window.PP_Wallet export must exist in pp-wallet-v1.js"
+        # confirm openWallet is exposed on the export object
+        m = re.search(r"window\.PP_Wallet\s*=\s*\{[^}]*\}", src, re.DOTALL)
+        assert m and "openWallet" in m.group(0), \
+            "openWallet must be exposed on window.PP_Wallet"
+
+    def test_b2c_wallet_unchanged_no_onboarding_injection(self):
+        """Regression: pp-b2c-wallet-v1.js v1.3.0 must NOT have been
+        touched by this fix — no injection into the onboarding-checklist
+        flow."""
+        src = (PWA / "extensions/payments/pp-b2c-wallet-v1.js").read_text()
+        assert re.search(r"VERSION:\s*'1\.3\.0'", src), \
+            "B2C wallet must still be VERSION 1.3.0 in v60.1.161"
+        assert "PP_BrandOnboarding" not in src, \
+            "B2C wallet must NOT reference PP_BrandOnboarding"
+        assert "onb-go-wallet" not in src, \
+            "B2C wallet must NOT reference the onboarding-checklist testid"
+
+    def test_zip_onboarding_checklist_contains_openwallet(self):
+        """The Cloudflare deploy zip MUST contain the v60.1.161 fix:
+        PP_Wallet.openWallet() literal in the onboarding-checklist
+        module AND VERSION '1.1.0'."""
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("extensions/profile/pp-brand-onboarding-checklist-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "PP_Wallet.openWallet()" in content, \
+            "ZIP'd onboarding-checklist must contain PP_Wallet.openWallet() literal"
+        assert re.search(r"VERSION:\s*'1\.1\.0'", content), \
+            "ZIP'd onboarding-checklist must be VERSION '1.1.0'"
+        # Other steps still use the brand_* navigeer pattern in the zip
+        assert "window.DY.navigeer('brand_profiel')" in content
+        assert "window.DY.navigeer('brand_producten')" in content
+        assert "window.DY.navigeer('brand_campagnes')" in content
+
+    def test_zip_index_html_cache_bust(self):
+        """The Cloudflare deploy zip's index.html must reference the
+        v60.1.161 onb-wallet-bypass cache key for the checklist."""
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("index.html") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "pp-brand-onboarding-checklist-v1.js?v=60.1.161-onb-wallet-bypass" in content
+
+    def test_zip_md5_matches_expected(self):
+        """Critical: zip MD5 must equal the agent-supplied value to
+        guarantee the bundle published to Cloudflare is the exact one
+        carrying the v60.1.161 fix."""
+        import hashlib
+        h = hashlib.md5()
+        with open(ZIP_FILE, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+        assert h.hexdigest() == "f1c8907bc8f1d468a2b78338eb036088", \
+            f"deploy zip MD5 mismatch: got {h.hexdigest()}"
