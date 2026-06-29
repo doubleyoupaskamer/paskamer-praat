@@ -220,16 +220,17 @@ class TestCacheVersion:
         # may still carry v60.1.156-restore-coming-soon-popup because their
         # source files were not modified in v60.1.157.
         # v60.1.160: pp-feedtabs-v1.js script tag carries the prod-img-contain cache key
-        # pp-wallet-v1.js script tag still carries v60.1.159 cache key (untouched in v60.1.160/161)
+        # pp-wallet-v1.js script tag still carries v60.1.159 cache key (untouched in v60.1.160/161/162)
         # v60.1.161: pp-brand-onboarding-checklist-v1.js script tag carries the new onb-wallet-bypass key
+        # v60.1.162: pp-feedtabs-v1.js bumped to uitgelicht-no-date-filter
         assert "pp-wallet-v1.js?v=60.1.159-direct-render-bypass" in src
-        assert "pp-feedtabs-v1.js?v=60.1.160-prod-img-contain" in src
+        assert "pp-feedtabs-v1.js?v=60.1.162-uitgelicht-no-date-filter" in src
         assert "pp-brand-onboarding-checklist-v1.js?v=60.1.161-onb-wallet-bypass" in src
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
-        assert "VERSION       = 'v60.1.161-20260623-onb-wallet-bypass'" in src or \
-               "VERSION = 'v60.1.161-20260623-onb-wallet-bypass'" in src
+        assert "VERSION       = 'v60.1.162-20260623-uitgelicht-no-date-filter'" in src or \
+               "VERSION = 'v60.1.162-20260623-uitgelicht-no-date-filter'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
@@ -244,8 +245,8 @@ class TestDeployZip:
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        # v60.1.161: SW VERSION bumped to onb-wallet-bypass
-        assert "v60.1.161-20260623-onb-wallet-bypass" in content
+        # v60.1.162: SW VERSION bumped to uitgelicht-no-date-filter
+        assert "v60.1.162-20260623-uitgelicht-no-date-filter" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -1071,8 +1072,11 @@ class TestUitgelichtProductImageRatio:
 
     def test_index_html_carries_new_cache_version(self):
         src = INDEX_HTML.read_text()
-        assert "pp-feedtabs-v1.js?v=60.1.160-prod-img-contain" in src, (
-            "index.html must carry v=60.1.160-prod-img-contain for pp-feedtabs-v1.js"
+        # v60.1.162 bumped pp-feedtabs-v1.js to uitgelicht-no-date-filter.
+        # The product-image fix (v60.1.160) is still part of the file, so
+        # the cache key tracks the latest version on this script.
+        assert "pp-feedtabs-v1.js?v=60.1.162-uitgelicht-no-date-filter" in src, (
+            "index.html must carry v=60.1.162-uitgelicht-no-date-filter for pp-feedtabs-v1.js"
         )
 
     def test_paint_product_html_dom_structure_unchanged(self):
@@ -1238,11 +1242,139 @@ class TestOnboardingChecklistWalletBypass:
     def test_zip_md5_matches_expected(self):
         """Critical: zip MD5 must equal the agent-supplied value to
         guarantee the bundle published to Cloudflare is the exact one
-        carrying the v60.1.161 fix."""
+        carrying the v60.1.162 fix."""
         import hashlib
         h = hashlib.md5()
         with open(ZIP_FILE, "rb") as f:
             for chunk in iter(lambda: f.read(1 << 20), b""):
                 h.update(chunk)
-        assert h.hexdigest() == "f1c8907bc8f1d468a2b78338eb036088", \
+        assert h.hexdigest() == "b3787fe8bea9e9d47f1e2187f1696695", \
             f"deploy zip MD5 mismatch: got {h.hexdigest()}"
+
+
+# ───────── v60.1.162: UITGELICHT — NO CLIENT-SIDE DATE FILTER ─────────
+class TestUitgelichtNoDateFilter:
+    """v60.1.162 user-reported bug (Dutch):
+    Feed → Uitgelicht → 'Gesponsord door onze partners' toonde 'Nog geen
+    actieve partner-campagnes' terwijl er een actieve campagne (status='live')
+    in Firestore stond. Root cause: dubbele client-side date filter op
+    c.startDatum.toMillis() / c.eindDatum.toMillis() faalde wanneer datums
+    geen Firestore Timestamps waren (string/Date/null). Fix: client-side
+    date-filter VERWIJDERD, vertrouwen we uitsluitend op de Firestore query
+    `where('status','==','live')` die al backend-side filtert.
+    """
+
+    def _paint_uitgelicht_body(self):
+        """Extract the paintUitgelicht function body for targeted assertions."""
+        src = FEEDTABS_FILE.read_text()
+        m = re.search(
+            r"function\s+paintUitgelicht\s*\([^)]*\)\s*\{",
+            src,
+        )
+        assert m, "paintUitgelicht function must exist in pp-feedtabs-v1.js"
+        # Walk braces to find function end
+        start = m.end()
+        depth = 1
+        i = start
+        while i < len(src) and depth > 0:
+            ch = src[i]
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+            i += 1
+        return src[start:i - 1]
+
+    def test_no_start_datum_to_millis_in_paint_uitgelicht(self):
+        body = self._paint_uitgelicht_body()
+        assert "c.startDatum.toMillis()" not in body, \
+            "v60.1.162: client-side c.startDatum.toMillis() filter must be removed"
+
+    def test_no_eind_datum_to_millis_in_paint_uitgelicht(self):
+        body = self._paint_uitgelicht_body()
+        assert "c.eindDatum.toMillis()" not in body, \
+            "v60.1.162: client-side c.eindDatum.toMillis() filter must be removed"
+
+    def test_filter_is_only_status_live(self):
+        body = self._paint_uitgelicht_body()
+        assert "c.status === 'live'" in body, \
+            "v60.1.162: filter must be `c && c.status === 'live'`"
+
+    def test_diagnostic_console_log_present(self):
+        body = self._paint_uitgelicht_body()
+        assert "[pp-feedtabs] uitgelicht render:" in body, \
+            "v60.1.162: diagnostic console.log must be present for future debugging"
+        # Structured payload keys
+        for key in ("ontvangen", "actief", "ids"):
+            assert key in body, f"diagnostic log must include `{key}` key"
+
+    def test_firestore_query_unchanged(self):
+        """The Firestore query at ~line 272 must remain a status='live'
+        query with limit(50). Only the client-side post-filter changed."""
+        src = FEEDTABS_FILE.read_text()
+        assert re.search(
+            r"db\.collection\(\s*['\"]campaigns['\"]\s*\)\s*"
+            r"\.where\(\s*['\"]status['\"]\s*,\s*['\"]==['\"]\s*,\s*['\"]live['\"]\s*\)\s*"
+            r"\.limit\(\s*50\s*\)",
+            src,
+        ), "Firestore query `campaigns.where(status==live).limit(50)` must be intact"
+
+    def test_cache_bust_in_index_html(self):
+        src = INDEX_HTML.read_text()
+        assert "pp-feedtabs-v1.js?v=60.1.162-uitgelicht-no-date-filter" in src, \
+            "index.html must cache-bust pp-feedtabs-v1.js to v60.1.162"
+
+    def test_sw_version_bumped(self):
+        src = SW_FILE.read_text()
+        assert "v60.1.162-20260623-uitgelicht-no-date-filter" in src, \
+            "sw.js VERSION must be bumped to v60.1.162"
+
+    def test_zip_no_to_millis_in_paint_uitgelicht(self):
+        """Critical: deployed Cloudflare bundle must not contain the
+        legacy client-side date filter anywhere in pp-feedtabs-v1.js."""
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("extensions/placements/pp-feedtabs-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "c.startDatum.toMillis()" not in content, \
+            "ZIP'd pp-feedtabs-v1.js still contains c.startDatum.toMillis()"
+        assert "c.eindDatum.toMillis()" not in content, \
+            "ZIP'd pp-feedtabs-v1.js still contains c.eindDatum.toMillis()"
+        assert "c.status === 'live'" in content, \
+            "ZIP'd pp-feedtabs-v1.js must contain the new `c.status === 'live'` filter"
+
+    def test_zip_pp_feedtabs_contains_v60_1_162(self):
+        """ZIP'd pp-feedtabs-v1.js should carry v60.1.162 marker comment."""
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("extensions/placements/pp-feedtabs-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "v60.1.162" in content, \
+            "ZIP'd pp-feedtabs-v1.js must contain v60.1.162 version marker"
+
+
+# ───────── v60.1.162 REGRESSION: productflow + v60.1.160/161 fixes intact ─────────
+class TestV60_162Regression:
+    def test_v60_160_product_image_aspect_ratio_intact(self):
+        """v60.1.160 fix: .pp-uitg-prod-img must still use aspect-ratio:3/4
+        and object-fit:contain."""
+        src = FEEDTABS_FILE.read_text()
+        assert ".pp-uitg-prod-img" in src
+        assert re.search(r"aspect-ratio\s*:\s*3\s*/\s*4", src), \
+            "v60.1.160 product-image aspect-ratio:3/4 must still be present"
+        assert re.search(r"object-fit\s*:\s*contain", src), \
+            "v60.1.160 product-image object-fit:contain must still be present"
+
+    def test_v60_161_onboarding_wallet_bypass_intact(self):
+        """v60.1.161 onboarding wallet bypass must still be in place."""
+        src = ONBOARDING.read_text()
+        assert re.search(r"VERSION:\s*'1\.1\.0'", src), \
+            "PP_BrandOnboarding.VERSION must remain '1.1.0' in v60.1.162"
+
+    def test_product_flow_unchanged(self):
+        """v60.1.162 is surgical: paintProductenOverview / .pp-uitg-prod-grid
+        must remain present and unchanged in structure."""
+        src = FEEDTABS_FILE.read_text()
+        assert "paintProductenOverview" in src, \
+            "paintProductenOverview must remain in pp-feedtabs-v1.js"
+        assert "pp-uitg-prod-grid" in src, \
+            "pp-uitg-prod-grid class must remain in pp-feedtabs-v1.js"
+

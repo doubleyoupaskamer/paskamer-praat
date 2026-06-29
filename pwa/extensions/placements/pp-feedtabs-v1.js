@@ -280,14 +280,23 @@
 
   function paintUitgelicht(grid, camps) {
     if (!grid) return;
-    var nu = Date.now();
-    var actief = (camps || []).filter(function(c) {
-      var startMs = (c.startDatum && c.startDatum.toMillis) ? c.startDatum.toMillis() : null;
-      var eindMs  = (c.eindDatum  && c.eindDatum.toMillis)  ? c.eindDatum.toMillis()  : null;
-      if (startMs && nu < startMs) return false;
-      if (eindMs && nu > eindMs) return false;
-      return true;
+    // v60.1.162 (2026-02-23): Client-side datum-filter VERWIJDERD.
+    // De Firestore query (regel 272) filtert al op status='live'. De
+    // backend brand-autocomplete-worker beheert de status-transities
+    // (live → completed wanneer eindDatum verstrijkt). Dubbele client-
+    // filter verbergt onterecht campagnes met null/string/Date dates
+    // i.p.v. Firestore Timestamps.
+    // Behouden voor diagnostics: log hoeveel campagnes zijn ontvangen.
+    var actief = (camps || []).filter(function (c) {
+      return c && c.status === 'live';
     });
+    try {
+      console.log('[pp-feedtabs] uitgelicht render:', {
+        ontvangen: (camps || []).length,
+        actief: actief.length,
+        ids: actief.map(function (c) { return c._id; })
+      });
+    } catch (_) {}
 
     // Render partner-grid + feed-overview in 1 pagina
     var html =

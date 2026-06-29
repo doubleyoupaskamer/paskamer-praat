@@ -1,0 +1,35 @@
+{
+  "summary": "v60.1.162 'Uitgelicht no-date-filter' surgical fix verified via static audit + pytest + curl. paintUitgelicht client-side date filter (c.startDatum.toMillis() / c.eindDatum.toMillis()) is fully removed; replaced with single `c && c.status === 'live'` post-filter. Firestore query (db.collection('campaigns').where('status','==','live').limit(50)) unchanged at line 272. Diagnostic console.log '[pp-feedtabs] uitgelicht render:' with {ontvangen, actief, ids} payload present. Cache-bust v=60.1.162-uitgelicht-no-date-filter applied in index.html. sw.js VERSION bumped to v60.1.162-20260623-uitgelicht-no-date-filter. ZIP MD5 b3787fe8bea9e9d47f1e2187f1696695 verified; ZIP'd pp-feedtabs-v1.js contains 0 toMillis references and the new live filter. Regression checks: v60.1.160 product-image aspect-ratio:3/4 + object-fit:contain intact; v60.1.161 onboarding wallet bypass (VERSION 1.1.0) intact; productflow (paintProductenOverview / .pp-uitg-prod-grid) unchanged. Backend GET /api/downloads/01-paskamerpraat-pwa-cloudflare.zip returns 200 OK, 4022208 bytes (3.84MB), correct MD5. Pytest suite expanded from 108 → 123 tests, all green.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/downloads/01-paskamerpraat-pwa-cloudflare.zip", "issue": "HEAD request returns 405 Method Not Allowed (only GET allowed). Not blocking — GET works and serves the correct 4MB ZIP — but consider adding HEAD support for clients that probe with HEAD before downloading."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/iter10_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "v60.1.162 is exactly the kind of surgical patch I would recommend — remove the redundant defensive filter and rely on the canonical server-side source of truth (Firestore status='live'). The diagnostic console.log with ontvangen/actief/ids is excellent for future field debugging.",
+    "Consider: if Firestore startDatum/eindDatum fields are sometimes plain JS Date / string / null, that's a data-quality issue worth fixing in the brand-autocomplete worker (normalize to Firestore Timestamp on write) so future filters can rely on the type. This is not blocking v60.1.162.",
+    "File pp-feedtabs-v1.js is 478 lines (well under 700-line guideline). No DRY violations introduced. Filter change is well-commented with date and rationale in Dutch — consistent with existing style.",
+    "TestUitgelichtProductImageRatio.test_index_html_carries_new_cache_version was a stale assertion still pointing at v60.1.160 cache key. Updated to track latest v60.1.162 since pp-feedtabs-v1.js is a single file whose cache key follows the latest fix. Future-proofing: consider parametrizing the expected version constant at the top of the test file to avoid this drift on every bump."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py (updated cache-version assertions to v60.1.162; updated ZIP MD5 to b3787fe8bea9e9d47f1e2187f1696695; added 9 new tests in class TestUitgelichtNoDateFilter; added 3 new regression tests in class TestV60_162Regression; fixed stale v60.1.160 cache-version assertion)"
+  ],
+  "success_rate": {"backend": "100% (123/123 pytest)", "frontend": "N/A (PWA deployed to Cloudflare Pages — skipped per request)"},
+  "test_credentials": "none required (static audit + public download endpoint)",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "v60.1.162 fix is fully verified at the source level and inside the deployed Cloudflare ZIP. Live partner-campaign rendering must be validated by the user against the live Cloudflare Pages deployment after cache bust propagates (PWA service-worker VERSION already bumped, so refresh on production should pull the new bundle). The diagnostic log '[pp-feedtabs] uitgelicht render:' in browser console will show {ontvangen, actief, ids} — useful for the next round of debugging if the bug returns. Suite is at 123 tests; next iteration should keep the existing TestUitgelichtNoDateFilter and TestV60_162Regression classes as regression guards.",
+  "rca_of_the_issue": "ROOT CAUSE: paintUitgelicht had a redundant client-side defensive filter `c.startDatum.toMillis() <= now && c.eindDatum.toMillis() >= now` AFTER the Firestore query already filtered `where('status','==','live')`. The .toMillis() call assumes Firestore Timestamp type. When campaigns were written with plain JS Date / ISO string / null (e.g. from older migration, manual Firestore console edit, or worker writing a non-Timestamp), the filter threw silently and the campaign was discarded — producing the 'Nog geen actieve partner-campagnes' empty state despite live: 1 in console. REPRODUCTION: Create campaign with status='live' and startDatum set to a JS Date (not firebase.firestore.Timestamp) — the campaign would be returned by the query but filtered out client-side. MITIGATION (v60.1.162): Removed the entire date-window post-filter. Source of truth is now the Firestore query + backend brand-autocomplete worker which transitions status='live' → 'completed' when eindDatum passes. Single line filter retained for the defensive null/undefined guard: `return c && c.status === 'live';`."
+}
