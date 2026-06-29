@@ -68,11 +68,23 @@
   }
 
   // ────────── INJECT: Uitgelicht teaser ──────────
+  // v1.1.0 (2026-02-23): Plaats teaser PRECIES vóór de "Gesponsord door
+  // onze partners" header (.pp-uitg-header) i.p.v. boven de hele grid.
+  // Voorheen stond hij boven "Uitgelicht" eyebrow; user wilde hem expliciet
+  // direct boven het "Gesponsord door onze partners" blok.
   function injectUitgelichtTeaser() {
-    // Toon alleen wanneer de Uitgelicht-tab content gerenderd is
-    var grid = document.querySelector('.pp-uitg-feed-grid');
-    if (!grid) return;
     if (document.getElementById(TEASER_ID)) return;
+    // Zoek het pp-uitg-header blok met h2 "Gesponsord door onze partners"
+    var anchor = null;
+    var headers = document.querySelectorAll('.pp-uitg-header');
+    for (var i = 0; i < headers.length; i++) {
+      var h2 = headers[i].querySelector('.pp-uitg-titel');
+      if (h2 && /Gesponsord door onze partners/i.test(h2.textContent || '')) {
+        anchor = headers[i];
+        break;
+      }
+    }
+    if (!anchor || !anchor.parentNode) return;
 
     var box = document.createElement('div');
     box.id = TEASER_ID;
@@ -84,15 +96,13 @@
       '<p class="pp-merken-teaser-text">Ontdek merken die speciaal voor de Tall &amp; Plus Size community ontworpen zijn.</p>' +
       '<div class="pp-merken-teaser-az" role="navigation" aria-label="Merken alfabet">' + azHtml + '</div>';
 
-    // Delegated click
     box.addEventListener('click', function (e) {
       var btn = e.target && e.target.closest && e.target.closest('button[data-letter]');
       if (!btn) return;
       gotoMerken(btn.getAttribute('data-letter'));
     });
 
-    // Plaats VOOR de grid (subtiel bovenaan de Uitgelicht-tab content)
-    grid.parentNode.insertBefore(box, grid);
+    anchor.parentNode.insertBefore(box, anchor);
   }
 
   // ────────── INJECT: Merken-pagina back button ──────────
@@ -138,7 +148,7 @@
   }
 
   window.PP_MerkenDiscoverability = {
-    VERSION: '1.0.0',
+    VERSION: '1.1.0',
     gotoMerken: gotoMerken,
     backFromMerken: backFromMerken
   };

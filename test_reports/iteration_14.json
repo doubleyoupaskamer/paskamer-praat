@@ -1,0 +1,43 @@
+{
+  "summary": "v60.1.166 (teaser-anchor) static-audit & backend verification PASSED. Updated TestMerkenDiscoverability: renamed test_inject_teaser_targets_uitg_feed_grid → test_teaser_anchor_is_gesponsord_header (inverted expectation), replaced test_inject_teaser_insert_before_grid → test_teaser_inserts_before_gesponsord_header (anchor.parentNode.insertBefore). Bumped all cache-version literals to v60.1.166-teaser-anchor / SW VERSION 'v60.1.166-20260623-teaser-anchor' / ZIP MD5 140eb3aa24ecc4145e755b0aedf9d95f / module VERSION '1.1.0'. All 204 tests pass (1.38s).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/iteration_14.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "injectUitgelichtTeaser (v1.1.0) now correctly iterates document.querySelectorAll('.pp-uitg-header') and filters on .pp-uitg-titel.textContent matching /Gesponsord door onze partners/i. Insertion uses anchor.parentNode.insertBefore(box, anchor) — exactly above the Gesponsord header block as user requested.",
+    "Legacy `.pp-uitg-feed-grid` and `grid.parentNode.insertBefore` patterns are fully GONE from pp-merken-discoverability-v1.js (grep confirmed: 0/0 matches in the module file).",
+    "Idempotency, MutationObserver init, setTimeout 500ms initial run, LETTERS array (27), data-testid 'uitg-merken-teaser', injectMerkenBackBtn (still anchored to .bp-header with data-testid 'merken-back-btn'), gotoMerken NavContext bypass, backFromMerken history.back() priority — all UNCHANGED and verified.",
+    "Regression-clean: pp-nav-context-v1.js (Phase A), pp-feedtabs-v1.js (line 305 still emits the .pp-uitg-header with h2 'Gesponsord door onze partners'), brand-portal-v1.js, pp-wallet-v1.js all unchanged. index.html carries pp-merken-discoverability-v1.js?v=60.1.166-teaser-anchor; sw.js VERSION 'v60.1.166-20260623-teaser-anchor'. ZIP MD5 matches 140eb3aa24ecc4145e755b0aedf9d95f (3.84MB)."
+  ],
+  "updated_files": ["/app/backend/tests/test_pwa_wallet_segmentation.py"],
+  "success_rate": {"backend": "100% (204/204)", "frontend": "N/A (PWA deployed externally; static-audit + backend curl only per review-request)"},
+  "test_credentials": "none required",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Suite remains at 204 assertions. v60.1.166 swapped one test for another (net 0). Key literals now: cache key 'pp-merken-discoverability-v1.js?v=60.1.166-teaser-anchor', SW VERSION 'v60.1.166-20260623-teaser-anchor', ZIP MD5 '140eb3aa24ecc4145e755b0aedf9d95f', PP_MerkenDiscoverability.VERSION '1.1.0'. Teaser is now anchored on the .pp-uitg-header with h2 'Gesponsord door onze partners'.",
+  "verification_summary": {
+    "module_version_1_1_0": "PASS",
+    "new_anchor_logic_pp_uitg_header_querySelectorAll": "PASS",
+    "regex_gesponsord_door_onze_partners_case_insensitive": "PASS",
+    "anchor_parentNode_insertBefore_box_anchor": "PASS",
+    "legacy_pp_uitg_feed_grid_removed": "PASS (0 matches in module)",
+    "legacy_grid_parentNode_insertBefore_removed": "PASS (0 matches in module)",
+    "letters_array_27_unchanged": "PASS",
+    "teaser_data_testid_uitg_merken_teaser": "PASS",
+    "intro_string_with_amp_unchanged": "PASS",
+    "merken_back_btn_unchanged": "PASS",
+    "gotoMerken_NavContext_priority": "PASS",
+    "backFromMerken_history_back_priority": "PASS",
+    "feedtabs_line_305_pp_uitg_header_h2_gesponsord_anchor_target": "PASS (verified via grep at line 303-305)",
+    "index_html_cache_key_v60_166_teaser_anchor": "PASS",
+    "sw_version_v60_166_20260623_teaser_anchor": "PASS",
+    "zip_md5_140eb3aa24ecc4145e755b0aedf9d95f": "PASS (verified via md5sum on both /app/01-paskamerpraat-pwa-cloudflare.zip and downloaded /api/downloads response)",
+    "backend_download_endpoint": "PASS (GET /api/downloads/01-paskamerpraat-pwa-cloudflare.zip → 200, 4029525 bytes, MD5 matches)",
+    "regression_clean": "PASS (brand-portal-v1.js / pp-feedtabs-v1.js / pp-nav-context-v1.js / pp-wallet-v1.js all unchanged)"
+  }
+}

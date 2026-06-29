@@ -233,13 +233,13 @@ class TestCacheVersion:
         assert "pp-brand-onboarding-checklist-v1.js?v=60.1.161-onb-wallet-bypass" in src
         assert "pp-nav-context-v1.js?v=60.1.164-nav-context" in src
         # v60.1.165: pp-merken-discoverability-v1.js NEW additive module
-        assert "pp-merken-discoverability-v1.js?v=60.1.165-merken-disc" in src
+        assert "pp-merken-discoverability-v1.js?v=60.1.166-teaser-anchor" in src
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
         # v60.1.165: SW VERSION bumped to merken-disc (Phase B)
-        assert "VERSION       = 'v60.1.165-20260623-merken-disc'" in src or \
-               "VERSION = 'v60.1.165-20260623-merken-disc'" in src
+        assert "VERSION       = 'v60.1.166-20260623-teaser-anchor'" in src or \
+               "VERSION = 'v60.1.166-20260623-teaser-anchor'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
@@ -255,7 +255,7 @@ class TestDeployZip:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
         # v60.1.165: SW VERSION bumped to merken-disc
-        assert "v60.1.165-20260623-merken-disc" in content
+        assert "v60.1.166-20260623-teaser-anchor" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -1257,7 +1257,7 @@ class TestOnboardingChecklistWalletBypass:
         with open(ZIP_FILE, "rb") as f:
             for chunk in iter(lambda: f.read(1 << 20), b""):
                 h.update(chunk)
-        assert h.hexdigest() == "34540873dab708c0a2cede432105e9c6", \
+        assert h.hexdigest() == "140eb3aa24ecc4145e755b0aedf9d95f", \
             f"deploy zip MD5 mismatch: got {h.hexdigest()}"
 
 
@@ -1336,7 +1336,7 @@ class TestUitgelichtNoDateFilter:
     def test_sw_version_bumped(self):
         src = SW_FILE.read_text()
         # v60.1.165: sw.js bumped to merken-disc (Phase B; supersedes v60.1.164)
-        assert "v60.1.165-20260623-merken-disc" in src, \
+        assert "v60.1.166-20260623-teaser-anchor" in src, \
             "sw.js VERSION must be bumped to v60.1.165 (merken-disc)"
 
     def test_zip_no_to_millis_in_paint_uitgelicht(self):
@@ -1557,7 +1557,7 @@ class TestV60_163Regression:
         index_src = INDEX_HTML.read_text()
         assert index_src.count("pp-brand-prod-img-fix.css") == 1
         # sw.js carries v60.1.165 marker (Phase B; supersedes v60.1.163/164)
-        assert "v60.1.165-20260623-merken-disc" in SW_FILE.read_text()
+        assert "v60.1.166-20260623-teaser-anchor" in SW_FILE.read_text()
 
 
 # ───────── v60.1.163: backend download endpoint smoke ─────────
@@ -1798,7 +1798,7 @@ class TestNavContext:
         # Exactly one script tag for pp-nav-context-v1.js
         assert INDEX_HTML.read_text().count("pp-nav-context-v1.js") == 1
         # sw.js carries v60.1.165 marker (superseded by Phase B; nav-context module still v60.1.164 cache key)
-        assert "v60.1.165-20260623-merken-disc" in SW_FILE.read_text()
+        assert "v60.1.166-20260623-teaser-anchor" in SW_FILE.read_text()
 
 
 # ─── v60.1.164: ZIP bundle audit for nav-context module ───
@@ -1826,7 +1826,7 @@ class TestNavContextZip:
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "v60.1.165-20260623-merken-disc" in content
+        assert "v60.1.166-20260623-teaser-anchor" in content
 
 
 
@@ -1846,8 +1846,8 @@ class TestMerkenDiscoverability:
 
     def test_module_version(self):
         src = MERKEN_DISC.read_text()
-        assert "VERSION:" in src and "'1.0.0'" in src, \
-            "PP_MerkenDiscoverability.VERSION must be '1.0.0'"
+        assert "VERSION:" in src and "'1.1.0'" in src, \
+            "PP_MerkenDiscoverability.VERSION must be '1.1.0' (v60.1.166)"
 
     def test_window_export_surface(self):
         src = MERKEN_DISC.read_text()
@@ -1869,21 +1869,35 @@ class TestMerkenDiscoverability:
         for ch in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
             assert ch in items, f"LETTERS missing uppercase '{ch}'"
 
-    # ─────── injectUitgelichtTeaser ───────
-    def test_inject_teaser_targets_uitg_feed_grid(self):
+    # ─────── injectUitgelichtTeaser (v60.1.166: anchored on Gesponsord header) ───────
+    def test_teaser_anchor_is_gesponsord_header(self):
+        """v60.1.166: teaser anchor is now the .pp-uitg-header containing the
+        h2 'Gesponsord door onze partners' — NOT the .pp-uitg-feed-grid grid."""
         src = MERKEN_DISC.read_text()
-        assert "querySelector('.pp-uitg-feed-grid')" in src, \
-            "injectUitgelichtTeaser must query .pp-uitg-feed-grid (emitted by pp-feedtabs-v1.js)"
+        # NEW anchor logic must be present
+        assert "querySelectorAll('.pp-uitg-header')" in src, \
+            "injectUitgelichtTeaser must iterate document.querySelectorAll('.pp-uitg-header')"
+        assert ".pp-uitg-titel" in src, \
+            "anchor lookup must query .pp-uitg-titel inside each header"
+        assert re.search(r"/Gesponsord door onze partners/i", src), \
+            "anchor lookup must match h2 text via /Gesponsord door onze partners/i regex"
+        # OLD grid-based logic must be GONE
+        assert ".pp-uitg-feed-grid" not in src, \
+            "v60.1.166: legacy '.pp-uitg-feed-grid' anchor lookup MUST be removed"
+        assert "grid.parentNode.insertBefore" not in src, \
+            "v60.1.166: legacy `grid.parentNode.insertBefore` MUST be removed"
 
     def test_inject_teaser_idempotent_skip(self):
         src = MERKEN_DISC.read_text()
         assert "getElementById(TEASER_ID)" in src, \
             "injectUitgelichtTeaser must skip when teaser already present (idempotency)"
 
-    def test_inject_teaser_insert_before_grid(self):
+    def test_teaser_inserts_before_gesponsord_header(self):
+        """v60.1.166: insertion must use anchor.parentNode.insertBefore(box, anchor)
+        — i.e., the teaser is placed EXACTLY above the Gesponsord header block."""
         src = MERKEN_DISC.read_text()
-        assert "grid.parentNode.insertBefore(box, grid)" in src, \
-            "teaser must be inserted BEFORE the .pp-uitg-feed-grid via parentNode.insertBefore"
+        assert "anchor.parentNode.insertBefore(box, anchor)" in src, \
+            "teaser must be inserted via anchor.parentNode.insertBefore(box, anchor)"
 
     def test_inject_teaser_intro_string_literal(self):
         src = MERKEN_DISC.read_text()
@@ -2020,7 +2034,7 @@ class TestMerkenDiscoverability:
     # ─────── index.html & sw.js wiring ───────
     def test_index_html_script_tag(self):
         src = INDEX_HTML.read_text()
-        assert "pp-merken-discoverability-v1.js?v=60.1.165-merken-disc" in src, \
+        assert "pp-merken-discoverability-v1.js?v=60.1.166-teaser-anchor" in src, \
             "index.html must include pp-merken-discoverability-v1.js with v60.1.165 cache key"
 
     def test_index_html_script_tag_after_nav_context(self):
@@ -2040,8 +2054,8 @@ class TestMerkenDiscoverability:
 
     def test_sw_version_bumped_v60_165(self):
         src = SW_FILE.read_text()
-        assert "v60.1.165-20260623-merken-disc" in src, \
-            "sw.js VERSION must be bumped to v60.1.165-20260623-merken-disc"
+        assert "v60.1.166-20260623-teaser-anchor" in src, \
+            "sw.js VERSION must be bumped to v60.1.166-20260623-teaser-anchor"
 
 
 # ─── v60.1.165 REGRESSION: legacy files MUST be UNCHANGED ───
@@ -2091,7 +2105,7 @@ class TestPhaseBRegressionUnchanged:
 
 # ─── v60.1.165 ZIP bundle audit ───
 class TestMerkenDiscZip:
-    EXPECTED_MD5 = "34540873dab708c0a2cede432105e9c6"
+    EXPECTED_MD5 = "140eb3aa24ecc4145e755b0aedf9d95f"
 
     def test_zip_md5(self):
         import hashlib
@@ -2116,13 +2130,13 @@ class TestMerkenDiscZip:
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("index.html") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "pp-merken-discoverability-v1.js?v=60.1.165-merken-disc" in content
+        assert "pp-merken-discoverability-v1.js?v=60.1.166-teaser-anchor" in content
 
     def test_zip_sw_version_v60_165(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        assert "v60.1.165-20260623-merken-disc" in content
+        assert "v60.1.166-20260623-teaser-anchor" in content
 
     def test_zip_still_contains_nav_context_phase_a(self):
         """Phase B did NOT remove Phase A — nav-context module must still be present."""
