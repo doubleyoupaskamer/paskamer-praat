@@ -6,6 +6,34 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.158 — Brand-Dashboard Wallet Card Hardened (23 feb 2026)
+
+### Probleem (gebruiker-gerapporteerd + screenshot)
+Op het brand_dashboard werd de Wallet-knop gerenderd als `<a href="javascript:void(0)" class="bp-quick" data-testid="brand-dash-wallet">` ZONDER zichtbare onclick. User klikte → landde op B2C pakketten i.p.v. B2B campagne-pakketten.
+
+### Root cause (deep-dive)
+Twee samenwerkende kwetsbaarheden:
+1. **`.onclick = fn` DOM-property** — onzichtbaar in DOM-inspector + kwetsbaar voor DOM-vervangingen door re-renders.
+2. **Brand-portal render-lock absorptie** — `brand-portal-v1.js` wraps `DY.toonPagina` (regel 193) en bevat een guard die ALLE non-BP_PAGES routes (zoals `wallet`) STIL NEGEERT zolang `BP._renderLock=true` is (tot 2s na een brand render). Klik tijdens die window → call verdwijnt → user lijkt nergens te navigeren of valt terug op stale B2C-state.
+
+### Fix (3-laags defense)
+- **`pp-wallet-v1.js` v1.7.0** — `injectDashboardCard` herschreven:
+  1. `<button type="button">` i.p.v. `<a href="javascript:void(0)">` → grid-parity met andere `bp-quick` knoppen + zichtbaar in DOM-inspector.
+  2. **Inline `onclick` attribuut** dat (a) `DY.brandPortal._renderLock=false` zet vóór navigatie en (b) `DY.navigeer('wallet')` aanroept. Robuust tegen re-renders.
+  3. **Nieuwe `setupWalletClickDelegator()`** — document-level capture-phase click delegator op `[data-testid="brand-dash-wallet"]` (idempotent via `window.__ppWalletDelegatorInstalled`). Vangt elke click VÓÓR bubble-handlers, cleared `_renderLock` + `_laatstGerenderd`, roept altijd `navigeer('wallet')` aan. Niet weg te halen door enige andere code.
+
+### Testing
+- **78/78 pytest assertions PASS** (66 → 78 uitgebreid).
+- Nieuwe `TestBrandDashWalletCardHardened` class met 12 assertions: button-element, inline onclick, navigeer('wallet') literal, _renderLock=false cleanup, anchor patterns verwijderd, delegator definition+ordering, capture-phase=true, .closest() target, idempotency guard, card DOM-contract, ZIP-regression, B2C non-injection.
+- Backend `/api/downloads/...` → 200 OK, 4.021.232 bytes, MD5 perfect match.
+- B2C wallet ongewijzigd. Public landing ongewijzigd. Legacy brand-portal-v1.js ongewijzigd.
+
+### Delivery
+- `index.html` cache → `?v=60.1.158-wallet-card-hardened` voor pp-wallet-v1.js
+- `sw.js` VERSION → `v60.1.158-20260623-wallet-card-hardened`
+- Zip: `/app/01-paskamerpraat-pwa-cloudflare.zip` (~3.83MB, md5 `47555fd0a835bcd01bad32c30d81b2ef`)
+
+
 ## v60.1.157 — Merken Campagne-Pakketten Layout in B2B Wallet Opwaarderen tab (23 feb 2026)
 
 ### Probleem (gebruiker-gerapporteerd + screenshot)
