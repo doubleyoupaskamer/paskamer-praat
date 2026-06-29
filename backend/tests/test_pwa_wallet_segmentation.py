@@ -229,8 +229,9 @@ class TestCacheVersion:
 
     def test_sw_version(self):
         src = SW_FILE.read_text()
-        assert "VERSION       = 'v60.1.162-20260623-uitgelicht-no-date-filter'" in src or \
-               "VERSION = 'v60.1.162-20260623-uitgelicht-no-date-filter'" in src
+        # v60.1.163: SW VERSION bumped to brand-prod-img-fix
+        assert "VERSION       = 'v60.1.163-20260623-brand-prod-img-fix'" in src or \
+               "VERSION = 'v60.1.163-20260623-brand-prod-img-fix'" in src
 
 
 # ───────────────── Static audit: deploy zip ─────────────────
@@ -245,8 +246,8 @@ class TestDeployZip:
         with zipfile.ZipFile(ZIP_FILE) as z:
             with z.open("sw.js") as f:
                 content = f.read().decode("utf-8", errors="ignore")
-        # v60.1.162: SW VERSION bumped to uitgelicht-no-date-filter
-        assert "v60.1.162-20260623-uitgelicht-no-date-filter" in content
+        # v60.1.163: SW VERSION bumped to brand-prod-img-fix
+        assert "v60.1.163-20260623-brand-prod-img-fix" in content
 
     def test_zip_contains_b2b_allowed_amounts(self):
         with zipfile.ZipFile(ZIP_FILE) as z:
@@ -1242,13 +1243,13 @@ class TestOnboardingChecklistWalletBypass:
     def test_zip_md5_matches_expected(self):
         """Critical: zip MD5 must equal the agent-supplied value to
         guarantee the bundle published to Cloudflare is the exact one
-        carrying the v60.1.162 fix."""
+        carrying the v60.1.163 fix."""
         import hashlib
         h = hashlib.md5()
         with open(ZIP_FILE, "rb") as f:
             for chunk in iter(lambda: f.read(1 << 20), b""):
                 h.update(chunk)
-        assert h.hexdigest() == "b3787fe8bea9e9d47f1e2187f1696695", \
+        assert h.hexdigest() == "6087fca10e683c71e854cef497538a3e", \
             f"deploy zip MD5 mismatch: got {h.hexdigest()}"
 
 
@@ -1326,8 +1327,9 @@ class TestUitgelichtNoDateFilter:
 
     def test_sw_version_bumped(self):
         src = SW_FILE.read_text()
-        assert "v60.1.162-20260623-uitgelicht-no-date-filter" in src, \
-            "sw.js VERSION must be bumped to v60.1.162"
+        # v60.1.163: sw.js bumped to brand-prod-img-fix (post-v60.1.162)
+        assert "v60.1.163-20260623-brand-prod-img-fix" in src, \
+            "sw.js VERSION must be bumped to v60.1.163"
 
     def test_zip_no_to_millis_in_paint_uitgelicht(self):
         """Critical: deployed Cloudflare bundle must not contain the
@@ -1377,4 +1379,193 @@ class TestV60_162Regression:
             "paintProductenOverview must remain in pp-feedtabs-v1.js"
         assert "pp-uitg-prod-grid" in src, \
             "pp-uitg-prod-grid class must remain in pp-feedtabs-v1.js"
+
+
+
+# ───────── v60.1.163: BRAND-PROFILE PRODUCT IMAGE RATIO FIX ─────────
+BRAND_PROD_IMG_FIX_CSS = PWA / "extensions/profile/pp-brand-prod-img-fix.css"
+BRAND_PORTAL_LEGACY = PWA / "js/brand-portal-v1.js"
+
+
+class TestBrandProdImgFix:
+    """v60.1.163 user-reported bug (Dutch):
+
+    On the brand-profile 'Merken' tab (route brand_detail/merken_detail,
+    rendered by legacy js/brand-portal-v1.js → bp-prod-grid), product
+    photos were cropped — the head of the fashion-model disappeared.
+
+    Mirrors the v60.1.160 fix (.pp-uitg-prod-img aspect-ratio:3/4 +
+    object-fit:contain) but targets the legacy .bp-prod-img selector.
+    Because brand-portal-v1.js may NOT be edited per strict additive
+    architecture rules, this fix is applied via a NEW additive CSS file
+    pp-brand-prod-img-fix.css loaded AFTER brand-portal.css in
+    index.html so it wins via CSS specificity + order.
+    """
+
+    def test_brand_prod_img_fix_css_exists(self):
+        assert BRAND_PROD_IMG_FIX_CSS.exists(), \
+            "pp-brand-prod-img-fix.css must exist at /app/pwa/extensions/profile/"
+
+    def test_brand_prod_img_aspect_ratio_3_4(self):
+        src = BRAND_PROD_IMG_FIX_CSS.read_text()
+        # .bp-prod-img block contains aspect-ratio:3/4
+        m = re.search(r"\.bp-prod-img\s*\{([^}]+)\}", src)
+        assert m, ".bp-prod-img CSS block must exist in pp-brand-prod-img-fix.css"
+        body = m.group(1)
+        assert re.search(r"aspect-ratio\s*:\s*3\s*/\s*4", body), \
+            "v60.1.163: .bp-prod-img must declare aspect-ratio: 3 / 4"
+        assert re.search(r"background\s*:\s*#0f0c08", body), \
+            "v60.1.163: .bp-prod-img must declare neutral letterbox background #0f0c08"
+        for required in (
+            "display: flex",
+            "align-items: center",
+            "justify-content: center",
+            "overflow: hidden",
+            "position: relative",
+        ):
+            assert required in body, \
+                f"v60.1.163: .bp-prod-img block must contain `{required}`"
+
+    def test_brand_prod_img_inner_img_object_fit_contain(self):
+        src = BRAND_PROD_IMG_FIX_CSS.read_text()
+        m = re.search(r"\.bp-prod-img\s+img\s*\{([^}]+)\}", src)
+        assert m, ".bp-prod-img img CSS block must exist in pp-brand-prod-img-fix.css"
+        body = m.group(1)
+        assert re.search(r"object-fit\s*:\s*contain", body), \
+            "v60.1.163: .bp-prod-img img must declare object-fit: contain"
+        assert re.search(r"width\s*:\s*100%", body), \
+            "v60.1.163: .bp-prod-img img must declare width: 100%"
+        assert re.search(r"height\s*:\s*100%", body), \
+            "v60.1.163: .bp-prod-img img must declare height: 100%"
+        assert re.search(r"display\s*:\s*block", body), \
+            "v60.1.163: .bp-prod-img img must declare display: block"
+
+    def test_index_html_links_brand_prod_img_fix_css(self):
+        src = INDEX_HTML.read_text()
+        # Exactly one <link> for the new css with v60.1.163 cache buster.
+        link = '<link rel="stylesheet" href="/extensions/profile/pp-brand-prod-img-fix.css?v=60.1.163-brand-prod-img-fix">'
+        assert link in src, \
+            "index.html must include the pp-brand-prod-img-fix.css link with v=60.1.163-brand-prod-img-fix"
+        # Ensure it appears exactly once (no duplicate injections).
+        assert src.count("pp-brand-prod-img-fix.css") == 1, \
+            "pp-brand-prod-img-fix.css must appear exactly once in index.html"
+
+    def test_index_html_link_order_after_brand_portal_css(self):
+        """The override file MUST load AFTER /brand-portal.css so legacy
+        rules are overridden via natural CSS source-order specificity."""
+        src = INDEX_HTML.read_text()
+        legacy_idx = src.find("/brand-portal.css")
+        fix_idx = src.find("pp-brand-prod-img-fix.css")
+        assert legacy_idx != -1, "brand-portal.css link must exist in index.html"
+        assert fix_idx != -1, "pp-brand-prod-img-fix.css link must exist in index.html"
+        assert fix_idx > legacy_idx, \
+            "pp-brand-prod-img-fix.css must load AFTER /brand-portal.css to win via source order"
+
+    def test_legacy_brand_portal_v1_js_unchanged(self):
+        """Legacy js/brand-portal-v1.js MUST NOT be touched — verify the
+        bp-prod-img rendering at ~line 473 is still present unchanged."""
+        assert BRAND_PORTAL_LEGACY.exists(), \
+            "Legacy js/brand-portal-v1.js must exist"
+        src = BRAND_PORTAL_LEGACY.read_text()
+        assert '<div class="bp-prod-img"><img src="' in src, \
+            "Legacy brand-portal-v1.js must still render <div class=\"bp-prod-img\"><img ...>"
+        assert '<div class="bp-prod-img bp-prod-noimg">' in src, \
+            "Legacy brand-portal-v1.js must still have the no-image fallback variant"
+
+    def test_zip_contains_brand_prod_img_fix_css(self):
+        """The Cloudflare deploy zip MUST contain the new CSS file with
+        both required selectors and exact declarations."""
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            names = z.namelist()
+            assert "extensions/profile/pp-brand-prod-img-fix.css" in names, \
+                "ZIP must contain extensions/profile/pp-brand-prod-img-fix.css"
+            with z.open("extensions/profile/pp-brand-prod-img-fix.css") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert re.search(r"\.bp-prod-img\s*\{[^}]*aspect-ratio\s*:\s*3\s*/\s*4", content), \
+            "ZIP'd pp-brand-prod-img-fix.css must contain .bp-prod-img with aspect-ratio:3/4"
+        assert re.search(r"\.bp-prod-img\s+img\s*\{[^}]*object-fit\s*:\s*contain", content), \
+            "ZIP'd pp-brand-prod-img-fix.css must contain .bp-prod-img img with object-fit:contain"
+
+    def test_zip_index_html_links_brand_prod_img_fix_css(self):
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("index.html") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert "/extensions/profile/pp-brand-prod-img-fix.css?v=60.1.163-brand-prod-img-fix" in content, \
+            "ZIP'd index.html must link pp-brand-prod-img-fix.css with v=60.1.163-brand-prod-img-fix"
+
+    def test_zip_legacy_brand_portal_v1_js_unchanged(self):
+        """Legacy file in zip must still contain the .bp-prod-img rendering."""
+        with zipfile.ZipFile(ZIP_FILE) as z:
+            with z.open("js/brand-portal-v1.js") as f:
+                content = f.read().decode("utf-8", errors="ignore")
+        assert '<div class="bp-prod-img"><img src="' in content, \
+            "ZIP'd legacy brand-portal-v1.js must still render bp-prod-img"
+
+
+# ───────── v60.1.163 REGRESSION: prior fixes (v60.1.159-162) intact ─────────
+class TestV60_163Regression:
+    def test_v60_159_pp_wallet_openwallet_intact(self):
+        """v60.1.159 PP_Wallet.openWallet entry point must remain."""
+        src = B2B_FILE.read_text()
+        assert "openWallet" in src, "PP_Wallet.openWallet must still exist (v60.1.159)"
+        assert re.search(r"VERSION\s*:\s*'1\.8\.0'", src), \
+            "B2B PP_Wallet must remain VERSION 1.8.0 (v60.1.159)"
+
+    def test_v60_160_uitg_prod_img_intact(self):
+        """v60.1.160 .pp-uitg-prod-img aspect-ratio:3/4 + object-fit:contain still present."""
+        src = FEEDTABS_FILE.read_text()
+        # Locate the .pp-uitg-prod-img block
+        m = re.search(r"\.pp-uitg-prod-img\{([^}]+)\}", src)
+        assert m, "v60.1.160 .pp-uitg-prod-img CSS block must remain"
+        assert re.search(r"aspect-ratio\s*:\s*3\s*/\s*4", m.group(1)), \
+            "v60.1.160 aspect-ratio:3/4 must remain"
+        m2 = re.search(r"\.pp-uitg-prod-img img\{([^}]+)\}", src)
+        assert m2, "v60.1.160 .pp-uitg-prod-img img CSS block must remain"
+        assert re.search(r"object-fit\s*:\s*contain", m2.group(1)), \
+            "v60.1.160 object-fit:contain on inner img must remain"
+
+    def test_v60_161_onboarding_wallet_bypass_intact(self):
+        """v60.1.161 onboarding wallet bypass must remain."""
+        src = ONBOARDING.read_text()
+        assert re.search(r"VERSION:\s*'1\.1\.0'", src), \
+            "PP_BrandOnboarding.VERSION must remain '1.1.0' (v60.1.161)"
+
+    def test_v60_162_paint_uitgelicht_live_filter_intact(self):
+        """v60.1.162 paintUitgelicht status='live' filter must remain."""
+        src = FEEDTABS_FILE.read_text()
+        assert "c.status === 'live'" in src, \
+            "v60.1.162 c.status === 'live' filter must remain"
+        # Legacy client-side date filter must NOT be reintroduced
+        assert "c.startDatum.toMillis()" not in src, \
+            "v60.1.162: legacy startDatum.toMillis filter must remain removed"
+        assert "c.eindDatum.toMillis()" not in src, \
+            "v60.1.162: legacy eindDatum.toMillis filter must remain removed"
+
+    def test_only_additive_changes_in_v60_163(self):
+        """v60.1.163 should only add 1 new CSS file + 1 line in index.html
+        + sw.js VERSION bump. Verify by checking the new css link is
+        present and the legacy brand-portal-v1.js is untouched."""
+        index_src = INDEX_HTML.read_text()
+        assert index_src.count("pp-brand-prod-img-fix.css") == 1
+        # sw.js carries v60.1.163 marker
+        assert "v60.1.163-20260623-brand-prod-img-fix" in SW_FILE.read_text()
+
+
+# ───────── v60.1.163: backend download endpoint smoke ─────────
+class TestV60_163Download:
+    def test_download_zip_endpoint_returns_200(self):
+        if not BASE_URL:
+            pytest.skip("REACT_APP_BACKEND_URL not configured")
+        url = f"{BASE_URL}/api/downloads/01-paskamerpraat-pwa-cloudflare.zip"
+        r = requests.get(url, stream=True, timeout=30)
+        assert r.status_code == 200, \
+            f"GET {url} expected 200, got {r.status_code}"
+        # Read content to verify size; cap at 6MB to avoid runaway
+        size = 0
+        for chunk in r.iter_content(chunk_size=65536):
+            size += len(chunk)
+            if size > 6 * 1024 * 1024:
+                break
+        assert 3 * 1024 * 1024 < size < 5 * 1024 * 1024, \
+            f"Downloaded zip size {size} not within 3-5MB"
 

@@ -1,0 +1,41 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * Doubleyou - Brand-Profile Product Image Ratio Fix (v1.0.0)
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * NON-BREAKING additieve CSS override. Spiegelt de fix uit v60.1.160
+ * (pp-feedtabs-v1.js .pp-uitg-prod-img) maar dan voor de brand-profile
+ * product-grid die wordt gerenderd door brand-portal-v1.js (legacy, mag
+ * niet aangeraakt worden).
+ *
+ * Probleem (v60.1.163): op de "Merken" tab van een brand-profile
+ * (bv. /feed met "← Terug naar merken" header) werden product-foto's
+ * afgesneden aan boven- en/of onderkant. Het hoofd van het fashion-
+ * model verdween. Oorzaak: brand-portal-v1.js regel 473 rendert
+ * <div class="bp-prod-img"><img ...></div> zonder expliciete
+ * aspect-ratio/object-fit, dus de browser default crop kicks in via
+ * de CSS in brand-portal.css.
+ *
+ * Fix: dezelfde aanpak als v60.1.160 — aspect-ratio:3/4 (portret) +
+ * object-fit:contain (volledige afbeelding letterboxed binnen container).
+ * Neutrale background-color blendt met de dark theme.
+ *
+ * Specificity: .bp-prod-img img is hoog genoeg om legacy brand-portal.css
+ * te overrulen mits dit bestand NA brand-portal.css laadt in index.html.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+.bp-prod-img {
+  aspect-ratio: 3 / 4;
+  background: #0f0c08;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.bp-prod-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}

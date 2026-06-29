@@ -1,0 +1,29 @@
+{
+  "summary": "v60.1.163 brand-profile product image ratio fix verified. New additive CSS file pp-brand-prod-img-fix.css exists with .bp-prod-img {aspect-ratio:3/4} and .bp-prod-img img {object-fit:contain}, linked in index.html after /brand-portal.css (line 1005 > line 314) with cache-buster v=60.1.163-brand-prod-img-fix, appearing exactly once. sw.js VERSION bumped to v60.1.163-20260623-brand-prod-img-fix. Legacy js/brand-portal-v1.js UNCHANGED (still renders <div class=\"bp-prod-img\"><img...>). Cloudflare zip MD5=6087fca10e683c71e854cef497538a3e (matches expected), size=4,023,243 bytes (3.84MB), contains the new CSS and updated sw.js + index.html. Backend GET /api/downloads/01-paskamerpraat-pwa-cloudflare.zip returns 200 OK with full 4MB payload. All v60.1.159-162 regressions intact (PP_Wallet.openWallet VERSION 1.8.0, .pp-uitg-prod-img aspect-ratio:3/4 + contain, PP_BrandOnboarding 1.1.0, paintUitgelicht status='live' filter with no client-side date filter). Pytest suite grown from 123 to 138 tests, all green.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py",
+    "/app/test_reports/pytest/pytest_iter_11.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "CSS override architecture is clean and surgical — single new file loaded after /brand-portal.css guarantees specificity wins via source order without touching the locked legacy brand-portal-v1.js. Pattern mirrors v60.1.160 (.pp-uitg-prod-img) consistently.",
+    "Two stale assertions from prior iterations were updated as part of this iteration's scope: TestUitgelichtNoDateFilter.test_sw_version_bumped (v60.1.162 → v60.1.163) and TestOnboardingChecklistWalletBypass.test_zip_md5_matches_expected (new MD5 6087fca10e683c71e854cef497538a3e). These tests assert on global VERSION/MD5 markers that always shift with each bundle; consider extracting them into a single TestCurrentBundle class so future version bumps only require editing one location instead of multiple."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pwa_wallet_segmentation.py"
+  ],
+  "success_rate": {"backend": "100% (138/138 pytest + 1/1 curl)", "frontend": "N/A (PWA deployed to Cloudflare, UI testing out of scope)"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Suite at /app/backend/tests/test_pwa_wallet_segmentation.py is the canonical regression for PWA v60.1.x. New class TestBrandProdImgFix (9 tests) covers v60.1.163. TestV60_163Regression (5 tests) guards v60.1.159-162 fixes. TestV60_163Download (1 test) hits backend /api/downloads. Two version-marker assertions (sw VERSION + zip MD5) need updating each release."
+}
