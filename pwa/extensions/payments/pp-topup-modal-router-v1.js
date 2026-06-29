@@ -159,44 +159,19 @@
         return orig.call(PP_TopupComingSoon, ctx);
       }
 
-      // ── Stap 3: B2C → Premium-check ───────────────────────
-      checkPremium().then(function (isPrem) {
-        if (isPrem) {
-          audit({
-            source: src,
-            decision: 'route:original-coming-soon',
-            reason: 'b2c_premium_user',
-            uid: user.uid,
-            ctx: { naam: ctx.naam, prijs: ctx.prijs }
-          });
-          orig.call(PP_TopupComingSoon, ctx);
-          return;
-        }
-        var openedPremium = openPremiumUpgrade();
-        audit({
-          source: src,
-          decision: openedPremium ? 'route:premium-upgrade-modal' : 'fallback:original-coming-soon',
-          reason: 'b2c_not_premium',
-          uid: user.uid,
-          ctx: { naam: ctx.naam, prijs: ctx.prijs }
-        });
-        if (!openedPremium) {
-          // Veilige fallback: original popup
-          orig.call(PP_TopupComingSoon, ctx);
-        }
-      }).catch(function (e) {
-        // Onverwachte fout → veiligste state: original popup
-        audit({
-          source: src,
-          decision: 'fallback:original-coming-soon',
-          reason: 'premium_check_error',
-          error: (e && (e.message || e.code)) || String(e),
-          ctx: { naam: ctx.naam, prijs: ctx.prijs }
-        });
-        try { orig.call(PP_TopupComingSoon, ctx); } catch (_) {}
+      // ── Stap 3: B2C → originele wallet-topup flow ─────────
+      // v1.1 FIX (2026-02-22): premium-gate VERWIJDERD voor B2C.
+      // Wallet opwaarderen is een eigen Shopify-checkout flow voor
+      // wallet-tegoed en heeft NIETS met premium upgrade te maken.
+      // Premium upgrade is een aparte knop met aparte product-IDs.
+      audit({
+        source: src,
+        decision: 'route:original-wallet-topup',
+        reason: 'b2c_wallet_topup_direct',
+        uid: user.uid,
+        ctx: { naam: ctx.naam, prijs: ctx.prijs }
       });
-
-      return true;
+      return orig.call(PP_TopupComingSoon, ctx);
     };
 
     try { console.log(TAG, 'wrapped PP_TopupComingSoon.show'); } catch (_) {}
