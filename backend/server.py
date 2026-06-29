@@ -54,6 +54,14 @@ try:
 except Exception as _e:
     logger.exception("Boost router niet geladen: %s", _e)
 
+# ── Weekly Campaign Reports (cron + admin trigger) ─────────────────
+try:
+    import weekly_reports
+    logger.info("weekly_reports module geladen")
+except Exception as _e:
+    logger.exception("weekly_reports niet geladen: %s", _e)
+    weekly_reports = None  # type: ignore
+
 
 # Define Models
 class StatusCheck(BaseModel):
@@ -1031,3 +1039,35 @@ app.add_middleware(
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+    try:
+        if weekly_reports is not None:
+            weekly_reports.shutdown_scheduler()
+    except Exception:
+        pass
+
+
+@app.on_event("startup")
+async def _startup_weekly_scheduler():
+    """Start de weekly-reports scheduler (ma 09:00 NL-tijd)."""
+    try:
+        if weekly_reports is not None:
+            weekly_reports.start_scheduler()
+    except Exception as e:
+        logger.exception("weekly scheduler start mislukt: %s", e)
+
+
+@app.post("/api/admin/weekly-reports/run")
+async def admin_run_weekly_reports(
+    x_admin_secret: Optional[str] = Header(None, alias="X-Admin-Secret"),
+    force: bool = False
+):
+    """
+    Handmatige trigger voor het weekrapport. Vereist X-Admin-Secret header.
+    Query param: ?force=true forceert verzending ook als laatst <6 dagen geleden.
+    """
+    secret = os.environ.get("ADMIN_GEN_SECRET", "")
+    if not secret or x_admin_secret != secret:
+        raise HTTPException(status_code=403, detail="forbidden")
+    if weekly_reports is None:
+        raise HTTPException(status_code=500, detail="weekly_reports module niet geladen")
+    return weekly_reports.run_weekly_for_all_campaigns(force=force)

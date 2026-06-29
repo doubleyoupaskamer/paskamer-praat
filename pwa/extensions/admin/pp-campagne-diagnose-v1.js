@@ -43,43 +43,68 @@
   }
 
   function buildCSV(rows) {
-    var headers = ['Campagne','Merk','Status','Plaatsing','Plaatsingen','Start','Eind',
-                   'Rendert_in_feed','Impressies','Kliks','Likes','CampagneId','BrandId'];
+    // v1.4.0: hiërarchisch — per campagne 1 TOTAAL-rij + 5 placement-rijen
+    var headers = ['Campagne','Merk','Status','Plaatsing','Start','Eind',
+                   'Rendert_in_feed','Impressies','Kliks','CTR_%','Likes','CampagneId','BrandId'];
     var lines = [headers.join(';')];
+
     rows.forEach(function (r) {
-      lines.push(headers.map(function (h) { return csvCell(r[h]); }).join(';'));
+      // Skip de "hulp-velden" entries — alleen echte data
+      if (!r.Campagne) return;
+      var totImpr = r.Impressies || 0;
+      var totClick = r.Kliks || 0;
+      var ctrTot = totImpr > 0 ? ((totClick / totImpr) * 100).toFixed(2) : '0.00';
+
+      // 1) TOTAAL-rij voor de campagne
+      lines.push([
+        csvCell(r.Campagne), csvCell(r.Merk), csvCell(r.Status),
+        csvCell('TOTAAL'),
+        csvCell(r.Start), csvCell(r.Eind), csvCell(r.Rendert_in_feed),
+        totImpr, totClick, ctrTot, (r.Likes || 0),
+        csvCell(r.CampagneId), csvCell(r.BrandId)
+      ].join(';'));
+
+      // 2) Per-placement rijen (alleen voor placements die in c.plaatsingen staan OF die events hebben)
+      var plcOrder = ['feed','stories','outfit_review','ai_assist','similar_items'];
+      var plcArr = r._plaatsingenArr || [];
+      var byPlc = r._byPlc || {};
+      plcOrder.forEach(function (plc) {
+        var pc = byPlc[plc] || { impr: 0, click: 0 };
+        var heeftPlaatsing = plcArr.indexOf(plc) !== -1;
+        // Alleen meenemen als de campagne deze plaatsing heeft gekocht OF data heeft
+        if (!heeftPlaatsing && pc.impr === 0 && pc.click === 0) return;
+        var ctr = pc.impr > 0 ? ((pc.click / pc.impr) * 100).toFixed(2) : '0.00';
+        lines.push([
+          csvCell(r.Campagne), csvCell(r.Merk), csvCell(r.Status),
+          csvCell(plc),
+          csvCell(r.Start), csvCell(r.Eind), csvCell(r.Rendert_in_feed),
+          pc.impr, pc.click, ctr, '',
+          csvCell(r.CampagneId), csvCell(r.BrandId)
+        ].join(';'));
+      });
     });
+
     // BOM voor Excel UTF-8 compat
     return '\ufeff' + lines.join('\r\n');
   }
 
-  function exportCSV(placement) {
+  function exportCSV(campaignId) {
     try {
       if (!_lastExportRows.length) {
         if (window.DY && DY.toast) DY.toast('Geen data om te exporteren — laad eerst de diagnose.');
         return;
       }
-      // Per-placement filter: alleen campagnes met die plaatsing,
-      // en gebruik placement-specifieke impr/click counts i.p.v. cumulatief.
-      var filtered = placement
-        ? _lastExportRows
-            .filter(function (r) { return (r._plaatsingenArr || []).indexOf(placement) !== -1; })
-            .map(function (r) {
-              var plc = (r._byPlc && r._byPlc[placement]) || { impr: 0, click: 0 };
-              return Object.assign({}, r, {
-                Plaatsing: placement,
-                Impressies: plc.impr,
-                Kliks: plc.click
-              });
-            })
-        : _lastExportRows.map(function (r) { return Object.assign({}, r, { Plaatsing: 'ALLE' }); });
+      // Optioneel: filter op 1 specifieke campagne
+      var rows = campaignId
+        ? _lastExportRows.filter(function (r) { return r.CampagneId === campaignId; })
+        : _lastExportRows;
 
-      if (!filtered.length) {
-        if (window.DY && DY.toast) DY.toast('Geen campagnes voor plaatsing "' + placement + '".');
+      if (!rows.length) {
+        if (window.DY && DY.toast) DY.toast('Geen data voor deze campagne.');
         return;
       }
 
-      var csv = buildCSV(filtered);
+      var csv = buildCSV(rows);
       var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       var url = URL.createObjectURL(blob);
       var nu = new Date();
@@ -87,7 +112,10 @@
                   String(nu.getMonth()+1).padStart(2,'0') + '-' +
                   String(nu.getDate()).padStart(2,'0') + '_' +
                   String(nu.getHours()).padStart(2,'0') + String(nu.getMinutes()).padStart(2,'0');
-      var fname = 'campagne_diagnose_' + (placement || 'alle') + '_' + stamp + '.csv';
+      var label = campaignId
+        ? (rows[0].Campagne || campaignId).replace(/[^a-z0-9\-]/gi, '_').toLowerCase()
+        : 'alle_campagnes';
+      var fname = 'campagne_diagnose_' + label + '_' + stamp + '.csv';
       var a = document.createElement('a');
       a.href = url;
       a.download = fname;
@@ -98,7 +126,7 @@
         try { document.body.removeChild(a); } catch (_) {}
         try { URL.revokeObjectURL(url); } catch (_) {}
       }, 100);
-      if (window.DY && DY.toast) DY.toast('CSV "' + (placement || 'alle') + '" geëxporteerd (' + filtered.length + ' rijen).');
+      if (window.DY && DY.toast) DY.toast('CSV geëxporteerd (' + rows.length + ' campagne(s) × 1 totaal + placements).');
     } catch (e) {
       try { alert('Export fout: ' + e.message); } catch (_) {}
     }
@@ -264,6 +292,7 @@
             '<td data-testid="diag-click-' + esc(d.id) + '" style="text-align:right">' + totClick + '</td>' +
             '<td data-testid="diag-likes-' + esc(d.id) + '" style="text-align:right">' + totLikes + '</td>' +
             '<td>' +
+              '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.exportCSV(\'' + esc(d.id) + '\')" data-testid="diag-export-camp-' + esc(d.id) + '" title="Download totaaloverzicht voor deze campagne">📥</button>' +
               (!plaats.length
                 ? '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.fixPlacements(\'' + esc(d.id) + '\')" data-testid="diag-fix-' + esc(d.id) + '">+ feed</button>'
                 : '') +
@@ -280,13 +309,8 @@
           '<button class="bp-back" onclick="window.DY.navigeer(\'admin_campagnes\')">&larr; Admin</button>' +
           '<h1>Campagne diagnose</h1>' +
           '<p class="bp-sub">Live debug-overzicht: zie WAAROM campagnes wel/niet renderen op publieke views.</p>' +
-          '<div class="pp-diag-export-bar" style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 18px">' +
-            '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.exportCSV()" data-testid="diag-export-csv">📥 Alle</button>' +
-            '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.exportCSV(\'feed\')" data-testid="diag-export-feed">📥 Feed</button>' +
-            '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.exportCSV(\'stories\')" data-testid="diag-export-stories">📥 Stories</button>' +
-            '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.exportCSV(\'outfit_review\')" data-testid="diag-export-review">📥 Outfit review</button>' +
-            '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.exportCSV(\'ai_assist\')" data-testid="diag-export-ai">📥 AI assistent</button>' +
-            '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.exportCSV(\'similar_items\')" data-testid="diag-export-similar">📥 Vergelijkbaar</button>' +
+          '<div class="pp-diag-export-bar" style="margin:10px 0 18px">' +
+            '<button class="bp-btn bp-btn-ghost" onclick="PP_Diag.exportCSV()" data-testid="diag-export-csv">📥 Export totaal overzicht (alle campagnes × alle plaatsingen)</button>' +
           '</div>' +
 
           '<div class="bp-stat-grid" style="margin-top:16px">' +

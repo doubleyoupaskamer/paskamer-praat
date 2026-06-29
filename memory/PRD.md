@@ -6,6 +6,46 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.177 — Hiërarchische CSV + Weekly Report Cron (29 jun 2026)
+
+### Probleem (gebruiker)
+1. "Per campagne 1 totaal overzicht geven niet allemaal losse knoppen maar per plaatsing 1 totaal overzicht" — UI was overladen met 6 placement-knoppen.
+2. "Stuur 1× per week een totaal overzicht van de campagne naar het emailadres dat gekoppeld is aan de campagne" — geen automation.
+
+### Fix 1 — Hiërarchische CSV (`pp-campagne-diagnose-v1.js` v1.4.0)
+- Verwijderd: 6 losse placement-knoppen.
+- Toegevoegd: **1 totale "Export totaal overzicht" knop** + per-rij **📥 download-knop** in de Actie-kolom.
+- CSV-structuur per campagne: 1 **TOTAAL-rij** (cumulatief) + N **placement-rijen** (alleen plaatsingen met activiteit of gekocht).
+- Kolommen: Campagne / Merk / Status / Plaatsing / Start / Eind / Rendert_in_feed / Impressies / Kliks / CTR_% / Likes / CampagneId / BrandId.
+
+### Fix 2 — Weekly Email Reports (`backend/weekly_reports.py` v1.0.0 — NIEUW)
+- **APScheduler** cron: elke **maandag 09:00 Europe/Amsterdam** → `run_weekly_for_all_campaigns()`.
+- Per live campagne:
+  - Aggregeert events (impr/click) per plaatsing + totaal.
+  - Telt likes uit `brand_products.likes` per merk.
+  - Resolveert ontvanger via prioriteit `campaigns.email` → fallback `brands.{brandId}.email`.
+  - Bouwt **HTML body** (stat-tegels + per-plaatsing tabel) + **CSV bijlage** (hiërarchisch, klantklaar).
+  - Verzendt via **SMTP** (`smtplib`, stdlib — universeel compatible met Shopify-mailing, Google Workspace, Microsoft 365, Zoho, etc.).
+  - Idempotent: `campaigns.last_weekly_report_sent` flag voorkomt dubbele send <6 dagen.
+- **DRY-RUN modus** standaard aan tot SMTP-creds zijn ingevuld (`WEEKLY_REPORTS_DRY_RUN=true`).
+- Admin trigger endpoint: `POST /api/admin/weekly-reports/run?force=true` met `X-Admin-Secret` header — voor handmatige test.
+- ENV-vars in `.env` toegevoegd (leeg, user vult in): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM_NAME`, `SMTP_FROM_EMAIL`, `WEEKLY_REPORTS_ENABLED`, `WEEKLY_REPORTS_DRY_RUN`.
+
+### Manual test (29 jun 2026, dry-run)
+```
+POST /api/admin/weekly-reports/run?force=true
+→ {"live_campaigns":2,"sent":0,"skipped_no_email":2,"dry_run":true}
+```
+Beide live campagnes ontbreken e-mail — zodra `campaigns.email` of `brands.{id}.email` wordt ingevuld én SMTP creds in `.env` worden gezet, verzendt het cron-job het weekrapport automatisch.
+
+### Delivery
+- `index.html` cache → `?v=60.1.177-csv-hierarchy`
+- `sw.js` VERSION → `v60.1.177-20260629-csv-hierarchy`
+- Backend: `weekly_reports.py` nieuw + `server.py` startup/shutdown hooks + admin endpoint
+- `requirements.txt`: `APScheduler==3.11.3`, `tzlocal==5.4.4`
+- Zip md5 `5eb71a15e30665dcd71cbdf5434010b8`
+
+
 ## v60.1.175 — Per-Placement CSV + Brand Analytics Live Data (29 jun 2026)
 
 ### Probleem (gebruiker)
