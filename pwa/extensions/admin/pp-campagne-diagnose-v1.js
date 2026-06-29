@@ -18,6 +18,9 @@
 (function() {
   'use strict';
 
+  // v1.2.0: laatste render-data buffer voor CSV-export
+  var _lastExportRows = [];
+
   function esc(s) { var d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
   function isAdmin() { return !!(window.DY && window.DY._isAdmin && window.DY._isAdmin()); }
   function db() { return window.firebase.firestore(); }
@@ -26,6 +29,58 @@
     if (!ts) return '-';
     if (ts.toDate) return ts.toDate().toLocaleString('nl-NL');
     return String(ts).slice(0,19);
+  }
+
+  // ────────── CSV EXPORT (v1.2.0) ──────────
+  // CSV format: NL-conventie (komma's in getallen geen probleem → ; separator).
+  // Strings quoted met dubbele quotes, embedded " worden verdubbeld.
+  function csvCell(v) {
+    var s = (v == null ? '' : String(v));
+    if (/[";\n\r]/.test(s) || s.indexOf(';') !== -1) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  }
+
+  function buildCSV(rows) {
+    var headers = ['Campagne','Merk','Status','Plaatsingen','Start','Eind',
+                   'Rendert_in_feed','Impressies','Kliks','Likes','CampagneId','BrandId'];
+    var lines = [headers.join(';')];
+    rows.forEach(function (r) {
+      lines.push(headers.map(function (h) { return csvCell(r[h]); }).join(';'));
+    });
+    // BOM voor Excel UTF-8 compat
+    return '\ufeff' + lines.join('\r\n');
+  }
+
+  function exportCSV() {
+    try {
+      if (!_lastExportRows.length) {
+        if (window.DY && DY.toast) DY.toast('Geen data om te exporteren — laad eerst de diagnose.');
+        return;
+      }
+      var csv = buildCSV(_lastExportRows);
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var nu = new Date();
+      var stamp = nu.getFullYear() + '-' +
+                  String(nu.getMonth()+1).padStart(2,'0') + '-' +
+                  String(nu.getDate()).padStart(2,'0') + '_' +
+                  String(nu.getHours()).padStart(2,'0') + String(nu.getMinutes()).padStart(2,'0');
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'campagne_diagnose_' + stamp + '.csv';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () {
+        try { document.body.removeChild(a); } catch (_) {}
+        try { URL.revokeObjectURL(url); } catch (_) {}
+      }, 100);
+      if (window.DY && DY.toast) DY.toast('CSV geëxporteerd (' + _lastExportRows.length + ' rijen).');
+    } catch (e) {
+      try { alert('Export fout: ' + e.message); } catch (_) {}
+    }
   }
 
   // ────────── ENGAGEMENT AGGREGATIE (v1.1.0) ──────────
@@ -96,6 +151,7 @@
                     geen_plaatsingen: 0, feed_actief: 0, binnen_window: 0,
                     totaal_impr: 0, totaal_click: 0, totaal_likes: 0 };
       var nuTs = Date.now();
+      _lastExportRows = []; // reset export-buffer
 
       campaignDocs.forEach(function(d) {
         var c = d.data();
@@ -132,6 +188,22 @@
         stats.totaal_click += totClick;
         stats.totaal_likes += totLikes;
 
+        // v1.2.0: bewaar voor CSV-export
+        _lastExportRows.push({
+          Campagne: c.naam || c.brandNaam || d.id.slice(0,8),
+          Merk: c.brandNaam || '',
+          Status: c.status || '',
+          Plaatsingen: plaats.length ? plaats.join(',') : '',
+          Start: fmtDate(c.startDatum),
+          Eind: fmtDate(c.eindDatum),
+          Rendert_in_feed: rendersInFeed ? 'ja' : 'nee',
+          Impressies: totImpr,
+          Kliks: totClick,
+          Likes: totLikes,
+          CampagneId: d.id,
+          BrandId: c.brandId || ''
+        });
+
         rows.push(
           '<tr data-testid="diag-camp-' + esc(d.id) + '">' +
             '<td>' + esc(c.naam || c.brandNaam || d.id.slice(0,8)) + '</td>' +
@@ -160,7 +232,9 @@
         '<div class="bp-page">' +
           '<button class="bp-back" onclick="window.DY.navigeer(\'admin_campagnes\')">&larr; Admin</button>' +
           '<h1>Campagne diagnose</h1>' +
-          '<p class="bp-sub">Live debug-overzicht: zie WAAROM campagnes wel/niet renderen op publieke views.</p>' +
+          '<p class="bp-sub">Live debug-overzicht: zie WAAROM campagnes wel/niet renderen op publieke views. ' +
+            '<button class="bp-btn bp-btn-ghost" style="margin-left:12px" onclick="PP_Diag.exportCSV()" data-testid="diag-export-csv">📥 Export CSV</button>' +
+          '</p>' +
 
           '<div class="bp-stat-grid" style="margin-top:16px">' +
             '<div class="bp-stat-kaart"><div class="bp-stat-label">Totaal</div><div class="bp-stat-num">' + stats.total + '</div></div>' +
@@ -244,5 +318,5 @@
     setTimeout(registerRoute, 100);
   }
 
-  window.PP_Diag = { render: render, fixPlacements: fixPlacements, goLive: goLive };
+  window.PP_Diag = { render: render, fixPlacements: fixPlacements, goLive: goLive, exportCSV: exportCSV };
 })();
