@@ -6,6 +6,42 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.156 — Coming-Soon Popup HERSTELD met B2B/B2C Context-Aware Eyebrow (23 feb 2026)
+
+### Probleem (gebruiker-gerapporteerd)
+1. "Wallet" knop in merkenportaal laadt visueel als B2C wallet context (5/10/15/25/50).
+2. "Opwaarderen" knop moet NIET direct naar betaalflow leiden — er moet een informatieve popup verschijnen ("opwaardering is pas mogelijk na lancering"). Deze popup bestond eerder maar was verdwenen.
+
+### Root cause (correctie iter_3 mis-diagnose)
+v60.1.155 verwijderde de coming-soon intercept in beide topup-functies, denkende dat dít de bug was. De echte bug was dat de gedeelde popup geen visueel onderscheid had tussen B2B en B2C, waardoor een B2B-klik leek alsof gebruiker in B2C terrein landde.
+
+### Fix
+- **`pp-wallet-v1.js`** v1.5.0 — Intercept hersteld. Klik op B2B-pakket toont popup met `source: 'b2b'`. Amount-guard (B2B_ALLOWED_AMOUNTS) draait VÓÓR de popup zodat ongeldig bedrag het popup-component niet eens bereikt. Shopify-checkout-code blijft intact onder de intercept als fallback voor launch-dag.
+- **`pp-b2c-wallet-v1.js`** v1.3.0 — Spiegel-fix met `source: 'b2c'`. Idem amount-guard + Shopify-fallback.
+- **`pp-topup-comingsoon-v1.js`** v1.1.0 — Source-aware eyebrow toegevoegd:
+  - `ctx.source === 'b2b'` → eyebrow "Merken Campagne Wallet" (goud-gradient, `data-testid="topup-cs-eyebrow-b2b"`)
+  - `ctx.source === 'b2c'` → eyebrow "Mijn Wallet" (zilver-tint, `data-testid="topup-cs-eyebrow-b2c"`)
+  - Updated meldtekst: "Opwaarderen is pas mogelijk na de officiële lancering"
+
+### Launch-dag actie (gedocumenteerd)
+Verwijder eenvoudig het `if (window.PP_TopupComingSoon && PP_TopupComingSoon.show) { ... return; }` blok in beide topup-functies; de Shopify-checkout-fallback eronder activeert automatisch zonder verdere wijzigingen.
+
+### Testing
+- **49/49 pytest assertions PASS** (`/app/backend/tests/test_pwa_wallet_segmentation.py`)
+- `TestComingSoonInterceptRemoved` (iter_3) is geïnverteerd naar `TestComingSoonInterceptRestored` (13 assertions) als permanente guard.
+- ZIP verificatie: source-tree volledig synchroon met deploy artefact.
+- Backend `/api/downloads/...` → 200 OK.
+
+### Cosmetic drift cleanup (zelfde release)
+- Header-comment in `pp-b2c-wallet-v1.js` aligned met VERSION constant (1.0.0 → 1.3.0).
+- Cache-bust voor `pp-brand-wallet-isolation-v1.js` en `pp-topup-modal-router-v1.js` geüniformeerd naar v60.1.156.
+
+### Delivery
+- `index.html` cache → `?v=60.1.156-restore-coming-soon-popup` (alle 5 betalings-scripts)
+- `sw.js` VERSION → `v60.1.156-20260623-restore-coming-soon-popup`
+- Zip: `/app/01-paskamerpraat-pwa-cloudflare.zip` (~3.9MB, md5 `456e553608dc064921a4c9451b0a0c9e`)
+
+
 ## v60.1.155 — Coming-Soon Intercept Verwijderd (23 feb 2026) — FINALE FIX
 
 ### Probleem (gebruiker-gerapporteerd)

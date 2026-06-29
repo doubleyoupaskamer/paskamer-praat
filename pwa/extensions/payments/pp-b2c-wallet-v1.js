@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * Doubleyou - B2C Klant Wallet Module (v1.0.0)
+ * Doubleyou - B2C Klant Wallet Module (v1.3.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Strikt GESCHEIDEN van B2B Merken Wallet (pp-wallet-v1.js):
