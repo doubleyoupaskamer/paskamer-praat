@@ -8,26 +8,41 @@ naar het email-adres dat aan de campagne is gekoppeld:
 
 Inhoud: HTML email body + CSV bijlage met per-plaatsing breakdown.
 
+VERZEND-METHODE:
+  • SEND_METHOD=firestore (DEFAULT) — schrijft naar `mail` collectie. De Firebase
+    "Trigger Email" extension (firebase/firestore-send-email) pikt het op en
+    verzendt via de SMTP die in de extension-config is ingesteld.
+  • SEND_METHOD=smtp                  — direct via smtplib (env-vars hieronder).
+
 ENV-vars (in /app/backend/.env):
+  SEND_METHOD                 = firestore | smtp        (default: firestore)
+  MAIL_COLLECTION             = mail                    (default: mail — pas aan als
+                                                         je extension een andere
+                                                         collection gebruikt)
+  WEEKLY_REPORTS_ENABLED      = true|false              (default: true)
+  WEEKLY_REPORTS_DRY_RUN      = true|false              (default: false)
+
+  # Alleen voor SEND_METHOD=smtp:
   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
   SMTP_FROM_NAME, SMTP_FROM_EMAIL
-  WEEKLY_REPORTS_ENABLED (true/false, default: true)
-  WEEKLY_REPORTS_DRY_RUN (true/false, default: false — true logt alleen)
 """
 from __future__ import annotations
 
 import io
 import csv
 import os
+import base64
 import smtplib
 import logging
 from datetime import datetime, timezone, timedelta
 from email.message import EmailMessage
-from typing import Any
+from typing import Any  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
 # ──────────────────────── ENV / CONFIG ─────────────────────────────────
+SEND_METHOD     = os.environ.get("SEND_METHOD", "firestore").lower().strip()
+MAIL_COLLECTION = os.environ.get("MAIL_COLLECTION", "mail")
 SMTP_HOST       = os.environ.get("SMTP_HOST", "")
 SMTP_PORT       = int(os.environ.get("SMTP_PORT", "587") or 587)
 SMTP_USER       = os.environ.get("SMTP_USER", "")
@@ -207,7 +222,47 @@ def _build_html(campaign_data: dict, agg: dict, week_label: str) -> str:
 </body></html>"""
 
 
-# ──────────────────────── SMTP VERZENDEN ──────────────────────────────
+# ──────────────────────── EMAIL VERZENDEN ────────────────────────────
+def _firestore_send(to_email: str, subject: str, html: str, csv_bytes: bytes, csv_name: str) -> bool:
+    """
+    Schrijf email-document naar `mail` collectie (Firebase Trigger Email extension).
+    Extension pikt het op (status.state: PROCESSING → SUCCESS/ERROR) en verstuurt
+    via SMTP-config die in de extension is ingesteld.
+    """
+    try:
+        db = _firestore()
+        from firebase_admin import firestore as fs
+        # Encode CSV als base64 voor de attachment
+        b64 = base64.b64encode(csv_bytes).decode("ascii")
+        doc = {
+            "to": [to_email],
+            "from": (f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
+                     if SMTP_FROM_EMAIL else None),
+            "message": {
+                "subject": subject,
+                "text": "Je e-mailclient ondersteunt geen HTML. Zie de CSV-bijlage voor je weekrapport.",
+                "html": html,
+                "attachments": [{
+                    "filename": csv_name,
+                    "content": b64,
+                    "encoding": "base64",
+                    "contentType": "text/csv; charset=utf-8"
+                }]
+            },
+            "createdAt": fs.SERVER_TIMESTAMP,
+            "source": "weekly_reports"
+        }
+        # Verwijder 'from' als leeg — extension gebruikt dan default sender uit config
+        if not doc["from"]:
+            doc.pop("from")
+        db.collection(MAIL_COLLECTION).add(doc)
+        logger.info("Weekrapport in queue gezet (firestore/%s) → %s (%s)", MAIL_COLLECTION, to_email, csv_name)
+        return True
+    except Exception as e:
+        logger.exception("Firestore mail-queue write naar %s mislukt: %s", to_email, e)
+        return False
+
+
 def _smtp_send(to_email: str, subject: str, html: str, csv_bytes: bytes, csv_name: str) -> bool:
     if not SMTP_HOST or not SMTP_FROM_EMAIL:
         logger.warning("SMTP niet geconfigureerd (SMTP_HOST/SMTP_FROM_EMAIL ontbreekt) — skip send.")
@@ -232,11 +287,18 @@ def _smtp_send(to_email: str, subject: str, html: str, csv_bytes: bytes, csv_nam
                 if SMTP_USER:
                     s.login(SMTP_USER, SMTP_PASS)
                 s.send_message(msg)
-        logger.info("Weekrapport verzonden naar %s (%s)", to_email, csv_name)
+        logger.info("Weekrapport verzonden (smtp) → %s (%s)", to_email, csv_name)
         return True
     except Exception as e:
         logger.exception("SMTP send naar %s mislukt: %s", to_email, e)
         return False
+
+
+def _dispatch_email(to_email: str, subject: str, html: str, csv_bytes: bytes, csv_name: str) -> bool:
+    """Routeer via firestore-queue (default) of direct SMTP."""
+    if SEND_METHOD == "smtp":
+        return _smtp_send(to_email, subject, html, csv_bytes, csv_name)
+    return _firestore_send(to_email, subject, html, csv_bytes, csv_name)
 
 
 # ──────────────────────── HOOFDPROCES ─────────────────────────────────
@@ -313,7 +375,7 @@ def run_weekly_for_all_campaigns(force: bool = False, only_campaign_id: str | No
             sent_count += 1
             continue
 
-        ok = _smtp_send(to_email, subject, html, csv_bytes, csv_name)
+        ok = _dispatch_email(to_email, subject, html, csv_bytes, csv_name)
         if ok:
             sent_count += 1
             # Mark as sent
