@@ -61,11 +61,18 @@
     // Wallet / Premium
     wallet:1, b2c_wallet:1, premium:1, premium_status:1, betaling_resultaat:1,
 
-    // Brand portal
+    // Brand portal (B2B Merkenportaal)
+    // v1.0.2 (2026-02-23): canonieke brand_* routes uit brand-portal-v1.js
+    // BP_PAGES map toegevoegd. Voorheen vielen brand_producten/brand_profiel/
+    // brand_analytics/brand_product_nieuw/brand_register/brand_login terug
+    // naar feed omdat ze niet in deze whitelist stonden en ook geen
+    // DY.render<Camel> functie hebben (worden door BP afgehandeld).
     merken:1, merken_overzicht:1, merken_aanmelden:1, merken_dashboard:1,
     merken_login:1, merken_producten:1, merken_campagnes:1, merken_pakketten:1,
     brand_portal:1, brand_pending:1, brand_dashboard:1,
-    brand_campagnes:1, brand_campagne_nieuw:1,
+    brand_register:1, brand_login:1,
+    brand_profiel:1, brand_producten:1, brand_product_nieuw:1,
+    brand_campagnes:1, brand_campagne_nieuw:1, brand_analytics:1,
 
     // Admin
     admin:1, admin_brands:1, admin_campagnes:1, admin_campagne_diagnose:1,
@@ -231,6 +238,6 @@
     getSelectedPkg:   getSelectedPkg,
     clearSelectedPkg: clearSelectedPkg,
     KNOWN_ROUTES:     KNOWN_ROUTES,
-    VERSION:          '1.0.0'
+    VERSION:          '1.0.2'
   };
 })();

@@ -6,6 +6,33 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.151 — Merkenportaal Routes & Brand-Wallet Isolation (23 feb 2026)
+
+### Probleem
+- Knoppen "Producten beheren", "Analytics" en "Merkprofiel" in het brand_dashboard navigeerden terug naar Feed in plaats van naar hun bestemming.
+- Merkenwallet (B2B) moest strikt gescheiden zijn van klant-wallet (B2C), zodat alleen de 4 campagnepakketten (€25/€50/€100/€250) verwerkt worden via de merken-checkout.
+
+### Root cause routing
+`pp-route-safety-v1.js` whitelist miste de canonieke brand_* routes uit `BP_PAGES` in `brand-portal-v1.js`:
+`brand_producten`, `brand_profiel`, `brand_analytics`, `brand_product_nieuw`, `brand_register`, `brand_login`.
+Dynamische fallback `DY.render<Camel>` werkte niet omdat brand-portal de renders op `BP.*` (niet `DY.*`) houdt → routes vielen terug naar `feed`.
+
+### Fixes (additief)
+- **`pp-route-safety-v1.js` v1.0.2**: whitelist uitgebreid met alle canonieke brand_* routes uit BP_PAGES.
+- **`pp-brand-wallet-isolation-v1.js` v1.0.0** (nieuw): wrapt `PP_Wallet.topup`, `PP_B2CWallet.topup` en `PP_TopupComingSoon.show`:
+  - B2B (Merken) accepteert ALLEEN bedragen {25, 50, 100, 250}
+  - B2C (Klant) accepteert ALLEEN bedragen {5, 10, 15, 25, 50}
+  - `ctx.source` default op basis van `DY.pagina` (b2b voor `wallet`/`brand_*`, anders b2c)
+  - Audit-trail via `window.__ppBrandWalletAudit` (max 50)
+  - Ongeldige bedragen → toast + console.warn + block
+
+### Delivery
+- `index.html` cache `?v=60.1.151-brand-routes-fix`
+- `sw.js` VERSION `v60.1.151-20260623-brand-routes-fix`
+- Zip vernieuwd: `/app/01-paskamerpraat-pwa-cloudflare.zip` (~3.9MB)
+- Endpoint geverifieerd: `GET /api/downloads/01-paskamerpraat-pwa-cloudflare.zip` → 200 OK
+
+
 
 ## v60.1.135 — Pakket Activate HARDENED v2 (18 jun 2026)
 
