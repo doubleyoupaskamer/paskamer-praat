@@ -6,6 +6,30 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.162 — Uitgelicht "Gesponsord door onze partners" Campagne Visibility Fix (23 feb 2026)
+
+### Probleem (gebruiker-gerapporteerd + screenshot)
+Feed → Uitgelicht → "Gesponsord door onze partners" toonde "Nog geen actieve partner-campagnes" terwijl user een campagne met `status='live'` in Firestore had. Console log toonde eerder `[pp-renderer] live campaigns: 1`.
+
+### Root cause
+`pp-feedtabs-v1.js` `paintUitgelicht` had een dubbele defensieve client-side filter op `c.startDatum.toMillis()` / `c.eindDatum.toMillis()` (regel 284-290). Wanneer campagne-datums NIET als Firestore Timestamps waren opgeslagen (bv. plain JS Date, string, of null), gaf de `.toMillis` check `null` → conditional pass — MAAR een correcte Timestamp met `eindDatum < now` werd legitiem weggefilterd. De backend `brand-autocomplete-worker` zou status naar `'completed'` zetten zodra eindDatum verstrijkt, dus client-date-filter was redundant én potentieel buggy.
+
+### Fix (surgical, 1 function)
+- `pp-feedtabs-v1.js` v60.1.162 — `paintUitgelicht` filter vereenvoudigd naar `c && c.status === 'live'`. Vertrouwt op Firestore query (regel 272, ongewijzigd) en backend auto-complete-worker voor status-transities.
+- Toegevoegd: diagnostic console.log `[pp-feedtabs] uitgelicht render: {ontvangen, actief, ids}` voor toekomstige debugging.
+- Productflow (`paintProductenOverview`) ongewijzigd. Geen DOM/HTML/CSS-wijzigingen.
+
+### Testing
+- **123/123 pytest assertions PASS** (100 → 123).
+- Nieuwe `TestUitgelichtNoDateFilter` class als permanente guard.
+- B2B wallet, onboarding-checklist, v60.1.160 image-fix allemaal intact.
+
+### Delivery
+- `index.html` cache → `?v=60.1.162-uitgelicht-no-date-filter` voor pp-feedtabs-v1.js
+- `sw.js` VERSION → `v60.1.162-20260623-uitgelicht-no-date-filter`
+- Zip md5 `b3787fe8bea9e9d47f1e2187f1696695`
+
+
 ## v60.1.161 — Onboarding-Checklist "Wallet opgeladen" Bypass (23 feb 2026)
 
 ### Probleem (gebruiker-gerapporteerd + screenshot)
