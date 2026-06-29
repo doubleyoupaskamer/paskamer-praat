@@ -6,6 +6,35 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.164 — Phase A: Nav-Context + Brand-Logo Universalizer (23 feb 2026)
+
+### Probleem (gebruiker master prompt)
+1. "Terug naar merken" knop viel terug naar /feed i.p.v. /merken overzicht
+2. Brand-logo's toonden overal initials i.p.v. echte logo's
+
+### Fix (nieuwe additieve module)
+- **`pp-nav-context-v1.js` v1.0.0** — nieuwe `PP_NavContext` API:
+  - `openMerken()` — direct `DY.brandPortal.renderMerken()` bypass (analoog aan v60.1.159 `PP_Wallet.openWallet` pattern; omzeilt _renderLock absorptie)
+  - `setupBackButtonDelegator()` — capture-phase delegator op `[data-testid="brand-detail-back"]` met `e.preventDefault + e.stopPropagation` + force `openMerken()`
+  - `resolveBackRoute({context, previousRoute, entityType, slug})` — context-aware fallback (brand_* → merken, wallet → brand_dashboard, fallback → history.back, geen hardcoded feed)
+  - `brandLogoFor(brandId)` — Promise<logoUrl|null> met 5-min TTL cache
+  - MutationObserver patcht `.pp-uitg-kaart` cards (extracts brandId uit openCamp() onclick) + vervangt `.pp-uitg-logo` initials met echte `<img>` (lazy-loaded, object-fit:cover, onerror fallback)
+
+### Testing
+- **164/164 pytest assertions PASS** (138 → 164, +26 nieuwe `TestNavContext`).
+- Backend `/api/downloads/...` → 200 OK, 4.026.558 bytes.
+
+### Delivery (Phase A)
+- `index.html` link toegevoegd `?v=60.1.164-nav-context`
+- `sw.js` VERSION → `v60.1.164-20260623-nav-context`
+- Zip md5 `d42fb737ea0ae065ffcac66e1b232852`
+
+### Wat NIET in deze release (volgende fases)
+- **Phase B**: PP_NavContext history-stack tracking + alle ← knoppen gerefactored
+- **Phase C**: Pretty URLs `/bedrijf/{slug}`, `/campagne/{slug}`, etc. (vereist slug-generator + Firestore migratie + URL rewriter)
+- **Phase D**: SEO meta tags + structured data + dynamische sitemap.xml worker
+
+
 ## v60.1.163 — Brand-Profile Product Image Ratio Fix (23 feb 2026)
 
 ### Probleem (gebruiker-gerapporteerd + screenshot)
