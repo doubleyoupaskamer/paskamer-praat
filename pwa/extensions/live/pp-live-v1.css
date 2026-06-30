@@ -680,6 +680,101 @@
 .dy-nav-item[data-pagina="live"],
 .dy-sb-item[data-pagina="live"] { position: relative; }
 
+/* ─── Paskamer Studio nav label: 2-lijns op mobile bottom nav.
+   Belangrijk: alleen onze button, NIET algemene .dy-nav-item overrulen. ─── */
+.dy-nav-item[data-pagina="live"] span:not(.pp-live-nav-dot) {
+  display: inline-block;
+  line-height: 1.05;
+  text-align: center;
+}
+.dy-nav-item[data-pagina="live"] span:not(.pp-live-nav-dot) br {
+  /* Op compacte schermen forceren we een echte line-break, normaal flow zorgt al voor 2 regels */
+  display: block;
+}
+.dy-sb-item[data-pagina="live"] span {
+  /* Sidebar (desktop): label op 1 regel */
+  white-space: nowrap;
+}
+
+/* ─── Premium polish voor onze custom Live nav item: active indicator ─── */
+.dy-nav-item[data-pagina="live"].active::before,
+.dy-sb-item[data-pagina="live"].active::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--clay, #c67d06);
+  box-shadow: 0 0 8px rgba(198,125,6,0.45);
+}
+.dy-sb-item[data-pagina="live"].active::before {
+  top: 50%; left: 0;
+  transform: translateY(-50%);
+  width: 3px; height: 22px;
+  box-shadow: 0 0 8px rgba(198,125,6,0.45);
+}
+
+/* ─── BOTTOM NAV MOBILE FIT: zorg dat ALLE items (incl. nieuwe Studio tab)
+   netjes verdeeld worden zonder dat labels achter de centrale ⊕ knop verdwijnen.
+   Pure visuele verfijning — geen functionaliteit gewijzigd. ─── */
+@media (max-width: 720px) {
+  /* Equal width tabs, geen verschuiving */
+  .dy-nav .dy-nav-item {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-left: 1px;
+    padding-right: 1px;
+  }
+  /* Studio label kleiner zodat 2 regels passen zonder afkapping */
+  .dy-nav-item[data-pagina="live"] span:not(.pp-live-nav-dot) {
+    font-size: 0.5rem;
+    letter-spacing: 0.01em;
+  }
+  /* SVG icon iets compacter op heel kleine schermen */
+  .dy-nav-item[data-pagina="live"] svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+@media (max-width: 380px) {
+  .dy-nav-item[data-pagina="live"] span:not(.pp-live-nav-dot) {
+    font-size: 0.46rem;
+  }
+}
+
+/* ─── TOP FEED TABS (Ontdek/Uitgelicht/Trending/Mijn): subtiele fade
+   rechts om aan te geven dat er meer scrollbaar is op mobiel.
+   We muteren de bestaande .dy-filters layout NIET — alleen een ::after overlay. ─── */
+@media (max-width: 640px) {
+  .dy-filters {
+    position: relative;
+    scroll-snap-type: x proximity;
+    scroll-padding-left: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .dy-filters > .dy-filter {
+    scroll-snap-align: start;
+  }
+  /* Fade indicator rechts — toont dat er nog meer tabs zijn */
+  .dy-filters::after {
+    content: '';
+    position: sticky;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    height: 100%;
+    flex-shrink: 0;
+    margin-left: -24px;
+    background: linear-gradient(to right, transparent, var(--cream, #fdf8f0) 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
 /* ────────── DARK THEME COMPAT ────────── */
 @media (prefers-color-scheme: dark) {
   .pp-live-page { /* no-op; legacy app dictates theme via .dy-dark */ }

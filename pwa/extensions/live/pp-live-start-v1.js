@@ -63,7 +63,7 @@
     modal.innerHTML = '' +
       '<div class="pp-live-start-sheet" role="document">' +
         '<div class="pp-live-sheet-handle" aria-hidden="true"></div>' +
-        '<div class="pp-live-sheet-title">📡 Start een live sessie</div>' +
+        '<div class="pp-live-sheet-title">📡 Start een Paskamer Studio sessie</div>' +
         '<div class="pp-live-sheet-sub">Jouw community kijkt live mee terwijl jij past.</div>' +
 
         '<div class="pp-live-error" id="pp-live-error" role="alert"></div>' +

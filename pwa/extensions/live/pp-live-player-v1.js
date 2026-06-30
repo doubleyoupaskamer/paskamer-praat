@@ -59,7 +59,7 @@
     modal.className = 'pp-live-modal';
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
-    modal.setAttribute('aria-label', 'Live sessie');
+    modal.setAttribute('aria-label', 'Paskamer Studio sessie');
     modal.innerHTML = '' +
       '<div class="pp-live-player-area" id="pp-live-player-area">' +
         '<div class="pp-live-video-pulse"></div>' +

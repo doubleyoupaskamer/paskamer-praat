@@ -54,7 +54,7 @@
     var btn = document.createElement('button');
     btn.className = 'dy-nav-item';
     btn.setAttribute('data-pagina', 'live');
-    btn.setAttribute('aria-label', 'Live');
+    btn.setAttribute('aria-label', 'Paskamer Studio');
     btn.setAttribute('data-testid', 'live-nav-btn-mobile');
     btn.innerHTML = '' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true">' +
@@ -62,7 +62,7 @@
         '<path d="M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/>' +
         '<path d="M8.4 8.4a5 5 0 0 0 0 7.2M15.6 8.4a5 5 0 0 1 0 7.2"/>' +
       '</svg>' +
-      '<span>Live</span>' +
+      '<span>Paskamer<br>Studio</span>' +
       '<span class="pp-live-nav-dot" aria-hidden="true"></span>';
     btn.addEventListener('click', function () {
       try { if (window.DY && DY.navigeer) DY.navigeer('live'); } catch (e) {}
@@ -74,7 +74,7 @@
     var btn = document.createElement('button');
     btn.className = 'dy-sb-item';
     btn.setAttribute('data-pagina', 'live');
-    btn.setAttribute('aria-label', 'Live');
+    btn.setAttribute('aria-label', 'Paskamer Studio');
     btn.setAttribute('data-testid', 'live-nav-btn-sidebar');
     btn.innerHTML = '' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">' +
@@ -82,7 +82,7 @@
         '<path d="M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/>' +
         '<path d="M8.4 8.4a5 5 0 0 0 0 7.2M15.6 8.4a5 5 0 0 1 0 7.2"/>' +
       '</svg>' +
-      '<span>Live</span>' +
+      '<span>Paskamer Studio</span>' +
       '<span class="pp-live-nav-dot" aria-hidden="true"></span>';
     btn.addEventListener('click', function () {
       try { if (window.DY && DY.navigeer) DY.navigeer('live'); } catch (e) {}
@@ -188,8 +188,8 @@
     return '' +
       '<div class="pp-live-empty" data-testid="live-empty-state">' +
         '<span class="pp-live-empty-emoji">📡</span>' +
-        '<div class="pp-live-empty-title">Nog niemand live</div>' +
-        '<div>Wees de eerste — druk op de knop hierboven om je live sessie te starten.</div>' +
+        '<div class="pp-live-empty-title">Nog niemand live in de Studio</div>' +
+        '<div>Wees de eerste — druk op de knop hierboven om je live paskamersessie te starten.</div>' +
       '</div>';
   }
 
@@ -206,7 +206,7 @@
     main.innerHTML = '' +
       '<div class="pp-live-page" data-testid="live-page">' +
         '<div class="pp-live-head">' +
-          '<h2 class="pp-live-title"><span class="pp-live-pulse-dot"></span> Live nu</h2>' +
+          '<h2 class="pp-live-title"><span class="pp-live-pulse-dot"></span> Paskamer Studio</h2>' +
           '<span class="pp-live-sub" id="pp-live-count">0 sessies</span>' +
         '</div>' +
         '<button class="pp-live-cta" data-testid="live-go-live-btn" type="button">' +
