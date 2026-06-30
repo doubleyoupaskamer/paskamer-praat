@@ -7,6 +7,21 @@
         { "fieldPath": "brandId", "order": "ASCENDING" },
         { "fieldPath": "status",  "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "live_sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",     "order": "ASCENDING" },
+        { "fieldPath": "startedAt",  "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "chat",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

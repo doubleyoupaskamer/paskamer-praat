@@ -55,7 +55,8 @@
     'merken_detail':   { type: 'brand',    pretty: 'bedrijf' },
     'campagne_detail': { type: 'campaign', pretty: 'campagne' },
     'product_detail':  { type: 'product',  pretty: 'product' },
-    'profiel':         { type: 'person',   pretty: 'profiel' }
+    'profiel':         { type: 'person',   pretty: 'profiel' },
+    'live_detail':     { type: 'live',     pretty: 'live' }
   };
 
   // ────────── HELPERS ──────────
@@ -203,6 +204,15 @@
     });
   }
 
+  function loadLive(id) {
+    return cached('live:' + id, function () {
+      var d = db(); if (!d || !id) return Promise.resolve(null);
+      return d.collection('live_sessions').doc(id).get().then(function (s) {
+        return s.exists ? Object.assign({ _id: s.id }, s.data()) : null;
+      }).catch(function () { return null; });
+    });
+  }
+
   // ────────── ENTITY META BUILDERS ──────────
   function buildBrandMeta(b) {
     if (!b) return null;
@@ -323,6 +333,45 @@
     };
   }
 
+  function buildLiveMeta(s) {
+    if (!s) return null;
+    var naam = s.title || 'Live sessie';
+    var hostNaam = s.hostName || 'iemand';
+    if (hostNaam && hostNaam.charAt(0) === '@') hostNaam = hostNaam.substring(1);
+    var tagsStr = Array.isArray(s.tags) ? s.tags.join(', ') : '';
+    var beschr = ('🔴 LIVE — ' + naam + ' met @' + hostNaam +
+      (tagsStr ? ' · ' + tagsStr : '') +
+      ' op Doubleyou Paskamerpraat.').slice(0, 200);
+    var slug = slugify(naam) || s._id;
+    var url = BASE_URL + '/live/' + slug + '?id=' + s._id;
+    var img = s.thumbUrl || s.hostAvatar || (BASE_URL + '/icons/pp-512.png');
+    var isLive = s.status === 'live';
+
+    return {
+      title: (isLive ? '🔴 LIVE: ' : '') + naam + ' — Doubleyou',
+      desc: beschr,
+      url: url,
+      image: img,
+      type: 'video.other',
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "BroadcastEvent",
+        "name": naam,
+        "description": beschr,
+        "isLiveBroadcast": isLive,
+        "url": url,
+        "image": img,
+        "publication": {
+          "@type": "BroadcastEvent",
+          "isLiveBroadcast": isLive,
+          "startDate": (s.startedAt && s.startedAt.toDate)
+            ? s.startedAt.toDate().toISOString()
+            : (new Date()).toISOString()
+        }
+      }
+    };
+  }
+
   // ────────── MAIN APPLIER ──────────
   function applyForPage(pagina, id) {
     if (!pagina) pagina = (window.DY && DY.pagina) || 'home';
@@ -345,6 +394,7 @@
     else if (ent.type === 'campaign') { loader = loadCampaign; builder = buildCampaignMeta; }
     else if (ent.type === 'product')  { loader = loadProduct;  builder = buildProductMeta; }
     else if (ent.type === 'person')   { loader = loadProfile;  builder = buildProfileMeta; }
+    else if (ent.type === 'live')     { loader = loadLive;     builder = buildLiveMeta; }
     else return;
 
     loader(id).then(function (data) {

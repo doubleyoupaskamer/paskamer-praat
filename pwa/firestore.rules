@@ -702,5 +702,63 @@ service cloud.firestore {
       return !(request.resource.data.diff(resource.data).affectedKeys()
         .hasAny(['wallet_balance', 'transactions', 'shopify_customer_id']));
     }
+
+    // ════════════════════════════════════════════════════════════════
+    // LIVE MODULE v1.0.0 — live_sessions + chat + reactions
+    // ════════════════════════════════════════════════════════════════
+    // Publieke read (iedereen kan live sessies en chat zien voor SEO/share).
+    // Schrijven alleen door host (uitgezonderd viewers/reactions counter via
+    // increment, en chat/reaction subcollecties door elke ingelogde user).
+
+    match /live_sessions/{sessionId} {
+      // Lezen: publiek (status='live' wordt client-side gefilterd; deelbare URLs)
+      allow read: if true;
+
+      // Aanmaken: alleen door eigenaar (hostUid moet matchen met auth uid)
+      allow create: if isIngelogd()
+                    && request.resource.data.hostUid == request.auth.uid
+                    && request.resource.data.status == 'live'
+                    && request.resource.data.title is string
+                    && request.resource.data.title.size() > 0
+                    && request.resource.data.title.size() <= 120;
+
+      // Updaten: host kan eigen sessie aanpassen; viewers mogen alleen het
+      // viewers-veld bumpen (increment +/- 1) zodat anonieme/ingelogde users
+      // de live-counter kunnen ophogen wanneer ze openen/sluiten.
+      allow update: if (
+        isIngelogd() && resource.data.hostUid == request.auth.uid
+      ) || (
+        // Viewer counter bump: alleen 'viewers' mag veranderen
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewers'])
+      );
+
+      // Verwijderen: alleen host of admin
+      allow delete: if isAdmin()
+                    || (isIngelogd() && resource.data.hostUid == request.auth.uid);
+
+      // Chat berichten: leesbaar voor iedereen, schrijfbaar door ingelogde users
+      match /chat/{msgId} {
+        allow read: if true;
+        allow create: if isIngelogd()
+                      && request.resource.data.uid == request.auth.uid
+                      && request.resource.data.text is string
+                      && request.resource.data.text.size() > 0
+                      && request.resource.data.text.size() <= 240;
+        allow update: if false;
+        allow delete: if isAdmin()
+                      || (isIngelogd() && resource.data.uid == request.auth.uid);
+      }
+
+      // Reactions: leesbaar voor iedereen, schrijfbaar door ingelogde users
+      match /reactions/{reactionId} {
+        allow read: if true;
+        allow create: if isIngelogd()
+                      && request.resource.data.uid == request.auth.uid
+                      && request.resource.data.emoji is string
+                      && request.resource.data.emoji.size() <= 8;
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
   }
 }

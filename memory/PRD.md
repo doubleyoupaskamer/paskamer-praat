@@ -6,6 +6,69 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.181 — Live Module (Stage-1) (30 jun 2026)
+
+### Originele vraag (gebruiker)
+"Volledige integratie, debugging en optimalisatie van Live Module (HTML) binnen bestaande app" — gebruiker leverde een HTML mockup van een Live tab + player + start-sheet, met de eis: geen bestaande code wijzigen, integratie via additieve modules.
+
+### Gebruikerskeuzes
+- **1c**: lokale camera (`getUserMedia`) + Firestore chat/reactions, géén echte broadcast naar viewers (komt fase 2)
+- **2a**: nieuwe `Live` tab toevoegen, bestaande tabs intact
+- **3c**: iedereen met account mag livegaan (geen `verified` rol vereist)
+- **4b**: co-host als UI-element behouden, functioneel pas fase 2
+- **5a**: publieke deelbare URLs (`/live/{slug}?id=...`) met Open Graph + JSON-LD
+
+### Geleverd
+**Nieuwe extension files** in `/app/pwa/extensions/live/`:
+- `pp-live-v1.css` — volledig scoped (`pp-live-*` selectors), gebruikt bestaande tokens (`--clay`, `--ink`, `--cream`), geen globals overridden
+- `pp-live-tab-v1.js` — injecteert `Live` button in `.dy-nav` (mobiel) en `.dy-sb-nav` (sidebar) na "Modegenoten"; rendert grid + empty-state; wrapt `DY.navigeer` én `DY.toonPagina` idempotent voor `live` en `live_detail`
+- `pp-live-player-v1.js` — modal player met `video` element + animated pulse placeholder, realtime chat (Firestore subscription), reactions overlay met float-up animatie, viewer counter via atomic increment
+- `pp-live-start-v1.js` — bottom-sheet met camera preview (`navigator.mediaDevices.getUserMedia`), title input, multi-tag selectie, error states (NotAllowedError/NotFoundError/NotReadableError), creëert `live_sessions` doc + opent player als host
+
+**Routing / Deep-link / SEO**:
+- Inline `<script>` in `index.html` na `__bpDeeplink` patroon: captures `?pagina=live` / `?pagina=live_detail&id=X` / `/live/{slug}` vóór legacy `replaceState` de URL strip; stored in `window.__ppLiveDeeplink`
+- Watchdog (250ms × 60) + MutationObserver op `#dy-main`: forceert render zolang URL `pagina=live*` aanwijst (legacy boot probeert anders te overschrijven met `'feed'`)
+- `pp-seo-entity-v1.js` uitgebreid: `live_detail` entity type met `BroadcastEvent` JSON-LD, `isLiveBroadcast`, `og:type=video.other`
+- `firestore.indexes.json`: composite index `live_sessions (status ASC, startedAt DESC)` + `chat (createdAt DESC)`
+
+**Firestore Security Rules** (additief):
+- `live_sessions/{id}`: lezen publiek; create alleen door host (`hostUid == request.auth.uid`, title 1-120 chars); update door host óf viewers (uitsluitend `viewers` veld bumpen — geen sluikse data-mutaties); delete door host of admin
+- `live_sessions/{id}/chat/{msgId}`: lezen publiek; create door ingelogde users (eigen `uid`, text 1-240 chars); delete door eigenaar of admin
+- `live_sessions/{id}/reactions/{id}`: lezen publiek; create door ingelogde users (emoji ≤ 8 chars); no update/delete
+
+**Cache busting**: `?v=60.1.181-live` op alle nieuwe + gewijzigde scripts; `sw.js VERSION = 'v60.1.181-20260630-live'`
+
+### Stage-1 architectuur (UI + realtime data, GEEN broadcast)
+- **Host**: ziet eigen camera lokaal via `getUserMedia` → `<video>` element
+- **Viewer**: ziet placeholder met pulse-animatie + emoji + chat + reactions (real-time via Firestore)
+- **Fase 2** (toekomstig): WebRTC SFU / Mux / LiveKit integratie voor echte broadcast
+
+### Smoke test (30 jun 2026)
+- `?pagina=live` → grid pagina rendered met empty-state ✓
+- Live nav-button geïnjecteerd in zowel mobile (`.dy-nav`) als desktop (`.dy-sb-nav`) ✓
+- CTA "Start een live paskamersessie" opent bottom-sheet ✓
+- Camera prompt + tag selectie + start button werken ✓
+- Deeplink `?pagina=live` blijft behouden in URL na boot ✓
+- Sidebar nav "Live" item actief gemarkeerd ✓
+
+### Bestanden
+- `/app/pwa/extensions/live/pp-live-v1.css` (NIEUW)
+- `/app/pwa/extensions/live/pp-live-tab-v1.js` (NIEUW)
+- `/app/pwa/extensions/live/pp-live-player-v1.js` (NIEUW)
+- `/app/pwa/extensions/live/pp-live-start-v1.js` (NIEUW)
+- `/app/pwa/extensions/seo/pp-seo-entity-v1.js` (UPGEGRADED — BroadcastEvent JSON-LD)
+- `/app/pwa/index.html` (additief: inline bootstrap + 4 script tags)
+- `/app/pwa/sw.js` (VERSION bump)
+- `/app/pwa/firestore.rules` (additief: live_sessions + chat + reactions)
+- `/app/pwa/firestore.indexes.json` (composite index live_sessions)
+- `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.9 MB, gereed voor Cloudflare Pages)
+
+### Volgende stappen (gebruiker actie vereist)
+1. Deploy zip naar Cloudflare Pages
+2. Deploy Firestore rules: `firebase deploy --only firestore:rules`
+3. Deploy Firestore indexes: `firebase deploy --only firestore:indexes`
+4. Test live grid + start sessie + chat flow op productie
+
 ## v60.1.180 — Fase D: SEO Indexation (29 jun 2026)
 
 ### Probleem (gebruiker)
