@@ -99,6 +99,9 @@
   }
 
   // ─── 2. Verwijder Reviews uit mobile bottom-nav via additive CSS ───
+  //    + verplaats Outfit vergelijker (kleuren_ai) naar de plek waar Reviews zat
+  //      (rechts van de centrale ⊕ Deel knop) zodat hij niet meer verstopt
+  //      achter de ronde Deel-knop verdwijnt.
   function injectHideStyles() {
     if (document.getElementById('pp-reviews-relocate-style')) return;
     var s = document.createElement('style');
@@ -107,8 +110,13 @@
       /* Mobile: verberg Reviews uit bottom-nav (was: 8 items, nu 7) */
       '@media (max-width: 720px) {' +
       '  .dy-nav .dy-nav-item[data-pagina="reviews"] { display: none !important; }' +
+      /* Mobile: zet Outfit vergelijker (kleuren_ai) NA Winkel zodat hij rechts
+         van de centrale Deel-knop staat (op de oude Reviews-positie).
+         Profiel blijft helemaal rechts. */
+      '  .dy-nav .dy-nav-item[data-pagina="kleuren_ai"] { order: 5 !important; }' +
+      '  .dy-nav .dy-nav-item[data-pagina="profiel"]    { order: 6 !important; }' +
       '}' +
-      /* Desktop sidebar: Reviews blijft staan — niets te doen */
+      /* Desktop sidebar: Reviews + originele volgorde blijft staan — niets te doen */
       '';
     document.head.appendChild(s);
   }
