@@ -2075,3 +2075,35 @@ ServiceWorker" was de combinatie van:
 - ZIP herbouwd: `/app/01-paskamerpraat-pwa-cloudflare.zip` (3.98 MB,
   227 files). HTTP 200 geverifieerd.
 - Syntax check: `node --check` pass.
+
+## 2026-02-XX - Hero afbeelding vervangen (v60.1.202) 🖼️
+
+- **User request**: "gebruik deze afbeelding op alle 9 plekken" - nieuwe
+  1:1.49 portret foto van 6 diverse mensen wandelend op Amsterdamse
+  grachtenstraat.
+- **Bronbestand**: `paskamerpraat-portrait-1782933152017.jpg` (848×1264,
+  965 KB) — customer-assets CDN.
+- **Verwerking** (`/tmp/new_hero/generate.py` met Pillow):
+  1. `hero-v3-canal-480.webp` (480×715, 84 KB)
+  2. `hero-v3-canal-480.jpg`  (480×715, 105 KB)
+  3. `hero-v3-canal-800.webp` (800×1192, 173 KB)
+  4. `hero-v3-canal-800.jpg`  (800×1192, 243 KB)
+  5. `hero-v3-canal-1024.webp`(1024×1526, 229 KB)
+  6. `hero-v3-canal-1024.jpg` (1024×1526, 353 KB)
+  7. `hero-v3-canal.jpg`      (848×1264, 302 KB — full fallback)
+  8. `hero-model.jpg`         (1200×630 OG, centering=(0.5, 0.55))
+  9. `hero-model.png`         (1200×630 OG, centering=(0.5, 0.55))
+- **AI visual check**: alle 6 gezichten binnen 1200×630 frame, geen
+  crop, gebalanceerde compositie (geverifieerd via analyze_file_tool).
+- **Cache bust**:
+  - SW `VERSION` → `v60.1.202-20260701-new-hero-image-v2`
+  - Hero markup in `js/pwa-v463-1780765770.js` → `?v=60.1.202`
+    op alle 7 canal-varianten (webp+jpg srcset + fallback src).
+  - OG/Twitter meta in `index.html`, `voorwaarden/index.html`,
+    `branding/cloudflare-seo-worker-v3.js` → `hero-model.png?v=60.1.202`
+    (5 refs) om social platform caches te bypassen.
+- **Deliverable**: `/app/01-paskamerpraat-pwa-cloudflare.zip`
+  (4.29 MB) opnieuw gebouwd met alle 9 nieuwe hero-bestanden en de
+  ge-bumped SW + JS cache strings.
+- **Status**: Wacht op user deploy naar Cloudflare Pages + verificatie
+  op desktop/mobile/social preview.

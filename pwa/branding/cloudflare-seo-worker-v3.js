@@ -111,11 +111,11 @@ function getBotHTML(pad, config) {
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Doubleyou">
 <meta property="og:locale" content="nl_NL">
-<meta property="og:image" content="https://paskamerpraat.nl/hero-model.png">
+<meta property="og:image" content="https://paskamerpraat.nl/hero-model.png?v=60.1.202">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${safeTitle}">
 <meta name="twitter:description" content="${escapeHtml(desc)}">
-<meta name="twitter:image" content="https://paskamerpraat.nl/hero-model.png">
+<meta name="twitter:image" content="https://paskamerpraat.nl/hero-model.png?v=60.1.202">
 <script type="application/ld+json">${jsonLd}</script>
 <style>body{font-family:-apple-system,sans-serif;max-width:860px;margin:0 auto;padding:32px 20px;color:#1e1a0f;background:#fdf8f0;line-height:1.6}
 h1{font-family:Georgia,serif;color:#1e1a0f;font-size:2rem}h2{font-family:Georgia,serif;margin-top:32px;font-size:1.5rem}
