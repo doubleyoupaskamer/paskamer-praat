@@ -915,3 +915,44 @@
   transform: translateY(-3px);
   box-shadow: 0 10px 24px rgba(30,26,15,0.14), 0 2px 6px rgba(30,26,15,0.06);
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+ * v60.1.189 LIVE MODULE LIFECYCLE FIXES
+ * ═══════════════════════════════════════════════════════════════════
+ * 1. Player top-bar: .pp-live-badge staat op position:absolute (voor
+ *    grid-cards). In de player-top flex container moet 'ie static zijn
+ *    zodat 'ie NIET over de X-close knop valt.
+ * 2. X-close z-index verhoogd zodat 'ie altijd bovenop staat.
+ * 3. Wanneer player modal open is: bottom-nav + sidebar KLIKKKAAR maken
+ *    boven de modal → tab-switch werkt zonder eerst X te klikken.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/* Fix 1+2: X-knop nooit meer verborgen achter LIVE badge */
+.pp-live-player-top .pp-live-badge {
+  position: static;
+  top: auto;
+  left: auto;
+}
+.pp-live-player-top .pp-live-close {
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+}
+
+/* Fix 3: Wanneer player open is, hef bottom-nav + sidebar boven de modal
+ * zodat gebruiker via tabs kan wisselen (auto-close via DY.navigeer wrapper). */
+body.pp-live-player-active .dy-nav {
+  z-index: 11500 !important;
+}
+body.pp-live-player-active .dy-sb-nav,
+body.pp-live-player-active .dy-sidebar {
+  z-index: 11500 !important;
+}
+
+/* Op mobile: reserveer ruimte onderaan zodat chat-input niet onder de
+ * bottom-nav valt wanneer die bovenop de modal staat. */
+@media (max-width: 640px) {
+  body.pp-live-player-active .pp-live-chat-area {
+    padding-bottom: calc(var(--nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+}

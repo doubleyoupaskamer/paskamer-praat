@@ -371,6 +371,7 @@
     }
     modal.classList.add('pp-live-open');
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('pp-live-player-active');
 
     // Update URL deep-link (idempotent)
     try {
@@ -399,6 +400,7 @@
     var modal = document.getElementById('pp-live-player');
     if (modal) modal.classList.remove('pp-live-open');
     document.body.style.overflow = '';
+    document.body.classList.remove('pp-live-player-active');
 
     if (state.sessionId) bumpViewerCount(state.sessionId, -1);
     unsubscribeChat();

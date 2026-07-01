@@ -430,8 +430,12 @@
           wrapped('live');
           return;
         }
-        if ((DY.pagina === 'live' || DY.pagina === 'live_detail') &&
-            pagina !== 'live' && pagina !== 'live_detail') {
+        // Cleanup: sluit player modal wanneer gebruiker naar een andere tab
+        // navigeert. Check zowel DY.pagina state ALS het feitelijke DOM
+        // (defense-in-depth: DY.pagina kan out-of-sync raken door legacy code).
+        var playerOpen = !!document.querySelector('.pp-live-modal.pp-live-open');
+        if (playerOpen ||
+            (DY.pagina === 'live' || DY.pagina === 'live_detail')) {
           stopGridSubscription();
           if (PP_Live.closePlayer) PP_Live.closePlayer({ skipHistory: true });
         }
@@ -462,9 +466,10 @@
           } catch (_) { renderLivePage(); }
           return;
         }
-        // Cleanup als we live verlaten
-        if ((DY.pagina === 'live' || DY.pagina === 'live_detail') &&
-            pagina !== 'live' && pagina !== 'live_detail') {
+        // Cleanup: zelfde defense-in-depth voor toonPagina (bypass van navigeer)
+        var playerOpenT = !!document.querySelector('.pp-live-modal.pp-live-open');
+        if (playerOpenT ||
+            (DY.pagina === 'live' || DY.pagina === 'live_detail')) {
           stopGridSubscription();
           if (PP_Live.closePlayer) PP_Live.closePlayer({ skipHistory: true });
         }
