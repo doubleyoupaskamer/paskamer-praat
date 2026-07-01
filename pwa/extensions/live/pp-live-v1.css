@@ -956,3 +956,76 @@ body.pp-live-player-active .dy-sidebar {
     padding-bottom: calc(var(--nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 8px);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+ * v60.1.192 CONTRAST FIX (dark theme) + SHEET CLOSE BUTTON
+ * ═══════════════════════════════════════════════════════════════════
+ * De site is standaard dark theme (bg #0a0806 warm-brown-zwart). De live
+ * module gebruikte var(--ink, #1e1a0f) voor teksten, wat effectief
+ * onzichtbaar is op de donkere achtergrond. Override alleen binnen de
+ * Paskamer Studio scope zodat geen andere modules worden beïnvloed.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/* Live grid page — hoofdtitel duidelijk leesbaar */
+[data-testid="live-page"] .pp-live-title {
+  color: rgba(254, 252, 245, 0.96) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* Empty state ("Nog niemand live in de Studio" + subtekst) */
+[data-testid="live-page"] .pp-live-empty {
+  color: rgba(254, 252, 245, 0.72) !important;
+}
+[data-testid="live-page"] .pp-live-empty-title {
+  color: rgba(254, 252, 245, 0.98) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+[data-testid="live-page"] .pp-live-empty-emoji {
+  opacity: 0.85;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* Category chips + tab-headers ook lichter */
+[data-testid="live-page"] .pp-live-tab {
+  color: rgba(254, 252, 245, 0.80);
+}
+[data-testid="live-page"] .pp-live-tab.pp-live-tab-active {
+  color: rgba(254, 252, 245, 1);
+}
+[data-testid="live-page"] .pp-live-count-badge {
+  color: rgba(30, 26, 15, 0.92);   /* dark ink on the light badge — keep readable */
+}
+
+/* Sessies-teller "0 SESSIES" badge blijft op wit — geen wijziging nodig */
+
+/* ────────── Start-sheet close button (X, top-right) ────────── */
+.pp-live-sheet-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: background 0.18s ease, transform 0.12s ease, border-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.pp-live-sheet-close:hover {
+  background: rgba(0, 0, 0, 0.62);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+.pp-live-sheet-close:active { transform: scale(0.94); }
+.pp-live-sheet-close:focus-visible {
+  outline: 2px solid var(--clay, #c67d06);
+  outline-offset: 2px;
+}
+.pp-live-start-sheet { position: relative; }

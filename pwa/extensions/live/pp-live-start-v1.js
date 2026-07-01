@@ -73,6 +73,13 @@
 
     modal.innerHTML = '' +
       '<div class="pp-live-start-sheet" role="document">' +
+        '<button type="button" class="pp-live-sheet-close" id="pp-live-sheet-close" ' +
+          'aria-label="Sluit studio" data-testid="live-sheet-close-btn">' +
+          '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
+            '<path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" ' +
+              'stroke-linecap="round" fill="none"/>' +
+          '</svg>' +
+        '</button>' +
         '<div class="pp-live-sheet-handle" aria-hidden="true"></div>' +
         '<div class="pp-live-sheet-title">🎬 Start een Paskamer Studio sessie</div>' +
         '<div class="pp-live-sheet-sub">Kies je format en ga live voor jouw community.</div>' +
@@ -105,6 +112,23 @@
     modal.addEventListener('click', function (e) {
       if (e.target === modal) closeSheet();
     });
+
+    // Close button (X)
+    var closeBtn = modal.querySelector('#pp-live-sheet-close');
+    if (closeBtn) closeBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      closeSheet();
+    });
+
+    // ESC key closes sheet
+    if (!window.__ppLiveSheetEscHooked) {
+      window.__ppLiveSheetEscHooked = true;
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        var m = document.getElementById('pp-live-start');
+        if (m && m.classList.contains('pp-live-open')) closeSheet();
+      });
+    }
 
     // Format selection (single-select)
     modal.querySelectorAll('.pp-live-format-tile').forEach(function (btn) {
