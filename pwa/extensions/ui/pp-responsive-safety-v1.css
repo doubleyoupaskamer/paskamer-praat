@@ -1,29 +1,20 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PASKAMER PRAAT — Responsive Safety Layer (v1.0.0)
+ * PASKAMER PRAAT — Responsive Safety Layer (v1.0.1 — minimal safe)
  * ═══════════════════════════════════════════════════════════════════════
- *
- * DOEL: Defensieve responsive vangnetten die de meest voorkomende
- *       root-causes voor "gebroken" weergave op edge-device sizes
- *       oplossen, ZONDER bestaande design-regels te overschrijven.
- *
- * PRINCIPES:
- *   1. Alleen LOW-specificity selectors — bestaande component-CSS wint
- *      altijd wanneer die specifieker of belangrijker is.
- *   2. Alleen SAFE properties: overflow-x, max-width, min-width, aspect-
- *      ratio, safe-area — nooit color/spacing/typography die design breken.
- *   3. Alleen problematische edge cases: <340px, >1920px, notch-apparaten.
- *   4. Load ORDER: NA app.css maar zonder !important tenzij strikt nodig
- *      voor kritieke overflow-preventie.
- *
- * NON-BREAKING: geen bestaande selector, class of layout wordt aangeraakt.
+ * v1.0.0 (2026-07-01): eerste release met 12 layers
+ * v1.0.1 (2026-07-01): STRIPPED — v1.0.0 veroorzaakte size-regressies op
+ *   feed challenges-bar, filter-buttons en feed card images. Alleen de
+ *   ECHT veilige regels behouden: horizontal overflow prevention + iOS
+ *   safe-area voor bottom-nav + focus-visible + reduced-motion.
+ *   Alle andere layers (touch-target min-height, img sizing, topbar
+ *   safe-area, ultra-small padding, tablet grid overrides) VERWIJDERD
+ *   omdat ze bestaande component-styling doorkruisen.
  * ═════════════════════════════════════════════════════════════════════ */
 
 
 /* ════════════════════════ 1. HORIZONTALE OVERFLOW PREVENTIE ═══════════
- * Root-cause voor "app kan naar rechts scrollen op mobiel" is meestal een
- * enkel element dat breder is dan viewport. We forceren horizontale
- * overflow op de html/body root ALLEEN — inner scrollable containers
- * (feed, modal-body, chat) behouden hun eigen scroll gedrag.
+ * Voorkomt "app scrollt naar rechts op mobiel" bugs, veilig omdat inner
+ * scroll containers (feed, modal, chat) hun eigen scroll-context houden.
  * ═════════════════════════════════════════════════════════════════════ */
 html,
 body {
@@ -32,188 +23,21 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
-/* Voorkom dat afbeeldingen/video's buiten hun container groeien */
-img,
-video,
-iframe,
-svg:not([width]) {
-  max-width: 100%;
-  height: auto;
-}
 
-/* Aspect-ratio behoud voor media elementen (voorkomt "squashed" thumbs
- * wanneer inline width/height ontbreekt in dynamic content) */
-img[loading="lazy"]:not([width]):not([height]),
-video:not([width]):not([height]) {
-  aspect-ratio: attr(width) / attr(height);
-}
-
-
-/* ════════════════════════ 2. FLEX/GRID MIN-WIDTH SAFETY ═══════════════
- * Flex-children krijgen default `min-width: auto` wat lange strings/tables
- * ongewenst laat expanden. Elk direct flex/grid child krijgt `min-width: 0`
- * ALS 'ie zelf geen explicit min-width heeft. Dit is de industry-standaard
- * fix voor "flex item overflow" bugs.
- * ═════════════════════════════════════════════════════════════════════ */
-.dy-feed,
-.dy-feed-item,
-.dy-fit-prompt,
-.dy-hm-hero,
-.dy-hm-hero > *,
-.pp-live-grid > *,
-.pp-live-scheduled-grid > *,
-.pp-b2c-pkg-grid > *,
-.dy-card > *,
-.dy-card-body {
-  min-width: 0;
-}
-
-
-/* ════════════════════════ 3. LONG WORD-BREAK PROTECTION ═══════════════
- * URLs, usernames en hostnames kunnen op mobile een layout breken. We
- * beperken word-break alleen tot user-generated content zones, NIET tot
- * design elements (titles, headings blijven zoals ontworpen).
- * ═════════════════════════════════════════════════════════════════════ */
-.dy-feed-text,
-.dy-comment-text,
-.dy-chat-text,
-.pp-live-chat-msg,
-.pp-live-scheduled-card-title,
-.dy-bericht-text,
-.dy-review-text {
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-
-/* ════════════════════════ 4. iOS NOTCH / SAFE AREA INSETS ═════════════
- * Voor iPhones met notch/dynamic island: gebruik safe-area waar bottom-
- * nav en fullscreen modals staan. Alleen extra padding TOEVOEGEN, nooit
- * bestaande padding overschrijven.
+/* ════════════════════════ 2. iOS BOTTOM-NAV SAFE-AREA ═════════════════
+ * Alleen bottom-nav krijgt extra safe-area padding op iOS notch/dynamic
+ * island devices. Topbar en modals blijven UNCHANGED zodat design intact
+ * blijft.
  * ═════════════════════════════════════════════════════════════════════ */
 @supports (padding: env(safe-area-inset-bottom)) {
   .dy-nav {
     padding-bottom: max(var(--sp-2, 8px), env(safe-area-inset-bottom));
   }
-  .pp-live-modal,
-  .pp-live-start-modal,
-  .dy-meld-sheet {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .dy-topbar {
-    padding-top: max(var(--sp-2, 8px), env(safe-area-inset-top));
-  }
 }
 
 
-/* ════════════════════════ 5. VIEWPORT UNITS SAFEGUARD ════════════════
- * Op iOS Safari veroorzaakt `100vh` dat modals achter de address-bar
- * verdwijnen. `100dvh` (dynamic viewport) fixet dit — waar de app dit
- * nog niet gebruikt, forceer 'm als fallback laag.
- * ═════════════════════════════════════════════════════════════════════ */
-@supports (height: 100dvh) {
-  .pp-live-modal,
-  .pp-live-start-modal,
-  .dy-modal[data-fullscreen],
-  .dy-meld-modal {
-    /* Alleen wanneer 100vh actief was: dvh geeft correcte visible height */
-    min-height: 100dvh;
-  }
-}
-
-
-/* ════════════════════════ 6. GROTE MONITOREN (>1920px) ═══════════════
- * Voorkomt dat content op ultra-wide monitors uitrekt tot lelijke
- * strekverhoudingen. Beperk feed-column tot een leesbaar maximum.
- * BESTAANDE max-width regels op componenten worden gerespecteerd — dit
- * treft alleen containers die geen limit hebben.
- * ═════════════════════════════════════════════════════════════════════ */
-@media (min-width: 1920px) {
-  .dy-hoofd-content,
-  .dy-feed-container,
-  .dy-profiel-wrap,
-  .dy-winkel-wrap,
-  .bp-page {
-    max-width: min(1440px, 92vw);
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-
-/* ════════════════════════ 7. ULTRA-SMALL SCREENS (<340px) ═════════════
- * Ouder Android/iPhone SE 1e gen (320px). Compress padding waar layout
- * anders zou breken. Non-invasief: alleen wanneer viewport écht klein is.
- * ═════════════════════════════════════════════════════════════════════ */
-@media (max-width: 340px) {
-  .dy-feed-item,
-  .dy-fit-prompt,
-  .pp-live-scheduled-card,
-  .pp-b2c-pkg-card {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-
-  /* Text die default 1.05rem+ is, iets kleiner op zeer smalle schermen */
-  h1 { font-size: clamp(1.4rem, 6vw, 1.75rem); }
-  h2 { font-size: clamp(1.15rem, 5vw, 1.4rem); }
-  h3 { font-size: clamp(1rem,   4vw, 1.15rem); }
-
-  /* Buttons met veel tekst: kleiner font zodat 'ie past */
-  .dy-btn,
-  .bp-btn,
-  .pp-live-start-btn {
-    font-size: 0.86rem;
-  }
-}
-
-
-/* ════════════════════════ 8. TABLET LANDSCAPE (768-1024px) ═══════════
- * Deze range zit vaak tussen mobile en desktop breakpoints. Zorg dat
- * cards in de grids niet te smal (< 220px effectief) worden.
- * ═════════════════════════════════════════════════════════════════════ */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .pp-live-scheduled-grid,
-  .pp-live-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  }
-  .pp-b2c-pkg-grid {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  }
-}
-
-
-/* ════════════════════════ 9. LANDSCAPE MOBIEL (short viewport) ═══════
- * Wanneer mobiel gedraaid wordt: modals mogen niet meer dan 92dvh hoog
- * zijn zodat de close-knop altijd bereikbaar is.
- * ═════════════════════════════════════════════════════════════════════ */
-@media (max-height: 500px) and (orientation: landscape) {
-  .pp-live-start-sheet,
-  .dy-meld-sheet {
-    max-height: 92dvh;
-    overflow-y: auto;
-  }
-  .pp-live-preview-wrap {
-    max-height: 40dvh;
-  }
-}
-
-
-/* ════════════════════════ 10. TOUCH TARGETS ─ MINIMUM 44×44 ═══════════
- * WCAG AAA touch target. Alleen buttons zonder expliciete size die te
- * klein zijn krijgen minimum size. Bestaande sized buttons blijven zoals
- * ontworpen (bijv. compacte icon buttons in nav worden niet aangeraakt).
- * ═════════════════════════════════════════════════════════════════════ */
-@media (pointer: coarse) {
-  button:not([class*="close"]):not([class*="icon"]):not([class*="pp-live-sheet-close"]):not([class*="dy-topbar-btn"]):not([class*="pp-tb-home-btn"]):not([class*="pp-sb-home-btn"]) {
-    min-height: 40px;
-  }
-}
-
-
-/* ════════════════════════ 11. PRINT / REDUCED MOTION ══════════════════
- * Users met "reduce motion" instellingen: schakel non-essentiële
- * animaties uit. Bestaande transitions blijven werken (essential UX).
+/* ════════════════════════ 3. REDUCED MOTION RESPECT ═══════════════════
+ * OS-instelling voor gebruikers met vestibulaire issues respecteren.
  * ═════════════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -227,10 +51,11 @@ video:not([width]):not([height]) {
 }
 
 
-/* ════════════════════════ 12. FOCUS-VISIBLE HELPER ════════════════════
- * Als user Tab-navigeert moet er altijd een zichtbare focus outline
- * zijn — belangrijk voor accessibility. Alleen wanneer bestaande CSS
- * geen focus-visible style heeft.
+/* ════════════════════════ 4. FOCUS-VISIBLE FALLBACK ═══════════════════
+ * Alleen wanneer een element GEEN eigen focus-visible style heeft: toon
+ * een subtiele accent outline voor toetsenbord-navigatie. Elementen met
+ * eigen focus-style (bestaande buttons, inputs met explicit :focus)
+ * behouden hun eigen styling omdat die specifieker is.
  * ═════════════════════════════════════════════════════════════════════ */
 button:focus-visible,
 a:focus-visible,
