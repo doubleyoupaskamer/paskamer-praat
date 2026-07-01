@@ -2244,8 +2244,8 @@ DY.renderHome = function() {
       '<section class="dy-hm-hero">' +
         '<div class="dy-hm-hero-bg">' +
           '<picture>' +
-            '<source type="image/webp" srcset="hero-v3-canal-480.webp?v=60.1.202 480w, hero-v3-canal-800.webp?v=60.1.202 800w, hero-v3-canal-1024.webp?v=60.1.202 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 720px">' +
-            '<img src="hero-v3-canal.jpg?v=60.1.202" srcset="hero-v3-canal-480.jpg?v=60.1.202 480w, hero-v3-canal-800.jpg?v=60.1.202 800w, hero-v3-canal-1024.jpg?v=60.1.202 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 720px" class="dy-hm-hero-img" width="848" height="1264" alt="Inclusieve modecommunity bij Amsterdamse gracht, mensen met diverse lichaamstypen, leeftijden en stijlen" loading="eager" fetchpriority="high" decoding="async">' +
+            '<source type="image/webp" srcset="hero-v4-canal-480.webp 480w, hero-v4-canal-800.webp 800w, hero-v4-canal-1024.webp 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 720px">' +
+            '<img src="hero-v4-canal.jpg" srcset="hero-v4-canal-480.jpg 480w, hero-v4-canal-800.jpg 800w, hero-v4-canal-1024.jpg 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 720px" class="dy-hm-hero-img" width="848" height="1264" alt="Inclusieve modecommunity bij Amsterdamse gracht, mensen met diverse lichaamstypen, leeftijden en stijlen" loading="eager" fetchpriority="high" decoding="async">' +
           '</picture>' +
           '<div class="dy-hm-hero-overlay"></div>' +
           // v60.1.32: tekst-overlay op de foto
