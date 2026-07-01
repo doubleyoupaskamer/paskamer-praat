@@ -1069,3 +1069,278 @@ body.pp-live-player-active .dy-sidebar {
     min-height: 44px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+ * v60.1.194 SCHEDULED LIVE — mode toggle + AANKOMEND grid + countdown
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Start-sheet: Nu / Later plannen toggle ───────────────────── */
+.pp-live-mode-toggle {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+  margin: 12px 0;
+}
+.pp-live-mode-opt {
+  flex: 1;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  color: rgba(254, 252, 245, 0.72);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: 9px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.pp-live-mode-opt:hover { color: rgba(254, 252, 245, 0.95); }
+.pp-live-mode-opt.pp-live-mode-active {
+  background: var(--clay, #c67d06);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(198, 125, 6, 0.35);
+}
+.pp-live-mode-emoji { font-size: 1.05em; line-height: 1; }
+
+/* ── Datetime picker wrap ─────────────────────────────────────── */
+.pp-live-schedule-wrap {
+  margin: 8px 0 14px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(198, 125, 6, 0.22);
+  border-radius: 12px;
+}
+.pp-live-schedule-label {
+  display: block;
+  color: rgba(254, 252, 245, 0.92);
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.pp-live-schedule-hint {
+  color: rgba(254, 252, 245, 0.55);
+  font-weight: 400;
+  font-size: 0.82rem;
+}
+.pp-live-schedule-input {
+  width: 100%;
+  padding: 11px 12px;
+  background: rgba(0, 0, 0, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color-scheme: dark;
+}
+.pp-live-schedule-input:focus {
+  outline: none;
+  border-color: var(--clay, #c67d06);
+  background: rgba(0, 0, 0, 0.48);
+}
+.pp-live-schedule-preview {
+  margin-top: 10px;
+  color: rgba(254, 252, 245, 0.9);
+  font-size: 0.9rem;
+}
+.pp-live-schedule-relatief {
+  color: rgba(254, 252, 245, 0.6);
+  font-weight: 400;
+  margin-left: 6px;
+}
+.pp-live-schedule-warn {
+  color: #ff8a8a;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* ═════════════════════════════════════════════════════════════════
+ * AANKOMEND sectie in de grid
+ * ═════════════════════════════════════════════════════════════════ */
+.pp-live-scheduled {
+  margin: 8px 0 24px;
+}
+.pp-live-scheduled-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 2px;
+}
+.pp-live-scheduled-title {
+  color: rgba(254, 252, 245, 0.96);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.pp-live-scheduled-count {
+  color: rgba(254, 252, 245, 0.6);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.pp-live-scheduled-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.pp-live-scheduled-card {
+  position: relative;
+  background: linear-gradient(160deg, #1a1508 0%, #241a0d 100%);
+  border: 1px solid rgba(198, 125, 6, 0.25);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.pp-live-scheduled-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(198, 125, 6, 0.5);
+  box-shadow: 0 6px 20px rgba(198, 125, 6, 0.18);
+}
+.pp-live-scheduled-card-media {
+  aspect-ratio: 4 / 3;
+  background: radial-gradient(circle at 50% 40%, rgba(198,125,6,0.16) 0%, rgba(0,0,0,0.4) 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.pp-live-scheduled-card-emoji {
+  font-size: 46px;
+  opacity: 0.85;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+.pp-live-scheduled-card-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 8px;
+  background: rgba(198, 125, 6, 0.9);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+}
+.pp-live-scheduled-card-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pp-live-scheduled-card-host {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pp-live-scheduled-card-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--clay, #c67d06);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.pp-live-scheduled-card-hostname {
+  color: rgba(254, 252, 245, 0.78);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+.pp-live-scheduled-card-title {
+  color: rgba(254, 252, 245, 0.96);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pp-live-scheduled-card-when {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: rgba(254, 252, 245, 0.72);
+  font-size: 0.82rem;
+}
+.pp-live-scheduled-card-when-icon { opacity: 0.7; }
+.pp-live-scheduled-card-countdown {
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: rgba(254, 252, 245, 0.94);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.04em;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+.pp-live-scheduled-card-cd-urgent {
+  background: rgba(220, 60, 60, 0.28);
+  color: #ffcccc;
+  border-color: rgba(220, 60, 60, 0.5);
+}
+.pp-live-scheduled-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+.pp-live-scheduled-btn {
+  flex: 1;
+  padding: 9px 8px;
+  border: 0;
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.1s ease, opacity 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.pp-live-scheduled-btn:active { transform: scale(0.96); }
+.pp-live-scheduled-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pp-live-scheduled-btn-primary {
+  background: var(--clay, #c67d06);
+  color: #fff;
+}
+.pp-live-scheduled-btn-primary:hover:not(:disabled) {
+  background: #d68912;
+}
+.pp-live-scheduled-btn-primary.pp-live-scheduled-btn-active {
+  background: rgba(64, 175, 96, 0.9);
+}
+.pp-live-scheduled-btn-ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(254, 252, 245, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  max-width: 90px;
+}
+.pp-live-scheduled-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* Mobile touch targets */
+@media (max-width: 640px) {
+  .pp-live-scheduled-btn { padding: 11px 10px; font-size: 0.85rem; min-height: 44px; }
+}

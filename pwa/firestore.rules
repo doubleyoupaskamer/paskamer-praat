@@ -794,13 +794,21 @@ service cloud.firestore {
         && request.resource.data.format == resource.data.format
         && (
           request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['title','status','endedAt','cohosts','tags','viewers','reactions','scheduledFor','thumbUrl'])
+            .hasOnly(['title','status','endedAt','cohosts','tags','viewers','reactions',
+                      'scheduledFor','thumbUrl',
+                      'startedAt','cancelReason','goLiveGraceUntil','reminderCount',
+                      'endedReason','autoCompletedAt','autoCompletedBy'])
         )
       ) || (
-        // Anonymous / any-user counter bump (viewers of reactions)
+        // Anonymous / any-user counter bump (viewers, reactions of reminderCount)
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewers'])
       ) || (
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+      ) || (
+        // Reminder-teller mag door elke ingelogde user atomair worden gebumped
+        // (frontend gebruikt FieldValue.increment(±1) bij subscribe/unsubscribe)
+        isEchtIngelogd()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reminderCount'])
       ) || isAdmin();
 
       // DELETE: alleen host of admin
@@ -875,6 +883,21 @@ service cloud.firestore {
         allow create: if isEchtIngelogd() && request.auth.uid == viewerUid;
         allow update: if isEchtIngelogd() && request.auth.uid == viewerUid;
         allow delete: if isEchtIngelogd() && request.auth.uid == viewerUid;
+      }
+
+      // ── SUBCOLLECTIE: reminders (opt-in T-15 push voor scheduled lives) ─
+      // User schrijft eigen reminder-doc (documentID == user uid). Wordt gelezen
+      // door de cron worker om T-15 pushmeldingen te versturen.
+      match /reminders/{uid} {
+        // Ingelogde users kunnen lezen (nodig voor "ben ik al aangemeld?" check)
+        allow read: if isEchtIngelogd() && request.auth.uid == uid;
+
+        // User mag eigen reminder-doc aanmaken/updaten/deleten
+        allow create: if isEchtIngelogd()
+          && request.auth.uid == uid
+          && request.resource.data.uid == uid;
+        allow update: if isEchtIngelogd() && request.auth.uid == uid;
+        allow delete: if isEchtIngelogd() && request.auth.uid == uid;
       }
     }
   }

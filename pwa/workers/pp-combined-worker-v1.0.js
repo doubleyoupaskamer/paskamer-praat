@@ -38,7 +38,7 @@
  *   GET /health   → { status, ts, version, tasks[] }
  */
 
-const WORKER_VERSION = 'pp-combined-v1.0.0';
+const WORKER_VERSION = 'pp-combined-v1.1.0-scheduled-lives';
 
 // ═══════════════════════ CONFIG PER TAAK ══════════════════════════════
 
@@ -265,7 +265,7 @@ export default {
         status: 'ok',
         ts: new Date().toISOString(),
         version: WORKER_VERSION,
-        tasks: ['pvdw', 'boost', 'autocomplete', 'studio']
+        tasks: ['pvdw', 'boost', 'autocomplete', 'studio', 'schedule']
       });
     }
 
@@ -297,7 +297,11 @@ export default {
         runAutoComplete(db, env)
       ]));
     } else if (cron === '*/15 * * * *') {
-      ctx.waitUntil(runStudioCleanup(db, env));
+      // Elke 15 min: studio cleanup + scheduled reminders/no-show in parallel
+      ctx.waitUntil(Promise.all([
+        runStudioCleanup(db, env),
+        runScheduleReminders(db, env)
+      ]));
     } else {
       // Onbekende cron → log en run "all" als fail-safe
       console.warn(`[combined-worker] Onbekende cron "${cron}", run all`);
@@ -318,17 +322,19 @@ async function routeTask(task, db, env) {
     case 'boost':        return { task, result: await runBoostExpire(db, env) };
     case 'autocomplete': return { task, result: await runAutoComplete(db, env) };
     case 'studio':       return { task, result: await runStudioCleanup(db, env) };
+    case 'schedule':     return { task, result: await runScheduleReminders(db, env) };
     case 'all': {
-      const [pvdw, boost, autocomplete, studio] = await Promise.all([
+      const [pvdw, boost, autocomplete, studio, schedule] = await Promise.all([
         runPvdw(db, env).catch(e => ({ status: 'error', error: e.message })),
         runBoostExpire(db, env).catch(e => ({ status: 'error', error: e.message })),
         runAutoComplete(db, env).catch(e => ({ status: 'error', error: e.message })),
-        runStudioCleanup(db, env).catch(e => ({ status: 'error', error: e.message }))
+        runStudioCleanup(db, env).catch(e => ({ status: 'error', error: e.message })),
+        runScheduleReminders(db, env).catch(e => ({ status: 'error', error: e.message }))
       ]);
-      return { task: 'all', pvdw, boost, autocomplete, studio };
+      return { task: 'all', pvdw, boost, autocomplete, studio, schedule };
     }
     default:
-      return { status: 'error', error: `Onbekende task "${task}". Gebruik: pvdw|boost|autocomplete|studio|all` };
+      return { status: 'error', error: `Onbekende task "${task}". Gebruik: pvdw|boost|autocomplete|studio|schedule|all` };
   }
 }
 
@@ -785,6 +791,156 @@ async function runStudioCleanup(db, env) {
     console.error('[studio-cleanup] Fatale fout:', e.message);
     await db.addDoc('worker_audit_log', {
       workerVersion: WORKER_VERSION, workerName: 'studio-cleanup',
+      runAt: nowIso, status: 'error', error: e.message
+    }).catch(() => {});
+    return { status: 'error', error: e.message };
+  }
+}
+
+// ═══════════════════════ 5. SCHEDULED LIVE REMINDERS + NO-SHOW ═══════
+
+const SCHEDULE_REMINDER_WINDOW_MS = 15 * 60 * 1000; // T-15 min
+const SCHEDULE_NO_SHOW_MS         = 30 * 60 * 1000; // no-show na +30min
+
+async function runScheduleReminders(db, env) {
+  const runStart = new Date();
+  const nowMs = runStart.getTime();
+  const nowIso = runStart.toISOString();
+  let remindersSent = 0;
+  let noShowsClosed = 0;
+  const errors = [];
+
+  try {
+    // Query 1: scheduled sessies met scheduledFor in [now, now+30min]
+    // → verstuur T-15 reminders naar subscribers die notified15min=false hebben
+    const windowStart = new Date(nowMs - 5 * 60 * 1000).toISOString();       // -5 min grace
+    const windowEnd   = new Date(nowMs + SCHEDULE_REMINDER_WINDOW_MS).toISOString();
+
+    const upcoming = await db.runQuery({
+      from: [{ collectionId: 'live_sessions' }],
+      where: { compositeFilter: { op: 'AND', filters: [
+        { fieldFilter: { field: { fieldPath: 'status' },       op: 'EQUAL',                value: { stringValue: 'scheduled' } } },
+        { fieldFilter: { field: { fieldPath: 'scheduledFor' }, op: 'LESS_THAN_OR_EQUAL',   value: { timestampValue: windowEnd } } },
+        { fieldFilter: { field: { fieldPath: 'scheduledFor' }, op: 'GREATER_THAN_OR_EQUAL', value: { timestampValue: windowStart } } }
+      ] } },
+      limit: 100
+    });
+
+    for (const row of (upcoming || [])) {
+      if (!row.document) continue;
+      const s = docToObject(row.document);
+      if (!s) continue;
+      const scheduledMs = s.scheduledFor instanceof Date ? s.scheduledFor.getTime() : null;
+      if (!scheduledMs) continue;
+      // Alleen sessies binnen T-15 (of iets meer als eerste run vertraagd was)
+      if (scheduledMs - nowMs > SCHEDULE_REMINDER_WINDOW_MS) continue;
+
+      // Haal subscribers op die nog geen T-15 notif hebben
+      const remRes = await db.listCollection(`live_sessions/${s._id}`, 'reminders', 200);
+      const remDocs = (remRes.documents || []).map(d => docToObject(d)).filter(Boolean);
+      const toNotify = remDocs.filter(r => r.notified15min !== true);
+      if (toNotify.length === 0) continue;
+
+      // Verstuur meldingen batch-gewijs (max 50 per commit is veilig)
+      const whenLocal = new Date(scheduledMs).toISOString();
+      for (let i = 0; i < toNotify.length; i += 50) {
+        const chunk = toNotify.slice(i, i + 50);
+        await Promise.all(chunk.map(async r => {
+          try {
+            await db.addDoc('meldingen', {
+              userId: r.uid,
+              reporterUid: r.uid,
+              type: 'live_scheduled_soon',
+              titel: '🔔 Bijna live!',
+              bericht: (s.hostName || 'Iemand') + ' gaat over 15 minuten live: "' + (s.title || 'Live sessie') + '"',
+              sessionId: s._id,
+              hostUid: s.hostUid || null,
+              hostName: s.hostName || null,
+              scheduledFor: whenLocal,
+              deeplink: '/?pagina=live&aankomend=' + s._id,
+              gelezen: false,
+              ts: nowIso
+            });
+            // Markeer reminder als notified
+            await db.patchDoc(`live_sessions/${s._id}/reminders/${r.uid}`,
+              ['notified15min', 'notified15minAt'],
+              { notified15min: true, notified15minAt: nowIso }
+            );
+            remindersSent++;
+          } catch (e) {
+            errors.push(`reminder ${s._id}/${r.uid}: ${e.message}`);
+          }
+        }));
+      }
+    }
+
+    // Query 2: scheduled sessies waarvan scheduledFor > 30 min geleden was en
+    // host is niet écht live gegaan → auto-cancel als "no-show"
+    const noShowThreshold = new Date(nowMs - SCHEDULE_NO_SHOW_MS).toISOString();
+    const noShows = await db.runQuery({
+      from: [{ collectionId: 'live_sessions' }],
+      where: { compositeFilter: { op: 'AND', filters: [
+        { fieldFilter: { field: { fieldPath: 'status' },       op: 'EQUAL',           value: { stringValue: 'scheduled' } } },
+        { fieldFilter: { field: { fieldPath: 'scheduledFor' }, op: 'LESS_THAN',        value: { timestampValue: noShowThreshold } } }
+      ] } },
+      limit: 50
+    });
+
+    for (const row of (noShows || [])) {
+      if (!row.document) continue;
+      const s = docToObject(row.document);
+      if (!s) continue;
+      try {
+        await db.patchDoc(`live_sessions/${s._id}`, ['status', 'endedAt', 'endedReason'], {
+          status: 'cancelled',
+          endedAt: nowIso,
+          endedReason: 'no_show_auto'
+        });
+        noShowsClosed++;
+
+        // Notify subscribers: "helaas heeft de host de live niet opgestart"
+        const remRes = await db.listCollection(`live_sessions/${s._id}`, 'reminders', 200);
+        const remDocs = (remRes.documents || []).map(d => docToObject(d)).filter(Boolean);
+        for (let i = 0; i < remDocs.length; i += 50) {
+          const chunk = remDocs.slice(i, i + 50);
+          await Promise.all(chunk.map(async r => {
+            try {
+              await db.addDoc('meldingen', {
+                userId: r.uid,
+                reporterUid: r.uid,
+                type: 'live_no_show',
+                titel: 'Live geannuleerd',
+                bericht: 'Helaas heeft ' + (s.hostName || 'de host') + ' de geplande live "' + (s.title || 'sessie') + '" niet opgestart.',
+                sessionId: s._id,
+                hostUid: s.hostUid || null,
+                hostName: s.hostName || null,
+                gelezen: false,
+                ts: nowIso
+              });
+            } catch (e) {
+              errors.push(`no-show notify ${s._id}/${r.uid}: ${e.message}`);
+            }
+          }));
+        }
+      } catch (e) {
+        errors.push(`no-show close ${s._id}: ${e.message}`);
+      }
+    }
+
+    await db.addDoc('worker_audit_log', {
+      workerVersion: WORKER_VERSION, workerName: 'schedule-reminders',
+      runAt: nowIso, duurMs: Date.now() - runStart.getTime(),
+      status: errors.length === 0 ? 'ok' : 'partial',
+      remindersSent, noShowsClosed, errorCount: errors.length,
+      errors: errors.slice(0, 10)
+    }).catch(() => {});
+
+    console.log(`[schedule-reminders] sent=${remindersSent} noshow=${noShowsClosed} errors=${errors.length}`);
+    return { status: 'ok', remindersSent, noShowsClosed, errors: errors.slice(0, 10) };
+  } catch (e) {
+    console.error('[schedule-reminders] Fatale fout:', e.message);
+    await db.addDoc('worker_audit_log', {
+      workerVersion: WORKER_VERSION, workerName: 'schedule-reminders',
       runAt: nowIso, status: 'error', error: e.message
     }).catch(() => {});
     return { status: 'error', error: e.message };

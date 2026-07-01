@@ -48,8 +48,36 @@
     stream: null,
     selectedFormat: 'live',
     activeSessionId: null,
-    isStarting: false
+    isStarting: false,
+    mode: 'now',           // 'now' | 'scheduled'
+    scheduledFor: null     // Date object when mode === 'scheduled'
   };
+
+  // ───────────── Datetime helpers voor "Later plannen" ─────────────
+  function pad2(n) { return n < 10 ? '0' + n : String(n); }
+  function defaultScheduledDate() {
+    // 1 uur vanaf nu, afgerond naar volgend kwartier
+    var d = new Date(Date.now() + 60 * 60 * 1000);
+    d.setSeconds(0, 0);
+    var m = d.getMinutes();
+    var next = Math.ceil(m / 15) * 15;
+    if (next >= 60) { d.setHours(d.getHours() + 1); d.setMinutes(0); }
+    else d.setMinutes(next);
+    return d;
+  }
+  function toLocalInputValue(d) {
+    // <input type="datetime-local"> verwacht 'YYYY-MM-DDTHH:MM' in local tz
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) +
+      'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+  function fromLocalInputValue(v) {
+    // Parse als LOCAL time (browser doet dit automatisch bij new Date(string))
+    if (!v) return null;
+    var d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function minAllowedDate() { return new Date(Date.now() + 15 * 60 * 1000); }         // T+15min
+  function maxAllowedDate() { return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); } // T+7d
 
   // ───────────── Modal DOM (lazy create) ─────────────
   function ensureSheet() {
@@ -84,6 +112,28 @@
         '<div class="pp-live-sheet-title">🎬 Start een Paskamer Studio sessie</div>' +
         '<div class="pp-live-sheet-sub">Kies je format en ga live voor jouw community.</div>' +
 
+        // ── Mode toggle: Nu vs Later plannen ────────────────────────
+        '<div class="pp-live-mode-toggle" role="tablist" data-testid="live-mode-toggle">' +
+          '<button type="button" class="pp-live-mode-opt pp-live-mode-active" ' +
+            'data-mode="now" data-testid="live-mode-now" role="tab">' +
+            '<span class="pp-live-mode-emoji">🔴</span> Nu live' +
+          '</button>' +
+          '<button type="button" class="pp-live-mode-opt" ' +
+            'data-mode="scheduled" data-testid="live-mode-scheduled" role="tab">' +
+            '<span class="pp-live-mode-emoji">📅</span> Later plannen' +
+          '</button>' +
+        '</div>' +
+
+        // ── Datetime picker (alleen zichtbaar bij mode=scheduled) ───
+        '<div class="pp-live-schedule-wrap" id="pp-live-schedule-wrap" style="display:none">' +
+          '<label class="pp-live-schedule-label" for="pp-live-schedule-input">' +
+            'Wanneer ga je live? <span class="pp-live-schedule-hint">(min. 15 min, max. 7 dagen)</span>' +
+          '</label>' +
+          '<input type="datetime-local" class="pp-live-schedule-input" ' +
+            'id="pp-live-schedule-input" data-testid="live-schedule-input">' +
+          '<div class="pp-live-schedule-preview" id="pp-live-schedule-preview"></div>' +
+        '</div>' +
+
         '<div class="pp-live-error" id="pp-live-error" role="alert"></div>' +
 
         '<div class="pp-live-preview-wrap" id="pp-live-preview-wrap">' +
@@ -101,7 +151,7 @@
         '<div class="pp-live-format-grid" id="pp-live-formats">' + formatsHtml + '</div>' +
 
         '<button type="button" class="pp-live-start-btn" data-testid="live-start-btn" id="pp-live-start-go">' +
-          '<span class="pp-live-dot"></span>' +
+          '<span class="pp-live-dot" id="pp-live-start-dot"></span>' +
           '<span id="pp-live-start-btn-label">Ga live</span>' +
         '</button>' +
       '</div>';
@@ -130,6 +180,24 @@
       });
     }
 
+    // Mode toggle (Nu / Later plannen)
+    modal.querySelectorAll('.pp-live-mode-opt').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var mode = btn.getAttribute('data-mode');
+        setMode(mode);
+      });
+    });
+
+    // Datetime input change → update preview + valideer
+    var dtInput = modal.querySelector('#pp-live-schedule-input');
+    if (dtInput) {
+      dtInput.setAttribute('min', toLocalInputValue(minAllowedDate()));
+      dtInput.setAttribute('max', toLocalInputValue(maxAllowedDate()));
+      dtInput.value = toLocalInputValue(defaultScheduledDate());
+      dtInput.addEventListener('change', updateSchedulePreview);
+      dtInput.addEventListener('input', updateSchedulePreview);
+    }
+
     // Format selection (single-select)
     modal.querySelectorAll('.pp-live-format-tile').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -150,8 +218,72 @@
 
     // Initial state: default format = 'live'
     state.selectedFormat = 'live';
+    setMode('now');
 
     return modal;
+  }
+
+  // ───────────── Mode: Nu / Later plannen ─────────────
+  function setMode(mode) {
+    state.mode = mode;
+    var modal = document.getElementById('pp-live-start');
+    if (!modal) return;
+    modal.querySelectorAll('.pp-live-mode-opt').forEach(function (b) {
+      if (b.getAttribute('data-mode') === mode) b.classList.add('pp-live-mode-active');
+      else b.classList.remove('pp-live-mode-active');
+    });
+    var wrap = modal.querySelector('#pp-live-schedule-wrap');
+    if (wrap) wrap.style.display = (mode === 'scheduled') ? '' : 'none';
+    // Update start-button label + dot
+    var lbl = modal.querySelector('#pp-live-start-btn-label');
+    var dot = modal.querySelector('#pp-live-start-dot');
+    if (lbl) lbl.textContent = (mode === 'scheduled') ? 'Plan aankondiging' : 'Ga live';
+    if (dot) dot.style.display = (mode === 'scheduled') ? 'none' : '';
+    // Preview updaten
+    updateSchedulePreview();
+  }
+
+  function formatDutchDate(d) {
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    var dagen = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+    var maanden = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    var vandaag = new Date(); vandaag.setHours(0,0,0,0);
+    var morgen  = new Date(vandaag.getTime() + 86400000);
+    var target  = new Date(d);  target.setHours(0,0,0,0);
+    var tijd = pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+    if (target.getTime() === vandaag.getTime()) return 'vandaag ' + tijd;
+    if (target.getTime() === morgen.getTime())  return 'morgen ' + tijd;
+    var diffDays = Math.round((target.getTime() - vandaag.getTime()) / 86400000);
+    if (diffDays > 0 && diffDays < 7) return dagen[d.getDay()] + ' ' + tijd;
+    return d.getDate() + ' ' + maanden[d.getMonth()] + ' ' + tijd;
+  }
+
+  function updateSchedulePreview() {
+    var input = document.getElementById('pp-live-schedule-input');
+    var preview = document.getElementById('pp-live-schedule-preview');
+    if (!input || !preview) return;
+    var d = fromLocalInputValue(input.value);
+    if (!d) { preview.textContent = ''; return; }
+    var min = minAllowedDate();
+    var max = maxAllowedDate();
+    if (d < min) {
+      preview.innerHTML = '<span class="pp-live-schedule-warn">⚠️ Moet minimaal 15 min in de toekomst zijn</span>';
+      state.scheduledFor = null;
+      return;
+    }
+    if (d > max) {
+      preview.innerHTML = '<span class="pp-live-schedule-warn">⚠️ Maximaal 7 dagen vooruit plannen</span>';
+      state.scheduledFor = null;
+      return;
+    }
+    state.scheduledFor = d;
+    var diffMs = d.getTime() - Date.now();
+    var diffH = Math.round(diffMs / (60 * 60 * 1000));
+    var relatief;
+    if (diffMs < 60 * 60 * 1000) relatief = 'over ' + Math.round(diffMs / 60000) + ' min';
+    else if (diffH < 24) relatief = 'over ' + diffH + ' uur';
+    else relatief = 'over ' + Math.round(diffH / 24) + ' dagen';
+    preview.innerHTML = '<strong>' + formatDutchDate(d) + '</strong> <span class="pp-live-schedule-relatief">(' + relatief + ')</span>';
   }
 
   // ───────────── Camera ─────────────
@@ -283,6 +415,20 @@
 
     // Detect brand vs user host via approved brands lookup (best-effort)
     var isBrand = !!(profile.isBrand || profile.brandId);
+    var isScheduled = (state.mode === 'scheduled');
+
+    // Extra valideren bij scheduled mode
+    if (isScheduled) {
+      updateSchedulePreview(); // parse latest input
+      if (!(state.scheduledFor instanceof Date) || isNaN(state.scheduledFor.getTime())) {
+        state.isStarting = false;
+        if (btn) btn.disabled = false;
+        if (lbl) lbl.textContent = 'Plan aankondiging';
+        showError('Kies een geldige datum en tijd (min. 15 min, max. 7 dagen).');
+        return;
+      }
+    }
+
     var sessionDoc = {
       hostUid: u.uid,
       hostType: isBrand ? 'brand' : 'user',
@@ -290,25 +436,48 @@
       hostAvatar: profile.fotoUrl || u.photoURL || null,
       brandId: isBrand ? u.uid : null,
       title: title.substring(0, 80),
-      format: state.selectedFormat,       // v13: primary categorization (live/talks/shows/drops/sessions)
-      tags: [],                            // reserved for future audience tags
-      status: 'live',
+      format: state.selectedFormat,
+      tags: [],
+      status: isScheduled ? 'scheduled' : 'live',
       viewers: 0,
       reactions: 0,
+      reminderCount: 0,
       cohosts: [],
-      startedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      startedAt: isScheduled ? null : firebase.firestore.FieldValue.serverTimestamp(),
       endedAt: null,
-      scheduledFor: null
+      scheduledFor: isScheduled ? firebase.firestore.Timestamp.fromDate(state.scheduledFor) : null,
+      scheduledAt: isScheduled ? firebase.firestore.FieldValue.serverTimestamp() : null,
+      // grace period voor no-show (scheduledFor + 30 min)
+      goLiveGraceUntil: isScheduled
+        ? firebase.firestore.Timestamp.fromDate(new Date(state.scheduledFor.getTime() + 30 * 60 * 1000))
+        : null
     };
 
-    endOldSessionsAndCreate().then(function () {
+    // Bij scheduled: geen oude live-sessies afsluiten (kan meerdere geplande hebben)
+    var setupPromise = isScheduled
+      ? Promise.resolve(null)
+      : endOldSessionsAndCreate();
+
+    setupPromise.then(function () {
       return f.collection('live_sessions').add(sessionDoc);
     }).then(function (ref) {
-      state.activeSessionId = ref.id;
+      state.activeSessionId = isScheduled ? null : ref.id;
       state.isStarting = false;
       if (btn) btn.disabled = false;
-      if (lbl) lbl.textContent = 'Ga live';
+      if (lbl) lbl.textContent = isScheduled ? 'Plan aankondiging' : 'Ga live';
       closeSheet();
+
+      if (isScheduled) {
+        // Success toast + notify volgers (best-effort, non-blocking)
+        try {
+          var when = formatDutchDate(state.scheduledFor);
+          if (window.DY && DY.toastSucces) DY.toastSucces('📅 Live gepland voor ' + when);
+        } catch (_) {}
+        notifyFollowersOfSchedule(f, u, ref.id, sessionDoc);
+        log('scheduled session', ref.id, 'for', state.scheduledFor);
+        return;
+      }
+
       // Open player as the host
       try {
         if (PP_Live.openPlayer) PP_Live.openPlayer(ref.id);
@@ -330,10 +499,59 @@
     }).catch(function (err) {
       state.isStarting = false;
       if (btn) btn.disabled = false;
-      if (lbl) lbl.textContent = 'Ga live';
-      showError('Kon sessie niet starten: ' + (err && err.message || 'onbekende fout'));
-      log('start failed', err && err.message);
+      if (lbl) lbl.textContent = isScheduled ? 'Plan aankondiging' : 'Ga live';
+      showError('Kon sessie niet ' + (isScheduled ? 'plannen' : 'starten') + ': ' + (err && err.message || 'onbekende fout'));
+      log('create failed', err && err.message);
     });
+  }
+
+  // ───────────── Followers notify bij schedule ─────────────
+  // Best-effort — als de "volgers" collectie niet bestaat of query faalt,
+  // gaat de scheduling gewoon door. Cron worker verstuurt T-15 reminders.
+  function notifyFollowersOfSchedule(f, u, sessionId, sessionDoc) {
+    try {
+      // Probeer volgers-lijst op te halen (gangbare paden in deze app)
+      var followersPromise = f.collection('followers')
+        .where('followedUid', '==', u.uid)
+        .limit(500)
+        .get()
+        .catch(function () {
+          // Fallback: users/{uid}/followers subcollection
+          return f.collection('users').doc(u.uid).collection('followers').limit(500).get();
+        });
+
+      followersPromise.then(function (snap) {
+        if (!snap || snap.empty) { log('geen followers om te notificeren'); return; }
+        var whenStr = formatDutchDate(sessionDoc.scheduledFor.toDate ? sessionDoc.scheduledFor.toDate() : state.scheduledFor);
+        var batch = f.batch();
+        var count = 0;
+        snap.forEach(function (doc) {
+          var d = doc.data() || {};
+          var followerUid = d.followerUid || d.uid || doc.id;
+          if (!followerUid || followerUid === u.uid) return;
+          var meldRef = f.collection('meldingen').doc();
+          batch.set(meldRef, {
+            userId: followerUid,
+            reporterUid: followerUid,
+            type: 'live_scheduled',
+            titel: '📅 ' + sessionDoc.hostName + ' plant een live',
+            bericht: sessionDoc.hostName + ' plant een live: "' + sessionDoc.title + '" op ' + whenStr,
+            sessionId: sessionId,
+            hostUid: u.uid,
+            hostName: sessionDoc.hostName,
+            deeplink: '/?pagina=live&aankomend=' + sessionId,
+            gelezen: false,
+            ts: new Date().toISOString()
+          });
+          count++;
+        });
+        if (count > 0) {
+          batch.commit()
+            .then(function () { log('notified ' + count + ' followers'); })
+            .catch(function (e) { log('follower notify batch fail', e && e.message); });
+        }
+      }).catch(function (e) { log('follower notify skip', e && e.message); });
+    } catch (e) { log('followers notify threw', e); }
   }
 
   function attachHostStreamToPlayer() {
