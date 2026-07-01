@@ -68,7 +68,13 @@
         '<div class="pp-live-player-top">' +
           '<button class="pp-live-close" data-testid="live-player-close" aria-label="Sluit live">✕</button>' +
           '<div class="pp-live-badge"><div class="pp-live-dot"></div> <span id="pp-live-badge-text">LIVE</span></div>' +
-          '<div style="width:38px"></div>' +
+          '<button class="pp-live-report-btn" id="pp-live-report-btn" data-testid="live-report-btn" ' +
+            'aria-label="Meld deze live sessie" title="Rapporteren" style="display:none">' +
+            '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
+              '<path d="M4 3v18M4 4h13l-2 4 2 4H4" stroke="currentColor" stroke-width="2" ' +
+                'stroke-linejoin="round" fill="none"/>' +
+            '</svg>' +
+          '</button>' +
         '</div>' +
         '<div class="pp-live-cohosts-bar" id="pp-live-cohosts-bar"></div>' +
         '<div class="pp-live-reactions-overlay" id="pp-live-reactions-overlay"></div>' +
@@ -95,6 +101,12 @@
     });
     modal.querySelector('#pp-live-chat-input').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); sendChat(); }
+    });
+    // Rapporteren / modereren — hergebruikt bestaande DY._toonMeldModal flow
+    var reportBtn = modal.querySelector('#pp-live-report-btn');
+    if (reportBtn) reportBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      openReport();
     });
     // Backdrop click does NOT close (full-screen modal, only X button) — by design
 
@@ -322,6 +334,15 @@
           state.sessionData = data;
           var bt = document.getElementById('pp-live-badge-text');
           if (bt) bt.textContent = 'LIVE · ' + (data.viewers || 0);
+          // Toon Report-knop alleen voor kijkers (niet voor host zelf)
+          try {
+            var reportBtn = document.getElementById('pp-live-report-btn');
+            if (reportBtn) {
+              var u = currentUser();
+              var isHost = u && data.hostUid && data.hostUid === u.uid;
+              reportBtn.style.display = isHost ? 'none' : 'inline-flex';
+            }
+          } catch (_) {}
           if (data.status === 'ended') {
             // Show end banner and auto-close
             var emo = document.getElementById('pp-live-player-emoji');
@@ -446,6 +467,43 @@
     window.__ppLiveUnloadHooked = true;
     window.addEventListener('beforeunload', endSessionOnUnload);
     window.addEventListener('pagehide', endSessionOnUnload);
+  }
+
+  // ───────────── Moderatie / rapporteren ─────────────
+  // Hergebruikt de bestaande DY._toonMeldModal() infrastructuur (categorieën,
+  // ernst, textarea, Firestore `meldingen` write + mailto naar staff).
+  // Voegt alleen de live-sessie context toe zodat moderators kunnen zien
+  // welke sessie/host gemeld werd.
+  function openReport() {
+    var u = currentUser();
+    if (!u || u.isAnonymous) {
+      try {
+        if (window.DY && typeof DY.toonLoginPrompt === 'function') {
+          DY.toonLoginPrompt('Log in om een live sessie te melden.');
+        }
+      } catch (_) {}
+      return;
+    }
+    var data = state.sessionData || {};
+    if (!window.DY || typeof DY._toonMeldModal !== 'function') {
+      log('DY._toonMeldModal niet beschikbaar');
+      return;
+    }
+    try {
+      DY._toonMeldModal({
+        id:   'live_session:' + (state.sessionId || ''),
+        uid:  data.hostUid || '',
+        naam: data.hostName || 'Onbekend',
+        foto: data.hostAvatar || '',
+        type: 'live_session',
+        titel: data.title || '',
+        extra: {
+          sessionId: state.sessionId,
+          format: data.format || '',
+          startedAt: data.startedAt ? (data.startedAt.toDate ? data.startedAt.toDate().toISOString() : String(data.startedAt)) : null
+        }
+      });
+    } catch (e) { log('openReport failed', e && e.message); }
   }
 
   function closePlayer(opts) {

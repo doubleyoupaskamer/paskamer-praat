@@ -1029,3 +1029,43 @@ body.pp-live-player-active .dy-sidebar {
   outline-offset: 2px;
 }
 .pp-live-start-sheet { position: relative; }
+
+/* ────────── v60.1.193 REPORT / MELDEN button in player top bar ────────── */
+.pp-live-player-top .pp-live-report-btn {
+  position: relative;
+  z-index: 5;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.18s ease, transform 0.12s ease, border-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+.pp-live-player-top .pp-live-report-btn:hover {
+  background: rgba(220, 60, 60, 0.55);
+  border-color: rgba(255, 255, 255, 0.42);
+}
+.pp-live-player-top .pp-live-report-btn:active { transform: scale(0.92); }
+.pp-live-player-top .pp-live-report-btn:focus-visible {
+  outline: 2px solid var(--clay, #c67d06);
+  outline-offset: 2px;
+}
+/* Op mobile: 44px touch target */
+@media (max-width: 640px) {
+  .pp-live-player-top .pp-live-report-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
