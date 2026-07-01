@@ -26,7 +26,14 @@
   var VERSION = '1.0.0';
   var PP_Live = window.PP_Live || (window.PP_Live = {});
 
-  var DEFAULT_TAGS = ['Tall', 'Plus size', 'Haul', 'Outfitvergelijking', 'Stijladvies', 'Co-host'];
+  // Studio formats — de 5 premium categorieën
+  var STUDIO_FORMATS = [
+    { key: 'live',     label: 'Studio Live',     emoji: '🔴', desc: 'Live fashion & interactie' },
+    { key: 'talks',    label: 'Studio Talks',    emoji: '🎙️', desc: 'Interviews met creators & merken' },
+    { key: 'shows',    label: 'Studio Shows',    emoji: '🎭', desc: 'Modeshows & collectielanceringen' },
+    { key: 'drops',    label: 'Studio Drops',    emoji: '💎', desc: 'Nieuwe releases & campagnes' },
+    { key: 'sessions', label: 'Studio Sessions', emoji: '✨', desc: 'Styling & community' }
+  ];
 
   function db() { return (window.firebase && firebase.firestore) ? firebase.firestore() : null; }
   function auth() { return (window.firebase && firebase.auth) ? firebase.auth() : null; }
@@ -39,7 +46,7 @@
 
   var state = {
     stream: null,
-    selectedTags: ['Tall'],
+    selectedFormat: 'live',
     activeSessionId: null,
     isStarting: false
   };
@@ -53,18 +60,22 @@
     modal.className = 'pp-live-start-modal';
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
-    modal.setAttribute('aria-label', 'Start live sessie');
+    modal.setAttribute('aria-label', 'Start Paskamer Studio sessie');
 
-    var tagsHtml = DEFAULT_TAGS.map(function (t, idx) {
-      var sel = idx === 0 ? ' pp-live-tag-selected' : '';
-      return '<button type="button" class="pp-live-sheet-tag' + sel + '" data-tag="' + escapeHtml(t) + '">' + escapeHtml(t) + '</button>';
+    var formatsHtml = STUDIO_FORMATS.map(function (f, idx) {
+      var sel = idx === 0 ? ' pp-live-format-selected' : '';
+      return '<button type="button" class="pp-live-format-tile' + sel + '" data-format="' + escapeHtml(f.key) + '" data-testid="live-format-' + escapeHtml(f.key) + '">' +
+        '<span class="pp-live-format-emoji">' + f.emoji + '</span>' +
+        '<span class="pp-live-format-label">' + escapeHtml(f.label) + '</span>' +
+        '<span class="pp-live-format-desc">' + escapeHtml(f.desc) + '</span>' +
+      '</button>';
     }).join('');
 
     modal.innerHTML = '' +
       '<div class="pp-live-start-sheet" role="document">' +
         '<div class="pp-live-sheet-handle" aria-hidden="true"></div>' +
-        '<div class="pp-live-sheet-title">📡 Start een Paskamer Studio sessie</div>' +
-        '<div class="pp-live-sheet-sub">Jouw community kijkt live mee terwijl jij past.</div>' +
+        '<div class="pp-live-sheet-title">🎬 Start een Paskamer Studio sessie</div>' +
+        '<div class="pp-live-sheet-sub">Kies je format en ga live voor jouw community.</div>' +
 
         '<div class="pp-live-error" id="pp-live-error" role="alert"></div>' +
 
@@ -79,12 +90,12 @@
 
         '<input type="text" class="pp-live-sheet-input" id="pp-live-title-input" data-testid="live-title-input" placeholder="Geef je sessie een titel..." maxlength="80">' +
 
-        '<div class="pp-live-sheet-tags-label">Categorie (kies één of meer)</div>' +
-        '<div class="pp-live-sheet-tags" id="pp-live-tags">' + tagsHtml + '</div>' +
+        '<div class="pp-live-sheet-tags-label">Kies je format</div>' +
+        '<div class="pp-live-format-grid" id="pp-live-formats">' + formatsHtml + '</div>' +
 
         '<button type="button" class="pp-live-start-btn" data-testid="live-start-btn" id="pp-live-start-go">' +
           '<span class="pp-live-dot"></span>' +
-          '<span id="pp-live-start-btn-label">Start live</span>' +
+          '<span id="pp-live-start-btn-label">Ga live</span>' +
         '</button>' +
       '</div>';
 
@@ -95,13 +106,14 @@
       if (e.target === modal) closeSheet();
     });
 
-    // Tag toggle
-    modal.querySelectorAll('.pp-live-sheet-tag').forEach(function (btn) {
+    // Format selection (single-select)
+    modal.querySelectorAll('.pp-live-format-tile').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        btn.classList.toggle('pp-live-tag-selected');
-        state.selectedTags = Array.prototype.slice.call(
-          modal.querySelectorAll('.pp-live-sheet-tag.pp-live-tag-selected')
-        ).map(function (b) { return b.getAttribute('data-tag'); });
+        modal.querySelectorAll('.pp-live-format-tile').forEach(function (b) {
+          b.classList.remove('pp-live-format-selected');
+        });
+        btn.classList.add('pp-live-format-selected');
+        state.selectedFormat = btn.getAttribute('data-format');
       });
     });
 
@@ -112,10 +124,8 @@
     // Start button
     modal.querySelector('#pp-live-start-go').addEventListener('click', startLive);
 
-    // Initial state: collect selected tags
-    state.selectedTags = Array.prototype.slice.call(
-      modal.querySelectorAll('.pp-live-sheet-tag.pp-live-tag-selected')
-    ).map(function (b) { return b.getAttribute('data-tag'); });
+    // Initial state: default format = 'live'
+    state.selectedFormat = 'live';
 
     return modal;
   }
@@ -191,8 +201,8 @@
       if (titleEl) titleEl.focus();
       return;
     }
-    if (!state.selectedTags || state.selectedTags.length === 0) {
-      showError('Kies minstens één categorie.');
+    if (!state.selectedFormat) {
+      showError('Kies een Studio format.');
       return;
     }
     var f = db();
@@ -211,25 +221,31 @@
     var hostName = profile.gebruikersnaam || profile.naam || u.displayName || (u.email && u.email.split('@')[0]) || 'gebruiker';
     if (hostName && hostName.charAt(0) !== '@') hostName = '@' + hostName;
 
+    // Detect brand vs user host via approved brands lookup (best-effort)
+    var isBrand = !!(profile.isBrand || profile.brandId);
     var sessionDoc = {
       hostUid: u.uid,
+      hostType: isBrand ? 'brand' : 'user',
       hostName: hostName,
       hostAvatar: profile.fotoUrl || u.photoURL || null,
+      brandId: isBrand ? u.uid : null,
       title: title.substring(0, 80),
-      tags: state.selectedTags.slice(0, 6),
+      format: state.selectedFormat,       // v13: primary categorization (live/talks/shows/drops/sessions)
+      tags: [],                            // reserved for future audience tags
       status: 'live',
       viewers: 0,
       reactions: 0,
       cohosts: [],
       startedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      endedAt: null
+      endedAt: null,
+      scheduledFor: null
     };
 
     f.collection('live_sessions').add(sessionDoc).then(function (ref) {
       state.activeSessionId = ref.id;
       state.isStarting = false;
       if (btn) btn.disabled = false;
-      if (lbl) lbl.textContent = 'Start live';
+      if (lbl) lbl.textContent = 'Ga live';
       closeSheet();
       // Open player as the host
       try {
@@ -252,7 +268,7 @@
     }).catch(function (err) {
       state.isStarting = false;
       if (btn) btn.disabled = false;
-      if (lbl) lbl.textContent = 'Start live';
+      if (lbl) lbl.textContent = 'Ga live';
       showError('Kon sessie niet starten: ' + (err && err.message || 'onbekende fout'));
       log('start failed', err && err.message);
     });

@@ -147,21 +147,27 @@
     return n.charAt(0).toUpperCase() || '?';
   }
 
+  var FORMAT_META = {
+    live:     { label: 'Studio Live',     emoji: '🔴', accent: '#E53935' },
+    talks:    { label: 'Studio Talks',    emoji: '🎙️', accent: '#8B6D2A' },
+    shows:    { label: 'Studio Shows',    emoji: '🎭', accent: '#6A3D8E' },
+    drops:    { label: 'Studio Drops',    emoji: '💎', accent: '#0F9D8B' },
+    sessions: { label: 'Studio Sessions', emoji: '✨', accent: '#C67D06' }
+  };
+
   function sessionCardHtml(s, featured) {
     var id = s.id;
-    var title = escapeHtml(s.title || 'Live sessie');
+    var title = escapeHtml(s.title || 'Studio sessie');
     var name = escapeHtml(s.hostName || 'anoniem');
+    var hostUid = escapeHtml(s.hostUid || '');
+    var hostType = s.hostType === 'brand' ? 'brand' : 'user';
     var viewers = (typeof s.viewers === 'number') ? s.viewers : 0;
-    var tags = Array.isArray(s.tags) ? s.tags.slice(0, 3) : [];
+    var format = FORMAT_META[s.format] || FORMAT_META.live;
     var thumbCls = featured ? 'pp-live-thumb' :
       (s.id && s.id.charCodeAt(0) % 2 === 0 ? 'pp-live-thumb pp-live-thumb-alt' : 'pp-live-thumb pp-live-thumb-alt2');
-    var emoji = featured ? '👗🪞' : (s.emoji || '✨');
+    var emoji = featured ? '👗🪞' : (s.emoji || format.emoji);
     var cohostBadge = (Array.isArray(s.cohosts) && s.cohosts.length > 0)
       ? '<div class="pp-live-cohost-badge">⚡ CO-HOST</div>' : '';
-
-    var tagsHtml = tags.map(function (t) {
-      return '<span class="pp-live-tag">' + escapeHtml(t) + '</span>';
-    }).join('');
 
     return '' +
       '<div class="pp-live-card ' + (featured ? 'pp-live-featured' : '') + '" ' +
@@ -171,15 +177,23 @@
             : escapeHtml(emoji)) + '</div>' +
         '<div class="pp-live-card-overlay"></div>' +
         cohostBadge +
-        '<div class="pp-live-badge"><div class="pp-live-dot"></div> LIVE</div>' +
-        '<div class="pp-live-viewer-count">👁 ' + viewers + '</div>' +
+        '<div class="pp-live-format-pill" style="background:' + format.accent + '">' +
+          format.emoji + ' ' + escapeHtml(format.label) +
+        '</div>' +
+        (s.status === 'live'
+          ? '<div class="pp-live-viewer-count">👁 ' + viewers + '</div>'
+          : '<div class="pp-live-viewer-count pp-live-scheduled">⏰ Gepland</div>') +
         '<div class="pp-live-card-info">' +
-          '<div class="pp-live-card-user">' +
-            '<div class="pp-live-avatar">' + escapeHtml(initialFor(s.hostName)) + '</div>' +
+          '<button type="button" class="pp-live-card-user pp-live-host-link" ' +
+              'data-host-uid="' + hostUid + '" data-host-type="' + hostType + '" ' +
+              'aria-label="Bekijk profiel van ' + name + '">' +
+            '<div class="pp-live-avatar">' + (s.hostAvatar
+              ? '<img src="' + escapeHtml(s.hostAvatar) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
+              : escapeHtml(initialFor(s.hostName))) + '</div>' +
             '<span class="pp-live-username">' + (name.charAt(0) === '@' ? name : '@' + name) + '</span>' +
-          '</div>' +
+            (hostType === 'brand' ? '<span class="pp-live-brand-tick" title="Geverifieerd merk">✓</span>' : '') +
+          '</button>' +
           '<div class="pp-live-card-titel">' + title + '</div>' +
-          (tagsHtml ? '<div class="pp-live-card-tags">' + tagsHtml + '</div>' : '') +
         '</div>' +
       '</div>';
   }
@@ -248,7 +262,34 @@
       html += '</div>';
       wrap.innerHTML = html;
       wrap.querySelectorAll('[data-session-id]').forEach(function (el) {
-        el.addEventListener('click', function () {
+        el.addEventListener('click', function (e) {
+          // Als de klik op de host-link zat, ga naar profiel i.p.v. sessie
+          var hostLink = e.target.closest('.pp-live-host-link');
+          if (hostLink) {
+            e.stopPropagation();
+            var uid = hostLink.getAttribute('data-host-uid');
+            var type = hostLink.getAttribute('data-host-type');
+            if (uid) {
+              try {
+                if (type === 'brand') {
+                  // Brandprofiel via bestaande brand-detail route
+                  window.DY && DY.navigeer && DY.navigeer('merken_detail');
+                  var url = new URL(window.location.href);
+                  url.searchParams.set('pagina', 'merken_detail');
+                  url.searchParams.set('id', uid);
+                  history.pushState(null, '', url.toString());
+                } else {
+                  // User profiel
+                  window.DY && DY.navigeer && DY.navigeer('profiel');
+                  var u2 = new URL(window.location.href);
+                  u2.searchParams.set('pagina', 'profiel');
+                  u2.searchParams.set('id', uid);
+                  history.pushState(null, '', u2.toString());
+                }
+              } catch (err) { log('host link failed', err); }
+            }
+            return;
+          }
           var id = el.getAttribute('data-session-id');
           if (id && PP_Live.openSession) PP_Live.openSession(id);
         });
