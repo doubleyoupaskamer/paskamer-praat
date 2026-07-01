@@ -1,0 +1,23 @@
+/**
+ * PASKAMER PRAAT — Hero Desktop Fullwidth Override (v1.0.0)
+ * ---------------------------------------------------------
+ * v1.0.0 (2026-07-01):
+ *   Op desktop (≥768px) laat de foto het volledige linker/midden
+ *   hero-blok vullen (object-fit: cover) en verwijder de wazige
+ *   achtergrondlaag (.dy-hm-hero-overlay).
+ *
+ * Additief only: dit bestand overschrijft slechts 2 property values
+ * uit app.css via hogere selector-specificiteit + het feit dat het
+ * NA app.css wordt ingeladen. Geen wijziging aan legacy CSS/JS.
+ */
+@media (min-width: 768px) {
+  /* Foto vult volledige beschikbare ruimte, geen padding rondom */
+  .dy-hm-hero-bg .dy-hm-hero-img {
+    object-fit: cover;
+    object-position: center center;
+  }
+  /* Verwijder de wazige/blur achtergrond-fill volledig */
+  .dy-hm-hero-bg .dy-hm-hero-overlay {
+    display: none !important;
+  }
+}
