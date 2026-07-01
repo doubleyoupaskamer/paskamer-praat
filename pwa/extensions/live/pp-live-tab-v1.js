@@ -376,6 +376,16 @@
   }
 
   function openStart() {
+    // Consistent met alle andere gates in de app: check DY.user (echt ingelogde
+    // user, geen anonymous) en toon dezelfde login-popup als bij andere flows.
+    try {
+      if (window.DY && !DY.user) {
+        if (typeof DY.toonLoginPrompt === 'function') {
+          DY.toonLoginPrompt('Log in om een live paskamersessie te starten en interactie te hebben met je community.');
+          return;
+        }
+      }
+    } catch (_) {}
     if (PP_Live.openStartSheet) PP_Live.openStartSheet();
   }
 

@@ -189,17 +189,17 @@
   function startLive() {
     if (state.isStarting) return;
     var u = currentUser();
-    if (!u) {
-      showError('Log in om een live sessie te starten.');
-      try { if (window.DY && DY.toonLoginPrompt) DY.toonLoginPrompt('Log in om live te gaan.'); } catch (_) {}
-      return;
-    }
     // Firestore rules eisen echt-ingelogde user (niet anonymous). Guest-auth
     // maakt een anonymous session aan, die mag WEL lezen/kijken maar niet zelf
-    // een live starten. Beter feedback dan de "Missing or insufficient permissions" error.
-    if (u.isAnonymous) {
-      showError('Je moet ingelogd zijn om zelf live te gaan. Anoniem kijken kan wel.');
-      try { if (window.DY && DY.toonLoginPrompt) DY.toonLoginPrompt('Log in om live te gaan.'); } catch (_) {}
+    // een live starten. Toon standaard login-popup (net als andere app-flows)
+    // en sluit de start-sheet, ipv een rode error binnen de sheet.
+    if (!u || u.isAnonymous) {
+      try { closeSheet(); } catch (_) {}
+      try {
+        if (window.DY && typeof DY.toonLoginPrompt === 'function') {
+          DY.toonLoginPrompt('Log in om een live paskamersessie te starten en interactie te hebben met je community.');
+        }
+      } catch (_) {}
       return;
     }
     var titleEl = document.getElementById('pp-live-title-input');

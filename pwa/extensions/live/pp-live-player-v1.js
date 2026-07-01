@@ -237,11 +237,11 @@
     var text = (input.value || '').trim();
     if (!text) return;
     var u = currentUser();
-    if (!u) {
-      // Not logged in — local optimistic message + login prompt
+    if (!u || u.isAnonymous) {
+      // Not logged in (of anonymous guest) — local optimistic message + login prompt
       appendMsg({ userName: '@gast', text: text });
       input.value = '';
-      try { if (window.DY && DY.toonLoginPrompt) DY.toonLoginPrompt('Log in om mee te chatten.'); } catch (_) {}
+      try { if (window.DY && DY.toonLoginPrompt) DY.toonLoginPrompt('Log in om mee te chatten in de Paskamer Studio.'); } catch (_) {}
       return;
     }
     var f = db();
@@ -279,7 +279,19 @@
     if (!state.sessionId) return;
     var f = db();
     var u = currentUser();
-    if (!f || !u) return;
+    if (!f) return;
+    // Anonymous of niet-ingelogd: alleen lokale float-animatie tonen +
+    // eenmalig login-popup. Voorkomt "Missing or insufficient permissions"
+    // in de console.
+    if (!u || u.isAnonymous) {
+      try {
+        if (!state._loginPromptShown && window.DY && DY.toonLoginPrompt) {
+          state._loginPromptShown = true;
+          DY.toonLoginPrompt('Log in om reacties te sturen in de Paskamer Studio.');
+        }
+      } catch (_) {}
+      return;
+    }
     // Throttle to max 1 per 400ms to avoid runaway writes
     var now = Date.now();
     if (state._lastReactAt && (now - state._lastReactAt) < 400) return;
