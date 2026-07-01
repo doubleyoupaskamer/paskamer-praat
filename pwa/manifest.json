@@ -1,6 +1,6 @@
 {
-  "name": "Doubleyou - Tailored for Tall & Plus Size",
-  "short_name": "Doubleyou",
+  "name": "Paskamerpraat - Tailored for Tall & Plus Size",
+  "short_name": "Paskamerpraat",
   "description": "Tailored for Tall & Plus Size. De community voor tall (1.85m+) en plus size (XL-5XL) fashion. Deel je pasvorm ervaringen en ontdek kleding die echt past.",
   "start_url": "/",
   "display": "standalone",
@@ -39,14 +39,14 @@
       "sizes": "720x1280",
       "type": "image/jpeg",
       "form_factor": "narrow",
-      "label": "Doubleyou community feed op mobiel"
+      "label": "Paskamerpraat community feed op mobiel"
     },
     {
       "src": "screenshot-wide.jpg",
       "sizes": "1280x720",
       "type": "image/jpeg",
       "form_factor": "wide",
-      "label": "Doubleyou - Tailored for Tall & Plus Size"
+      "label": "Paskamerpraat - Tailored for Tall & Plus Size"
     }
   ],
   "scope": "/",

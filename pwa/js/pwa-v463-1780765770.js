@@ -146,18 +146,18 @@ DY._VERSION = 'v1779170400-seo-v358';
 
 // ── SEO: Dynamische meta-tags per pagina ─────────────────────────
 DY._seoMetaConfig = {
-  feed:             { title: 'Community Feed | Pasvorm Ervaringen & Fitchecks - Doubleyou', desc: 'Bekijk de nieuwste pasvorm ervaringen, fitchecks en outfit verhalen van tall (1.85m+) en plus size (XL-5XL) fashion fans in Nederland. Gratis community.' },
-  lookbook:         { title: 'Outfit Inspiratie Tall & Plus Size | Lookbook - Doubleyou', desc: 'Outfit inspiratie van echte mensen, gefilterd op jouw lengte (1.85m-2.00m+) en maat (XL-5XL). Zie hoe kleding écht staat op een lichaam als het jouwe.' },
-  reviews:          { title: 'Pasvorm Reviews | Kleding voor Lange & Plus Size Mensen - Doubleyou', desc: 'Eerlijke pasvorm reviews van kledingmerken voor tall (1.85m+) en plus size (XL-5XL). Ontdek welke merken goed passen bij jouw lengte en bouw.' },
-  winkel:           { title: 'DoubleYou Winkel | Kleding voor Tall & Plus Size - Doubleyou', desc: 'Kleding gemaakt voor tall mensen (1.85m+) en plus size mensen (XL-5XL). Nederlandse ateliers, eerlijke pasvorm. Ontdek de DoubleYou collectie.' },
-  challenges:       { title: 'Fashion Challenges voor Tall & Plus Size | Win DSP Punten - Doubleyou', desc: 'Doe mee aan wekelijkse fashion challenges voor tall en plus size mensen. Verdien DSP punten, stijg in rang en win community erkenning.' },
-  ovdw:             { title: 'Post van de Week | Beste Pasvorm Bijdrage - Doubleyou', desc: 'De best beoordeelde community bijdrage van afgelopen week. Elke week kiezen Doubleyou leden de mooiste fitcheck of pasvorm review.' },
-  kleuren_ai:       { title: 'AI Outfit Vergelijker | Stijladvies voor Tall & Plus Size - Doubleyou', desc: 'Vergelijk outfits met AI en ontvang persoonlijk stijladvies op basis van jouw lengte, maat en lichaamsprofiel. Gratis AI stylist voor tall en plus size mensen.' },
-  voorwaarden:      { title: 'Algemene Voorwaarden - Doubleyou | DoubleYou', desc: 'Lees de gebruiksvoorwaarden van Doubleyou, de tall en plus size fashion community van DoubleYou Fashion Nederland.' },
-  privacy:          { title: 'Privacybeleid - Doubleyou | DoubleYou', desc: 'Hoe Doubleyou omgaat met jouw persoonsgegevens. AVG-conform privacybeleid van de tall en plus size fashion community.' },
-  community_regels: { title: 'Community Regels - Doubleyou | Veilige Modeomgeving', desc: 'De gedragsregels van Doubleyou: respectvol, inclusief en veilig voor alle tall en plus size fashion liefhebbers in Nederland.' },
-  beta_pagina:      { title: 'Beta | Nieuwe Features - Doubleyou', desc: 'Doubleyou is in beta. Ontdek de nieuwste features voor de tall en plus size fashion community van DoubleYou.' },
-  home:             { title: 'Doubleyou | Tailored for Tall & Plus Size - Fashion Community Nederland', desc: 'Tailored for Tall & Plus Size. De gratis community voor tall fashion (1.85m+) en plus size mode (XL-5XL) in Nederland. Eerlijke pasvorm reviews, outfit inspiratie en AI stijladvies.' }
+  feed:             { title: 'Community Feed | Pasvorm Ervaringen & Fitchecks - Paskamerpraat', desc: 'Bekijk de nieuwste pasvorm ervaringen, fitchecks en outfit verhalen van tall (1.85m+) en plus size (XL-5XL) fashion fans in Nederland. Gratis community.' },
+  lookbook:         { title: 'Outfit Inspiratie Tall & Plus Size | Lookbook - Paskamerpraat', desc: 'Outfit inspiratie van echte mensen, gefilterd op jouw lengte (1.85m-2.00m+) en maat (XL-5XL). Zie hoe kleding écht staat op een lichaam als het jouwe.' },
+  reviews:          { title: 'Pasvorm Reviews | Kleding voor Lange & Plus Size Mensen - Paskamerpraat', desc: 'Eerlijke pasvorm reviews van kledingmerken voor tall (1.85m+) en plus size (XL-5XL). Ontdek welke merken goed passen bij jouw lengte en bouw.' },
+  winkel:           { title: 'Paskamerpraat Winkel | Kleding voor Tall & Plus Size - Paskamerpraat', desc: 'Kleding gemaakt voor tall mensen (1.85m+) en plus size mensen (XL-5XL). Nederlandse ateliers, eerlijke pasvorm. Ontdek de DoubleYou collectie.' },
+  challenges:       { title: 'Fashion Challenges voor Tall & Plus Size | Win DSP Punten - Paskamerpraat', desc: 'Doe mee aan wekelijkse fashion challenges voor tall en plus size mensen. Verdien DSP punten, stijg in rang en win community erkenning.' },
+  ovdw:             { title: 'Post van de Week | Beste Pasvorm Bijdrage - Paskamerpraat', desc: 'De best beoordeelde community bijdrage van afgelopen week. Elke week kiezen Paskamerpraat leden de mooiste fitcheck of pasvorm review.' },
+  kleuren_ai:       { title: 'AI Outfit Vergelijker | Stijladvies voor Tall & Plus Size - Paskamerpraat', desc: 'Vergelijk outfits met AI en ontvang persoonlijk stijladvies op basis van jouw lengte, maat en lichaamsprofiel. Gratis AI stylist voor tall en plus size mensen.' },
+  voorwaarden:      { title: 'Algemene Voorwaarden - Paskamerpraat | DoubleYou', desc: 'Lees de gebruiksvoorwaarden van Paskamerpraat, de tall en plus size fashion community van DoubleYou Fashion Nederland.' },
+  privacy:          { title: 'Privacybeleid - Paskamerpraat | DoubleYou', desc: 'Hoe Paskamerpraat omgaat met jouw persoonsgegevens. AVG-conform privacybeleid van de tall en plus size fashion community.' },
+  community_regels: { title: 'Community Regels - Paskamerpraat | Veilige Modeomgeving', desc: 'De gedragsregels van Paskamerpraat: respectvol, inclusief en veilig voor alle tall en plus size fashion liefhebbers in Nederland.' },
+  beta_pagina:      { title: 'Beta | Nieuwe Features - Paskamerpraat', desc: 'Paskamerpraat is in beta. Ontdek de nieuwste features voor de tall en plus size fashion community van DoubleYou.' },
+  home:             { title: 'Paskamerpraat | Tailored for Tall & Plus Size - Fashion Community Nederland', desc: 'Tailored for Tall & Plus Size. De gratis community voor tall fashion (1.85m+) en plus size mode (XL-5XL) in Nederland. Eerlijke pasvorm reviews, outfit inspiratie en AI stijladvies.' }
 };
 
 DY._updateSEOMeta = function(pagina) {
@@ -1488,7 +1488,7 @@ DY.renderVrienden = async function() {
       '<div class="dy-vr-header">' +
         '<div class="dy-vr-header-inner">' +
           '<div>' +
-            '<div class="dy-feed-merk-label">Doubleyou</div>' +
+            '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
             '<h1 class="dy-vr-titel">Mijn <em>Community</em></h1>' +
             '<span class="dy-trust-badge" aria-hidden="true"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Community Safe Space</span>' +
           '</div>' +
@@ -1618,7 +1618,7 @@ DY.renderVindMensen = async function() {
       '<div class="dy-vr-header">' +
         '<div class="dy-vr-header-inner">' +
           '<div>' +
-            '<div class="dy-feed-merk-label">Doubleyou</div>' +
+            '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
             '<h1 class="dy-vr-titel">Ontdek <em>community</em></h1>' +
           '</div>' +
           '<button class="dy-pg-actie-btn" id="dy-vind-terug">← Terug</button>' +
@@ -1937,7 +1937,7 @@ DY.renderLogin = function() {
       <button class="dy-back-btn" onclick="try{DY.pagina=null;DY.navigeer('home');}catch(e){window.location.replace('/');}" style="margin:var(--sp-4) var(--sp-4) 0">← Terug</button>
       <div class="dy-auth-logo">
         <div class="dy-auth-w">W</div>
-        <div class="dy-auth-brand">DoubleYou</div>
+        <div class="dy-auth-brand">Paskamerpraat</div>
         <div class="dy-auth-sub">Paskamerpraat</div>
       </div>
       <div class="dy-auth-card">
@@ -2021,7 +2021,7 @@ DY.renderRegister = function() {
       <button class="dy-back-btn" onclick="DY.terug()" style="margin:var(--sp-4) var(--sp-4) 0">← Terug</button>
       <div class="dy-auth-logo">
         <div class="dy-auth-w">W</div>
-        <div class="dy-auth-brand">DoubleYou</div>
+        <div class="dy-auth-brand">Paskamerpraat</div>
         <div class="dy-auth-sub">Paskamerpraat</div>
       </div>
       <div class="dy-auth-card">
@@ -2213,7 +2213,7 @@ DY.toonBposOverlay = function() {
       '</div>' +
       '<div class="dy-bpos-regels-lijst">' + regelHTML + '</div>' +
       '<div class="dy-bpos-slot">' +
-        '<button class="dy-bpos-cta" onclick="DY.sluitBposOverlay()">Terug naar DoubleYou</button>' +
+        '<button class="dy-bpos-cta" onclick="DY.sluitBposOverlay()">Terug naar Paskamerpraat</button>' +
       '</div>' +
     '</div>';
 
@@ -2442,7 +2442,7 @@ DY.renderVoorwaarden = function() {
     '<div class="dy-vr-header-inner" style="justify-content:flex-start;gap:12px">' +
       '<button class="dy-back-btn" onclick="DY.terug()" style="color:rgba(252,248,239,0.7)">&#8592;</button>' +
       '<div>' +
-        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Doubleyou</div>' +
+        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Paskamerpraat</div>' +
         '<h1 class="dy-vr-titel">Algemene <em>Voorwaarden</em></h1>' +
       '</div>' +
     '</div>' +
@@ -2456,7 +2456,7 @@ DY.renderVoorwaarden = function() {
     '<div style="padding:20px 16px 80px;max-width:680px;margin:0 auto">' +
       '<p style="font-size:0.8rem;color:rgba(253,248,240,0.35);margin-bottom:20px">Laatst geüpdatet 28-05-2026</p>' +
       '<h2 style="' + h2 + '">1. Gebruik van de app</h2>' +
-      '<p style="' + p + '">Doubleyou is een community-platform van DoubleYou voor tall en plus size kleding. Door gebruik te maken van de app ga je akkoord met deze voorwaarden.</p>' +
+      '<p style="' + p + '">Paskamerpraat is een community-platform van DoubleYou voor tall en plus size kleding. Door gebruik te maken van de app ga je akkoord met deze voorwaarden.</p>' +
       '<h2 style="' + h2 + '">2. Account en gedrag</h2>' +
       '<p style="' + p + '">Je bent verantwoordelijk voor het gebruik van jouw account. Beledigende, discriminerende of misleidende content is niet toegestaan. DoubleYou behoudt het recht content te verwijderen en accounts te blokkeren.</p>' +
       '<h2 style="' + h2 + '">3. Content en eigendomsrecht</h2>' +
@@ -2482,7 +2482,7 @@ DY.renderPrivacyBeleid = function() {
     '<div class="dy-vr-header-inner" style="justify-content:flex-start;gap:12px">' +
       '<button class="dy-back-btn" onclick="DY.terug()" style="color:rgba(252,248,239,0.7)">&#8592;</button>' +
       '<div>' +
-        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Doubleyou</div>' +
+        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Paskamerpraat</div>' +
         '<h1 class="dy-vr-titel">Privacy<em>beleid</em></h1>' +
       '</div>' +
     '</div>' +
@@ -2526,7 +2526,7 @@ DY.renderPrivacyCenter = function() {
     '<div class="dy-vr-header-inner" style="justify-content:flex-start;gap:12px">' +
       '<button class="dy-back-btn" onclick="DY.terug()" style="color:rgba(252,248,239,0.7)">&#8592;</button>' +
       '<div>' +
-        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Doubleyou</div>' +
+        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Paskamerpraat</div>' +
         '<h1 class="dy-vr-titel">Privacy & <em>Instellingen</em></h1>' +
       '</div>' +
     '</div>' +
@@ -2739,7 +2739,7 @@ DY.renderAccountVerwijder = function() {
     '<div class="dy-vr-header-inner" style="justify-content:flex-start;gap:12px">' +
       '<button class="dy-back-btn" onclick="DY.terug()" style="color:rgba(252,248,239,0.7)">&#8592;</button>' +
       '<div>' +
-        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Doubleyou</div>' +
+        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Paskamerpraat</div>' +
         '<h1 class="dy-vr-titel">Account <em>Verwijderen</em></h1>' +
       '</div>' +
     '</div>' +
@@ -2866,7 +2866,7 @@ DY.renderCommunityRegels = function() {
     '<div class="dy-vr-header-inner" style="justify-content:flex-start;gap:12px">' +
       '<button class="dy-back-btn" onclick="DY.terug()" style="color:rgba(252,248,239,0.7)">&#8592;</button>' +
       '<div>' +
-        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Doubleyou</div>' +
+        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Paskamerpraat</div>' +
         '<h1 class="dy-vr-titel">Community <em>Regels</em></h1>' +
       '</div>' +
     '</div>' +
@@ -2882,7 +2882,7 @@ DY.renderCommunityRegels = function() {
       '<h2 style="' + h2 + '">1. Respect</h2>' +
       '<p style="' + p + '">Behandel anderen zoals je zelf behandeld wilt worden. Geen discriminatie, pesten of persoonlijke aanvallen op basis van uiterlijk, lengte, gewicht, geslacht, afkomst of achtergrond.</p>' +
       '<h2 style="' + h2 + '">2. Body positivity</h2>' +
-      '<p style="' + p + '">Doubleyou is een body-positive ruimte. Negatieve opmerkingen over lichamen, maten of gewicht worden niet getolereerd.</p>' +
+      '<p style="' + p + '">Paskamerpraat is een body-positive ruimte. Negatieve opmerkingen over lichamen, maten of gewicht worden niet getolereerd.</p>' +
       '<h2 style="' + h2 + '">3. Authentieke content</h2>' +
       '<p style="' + p + '">Deel alleen content waarvan je de rechten bezit. Geen spam, reclame zonder toestemming of nep-accounts.</p>' +
       '<h2 style="' + h2 + '">4. Handhaving</h2>' +
@@ -2904,8 +2904,8 @@ DY.renderBetaPagina = function() {
     '<div class="dy-vr-header-inner" style="justify-content:flex-start;gap:12px">' +
       '<button class="dy-back-btn" onclick="DY.terug()" style="color:rgba(252,248,239,0.7)">&#8592;</button>' +
       '<div>' +
-        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Doubleyou</div>' +
-        '<h1 class="dy-vr-titel">Doubleyou <em>Beta</em></h1>' +
+        '<div class="dy-feed-merk-label" style="color:rgba(252,248,239,0.45)">Paskamerpraat</div>' +
+        '<h1 class="dy-vr-titel">Paskamerpraat <em>Beta</em></h1>' +
       '</div>' +
     '</div>' +
   '</div>' +
@@ -2918,7 +2918,7 @@ DY.renderBetaPagina = function() {
     '<div style="padding:20px 16px 80px;max-width:680px;margin:0 auto">' +
       '<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(198,125,6,0.12);border:1px solid rgba(198,125,6,0.3);padding:4px 12px;border-radius:4px;font-size:0.72rem;font-weight:700;letter-spacing:0.1em;color:var(--clay);margin-bottom:20px">BETA</div>' +
       '<h2 style="' + h2 + '">Wat betekent Beta?</h2>' +
-      '<p style="' + p + '">Doubleyou is momenteel in beta. Dit betekent dat de app actief wordt doorontwikkeld op basis van jouw feedback en dat er regelmatig nieuwe functies en verbeteringen worden doorgevoerd.</p>' +
+      '<p style="' + p + '">Paskamerpraat is momenteel in beta. Dit betekent dat de app actief wordt doorontwikkeld op basis van jouw feedback en dat er regelmatig nieuwe functies en verbeteringen worden doorgevoerd.</p>' +
       '<h2 style="' + h2 + '">Wat kun je verwachten?</h2>' +
       '<p style="' + p + '">Tijdens de beta-fase kan de app af en toe tijdelijk minder stabiel zijn. We werken continu aan verbeteringen. Nieuwe functies worden als eerste uitgerold naar beta-gebruikers.</p>' +
       '<h2 style="' + h2 + '">Jouw feedback telt</h2>' +
@@ -3097,7 +3097,7 @@ DY.toonBodyPositivityOverlay = function() {
         '</div>' +
       '</div>' +
       '<div class="dy-bpos-content">' +
-        '<p class="dy-bpos-welkom">Welkom bij Doubleyou Paskamerpraat. Onze community draait om <strong>zelfvertrouwen, respect en inclusiviteit</strong>.</p>' +
+        '<p class="dy-bpos-welkom">Welkom bij Paskamerpraat Paskamerpraat. Onze community draait om <strong>zelfvertrouwen, respect en inclusiviteit</strong>.</p>' +
         '<div class="dy-bpos-regels">' +
           '<div class="dy-bpos-regel"><span class="dy-bpos-nr">1</span><div><strong>Respect voor ieder lichaam</strong><p>Geen discriminatie over gewicht, lengte, lichaamsvorm, huidskleur of kledingstijl.</p></div></div>' +
           '<div class="dy-bpos-regel"><span class="dy-bpos-nr">2</span><div><strong>Geen bodyshaming</strong><p>Kwetsende opmerkingen, vernederende vergelijkingen en pestgedrag zijn verboden.</p></div></div>' +
@@ -3105,7 +3105,7 @@ DY.toonBodyPositivityOverlay = function() {
           '<div class="dy-bpos-regel"><span class="dy-bpos-nr">4</span><div><strong>Authentieke content</strong><p>Geen promotie van extreme diëten, schadelijke afslankmethodes of misleidende content.</p></div></div>' +
           '<div class="dy-bpos-regel"><span class="dy-bpos-nr">5</span><div><strong>Respect privacy</strong><p>Vraag toestemming voordat je persoonlijke content van anderen deelt.</p></div></div>' +
         '</div>' +
-        '<p class="dy-bpos-akkoord">Door Doubleyou te gebruiken ga je akkoord met dit reglement en draag je bij aan een veilige, inspirerende community voor iedereen. 🤎</p>' +
+        '<p class="dy-bpos-akkoord">Door Paskamerpraat te gebruiken ga je akkoord met dit reglement en draag je bij aan een veilige, inspirerende community voor iedereen. 🤎</p>' +
       '</div>' +
       '<button class="dy-bpos-cta" id="dy-bpos-akkoord">Ik ga akkoord - naar de community</button>' +
     '</div>';
@@ -3147,7 +3147,7 @@ DY.toonOnboardingOverlay = function() {
       '<div class="dy-ob-merk">' +
         '<span class="dy-ob-w">W</span>' +
         '<div class="dy-ob-merk-tekst">' +
-          '<span class="dy-ob-merknaam">Doubleyou</span>' +
+          '<span class="dy-ob-merknaam">Paskamerpraat</span>' +
           '<span class="dy-ob-merksub">Tall & Plus Size Community</span>' +
         '</div>' +
       '</div>' +
@@ -4964,7 +4964,7 @@ DY.renderNieuwVerhaal = function() {
       <!-- Community norm - subtiel, niet opdringerig -->
       <div class="dy-community-norm">
         <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" style="color:var(--clay);flex-shrink:0"><path d="M8 14.5s-6-3.8-6-8a4.5 4.5 0 0 1 6-4.2A4.5 4.5 0 0 1 14 6.5c0 4.2-6 8-6 8z"/></svg>
-        <span>Doubleyou is een respectvolle, niet-oordelende ruimte. Deel wat jij wil en behandel anderen zoals jij behandeld wil worden.</span>
+        <span>Paskamerpraat is een respectvolle, niet-oordelende ruimte. Deel wat jij wil en behandel anderen zoals jij behandeld wil worden.</span>
       </div>
 
       <!-- Actiebalk onderin -->
@@ -7466,7 +7466,7 @@ DY.renderDSP = function() {
     <div class="dy-vr-header">
       <div class="dy-vr-header-inner">
         <div>
-          <div class="dy-feed-merk-label">Doubleyou</div>
+          <div class="dy-feed-merk-label">Paskamerpraat</div>
           <h1 class="dy-vr-titel"><span class="dy-dsp-label">DSP</span> <em>Punten</em></h1>
         </div>
         <button class="dy-pg-actie-btn" onclick="DY.terug()">← Terug</button>
@@ -7506,7 +7506,7 @@ DY.renderDSP = function() {
 // ── DELEN ──────────────────────────────────────────────────────────
 DY.openDeel = function(verhaalId, titel) {
   const url = `https://paskamer-praat.pages.dev/?verhaal=${verhaalId}`;
-  const tekst = `"${titel.substring(0,80)}. Lees het verhaal op Doubleyou`;
+  const tekst = `"${titel.substring(0,80)}. Lees het verhaal op Paskamerpraat`;
 
   // Bestaande modal verwijderen
   const bestaand = document.getElementById('dy-deel-modal');
@@ -7811,7 +7811,7 @@ DY._stuurPushGedebounced = function(auteurUid, type, docId, extraLabel) {
     var titel = '', bericht = '', url = '';
     if (type === 'like') {
       titel = batch.count === 1 ? mijnNaam + ' vond je post leuk' : batch.count + ' mensen vonden je post leuk';
-      bericht = 'Bekijk je verhaal in Doubleyou';
+      bericht = 'Bekijk je verhaal in Paskamerpraat';
       url = '/?docId=' + batch.docId;
     } else if (type === 'volgen') {
       titel = mijnNaam + ' volgt je nu';
@@ -8057,7 +8057,7 @@ DY.toonLoginPrompt = function(reden, opties) {
       '<div class="dy-login-sheet-merk">' +
         '<span class="dy-login-sheet-w">W</span>' +
         '<div class="dy-login-sheet-merk-tekst">' +
-          '<span class="dy-login-sheet-merk-naam">Doubleyou</span>' +
+          '<span class="dy-login-sheet-merk-naam">Paskamerpraat</span>' +
           '<span class="dy-login-sheet-merk-sub">Paskamerpraat</span>' +
         '</div>' +
       '</div>' +
@@ -9223,7 +9223,7 @@ DY.renderWinkel = function() {
       <div class="dy-vr-header">
         <div class="dy-vr-header-inner">
           <div>
-            <div class="dy-feed-merk-label">DoubleYou</div>
+            <div class="dy-feed-merk-label">Paskamerpraat</div>
             <h1 class="dy-vr-titel">De <em>Winkel</em></h1>
           </div>
           <button class="dy-pg-actie-btn" onclick="DY.openWebshop('https://doubleyoufashion.nl/collections/doubleyou-1')">
@@ -9250,7 +9250,7 @@ DY.renderWinkel = function() {
           <!-- W Premium midden kaart -->
           <div class="dy-wk-w-midden">
             <div class="dy-wk-w-logo">W</div>
-            <div class="dy-wk-w-brand">DoubleYou</div>
+            <div class="dy-wk-w-brand">Paskamerpraat</div>
             <div class="dy-wk-w-sub">Tailored for Tall &amp; Plus Size</div>
             <div class="dy-wk-w-tag">Premium</div>
           </div>
@@ -9735,7 +9735,7 @@ DY.renderMeldingen = async function() {
       '<div class="dy-pg-header-inner">' +
         '<div>' +
           '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2)" data-testid="meldingen-terug-btn">← Terug</button>' +
-          '<div class="dy-feed-merk-label">Doubleyou</div>' +
+          '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
           '<h1 class="dy-pg-titel">Activiteiten</h1>' +
         '</div>' +
       '</div>' +
@@ -9944,7 +9944,7 @@ DY.renderChallenges = async function() {
       '<div class="dy-pg-header-inner">' +
         '<div>' +
           '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2);color:rgba(253,248,240,0.85)" data-testid="challenges-terug-btn">← Terug</button>' +
-          '<div class="dy-feed-merk-label" style="color:rgba(198,125,6,0.7)">Doubleyou</div>' +
+          '<div class="dy-feed-merk-label" style="color:rgba(198,125,6,0.7)">Paskamerpraat</div>' +
           '<h1 class="dy-pg-titel" style="color:rgba(253,248,240,0.95)">Community <em>Challenges</em></h1>' +
           '<p class="dy-pg-sub" style="color:rgba(253,248,240,0.38)">Doe mee en verdien extra <span class="dy-dsp-label">DSP punten</span>.</p>' +
         '</div>' +
@@ -10184,7 +10184,7 @@ DY.renderOvdwFeed = async function() {
       '<div class="dy-lb-header-inner">' +
         '<div style="min-width:0;flex:1;overflow:hidden">' +
           '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2)" data-testid="ovdw-terug-btn">← Terug</button>' +
-          '<div class="dy-feed-merk-label">Doubleyou</div>' +
+          '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
           '<h1 class="dy-lb-page-titel">Post <em>van de week</em></h1>' +
         '</div>' +
       '</div>' +
@@ -10572,7 +10572,7 @@ DY.renderLeaderboard = async function() {
     '<div class="dy-vr-header">' +
       '<div class="dy-vr-header-inner">' +
         '<div>' +
-          '<div class="dy-feed-merk-label">Doubleyou</div>' +
+          '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
           '<h1 class="dy-vr-titel">Top <em>leden</em></h1>' +
         '</div>' +
         '<button class="dy-pg-actie-btn" onclick="DY.navigeer(\'feed\')">← Terug</button>' +
@@ -11037,7 +11037,7 @@ DY.renderReviewsOverzicht = async function() {
     '<div class="dy-vr-header">' +
       '<div class="dy-vr-header-inner">' +
         '<div>' +
-          '<div class="dy-feed-merk-label">Doubleyou</div>' +
+          '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
           '<h1 class="dy-vr-titel">Eerlijke <em>Reviews</em></h1>' +
         '</div>' +
         '<button class="dy-pg-actie-btn" id="dy-rev-nieuw-btn">\u2605 Plaatsen</button>' +
@@ -11686,10 +11686,10 @@ DY._looksCacheTTL = 90000;
 DY.deelVerhaal = async function(id, titel) {
   try {
     var url = window.location.origin + '/?verhaal=' + (id || '');
-    var tekst = titel || 'Bekijk dit verhaal op Doubleyou';
+    var tekst = titel || 'Bekijk dit verhaal op Paskamerpraat';
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Doubleyou', text: tekst, url: url });
+        await navigator.share({ title: 'Paskamerpraat', text: tekst, url: url });
         DY.geefPunten && DY.geefPunten('deel_verhaal', id);
       } catch(e) {
         if (e.name !== 'AbortError') DY._deelFallback(url);
@@ -11722,7 +11722,7 @@ DY.renderLookbook = function() {
       '<div class="dy-lb-header-inner">' +
         '<div>' +
           '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2)" data-testid="lookbook-terug-btn">← Terug</button>' +
-          '<div class="dy-feed-merk-label">Doubleyou</div>' +
+          '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
           '<h1 class="dy-lb-page-titel">Look <em>Book</em></h1>' +
         '</div>' +
         (DY.user ? '<button class="dy-lb-post-btn-header" onclick="DY.navigeer(\'lookbook_nieuw\')">'+
@@ -13168,7 +13168,7 @@ DY.cfgDownloadBriefing = function() {
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = 'doubleyou-atelier-briefing-' + k + '-' + new Date().toISOString().slice(0,10) + '.html';
+  a.download = 'paskamerpraat-atelier-briefing-' + k + '-' + new Date().toISOString().slice(0,10) + '.html';
   a.click();
   URL.revokeObjectURL(url);
   DY.toast('Briefing gedownload!');
@@ -13203,7 +13203,7 @@ DY.cfgMailBriefing = function() {
     '\nKLEUR\n' + kleurNaam + '\n' +
     (s.details && s.details.length ? '\nDETAILS\n' + s.details.join('\n') + '\n' : '') +
     (notitiesWaarde ? '\nNOTITIES\n' + notitiesWaarde + '\n' : '') +
-    '\n---\nVerzonden via Doubleyou'
+    '\n---\nVerzonden via Paskamerpraat'
   );
 
   window.location.href = 'mailto:info@doubleyousmallandtall.nl?subject=' + onderwerp + '&body=' + body;
@@ -13211,7 +13211,7 @@ DY.cfgMailBriefing = function() {
 
 
 // ── CONFIGURATOR SHOPIFY STOREFRONT KOPPELING ─────────────────────
-DY.CFG_SHOPIFY_STORE = 'doubleyou-5206.myshopify.com';
+DY.CFG_SHOPIFY_STORE = 'paskamerpraat-5206.myshopify.com';
 DY.CFG_SHOPIFY_TOKEN = ''; // Wordt ingevuld na token aanmaken
 
 DY.cfgLaadShopifyProducten = async function() {
@@ -13370,7 +13370,7 @@ DY.cfgDownloadPatroon = function() {
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = 'doubleyou-patroon-' + k + '-' + (profiel.lengte||'') + 'cm-' + new Date().toISOString().slice(0,10) + '.svg';
+  a.download = 'paskamerpraat-patroon-' + k + '-' + (profiel.lengte||'') + 'cm-' + new Date().toISOString().slice(0,10) + '.svg';
   a.click();
   URL.revokeObjectURL(url);
   DY.toast('Patroon gedownload!');
@@ -13406,7 +13406,7 @@ DY.cfgStuurNaarAtelier = function() {
     '\nKLEUR: ' + kleurNaam + '\n' +
     (s.details && s.details.length ? '\nDETAILS: ' + s.details.join(', ') + '\n' : '') +
     (notitiesTekst ? '\nNOTITIES\n' + notitiesTekst + '\n' : '') +
-    '\n\u2014\nVerzonden via Doubleyou';
+    '\n\u2014\nVerzonden via Paskamerpraat';
 
   window.location.href = 'mailto:info@doubleyousmallandtall.nl' +
     '?subject=' + encodeURIComponent(onderwerp) +
@@ -13715,7 +13715,7 @@ DY.cfgAdminDownload = function() {
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = 'doubleyou-atelier-' + k + '-' + lengte + 'cm-' + new Date().toISOString().slice(0,10) + '.svg';
+  a.download = 'paskamerpraat-atelier-' + k + '-' + lengte + 'cm-' + new Date().toISOString().slice(0,10) + '.svg';
   a.click();
   URL.revokeObjectURL(url);
   DY.toast('Atelier patroon gedownload!');
@@ -13769,7 +13769,7 @@ DY.cfgDownloadSVG = function() {
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = 'doubleyou-' + (DY._svgNaam || 'patroon') + '.svg';
+  a.download = 'paskamerpraat-' + (DY._svgNaam || 'patroon') + '.svg';
   a.click();
   URL.revokeObjectURL(url);
   DY.toast('Patroon gedownload!');
@@ -14792,7 +14792,7 @@ DY.renderBerichten = async function() {
     <div class="dy-vr-header">
       <div class="dy-vr-header-inner">
         <div>
-          <div class="dy-feed-merk-label">Doubleyou</div>
+          <div class="dy-feed-merk-label">Paskamerpraat</div>
           <h1 class="dy-vr-titel">Mijn <em>berichten</em></h1>
           <p class="dy-kai-sub" style="color:rgba(252,248,239,0.55);font-size:var(--t-sm);margin:2px 0 0">Gesprekken die ertoe doen.</p>
         </div>
@@ -17146,7 +17146,7 @@ DY.renderDeelHub = function() {
         '<div class="dy-vr-header-inner">' +
           '<div>' +
             '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2);color:rgba(252,248,239,0.7)" data-testid="deelhub-terug-btn">← Terug</button>' +
-            '<div class="dy-feed-merk-label">Doubleyou</div>' +
+            '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
             '<h1 class="dy-vr-titel">Wat deel je, <em>' + naam + '</em>?</h1>' +
           '</div>' +
         '</div>' +
@@ -17289,7 +17289,7 @@ DY.toonModeratie = function() {
 
       // ── Intro ────────────────────────────────────────────────
       '<div class="dy-moderatie-titel">Onze community<em style="font-style:italic;color:var(--clay)"> regels</em></div>' +
-      '<p class="dy-moderatie-sub">Doubleyou is een veilige, inclusieve en respectvolle ruimte waar mensen zich vrij kunnen uiten over stijl, lichaam en fashion. We omarmen alle lichaamstypes, lengtes, maten en stijlen.</p>' +
+      '<p class="dy-moderatie-sub">Paskamerpraat is een veilige, inclusieve en respectvolle ruimte waar mensen zich vrij kunnen uiten over stijl, lichaam en fashion. We omarmen alle lichaamstypes, lengtes, maten en stijlen.</p>' +
       '<p class="dy-moderatie-sub" style="margin-top:-12px">We verwachten dat iedereen elkaar met respect behandelt en bijdraagt aan een positieve community-ervaring.</p>' +
 
       '<div class="dy-moderatie-sectie-titel">Gedragsregels</div>' +
@@ -17404,7 +17404,7 @@ DY.toonModeratie = function() {
       '</div>' +
 
       // ── Slot ──────────────────────────────────────────────────
-      '<p class="dy-mod-slot">Doubleyou is gebouwd op vertrouwen, stijl en inclusiviteit. Door deel te nemen ga je akkoord met deze regels.</p>' +
+      '<p class="dy-mod-slot">Paskamerpraat is gebouwd op vertrouwen, stijl en inclusiviteit. Door deel te nemen ga je akkoord met deze regels.</p>' +
 
       // ── Meld knop ─────────────────────────────────────────────
       '<div class="dy-mod-meld-sectie">' +
@@ -17645,7 +17645,7 @@ DY._verstuurMelding = function(content) {
 
 
 // ══════════════════════════════════════════════════════════════════
-// ADMIN PANEL - Doubleyou
+// ADMIN PANEL - Paskamerpraat
 // Toegang: alleen admin gebruikers
 // ══════════════════════════════════════════════════════════════════
 
@@ -17828,7 +17828,7 @@ DY.renderAdmin = function() {
       '<div class="dy-vr-header"><div class="dy-vr-header-inner">' +
         '<div>' +
           '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2);color:rgba(252,248,239,0.7)" data-testid="admin-terug-btn">← Terug</button>' +
-          '<div class="dy-feed-merk-label">DoubleYou</div>' +
+          '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
           '<h1 class="dy-vr-titel">Admin <em>Dashboard</em></h1>' +
         '</div>' +
       '</div></div>' +
@@ -18658,7 +18658,7 @@ DY.renderKleurenAI = function() {
       '<div class="dy-vr-header">' +
         '<div class="dy-vr-header-inner">' +
           '<div>' +
-            '<div class="dy-feed-merk-label">Doubleyou</div>' +
+            '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
             '<h1 class="dy-vr-titel">Outfit <em>vergelijker</em></h1>' +
             '<p style="color:rgba(252,248,239,0.78);font-size:var(--t-sm);margin:2px 0 0">Jouw persoonlijke AI-stylist</p>' +
           '</div>' +
@@ -20817,7 +20817,7 @@ DY._kaiDeel = async function() {
   var scoreGemiddeld = Math.round(((a.harmonie_score||0) + (a.contrast_score||0) + (a.balans_score||0)) / 3);
   var stijlEmoji = { casual:'👕', zakelijk:'👔', sportief:'🏃', elegant:'✨', streetwear:'🧢', bohemian:'🌿', minimalistisch:'⬜' };
   var tekst =
-    (stijlEmoji[a.stijl] || '👗') + ' Mijn outfit op Doubleyou\n' +
+    (stijlEmoji[a.stijl] || '👗') + ' Mijn outfit op Paskamerpraat\n' +
     '\uD83C\uDF1F Score: ' + scoreGemiddeld + '/100\n' +
     '\uD83D\uDC60 Stijl: ' + (a.stijl || 'casual') + '\n' +
     '\uD83C\uDF42 Seizoen: ' + (a.seizoen || 'het hele jaar') + '\n' +
@@ -20855,7 +20855,7 @@ DY._kaiDeel = async function() {
   if (navigator.share) {
     try {
       await navigator.share({
-        title: 'Mijn kleuranalyse - Doubleyou',
+        title: 'Mijn kleuranalyse - Paskamerpraat',
         text:  tekst,
         url:   shareUrl
       });
@@ -24231,13 +24231,13 @@ DY.svDeel = function(e) {
   var auteurNaam = (u && u.naam) || 'een gebruiker';
   var preview    = (s.tekst || s.caption || '').slice(0, 60);
   var url        = 'https://paskamerpraat.nl/?story=' + storyId;
-  var tekst      = 'Story van ' + auteurNaam + ' op Doubleyou' + (preview ? ': "' + preview + (preview.length >= 60 ? '…' : '') + '"' : '');
+  var tekst      = 'Story van ' + auteurNaam + ' op Paskamerpraat' + (preview ? ': "' + preview + (preview.length >= 60 ? '…' : '') + '"' : '');
 
   DY.svPauze();
 
   // Native share (mobiel)
   if (navigator.share && storyId) {
-    navigator.share({ title: 'Story op Doubleyou', text: tekst, url: url })
+    navigator.share({ title: 'Story op Paskamerpraat', text: tekst, url: url })
       .then(function()  { DY._svNaDeelRegistreer(storyId); })
       .catch(function(err) {
         if (err && err.name !== 'AbortError') {
@@ -24271,7 +24271,7 @@ DY._svDeelModal = function(storyId, u, tekst, url) {
   var tgtxt = encodeURIComponent(tekst);
   var xurl = encodeURIComponent(url);
   var xtxt = encodeURIComponent(tekst);
-  var mail = encodeURIComponent('Story op Doubleyou') + '&body=' + encodeURIComponent(tekst + '\n' + url);
+  var mail = encodeURIComponent('Story op Paskamerpraat') + '&body=' + encodeURIComponent(tekst + '\n' + url);
 
   modal.innerHTML =
     '<div class="dy-deel-overlay" onclick="DY._svSluitDeelModal()"></div>' +
@@ -24851,7 +24851,7 @@ DY.renderChallengeDetail = async function(challengeId) {
     '<div class="dy-vr-header">' +
       '<div class="dy-vr-header-inner">' +
         '<div>' +
-          '<div class="dy-feed-merk-label">Doubleyou</div>' +
+          '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
           '<h1 class="dy-vr-titel" id="dy-chd-titel">Challenge <em>laden…</em></h1>' +
         '</div>' +
         '<button class="dy-pg-actie-btn" onclick="DY.navigeer(\'challenges\')">← Terug</button>' +
@@ -25122,7 +25122,7 @@ DY.renderChallenges = async function() {
       '<div class="dy-pg-header-inner">' +
         '<div>' +
           '<button class="dy-back-btn" onclick="DY.terug()" style="margin-bottom:var(--sp-2);color:rgba(253,248,240,0.85)" data-testid="challenges-terug-btn">← Terug</button>' +
-          '<div class="dy-feed-merk-label" style="color:rgba(198,125,6,0.7)">Doubleyou</div>' +
+          '<div class="dy-feed-merk-label" style="color:rgba(198,125,6,0.7)">Paskamerpraat</div>' +
           '<h1 class="dy-pg-titel" style="color:rgba(253,248,240,0.95)">Community <em>Challenges</em></h1>' +
           '<p class="dy-pg-sub" style="color:rgba(253,248,240,0.38)">Doe mee en verdien extra <span class="dy-dsp-label">DSP punten</span>.</p>' +
         '</div>' +

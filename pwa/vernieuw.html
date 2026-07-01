@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Doubleyou - Vernieuwen</title>
+<title>Paskamerpraat - Vernieuwen</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -55,11 +55,11 @@
 <body>
   <div class="kaart">
     <div class="ico">🔄</div>
-    <h1>Vernieuwen van Doubleyou</h1>
+    <h1>Vernieuwen van Paskamerpraat</h1>
     <p>Verwijdert oude cache zodat je de nieuwste versie ziet.</p>
     <div class="log" id="log"></div>
     <button class="btn" id="terug" disabled><span class="spinner"></span>Bezig…</button>
-    <div class="versie">Doubleyou - refresh tool</div>
+    <div class="versie">Paskamerpraat - refresh tool</div>
   </div>
 
 <script>
@@ -144,7 +144,7 @@
     log('Klik hieronder om de app opnieuw te laden.', 'info');
 
     btn.disabled = false;
-    btn.innerHTML = '→ Open Doubleyou opnieuw';
+    btn.innerHTML = '→ Open Paskamerpraat opnieuw';
     btn.onclick = function() {
       // Hard reload naar root met cache-buster
       window.location.replace('/?fresh=' + Date.now());
