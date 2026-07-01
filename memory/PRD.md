@@ -6,6 +6,26 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+## v60.1.186 — Combined Cloudflare Worker (1 jul 2026)
+
+### Gebruikerskeuze
+"ik heb al een worker, geef me de volledige worker tekst zodat ik deze 1op1 kan plakken" → keuze **1a**: alle 4 cron-taken bundelen in één enkel worker-script, gerouteerd via `event.cron` pattern.
+
+### Geleverd
+- **`/app/pwa/workers/pp-combined-worker-v1.0.js`** — één worker die bevat:
+  - Post van de Week (cron: `0 23 * * 0`)
+  - Post-boosts expiry (cron: `0 * * * *`)
+  - Brand campaign auto-complete (cron: `0 * * * *`, samen met boost-expiry)
+  - Studio stale-sessions cleanup (cron: `*/15 * * * *`)
+  - Handmatige triggers via `POST /run?task=pvdw|boost|autocomplete|studio|all` met `Bearer WORKER_SECRET`
+  - `GET /health` endpoint met versie + task-lijst
+- Backend `/api/health` endpoint toegevoegd (minor uit iteration_16 test report)
+- PWA-zip `/app/01-paskamerpraat-pwa-cloudflare.zip` opnieuw gebuild (255 files, 4.09 MB) mét de combined-worker file
+
+### Testing
+- Backend pytest: 8/9 groen (extensions bestaan, downloads-endpoint werkt, /api/health werkt)
+- Frontend UI-tests: NIET verifieerbaar via Emergent preview URL — /app/pwa/ wordt niet geserveerd op de preview (alleen /api/*). PWA test-target = paskamerpraat.nl (Cloudflare Pages), na deploy van de zip.
+
 ## v60.1.181 — Live Module (Stage-1) (30 jun 2026)
 
 ### Originele vraag (gebruiker)
