@@ -34,8 +34,14 @@
     s.id = 'pp-merken-disc-css';
     s.textContent =
       '#' + TEASER_ID + '{margin:8px 0 18px;padding:14px 16px;background:linear-gradient(155deg,rgba(212,145,10,0.08),rgba(20,16,12,0.4));border:1px solid rgba(212,145,10,0.22);border-radius:14px}' +
-      '#' + TEASER_ID + ' .pp-merken-teaser-text{font-size:13px;color:rgba(245,236,224,0.78);margin:0 0 10px;line-height:1.4}' +
-      '#' + TEASER_ID + ' .pp-merken-teaser-az{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-start}' +
+      '#' + TEASER_ID + ' .pp-merken-teaser-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 0}' +
+      '#' + TEASER_ID + ' .pp-merken-teaser-text{font-size:13px;color:rgba(245,236,224,0.78);margin:0;line-height:1.4;flex:1;min-width:0}' +
+      '#' + TEASER_ID + ' .pp-merken-teaser-toggle{flex:0 0 auto;background:transparent;border:1px solid rgba(245,236,224,0.18);border-radius:999px;color:rgba(245,236,224,0.82);width:32px;height:32px;padding:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.18s ease;font-family:inherit}' +
+      '#' + TEASER_ID + ' .pp-merken-teaser-toggle:hover{background:rgba(212,145,10,0.15);border-color:rgba(212,145,10,0.55);color:#f0b340}' +
+      '#' + TEASER_ID + ' .pp-merken-teaser-toggle svg{width:14px;height:14px;transition:transform 0.22s ease}' +
+      '#' + TEASER_ID + '[data-open="true"] .pp-merken-teaser-toggle svg{transform:rotate(180deg)}' +
+      '#' + TEASER_ID + ' .pp-merken-teaser-az{display:none;flex-wrap:wrap;gap:4px;justify-content:flex-start;margin-top:12px}' +
+      '#' + TEASER_ID + '[data-open="true"] .pp-merken-teaser-az{display:flex}' +
       '#' + TEASER_ID + ' .pp-merken-teaser-az button{background:transparent;border:1px solid rgba(245,236,224,0.12);border-radius:8px;color:rgba(245,236,224,0.72);padding:4px 9px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all 0.15s ease;font-family:inherit;letter-spacing:0.04em}' +
       '#' + TEASER_ID + ' .pp-merken-teaser-az button:hover{background:rgba(212,145,10,0.18);border-color:rgba(212,145,10,0.55);color:#f0b340;transform:translateY(-1px)}' +
       '#' + BACK_BTN_ID + '{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid rgba(245,236,224,0.18);border-radius:999px;color:rgba(245,236,224,0.85);padding:6px 14px 6px 11px;font-size:12.5px;font-weight:600;cursor:pointer;margin:0 0 14px;transition:all 0.18s ease;font-family:inherit}' +
@@ -89,14 +95,29 @@
     var box = document.createElement('div');
     box.id = TEASER_ID;
     box.setAttribute('data-testid', 'uitg-merken-teaser');
+    box.setAttribute('data-open', 'false');
     var azHtml = LETTERS.map(function (l) {
       return '<button type="button" data-letter="' + l + '" data-testid="uitg-az-' + l + '">' + l + '</button>';
     }).join('');
     box.innerHTML =
-      '<p class="pp-merken-teaser-text">Ontdek merken die speciaal voor de Tall &amp; Plus Size community ontworpen zijn.</p>' +
+      '<div class="pp-merken-teaser-head">' +
+        '<p class="pp-merken-teaser-text">Ontdek merken die speciaal voor de Tall &amp; Plus Size community ontworpen zijn.</p>' +
+        '<button type="button" class="pp-merken-teaser-toggle" data-testid="uitg-az-toggle" aria-expanded="false" aria-label="Toon alfabet filter" title="Toon alfabet filter">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
+        '</button>' +
+      '</div>' +
       '<div class="pp-merken-teaser-az" role="navigation" aria-label="Merken alfabet">' + azHtml + '</div>';
 
     box.addEventListener('click', function (e) {
+      var toggle = e.target && e.target.closest && e.target.closest('.pp-merken-teaser-toggle');
+      if (toggle) {
+        var isOpen = box.getAttribute('data-open') === 'true';
+        box.setAttribute('data-open', isOpen ? 'false' : 'true');
+        toggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+        toggle.setAttribute('aria-label', isOpen ? 'Toon alfabet filter' : 'Verberg alfabet filter');
+        toggle.setAttribute('title', isOpen ? 'Toon alfabet filter' : 'Verberg alfabet filter');
+        return;
+      }
       var btn = e.target && e.target.closest && e.target.closest('button[data-letter]');
       if (!btn) return;
       gotoMerken(btn.getAttribute('data-letter'));
