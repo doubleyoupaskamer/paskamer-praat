@@ -10,9 +10,12 @@
  *
  * CLOUDFLARE DASHBOARD — CRON TRIGGERS INSTELLEN
  *   Workers & Pages → deze Worker → Triggers → Cron Triggers → Add
- *     • "0 23 * * 0"    → Post van de Week
- *     • "0 * * * *"     → Boost expiry + brand auto-complete (samen)
- *     • "*\/15 * * * *"  → Studio cleanup
+ *     • "0 23 * * SUN"   → Post van de Week (zondag 23:00 UTC)
+ *     • "0 * * * *"      → Boost expiry + brand auto-complete (elk uur)
+ *     • "*\/15 * * * *"   → Studio cleanup (elke 15 min)
+ *
+ *   LET OP: Cloudflare gebruikt Quartz-cron (1=zondag, 7=zaterdag) — NIET Unix cron.
+ *   Dus "0" voor day-of-week is ONGELDIG. Gebruik "SUN" of "1" voor zondag.
  *
  * ENV VARIABLES (allemaal onder Settings → Variables)
  *   FIREBASE_PROJECT_ID   = doubleyou-journal
@@ -284,7 +287,8 @@ export default {
     console.log(`[combined-worker] cron fired: "${cron}"`);
 
     // Route op basis van cron pattern
-    if (cron === '0 23 * * 0') {
+    // NB: Cloudflare Quartz cron — day-of-week 1=zondag, 7=zaterdag (NIET Unix cron)
+    if (cron === '0 23 * * SUN' || cron === '0 23 * * 1') {
       ctx.waitUntil(runPvdw(db, env));
     } else if (cron === '0 * * * *') {
       // Hourly cron draait boost-expiry + brand-autocomplete parallel
