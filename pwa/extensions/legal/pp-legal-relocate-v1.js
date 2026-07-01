@@ -112,7 +112,7 @@
       +   '<a href="/voorwaarden/#campagnes" data-testid="legal-inline-campagnes">Campagnevoorwaarden</a>'
       + '</div>'
       + '<div class="pp-legal-inline-powered">'
-      +   '<a href="https://www.doubleyoufashion.nl" target="_blank" rel="noopener noreferrer" data-testid="legal-inline-powered">Powered by Doubleyou Tailored for Tall &amp; Plus size 2026</a>'
+      +   '<a href="https://www.doubleyoufashion.nl" target="_blank" rel="noopener noreferrer" data-testid="legal-inline-powered">Powered by: Doubleyou Tailored for Tall &amp; Plus size. 2026©</a>'
       + '</div>';
     return wrap;
   }
