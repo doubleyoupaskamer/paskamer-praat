@@ -31,7 +31,7 @@
     "ai_score_model_version": {
       "type": "string",
       "writeable_by": "ai_engine_only",
-      "description": "Bv. 'gemini-3-pro-vision-v1' — voor reproducibility en re-scoring na model update."
+      "description": "Bv. 'gemini-3-pro-vision-v1' voor reproducibility en re-scoring na model update."
     },
     "similar_items": {
       "type": "array",

@@ -21474,7 +21474,7 @@ select.dy-kai-ctx-locked {
   .dy-ai-panel .dy-kai-vb-effect { font-size: 0.72rem; }
 }
 
-/* ── Middelgrote telefoons (381px–480px: standaard iPhone/Android) ─ */
+/* ── Middelgrote telefoons (381px-480px: standaard iPhone/Android) ─ */
 @media (min-width: 381px) and (max-width: 480px) {
   .dy-ai-panel .dy-kai-vb-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -21487,7 +21487,7 @@ select.dy-kai-ctx-locked {
   .dy-ai-panel .dy-kai-vb-label { font-size: 0.68rem; }
 }
 
-/* ── Grote telefoons (481px–600px: iPhone Pro Max, grote Android) ── */
+/* ── Grote telefoons (481px-600px: iPhone Pro Max, grote Android) ── */
 @media (min-width: 481px) and (max-width: 600px) {
   .dy-ai-panel .dy-kai-vb-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -21496,7 +21496,7 @@ select.dy-kai-ctx-locked {
   .dy-ai-panel .dy-kai-vb-knop { min-height: 58px; }
 }
 
-/* ── Tablets portrait (600px–768px) ────────────────────────────── */
+/* ── Tablets portrait (600px-768px) ────────────────────────────── */
 @media (min-width: 600px) and (max-width: 768px) {
   .dy-ai-panel .dy-kai-vb-grid {
     grid-template-columns: repeat(3, 1fr);

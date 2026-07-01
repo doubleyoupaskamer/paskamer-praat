@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * Doubleyou — Live Module (Tab + Grid Renderer)  v1.0.0
+ * Doubleyou Live Module (Tab + Grid Renderer)  v1.0.0
  * ═══════════════════════════════════════════════════════════════════════
  *
  * NON-BREAKING additieve module. Voegt een "Live" tab toe aan de bestaande
@@ -21,8 +21,8 @@
  *   PP_Live.VERSION
  *
  * Gerelateerde modules:
- *   pp-live-player-v1.js  — modal player + chat + reactions
- *   pp-live-start-v1.js   — start-live bottom sheet + camera preview
+ *   pp-live-player-v1.js  modal player + chat + reactions
+ *   pp-live-start-v1.js   start-live bottom sheet + camera preview
  * ═══════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -203,7 +203,7 @@
       '<div class="pp-live-empty" data-testid="live-empty-state">' +
         '<span class="pp-live-empty-emoji">📡</span>' +
         '<div class="pp-live-empty-title">Nog niemand live in de Studio</div>' +
-        '<div>Wees de eerste — druk op de knop hierboven om je live paskamersessie te starten.</div>' +
+        '<div>Wees de eerste druk op de knop hierboven om je live paskamersessie te starten.</div>' +
       '</div>';
   }
 
@@ -318,7 +318,7 @@
     stopGridSubscription();
     var f = db();
     if (!f) {
-      // Firestore not ready yet — retry shortly
+      // Firestore not ready yet retry shortly
       setTimeout(startGridSubscription, 800);
       return;
     }
@@ -449,7 +449,7 @@
       DY.navigeer = wrapped;
     }
 
-    // Ook DY.toonPagina wrappen — legacy boot belt deze direct (bypass van navigeer)
+    // Ook DY.toonPagina wrappen legacy boot belt deze direct (bypass van navigeer)
     if (typeof DY.toonPagina === 'function' && !DY.toonPagina.__ppLiveWrapped) {
       var origToon = DY.toonPagina.bind(DY);
       var wrappedToon = function (pagina) {

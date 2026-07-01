@@ -1,6 +1,6 @@
-# Paskamer Praat — v50 Card Hub Actions (2026-02-13)
+# Paskamer Praat v50 Card Hub Actions (2026-02-13)
 
-> **8 must-have actie-items** toegevoegd aan het drie-puntjes menu binnen elke feed-card. **Non-invasief** — core `pwa-v463-*.js` ongewijzigd.
+> **8 must-have actie-items** toegevoegd aan het drie-puntjes menu binnen elke feed-card. **Non-invasief** core `pwa-v463-*.js` ongewijzigd.
 
 ---
 

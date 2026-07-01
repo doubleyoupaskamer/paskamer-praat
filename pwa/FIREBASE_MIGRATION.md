@@ -2,13 +2,13 @@
 
 ## Waarom
 - **compat v9.23 SDK**: ~280 KB gzip, geen tree-shaking, end-of-life voor nieuwe features.
-- **modular v11**: ~80–120 KB na tree-shaking (alleen wat je écht gebruikt). Sneller op slechtere verbindingen, betere Core Web Vitals.
+- **modular v11**: ~80-120 KB na tree-shaking (alleen wat je écht gebruikt). Sneller op slechtere verbindingen, betere Core Web Vitals.
 
-**Verwachte besparing op Paskamer Praat:** 150–200 KB JavaScript op de first paint.
+**Verwachte besparing op Paskamer Praat:** 150-200 KB JavaScript op de first paint.
 
-## Stap 1 — Verwijder de 4 CDN script-tags
+## Stap 1 Verwijder de 4 CDN script-tags
 
-In `index.html` regels 720–723, verwijder:
+In `index.html` regels 720-723, verwijder:
 
 ```html
 <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -19,7 +19,7 @@ In `index.html` regels 720–723, verwijder:
 
 Vervang door één enkele import in je gebundelde firebase init (zie stap 3).
 
-## Stap 2 — Installeer modular SDK
+## Stap 2 Installeer modular SDK
 
 Als je een bundler hebt (Vite/Webpack/Rollup):
 ```bash
@@ -32,9 +32,9 @@ import { initializeApp } from 'https://esm.sh/firebase@11/app';
 ```
 Dit lukt alleen als je je init-bestand als `<script type="module">` laadt.
 
-## Stap 3 — Migreer init en API calls
+## Stap 3 Migreer init en API calls
 
-### Voor (compat — wat je nu hebt)
+### Voor (compat wat je nu hebt)
 ```js
 const app = firebase.initializeApp(config);
 const auth = firebase.auth();
@@ -85,7 +85,7 @@ window.DY = window.DY || {};
 window.DY.fb = { app, auth, db, stor };
 ```
 
-## Stap 4 — Vervang `firebase.X` calls in `js/pwa-v463-*.js`
+## Stap 4 Vervang `firebase.X` calls in `js/pwa-v463-*.js`
 
 Zoek-en-vervang patronen (heel veel zoek-vervang werk in 25k regels JS):
 
@@ -105,11 +105,11 @@ Zoek-en-vervang patronen (heel veel zoek-vervang werk in 25k regels JS):
 | `.onSnapshot(cb)` | `onSnapshot(ref,cb)` |
 | `firebase.auth.GoogleAuthProvider` | `GoogleAuthProvider` (import) |
 
-## Stap 5 — Update CSP
+## Stap 5 Update CSP
 
-In `_headers` mag je dan `https://www.gstatic.com` weghalen uit `script-src` (mits je ook geen andere scripts van gstatic laadt). Behoud `https://*.googleapis.com` en `https://firestore.googleapis.com` in `connect-src` — modular SDK gebruikt dezelfde endpoints.
+In `_headers` mag je dan `https://www.gstatic.com` weghalen uit `script-src` (mits je ook geen andere scripts van gstatic laadt). Behoud `https://*.googleapis.com` en `https://firestore.googleapis.com` in `connect-src` modular SDK gebruikt dezelfde endpoints.
 
-## Stap 6 — Test grondig
+## Stap 6 Test grondig
 
 1. Login / register / logout
 2. Feed laden + filteren
@@ -120,7 +120,7 @@ In `_headers` mag je dan `https://www.gstatic.com` weghalen uit `script-src` (mi
 
 ## Pragmatisch alternatief
 
-Als de migratie te groot is om in één keer te doen: je kunt **compat blijven gebruiken** maar upgraden naar **v10.14 of v11 compat**. Dat geeft je ~30–50 KB winst en bugfixes zonder code-changes. Vervang in `index.html`:
+Als de migratie te groot is om in één keer te doen: je kunt **compat blijven gebruiken** maar upgraden naar **v10.14 of v11 compat**. Dat geeft je ~30-50 KB winst en bugfixes zonder code-changes. Vervang in `index.html`:
 
 ```html
 <script defer src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js"></script>
@@ -129,4 +129,4 @@ Als de migratie te groot is om in één keer te doen: je kunt **compat blijven g
 <script defer src="https://www.gstatic.com/firebasejs/11.0.2/firebase-storage-compat.js"></script>
 ```
 
-(Versie 11 ondersteunt compat nog altijd — geen breaking changes vanaf v9.)
+(Versie 11 ondersteunt compat nog altijd geen breaking changes vanaf v9.)

@@ -1,5 +1,5 @@
 /**
- * PASKAMER PRAAT — Legal footer verplaatsen onder Contact + footer hiden
+ * PASKAMER PRAAT Legal footer verplaatsen onder Contact + footer hiden
  * -----------------------------------------------------------------
  * v1.0.0 (2026-07-01):
  *   1. Kopieert het W-mark + 5 legal links (Gebruikersreglement, Acceptable

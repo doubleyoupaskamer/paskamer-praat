@@ -16,7 +16,7 @@
  *      tonen een banner met de gekozen pakket-naam + prijs.
  *    - Banner blijft 15 minuten geldig; daarna automatisch verwijderd.
  *
- * Volledig additief — bestaande routes/state/handlers ongewijzigd.
+ * Volledig additief bestaande routes/state/handlers ongewijzigd.
  * ═══════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';

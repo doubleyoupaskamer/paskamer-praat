@@ -1,22 +1,22 @@
-# v60.1.44 — Live campagne feed + "Bekijk als klant" + brand-detail rules fix
+# v60.1.44 Live campagne feed + "Bekijk als klant" + brand-detail rules fix
 
 ## Wijzigingen (cumulatief sinds v60.1.43)
 
 ### 1. 🔴 Brand-detail page rules fix (kritieke productie-bug)
 - **Probleem**: Klik op brand-kaart op `/merken` → "Missing or insufficient permissions"
 - **Root cause**: v60.1.42 verwijderde `.where('status','==','actief')` op `brand_products` query; Firestore rule eist deze filter voor anonieme bezoekers.
-- **Fix**: regel 458 — query restored met `.where('status','==','actief')`
-- **Index nodig**: `brand_products: (brandId, status)` — toegevoegd aan `firestore.indexes.json`
+- **Fix**: regel 458 query restored met `.where('status','==','actief')`
+- **Index nodig**: `brand_products: (brandId, status)` toegevoegd aan `firestore.indexes.json`
 
 ### 2. 🆕 Live campagne feed op `/merken`
-- Nieuwe sectie bovenaan publieke Merken-tab: "Uitgelicht — Actieve campagnes"
+- Nieuwe sectie bovenaan publieke Merken-tab: "Uitgelicht Actieve campagnes"
 - Toont live campagnes (status=='live') waarvan `plaatsingen.includes('feed')`
 - Horizontal scroll-carousel, scroll-snap, max-width 320px per kaart
 - "Gesponsord" badge rechtsboven
 - Klikken → impression tracking via `campaign_events` + navigatie naar brand-detail
 - Auto-filter op datum-window (start <= nu <= eind)
 - **Firestore rules-compliant**: gebruikt `type:'impression'` + `type:'campaign_click'` (whitelisted)
-- **Geen FieldValue.increment op campaigns** — server-side aggregator via Cloud Function/Worker (toekomst)
+- **Geen FieldValue.increment op campaigns** server-side aggregator via Cloud Function/Worker (toekomst)
 
 ### 3. 🆕 "Bekijk als klant" knop op merkprofiel
 - Naast "Wijzigingen opslaan" submit
@@ -59,7 +59,7 @@ Dit creëert de `brand_products: (brandId ASC, status ASC)` composite index die 
 2. Submit → status='review' in DB
 3. Login als admin → Admin Campagnes → klik "Goedkeur & live"
 4. Open `/?pagina=merken` (in incognito of nieuw tab)
-5. **Verwacht**: campagne verschijnt bovenaan in "Uitgelicht — Actieve campagnes" sectie
+5. **Verwacht**: campagne verschijnt bovenaan in "Uitgelicht Actieve campagnes" sectie
 6. Impression event wordt geschreven naar `campaign_events`
 
 ## Edge cases gecovered

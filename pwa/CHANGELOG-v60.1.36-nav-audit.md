@@ -1,4 +1,4 @@
-# v60.1.36 — Navigation Flow Audit + Back-Button Fixes
+# v60.1.36 Navigation Flow Audit + Back-Button Fixes
 
 ## Probleem
 6 pagina's hadden geen back-button en zaten niet in de bottom-nav → dead-end UX. Browser back werkte wel (via popstate hook) maar gebruikers verwachtten een zichtbare exit in de header.
@@ -18,9 +18,9 @@
 Alle gebruiken `DY.terug()` (smart fallback al aanwezig sinds v463).
 
 ## Files
-- `/app/pwa/js/pwa-v463-1780765770.js` — 7 search-replace inserts
-- `/app/pwa/index.html` — `?v=60.1.36-nav-audit`
-- `/app/pwa/sw.js` — VERSION bumped
+- `/app/pwa/js/pwa-v463-1780765770.js` 7 search-replace inserts
+- `/app/pwa/index.html` `?v=60.1.36-nav-audit`
+- `/app/pwa/sw.js` VERSION bumped
 
 ## Verificatie
 - Node parse check: ✅

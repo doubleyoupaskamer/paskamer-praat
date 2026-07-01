@@ -1,10 +1,10 @@
-# Paskamer Praat — Backend Deploy Gids (v47)
+# Paskamer Praat Backend Deploy Gids (v47)
 
 Je hebt 4 manieren om de FastAPI AI-backend te hosten. Kies wat past:
 
 ---
 
-## Optie A — Emergent Deploy (snelst, 5 min)
+## Optie A Emergent Deploy (snelst, 5 min)
 
 1. Open je Emergent chat workspace
 2. Klik op **"Deploy"** rechtsboven
@@ -18,11 +18,11 @@ Je hebt 4 manieren om de FastAPI AI-backend te hosten. Kies wat past:
 7. Upload PWA-bundel naar je hosting (paskamerpraat.nl)
 
 **Kosten:** ~$20/maand all-in.
-**CORS:** open `*` — werkt direct vanaf paskamerpraat.nl.
+**CORS:** open `*` werkt direct vanaf paskamerpraat.nl.
 
 ---
 
-## Optie B — Render (gratis tier mogelijk)
+## Optie B Render (gratis tier mogelijk)
 
 1. Push de `backend/` map naar een GitHub-repo
 2. https://dashboard.render.com → **New + → Blueprint** → kies repo
@@ -33,11 +33,11 @@ Je hebt 4 manieren om de FastAPI AI-backend te hosten. Kies wat past:
 7. In `index.html`: `window.DY.apiBase = 'https://api.paskamerpraat.nl';`
 
 **Kosten:** $0 (free tier, slaapt na 15 min idle) of $7/mnd (always-on).
-**Region:** Frankfurt (ams) — lage latency voor NL.
+**Region:** Frankfurt (ams) lage latency voor NL.
 
 ---
 
-## Optie C — Railway (eenvoudigste UX)
+## Optie C Railway (eenvoudigste UX)
 
 1. Push `backend/` naar GitHub
 2. https://railway.app → **New Project → Deploy from GitHub**
@@ -51,7 +51,7 @@ Je hebt 4 manieren om de FastAPI AI-backend te hosten. Kies wat past:
 
 ---
 
-## Optie D — Fly.io (laagste latency NL)
+## Optie D Fly.io (laagste latency NL)
 
 ```bash
 cd backend
@@ -65,11 +65,11 @@ flyctl certs add api.paskamerpraat.nl
 Voeg AAAA + A records toe volgens Fly's instructie.
 
 **Kosten:** ~$0-3/mnd (shared-cpu-1x, 512 MB, auto-stop).
-**Region:** `ams` (Amsterdam) — sub-30ms naar NL gebruikers.
+**Region:** `ams` (Amsterdam) sub-30ms naar NL gebruikers.
 
 ---
 
-## Optie E — Eigen VPS / Docker
+## Optie E Eigen VPS / Docker
 
 ```bash
 cd backend
@@ -139,8 +139,8 @@ De key werkt voor:
 
 | Probleem                              | Oplossing                                                                 |
 | ------------------------------------- | ------------------------------------------------------------------------- |
-| 503 "EMERGENT_LLM_KEY ontbreekt"      | Env-var niet gezet — check secrets in dashboard                           |
-| 502 "AI service fout"                 | Universal Key budget op — Profile → Add Balance                           |
+| 503 "EMERGENT_LLM_KEY ontbreekt"      | Env-var niet gezet check secrets in dashboard                           |
+| 502 "AI service fout"                 | Universal Key budget op Profile → Add Balance                           |
 | CORS error in browser console         | `apiBase` wijst naar verkeerde URL of typo                                |
 | Try-on duurt >60s                     | Normaal voor Nano Banana; verhoog frontend timeout indien gewenst         |
 | Score-pill verschijnt niet            | Check `console.log` op `__ppOutfitScoreInit` + dat feed-cards `<img>` hebben |

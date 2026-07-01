@@ -1,4 +1,4 @@
-# Paskamer Praat — v48 AI Fix Pack (2026-02-13)
+# Paskamer Praat v48 AI Fix Pack (2026-02-13)
 
 > **Hotfix:** v47 op paskamerpraat.nl liet de Weekly Stylist banner verschijnen terwijl de backend nog niet op `api.paskamerpraat.nl` draaide → "Even niet gelukt om je brief te genereren"-fout.
 
@@ -25,7 +25,7 @@
 
 ### 4. Silent-fail bij backend offline
 - **Weekly stylist banner verschijnt alleen als backend healthy is** (geen rode error meer op live)
-- **Outfit-score auto-mode wordt automatisch uitgezet** als backend down — gebruiker krijgt geen N×404
+- **Outfit-score auto-mode wordt automatisch uitgezet** als backend down gebruiker krijgt geen N×404
 - Firebase events `weekly_skipped_backend_offline` + `outfit_score_skipped_backend_offline` voor monitoring
 
 ### 5. Verbeterde error-UX
@@ -39,7 +39,7 @@
 1. Download `paskamerpraat-pwa-v48-COMPLETE.zip`
 2. Pak uit, upload **alle bestanden** naar je hosting (vervang oude)
 3. iPhone PWA: open eens https://paskamerpraat.nl/vernieuw.html om cache te wissen
-4. Klaar — Weekly Stylist + Outfit Score + Virtual Try-On werken direct
+4. Klaar Weekly Stylist + Outfit Score + Virtual Try-On werken direct
 
 > Geen backend-deploy nodig. Werkt out-of-the-box via Emergent's live preview backend.
 
@@ -48,7 +48,7 @@
 ## 🛡️ Cache-bust
 - `sw.js` VERSION → `v48-20260213-ai-megabundle-health-check`
 - 20× scripts gebumped naar `?v=48`
-- Idempotente init-guards (`__ppAiHealthInit`, `__ppTryOnInit`, etc) — dubbele load = no-op
+- Idempotente init-guards (`__ppAiHealthInit`, `__ppTryOnInit`, etc) dubbele load = no-op
 
 ---
 

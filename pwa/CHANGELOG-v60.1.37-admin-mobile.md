@@ -1,4 +1,4 @@
-# v60.1.37 — Admin Mobile Optimization + Usernames
+# v60.1.37 Admin Mobile Optimization + Usernames
 
 ## Problemen
 1. **UID-codes i.p.v. namen**: admin toonde `doc.id.slice(0,8)` als displayName ontbrak → leek op codes

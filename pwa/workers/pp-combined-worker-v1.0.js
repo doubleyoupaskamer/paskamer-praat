@@ -1,31 +1,31 @@
 /**
- * PASKAMER PRAAT — Combined Cloudflare Worker
+ * PASKAMER PRAAT Combined Cloudflare Worker
  * DoubleYou / Paskamer Praat  •  v1.0.0 (februari 2026)
  *
  * BUNDELT 4 CRON-TAKEN IN 1 WORKER:
- *   1. Post van de Week (pvdw)             — zondag 23:00 UTC
- *   2. Boost expiry (post-boosts-expire)   — elk uur
- *   3. Brand campaign auto-complete        — elk uur
- *   4. Studio stale sessions cleanup       — elke 15 min
+ *   1. Post van de Week (pvdw)             zondag 23:00 UTC
+ *   2. Boost expiry (post-boosts-expire)   elk uur
+ *   3. Brand campaign auto-complete        elk uur
+ *   4. Studio stale sessions cleanup       elke 15 min
  *
- * CLOUDFLARE DASHBOARD — CRON TRIGGERS INSTELLEN
+ * CLOUDFLARE DASHBOARD CRON TRIGGERS INSTELLEN
  *   Workers & Pages → deze Worker → Triggers → Cron Triggers → Add
  *     • "0 23 * * SUN"   → Post van de Week (zondag 23:00 UTC)
  *     • "0 * * * *"      → Boost expiry + brand auto-complete (elk uur)
  *     • "*\/15 * * * *"   → Studio cleanup (elke 15 min)
  *
- *   LET OP: Cloudflare gebruikt Quartz-cron (1=zondag, 7=zaterdag) — NIET Unix cron.
+ *   LET OP: Cloudflare gebruikt Quartz-cron (1=zondag, 7=zaterdag) NIET Unix cron.
  *   Dus "0" voor day-of-week is ONGELDIG. Gebruik "SUN" of "1" voor zondag.
  *
  * ENV VARIABLES (allemaal onder Settings → Variables)
  *   FIREBASE_PROJECT_ID   = doubleyou-journal
  *   FIREBASE_SERVICE_KEY  = <base64 service account JSON>
  *   WORKER_SECRET         = <random secret voor /run>
- *   WORKER_ADMIN_EMAIL    = admin@paskamerpraat.nl        (optioneel — pvdw admin mail)
- *   WORKER_APP_URL        = https://paskamerpraat.nl      (optioneel — pvdw deeplink)
- *   MAX_SESSION_MS        = 21600000                       (optioneel — studio 6u default)
- *   STALE_MS              = 1800000                        (optioneel — studio 30min default)
- *   DELETE_SUBCOLLECTIONS = 'false'                        (optioneel — studio chat/reactions delete)
+ *   WORKER_ADMIN_EMAIL    = admin@paskamerpraat.nl        (optioneel pvdw admin mail)
+ *   WORKER_APP_URL        = https://paskamerpraat.nl      (optioneel pvdw deeplink)
+ *   MAX_SESSION_MS        = 21600000                       (optioneel studio 6u default)
+ *   STALE_MS              = 1800000                        (optioneel studio 30min default)
+ *   DELETE_SUBCOLLECTIONS = 'false'                        (optioneel studio chat/reactions delete)
  *
  * HANDMATIG TRIGGEREN (voor testen vanaf admin dashboard):
  *   POST /run?task=pvdw           Authorization: Bearer <WORKER_SECRET>
@@ -287,7 +287,7 @@ export default {
     console.log(`[combined-worker] cron fired: "${cron}"`);
 
     // Route op basis van cron pattern
-    // NB: Cloudflare Quartz cron — day-of-week 1=zondag, 7=zaterdag (NIET Unix cron)
+    // NB: Cloudflare Quartz cron day-of-week 1=zondag, 7=zaterdag (NIET Unix cron)
     if (cron === '0 23 * * SUN' || cron === '0 23 * * 1') {
       ctx.waitUntil(runPvdw(db, env));
     } else if (cron === '0 * * * *') {
@@ -436,11 +436,11 @@ async function pvdwSendAdminMail(db, adminEmail, winnaar, weekId, bereik) {
   try {
     const uid = winnaar.userId || winnaar.authorId || 'onbekend';
     const naam = winnaar.authorName || winnaar.displayName || 'Onbekend';
-    const subject = `[Paskamer Praat] Post van de Week winnaar — ${weekId}`;
-    const html = `<h2>Post van de Week — winnaar geselecteerd</h2><p><strong>Week:</strong> ${weekId} (${bereik.startIso.slice(0, 10)} t/m ${bereik.endIso.slice(0, 10)})</p><p><strong>Winnaar:</strong> ${naam} (uid: <code>${uid}</code>)</p><p><strong>Post:</strong> <code>${winnaar._id}</code></p><p><strong>Likes:</strong> ${winnaar._likesCount}</p><p><strong>DSP-bonus uitgekeerd:</strong> ${PVDW_DSP_BONUS}</p><p><strong>Reden:</strong> Hoogste likes ≥ ${PVDW_MIN_LIKES}, niet verborgen/gemodereerd</p><hr><p style="color:#888;font-size:12px">Automatisch verzonden door ${WORKER_VERSION}</p>`;
+    const subject = `[Paskamer Praat] Post van de Week winnaar ${weekId}`;
+    const html = `<h2>Post van de Week winnaar geselecteerd</h2><p><strong>Week:</strong> ${weekId} (${bereik.startIso.slice(0, 10)} t/m ${bereik.endIso.slice(0, 10)})</p><p><strong>Winnaar:</strong> ${naam} (uid: <code>${uid}</code>)</p><p><strong>Post:</strong> <code>${winnaar._id}</code></p><p><strong>Likes:</strong> ${winnaar._likesCount}</p><p><strong>DSP-bonus uitgekeerd:</strong> ${PVDW_DSP_BONUS}</p><p><strong>Reden:</strong> Hoogste likes ≥ ${PVDW_MIN_LIKES}, niet verborgen/gemodereerd</p><hr><p style="color:#888;font-size:12px">Automatisch verzonden door ${WORKER_VERSION}</p>`;
     await db.addDoc('mail', {
       to: [adminEmail],
-      message: { subject, html, text: `Winnaar Post van de Week ${weekId}: ${naam} (${uid}) — post ${winnaar._id} met ${winnaar._likesCount} likes. DSP +${PVDW_DSP_BONUS}.` }
+      message: { subject, html, text: `Winnaar Post van de Week ${weekId}: ${naam} (${uid}) post ${winnaar._id} met ${winnaar._likesCount} likes. DSP +${PVDW_DSP_BONUS}.` }
     });
   } catch (e) { console.error('[pvdw] admin mail mislukt:', e.message); }
 }
@@ -547,7 +547,7 @@ async function pvdwVerwerkWeek(db, weekId, bereik, env) {
   if (auteurId) {
     await db.addDoc('dsp_log', {
       uid: auteurId, actie: 'pvdw_winnaar', pts: PVDW_DSP_BONUS,
-      label: `Post van de Week (${weekId}) — ${PVDW_DSP_BONUS} DSP bonus`,
+      label: `Post van de Week (${weekId}) ${PVDW_DSP_BONUS} DSP bonus`,
       postId: winnaar._id, weekId, ts: new Date().toISOString()
     }).catch(e => console.error('[pvdw] dsp_log fout:', e.message));
     await db.incrementFields('users', auteurId, {

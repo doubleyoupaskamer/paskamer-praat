@@ -8,7 +8,7 @@
  *       BETAALD (campaigns.status='live' + plaatsingen bevat 'feed')
  *       mee-scrollen in de hoofd-feed (#dy-verhalen) als reguliere
  *       fullscreen reel-item, net als een normale feedpost. Geen header-
- *       strip bovenaan, geen "Aangeboden" rij — gewoon in de feed-flow.
+ *       strip bovenaan, geen "Aangeboden" rij gewoon in de feed-flow.
  *
  * Strategie:
  *  1. Subscribe op `campaigns` waar status='live' en plaatsingen bevat 'feed'
@@ -22,8 +22,8 @@
  *     campaign_click event
  *
  * Public API:
- *   PP_SponsoredProducts.refresh()            — herlaadt producten/campagnes
- *   PP_SponsoredProducts.openProduct(pid,url,bid) — handelt klik af
+ *   PP_SponsoredProducts.refresh()            herlaadt producten/campagnes
+ *   PP_SponsoredProducts.openProduct(pid,url,bid) handelt klik af
  *   PP_SponsoredProducts.VERSION
  * ═══════════════════════════════════════════════════════════════════════ */
 (function () {
@@ -378,7 +378,7 @@
       '.pp-sp-titel{font-style:normal !important}' +
       '.pp-sp-prijs{font-weight:600;color:#fcf8ef}' +
       '.pp-sp-cta{cursor:pointer}';
-      // v1.1.0: actiebar wordt NIET meer verborgen — likes blijven zichtbaar
+      // v1.1.0: actiebar wordt NIET meer verborgen likes blijven zichtbaar
       // op gesponsorde posts (klant betaalt voor engagement).
     document.head.appendChild(s);
   }

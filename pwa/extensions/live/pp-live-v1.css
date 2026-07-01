@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * Doubleyou — Live Module Styles (v1.0.0)
+ * Doubleyou Live Module Styles (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * Additive, FULLY SCOPED to `.pp-live-*` classnames + #pp-live-* IDs so
@@ -719,7 +719,7 @@
 
 /* ─── BOTTOM NAV MOBILE FIT: zorg dat ALLE items (incl. nieuwe Studio tab)
    netjes verdeeld worden zonder dat labels achter de centrale ⊕ knop verdwijnen.
-   Pure visuele verfijning — geen functionaliteit gewijzigd. ─── */
+   Pure visuele verfijning geen functionaliteit gewijzigd. ─── */
 @media (max-width: 720px) {
   /* Equal width tabs, geen verschuiving */
   .dy-nav .dy-nav-item {
@@ -747,7 +747,7 @@
 
 /* ─── TOP FEED TABS (Ontdek/Uitgelicht/Trending/Mijn): subtiele fade
    rechts om aan te geven dat er meer scrollbaar is op mobiel.
-   We muteren de bestaande .dy-filters layout NIET — alleen een ::after overlay. ─── */
+   We muteren de bestaande .dy-filters layout NIET alleen een ::after overlay. ─── */
 @media (max-width: 640px) {
   .dy-filters {
     position: relative;
@@ -758,7 +758,7 @@
   .dy-filters > .dy-filter {
     scroll-snap-align: start;
   }
-  /* Fade indicator rechts — toont dat er nog meer tabs zijn */
+  /* Fade indicator rechts toont dat er nog meer tabs zijn */
   .dy-filters::after {
     content: '';
     position: sticky;
@@ -792,7 +792,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
- * v1.0.2 — Premium Paskamer Studio polish
+ * v1.0.2 Premium Paskamer Studio polish
  * ═══════════════════════════════════════════════════════════════════ */
 
 /* ────────── FORMAT PILL (Studio categories) ────────── */
@@ -966,7 +966,7 @@ body.pp-live-player-active .dy-sidebar {
  * Paskamer Studio scope zodat geen andere modules worden beïnvloed.
  * ═══════════════════════════════════════════════════════════════════ */
 
-/* Live grid page — hoofdtitel duidelijk leesbaar */
+/* Live grid page hoofdtitel duidelijk leesbaar */
 [data-testid="live-page"] .pp-live-title {
   color: rgba(254, 252, 245, 0.96) !important;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
@@ -993,10 +993,10 @@ body.pp-live-player-active .dy-sidebar {
   color: rgba(254, 252, 245, 1);
 }
 [data-testid="live-page"] .pp-live-count-badge {
-  color: rgba(30, 26, 15, 0.92);   /* dark ink on the light badge — keep readable */
+  color: rgba(30, 26, 15, 0.92);   /* dark ink on the light badge keep readable */
 }
 
-/* Sessies-teller "0 SESSIES" badge blijft op wit — geen wijziging nodig */
+/* Sessies-teller "0 SESSIES" badge blijft op wit geen wijziging nodig */
 
 /* ────────── Start-sheet close button (X, top-right) ────────── */
 .pp-live-sheet-close {
@@ -1071,7 +1071,7 @@ body.pp-live-player-active .dy-sidebar {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
- * v60.1.194 SCHEDULED LIVE — mode toggle + AANKOMEND grid + countdown
+ * v60.1.194 SCHEDULED LIVE mode toggle + AANKOMEND grid + countdown
  * ═══════════════════════════════════════════════════════════════════ */
 
 /* ── Start-sheet: Nu / Later plannen toggle ───────────────────── */

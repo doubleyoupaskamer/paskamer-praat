@@ -10,13 +10,13 @@
  *       `BP.renderAnalytics` zonder de legacy code aan te raken en patcht
  *       de DOM na-render met LIVE cijfers:
  *
- *        • Impr. per campagne — uit events waar campaignId === d.id
- *        • Kliks per campagne — uit events met type=campaign_click
- *        • Likes — sum van `brand_products.likes[uid]` per merk
- *        • Actie — knop "Bekijk live →" naar campagne-detail
+ *        • Impr. per campagne uit events waar campaignId === d.id
+ *        • Kliks per campagne uit events met type=campaign_click
+ *        • Likes sum van `brand_products.likes[uid]` per merk
+ *        • Actie knop "Bekijk live →" naar campagne-detail
  *
  *       Bovendien voegt het 1 nieuwe stat-tegel toe (Totaal likes) en 2
- *       nieuwe kolommen (Likes, Actie) aan de tabel — zonder de legacy
+ *       nieuwe kolommen (Likes, Actie) aan de tabel zonder de legacy
  *       kolommen te raken.
  *
  * Public API:
@@ -57,7 +57,7 @@
   async function loadBrandEngagement(brandUid, campaignIds) {
     var perCamp = {};       // campId → { impr, click, byPlc }
     // v1.2.0: brand-totals tellen ALLE brand-events (incl. sponsored_product
-    // zonder campaignId) — dat is de echte engagement voor het merk.
+    // zonder campaignId) dat is de echte engagement voor het merk.
     var brandTotals = { impr: 0, click: 0, likes: 0, byPlc: emptyPlcMap() };
     campaignIds.forEach(function (cid) {
       perCamp[cid] = { impr: 0, click: 0, byPlc: emptyPlcMap() };
@@ -77,7 +77,7 @@
         var cid = e.campaignId;
         var plc = e.plaatsing;
 
-        // Brand-level totals — alle brand-events tellen
+        // Brand-level totals alle brand-events tellen
         if (etype === 'impression') brandTotals.impr++;
         else if (etype === 'campaign_click') brandTotals.click++;
         if (plc && brandTotals.byPlc[plc]) {
@@ -85,7 +85,7 @@
           else if (etype === 'campaign_click') brandTotals.byPlc[plc].click++;
         }
 
-        // Per-campaign — alleen events met matching campaignId
+        // Per-campaign alleen events met matching campaignId
         if (cid && perCamp[cid]) {
           if (etype === 'impression') perCamp[cid].impr++;
           else if (etype === 'campaign_click') perCamp[cid].click++;
@@ -292,8 +292,8 @@
       if (!tr.querySelector('[data-testid^="pp-ba-likes-cell-"]')) {
         var tdLikes = document.createElement('td');
         tdLikes.setAttribute('data-testid', 'pp-ba-likes-cell-' + rowData.id);
-        // Likes zijn brand-niveau, niet campaign-niveau. Toon — als indicator.
-        tdLikes.textContent = '—';
+        // Likes zijn brand-niveau, niet campaign-niveau. Toon als indicator.
+        tdLikes.textContent = ' ';
         tdLikes.title = 'Likes worden geaggregeerd op merk-niveau (zie stat-tegel boven)';
         tdLikes.style.textAlign = 'center';
         tdLikes.style.color = '#9b8775';
@@ -323,7 +323,7 @@
       var rows = BP._analyticsRows || [];
       var campIds = rows.map(function (r) { return r.id; }).filter(Boolean);
 
-      try { console.log(TAG, 'enhance start — brandUid=' + brandUid + ' campaigns=' + campIds.length); } catch (_) {}
+      try { console.log(TAG, 'enhance start brandUid=' + brandUid + ' campaigns=' + campIds.length); } catch (_) {}
 
       var data = await loadBrandEngagement(brandUid, campIds);
 

@@ -15,7 +15,7 @@
  * aspect-ratio/object-fit, dus de browser default crop kicks in via
  * de CSS in brand-portal.css.
  *
- * Fix: dezelfde aanpak als v60.1.160 — aspect-ratio:3/4 (portret) +
+ * Fix: dezelfde aanpak als v60.1.160 aspect-ratio:3/4 (portret) +
  * object-fit:contain (volledige afbeelding letterboxed binnen container).
  * Neutrale background-color blendt met de dark theme.
  *

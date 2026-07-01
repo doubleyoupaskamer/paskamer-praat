@@ -17,9 +17,9 @@
  * Geen redesign, geen route-mutaties. Pure DOM-injection + delegators.
  *
  * Public API:
- *   PP_NavContext.openMerken()       — direct BP.renderMerken bypass
- *   PP_NavContext.resolveBackRoute() — context-aware back-route resolver
- *   PP_NavContext.brandLogoFor(brandId) — Promise<logoUrl|null>
+ *   PP_NavContext.openMerken()       direct BP.renderMerken bypass
+ *   PP_NavContext.resolveBackRoute() context-aware back-route resolver
+ *   PP_NavContext.brandLogoFor(brandId) Promise<logoUrl|null>
  *   PP_NavContext.VERSION
  * ═══════════════════════════════════════════════════════════════════════ */
 (function () {
@@ -173,9 +173,9 @@
       try {
         card.setAttribute('data-pp-brand-id-set', '1');
         var testid = card.getAttribute('data-testid') || '';
-        // testid format: pp-uitg-<campaignId>; we need brandId — extract from onclick
+        // testid format: pp-uitg-<campaignId>; we need brandId extract from onclick
         var onclick = card.getAttribute('onclick') || '';
-        // onclick="PP_FeedTabs.openCamp('cid','bid')" — extract 2nd arg
+        // onclick="PP_FeedTabs.openCamp('cid','bid')" extract 2nd arg
         var m = onclick.match(/openCamp\('[^']*','([^']*)'/);
         if (m && m[1]) {
           var logo = card.querySelector('.pp-uitg-logo');
@@ -256,7 +256,7 @@
       }
       var prev = navStack[navStack.length - 1];
       if (prev && prev.page) {
-        // Bypass voor merken/brand portal — gebruik openMerken() helper
+        // Bypass voor merken/brand portal gebruik openMerken() helper
         if (prev.page === 'merken') return openMerken();
         if (window.DY && typeof DY.navigeer === 'function') {
           return DY.navigeer(prev.page, prev.id || undefined);
@@ -313,7 +313,7 @@
   // Vangt elke knop met data-testid="universal-back" of [data-pp-back="1"]
   // en routeert via context-aware goBack(). Bestaande specifieke
   // handlers (brand-detail-back, merken-back-btn) blijven intact en
-  // voorrang houden — deze delegator is een net-vanger voor nieuwe
+  // voorrang houden deze delegator is een net-vanger voor nieuwe
   // back-knoppen die geen specifieke handler hebben.
   function setupUniversalBackDelegator() {
     document.addEventListener('click', function (e) {

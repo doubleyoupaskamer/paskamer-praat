@@ -1,4 +1,4 @@
-# Doubleyou — robots.txt
+# Doubleyou robots.txt
 # Tall & Plus Size Fashion Community Nederland
 # https://paskamerpraat.nl
 
@@ -40,7 +40,7 @@ Disallow: /uploaden
 Disallow: /api/
 Disallow: /branding/
 
-# AI training & search crawlers — expliciet toegestaan voor publieke pagina's
+# AI training & search crawlers expliciet toegestaan voor publieke pagina's
 User-agent: GPTBot
 Allow: /
 Disallow: /admin

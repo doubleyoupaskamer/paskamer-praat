@@ -1,4 +1,4 @@
-# Paskamer Praat — v45 Stability + Performance Audit Fixes
+# Paskamer Praat v45 Stability + Performance Audit Fixes
 
 **Datum:** 2026-02-13
 **Type:** Non-invasieve stability + performance patch op v44. `pwa-v463-*.js` NIET aangepast.
@@ -23,14 +23,14 @@ gevaarlijke patronen om en haalt onnodige permanente timers eruit.
 ## Wat is gefixed in v45
 
 ### 1. Globale error boundary (NIEUW)
-- **`js/error-boundary-v1.js`** — laadt ALS EERSTE script.
+- **`js/error-boundary-v1.js`** laadt ALS EERSTE script.
 - Vangt `window.error` (incl. resource load failures) + `unhandledrejection`.
 - Dedupes identieke fouten binnen 5s, ring-buffer van 50.
 - Publieke API: `DY.errors.list()`, `DY.errors.count()`, `DY.errors.clear()`.
 - Event: `dy:error-captured` voor latere analytics-hook.
-- **Onderdrukt niets** — alleen observeren + structureren.
+- **Onderdrukt niets** alleen observeren + structureren.
 
-### 2. `zoek-mijnmaat-v1.js` — twee root-causes
+### 2. `zoek-mijnmaat-v1.js` twee root-causes
 - **Was:** `if (!window.DY) setTimeout(init, 100)` → oneindige polling-loop
   als `DY` nooit zou laden (CPU/battery drain).
   **Nu:** retry-cap van 60 × 100ms = 6s, daarna stille exit.
@@ -39,16 +39,16 @@ gevaarlijke patronen om en haalt onnodige permanente timers eruit.
   draaide nooit.
   **Nu:** `try { await orig... } catch { console.warn + rethrow } finally { filter altijd }`.
 
-### 3. `extra-menu-v3.js` — permanente timer afgeschaft
+### 3. `extra-menu-v3.js` permanente timer afgeschaft
 - **Was:** `setInterval(nukeOnce, 1500)` → loopt tot tab gesloten wordt.
 - **Nu:** zelfde interval, maar `clearInterval` na 10s. CSS killstyles in
   `<head>` houden legacy FAB's permanent verborgen.
 - **Impact:** -40 timer-callbacks per minuut, indefinitely.
 
-### 4. `index.html` inline early-exec guard — zelfde fix
+### 4. `index.html` inline early-exec guard zelfde fix
 - Dubbele nuker liep parallel aan extra-menu-v3. Beide stoppen nu na 10s.
 
-### 5. `lazy-images-v1.js` — MutationObserver scope smaller
+### 5. `lazy-images-v1.js` MutationObserver scope smaller
 - **Was:** `observe(document.documentElement, {childList, subtree})` →
   observeert ook `<head>` mutaties (nooit `<img>`).
 - **Nu:** `observe(document.body || documentElement, …)` → schoner +
@@ -102,5 +102,5 @@ js/lazy-images-v1.js      ← observer scope fix
 - Geen wijziging aan `pwa-v463-*.js`, Firebase SDK, Anthropic flow, auth.
 - Bestaande API's (`DY.voerZoekUit`, `DY._zoekFilters`, popover-flow) blijven
   identiek bruikbaar; alleen safety net errom heen.
-- error-boundary onderdrukt geen errors, bubbled ze nog steeds — DevTools
+- error-boundary onderdrukt geen errors, bubbled ze nog steeds DevTools
   laat ze net zo zien als voorheen.

@@ -3,7 +3,7 @@
   "alias_for": "campaign_events",
   "version": "1.0.0",
   "date": "2026-02-14",
-  "description": "Append-only event log. Een nieuwe `events` collectie wordt naast `campaign_events` gebruikt voor uitgebreide event-types. Migratie wordt NIET geforceerd — beide collections runnen parallel tot natural aging.",
+  "description": "Append-only event log. Een nieuwe `events` collectie wordt naast `campaign_events` gebruikt voor uitgebreide event-types. Migratie wordt NIET geforceerd beide collections runnen parallel tot natural aging.",
   "missing_fields": {
     "processed": {
       "type": "boolean",

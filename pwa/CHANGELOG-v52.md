@@ -1,11 +1,11 @@
-# Paskamer Praat — v52 Release Notes (Premium + Wardrobe Recommender)
+# Paskamer Praat v52 Release Notes (Premium + Wardrobe Recommender)
 
 **Release date:** 2026-02-13
 **Cache-buster:** `?v=52` · **SW VERSION:** `v52-20260213-premium-wardrobe-recommender`
 
 ---
 
-## 1. Wardrobe Recommender — "Wat te dragen deze week"
+## 1. Wardrobe Recommender "Wat te dragen deze week"
 
 Een persoonlijke AI-flow die de **bewaarde items** (Mijn Garderobe) combineert
 met **recente Style Scores** + een licht weersdetectie tot **3 outfit-picks**
@@ -22,7 +22,7 @@ per week. Non-invasief: gebruikt bestaande LocalStorage `dy_saved_posts`.
 - Premium: **onbeperkt**.
 
 ### Backend
-- `POST /api/wardrobe/recommend` — combineert saved_items + recent_scores +
+- `POST /api/wardrobe/recommend` combineert saved_items + recent_scores +
   weather + occasion. Gebruikt Claude Sonnet 4.5 via Emergent LLM Key.
 - Output: `{ week, intro, picks[3], based_on_saved, based_on_scores,
   is_premium, remaining_free_uses }`.
@@ -50,28 +50,28 @@ Stripe Price ID worden uitgebreid).
 
 ### Architectuur
 - Server-side fixed package `premium_monthly` (security: prijs nooit van frontend).
-- Email-only checkout toegestaan — geen Firebase login vereist.
+- Email-only checkout toegestaan geen Firebase login vereist.
 - `user_key` = Firebase uid OF email OF anoniem device-session.
 - Premium-status TTL: 31 dagen vanaf activatie.
 
 ### Backend endpoints
-- `POST /api/checkout/session` — maakt Stripe checkout
-- `GET  /api/checkout/status/{sid}` — pollt en activeert idempotent
-- `POST /api/webhook/stripe` — Stripe webhook (idempotent, dual-source met polling)
-- `GET  /api/premium/status?user_key=...` — check live status
-- `GET  /api/premium/packages` — lijst beschikbare pakketten
+- `POST /api/checkout/session` maakt Stripe checkout
+- `GET  /api/checkout/status/{sid}` pollt en activeert idempotent
+- `POST /api/webhook/stripe` Stripe webhook (idempotent, dual-source met polling)
+- `GET  /api/premium/status?user_key=...` check live status
+- `GET  /api/premium/packages` lijst beschikbare pakketten
 
 ### Database collections (MongoDB)
-- `payment_transactions` — Stripe sessies (idempotency)
-- `premium_users` — `{ user_key, package, expires_ts, activated_ts }`
-- `rate_limits` — gratis tier rate-limit tracking
+- `payment_transactions` Stripe sessies (idempotency)
+- `premium_users` `{ user_key, package, expires_ts, activated_ts }`
+- `rate_limits` gratis tier rate-limit tracking
 
 ### Frontend
-- **Floating Premium pill** (rechtsonder) — verbergt naar "Premium ✓" badge na
+- **Floating Premium pill** (rechtsonder) verbergt naar "Premium ✓" badge na
   upgrade.
 - **Upgrade modal** met perks-lijst + email input + Stripe redirect.
-- **Garderobe CTA** — banner bovenin Mijn Garderobe voor non-premium users.
-- **Return polling** — Stripe `?session_id=...` redirect wordt opgevangen,
+- **Garderobe CTA** banner bovenin Mijn Garderobe voor non-premium users.
+- **Return polling** Stripe `?session_id=...` redirect wordt opgevangen,
   status wordt 6× gepolld (1.8s interval) en cleanup van URL params.
 
 ### Stripe config
@@ -107,7 +107,7 @@ Frontend (changed):
 ## 4. Test instructies
 
 1. Upload `paskamerpraat-pwa-v52-COMPLETE.zip` naar je hosting.
-2. Wacht 5-10s — service worker detecteert v52 en herlaadt.
+2. Wacht 5-10s service worker detecteert v52 en herlaadt.
 3. **Premium pill** verschijnt rechtsonder (👑 Premium €6,99).
 4. **Test checkout flow:**
    - Klik op pill → upgrade modal opent.
@@ -127,6 +127,6 @@ Frontend (changed):
 
 - Sub-cancel-flow zit nog niet in UI; premium loopt automatisch af na 31 dagen.
   Toevoegen via `/api/premium/cancel` endpoint kan later.
-- Anti-fraud: 1 email kan meerdere keren betalen — geen duplicate-check.
+- Anti-fraud: 1 email kan meerdere keren betalen geen duplicate-check.
 - Webhook werkt alleen als Stripe je publieke URL kan bereiken. Polling is de
   primaire activation path (idempotent, race-condition-veilig).

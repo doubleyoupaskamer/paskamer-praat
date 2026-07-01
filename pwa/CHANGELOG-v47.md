@@ -1,6 +1,6 @@
-# Paskamer Praat — v47 AI Megabundle (2026-02-13)
+# Paskamer Praat v47 AI Megabundle (2026-02-13)
 
-> **DRIE high-ROI AI features in één bundel.** Volledig non-invasief — `pwa-v463-1780765770.js` is niet aangeraakt.
+> **DRIE high-ROI AI features in één bundel.** Volledig non-invasief `pwa-v463-1780765770.js` is niet aangeraakt.
 
 ---
 
@@ -17,7 +17,7 @@
 
 ### 2. AI Outfit Score (`js/outfit-score-v1.js`)
 - **Gemini Vision** scoort iedere feed-foto op 0-100 + label + 3 tips + kleurpalet
-- **Auto-mode standaard AAN** sinds v47 — elke feed-card krijgt direct een score-pill
+- **Auto-mode standaard AAN** sinds v47 elke feed-card krijgt direct een score-pill
 - Opt-out: `window.DY.outfitScoreAuto = false` (manuele "Vraag Style Score"-knop)
 - LocalStorage cache 14 dagen per `post-id` → nul herhaalkosten
 - MutationObserver pakt nieuwe feed-items automatisch op (200ms debounce)
@@ -43,7 +43,7 @@
 | `POST /api/weekly-stylist`  | `gemini-3-pro-image-preview`     | 3 picks JSON                |
 
 - Gebruikt **`EMERGENT_LLM_KEY`** via `emergentintegrations` (geen extra secrets nodig op Emergent Deploy)
-- Volledig open CORS (`*`) — werkt vanaf elk PWA-domein
+- Volledig open CORS (`*`) werkt vanaf elk PWA-domein
 - Strikte input-validatie (max ~9 MB base64), 400/413/502 fouten met duidelijke detail
 
 ---
@@ -86,7 +86,7 @@ Na deploy: zet `window.DY.apiBase` in `index.html` en upload de PWA naar je host
 - `sw.js` VERSION → `v47-20260213-ai-megabundle-tryon-score-weekly` (forceert cache-purge op installatie)
 - Alle script-tags bumped naar `?v=47` (forceert verse fetch op iOS PWA)
 - Geen wijzigingen aan core `pwa-v463-1780765770.js`
-- Alle 3 v47 scripts zijn **idempotent** (`__ppXxxInit` guard) — dubbel laden is veilig
+- Alle 3 v47 scripts zijn **idempotent** (`__ppXxxInit` guard) dubbel laden is veilig
 
 ---
 

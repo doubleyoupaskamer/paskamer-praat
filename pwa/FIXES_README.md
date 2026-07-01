@@ -1,9 +1,9 @@
-# Paskamer Praat — Fixes pack (8 juni 2026)
+# Paskamer Praat Fixes pack (8 juni 2026)
 
 Deze build bevat alle 5 quick wins uit de PWA‑scan.
 
-## ✅ 1. Hero image — alt + AVIF/WebP/PNG met `<picture>`
-- **Files gewijzigd:** `js/pwa-v463-1780765770.js` (lines ~2143–2150)
+## ✅ 1. Hero image alt + AVIF/WebP/PNG met `<picture>`
+- **Files gewijzigd:** `js/pwa-v463-1780765770.js` (lines ~2143-2150)
 - **Nieuwe assets:**
   - `hero-model-480.avif` (29 KB) · `hero-model-800.avif` (65 KB) · `hero-model-1024.avif` (100 KB)
   - `hero-model-480.webp` (34 KB) · `hero-model-800.webp` (77 KB) · `hero-model-1024.webp` (118 KB)
@@ -12,13 +12,13 @@ Deze build bevat alle 5 quick wins uit de PWA‑scan.
 
 **Verwachte LCP‑winst op mobiel:** 226 KB PNG → 29 KB AVIF (~87% minder bytes).
 
-## ✅ 2. Onboarding modal — niet langer agressief
+## ✅ 2. Onboarding modal niet langer agressief
 - **File gewijzigd:** `js/pwa-v463-1780765770.js` rondom `// Onboarding overlay voor gasten`
 - Modal verschijnt nu pas **na 25 s op de pagina** of **bij scroll‑diepte > 40%** (wat eerst komt).
 - Sluiten ("Doorgaan zonder account") slaat dismissal **30 dagen** op in `localStorage` (`dy_overlay_dismissed_until`).
 - Voorkomt Google's *intrusive interstitial* penalty op mobiele SERP.
 
-## ✅ 3. Manifest — screenshots + maskable icon
+## ✅ 3. Manifest screenshots + maskable icon
 - **Files:** `manifest.json` (overschreven), nieuwe assets:
   - `screenshot-narrow.jpg` 720×1280 (`form_factor: narrow`)
   - `screenshot-wide.jpg` 1280×720 (`form_factor: wide`)
@@ -31,10 +31,10 @@ Deze build bevat alle 5 quick wins uit de PWA‑scan.
 
 ## ✅ 4. Firebase compat → modular migratie
 - **File:** `FIREBASE_MIGRATION.md` (volledig stappenplan).
-- Bevat zoek‑vervang tabel, voor/na code, CSP‑update en een pragmatisch tussenstap (compat v11.0.2 — ~30–50 KB winst zonder code changes).
+- Bevat zoek‑vervang tabel, voor/na code, CSP‑update en een pragmatisch tussenstap (compat v11.0.2 ~30-50 KB winst zonder code changes).
 - **Niet automatisch toegepast** omdat dit 25k regels code raakt; doe dit in een aparte sprint met testdekking.
 
-## ✅ 5. Service worker — runtime caching
+## ✅ 5. Service worker runtime caching
 - **File:** `sw.js` (overschreven, v21).
 - Strategieën per resource type:
   - **HTML / navigaties:** network‑first met 3 s timeout → altijd verse content na deploy, maar offline fallback uit cache.
@@ -42,7 +42,7 @@ Deze build bevat alle 5 quick wins uit de PWA‑scan.
   - **CSS + Google Fonts:** stale‑while‑revalidate.
   - **Images (eigen + lh3.googleusercontent.com avatars):** cache‑first, LRU max 60 entries.
   - **Firebase / Firestore / Storage / Anthropic / Workers:** **network‑only** (zoals het hoort).
-- Veilig i.c.m. je versioned filenames (`pwa-v463-1780765770.js`) — nieuwe deploy = nieuwe filename = automatisch nieuwe fetch.
+- Veilig i.c.m. je versioned filenames (`pwa-v463-1780765770.js`) nieuwe deploy = nieuwe filename = automatisch nieuwe fetch.
 - Push notifications + `SKIP_WAITING` behouden. Extra `CLEAR_CACHES` message handler toegevoegd voor noodgevallen.
 
 ## 🎁 Bonus

@@ -1,8 +1,8 @@
-# v60.1.44 — Brand Portal Firestore rules fix (publieke brand-detail)
+# v60.1.44 Brand Portal Firestore rules fix (publieke brand-detail)
 
 ## Probleem (gevonden tijdens E2E productie-validatie)
 Klik op een merk-kaart op `/merken` toonde:
-> "Fout bij laden — Missing or insufficient permissions"
+> "Fout bij laden Missing or insufficient permissions"
 
 ## Root cause
 De v60.1.42 refactor verwijderde `.where('status','==','actief')` uit de
@@ -18,12 +18,12 @@ match /brand_products/{productId} {
 
 Firestore vereist dat de query SERVER-SIDE garandeert dat alleen rule-compliant
 docs worden teruggegeven. Een query zonder `where('status')` filter kan
-docs met status='concept' of 'verwijderd' ophalen — die de rule blokkeert.
+docs met status='concept' of 'verwijderd' ophalen die de rule blokkeert.
 Resultaat: hele query failt met `permission-denied`.
 
 ## Fix
 Herstel de `.where('status','==','actief')` clause. Vereist composite index
-`brand_products: (brandId ASC, status ASC)` — toegevoegd aan
+`brand_products: (brandId ASC, status ASC)` toegevoegd aan
 `firestore.indexes.json` voor 1-commando deploy via Firebase CLI.
 
 ```js
@@ -46,12 +46,12 @@ Dus daar werkt de client-side sort ZONDER status-filter prima.
 ## Index deploy
 Twee opties voor de user:
 
-### Optie A — Firebase CLI (aanbevolen)
+### Optie A Firebase CLI (aanbevolen)
 ```bash
 firebase deploy --only firestore:indexes
 ```
 
-### Optie B — Handmatig in Firebase Console
+### Optie B Handmatig in Firebase Console
 1. Open Firebase Console → Firestore → Indexes
 2. Klik "Create index"
 3. Collection: `brand_products`
@@ -63,10 +63,10 @@ Als deze index er **al was** (van de "7 indexes" die de user toevoegde),
 dan werkt de page direct na deploy.
 
 ## Files
-- `js/brand-portal-v1.js` — regel 458 query restored
-- `firestore.indexes.json` — nieuw, voor `firebase deploy --only firestore:indexes`
-- `index.html` — cache version bump `?v=60.1.44-rules-fix`
-- `sw.js` — `VERSION = 'v60.1.44-20260214-rules-fix'`
+- `js/brand-portal-v1.js` regel 458 query restored
+- `firestore.indexes.json` nieuw, voor `firebase deploy --only firestore:indexes`
+- `index.html` cache version bump `?v=60.1.44-rules-fix`
+- `sw.js` `VERSION = 'v60.1.44-20260214-rules-fix'`
 
 ## E2E test resultaten (v60.1.43 productie)
 - ✅ `/merken` route → 2 approved brands gerendered (Hqjwjh, williamn)

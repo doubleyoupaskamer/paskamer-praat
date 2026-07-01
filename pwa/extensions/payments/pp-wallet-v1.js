@@ -276,7 +276,7 @@
           // Tab content: Opwaarderen
           // v1.6.0 (2026-02-23): Layout afgestemd op publieke Campagne-pakketten
           // landingspagina (pp-merken-pakketten-v1.js) zodat het merkenportaal
-          // EXACT dezelfde visuele identiteit gebruikt — "VOOR MERKEN" eyebrow,
+          // EXACT dezelfde visuele identiteit gebruikt "VOOR MERKEN" eyebrow,
           // hero-blok "Campagne-pakketten", intro-tekst en dezelfde 4 cards
           // (Starter/Groei/Pro/Ultimate met VERWACHTING blokken en POPULAR badge).
           // CTA op iedere card roept PP_Wallet.topup(amount) aan → coming-soon popup.

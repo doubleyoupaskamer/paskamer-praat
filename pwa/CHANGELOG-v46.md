@@ -1,4 +1,4 @@
-# Paskamer Praat — v46 Growth + Retention + UX Bundle (FULL)
+# Paskamer Praat v46 Growth + Retention + UX Bundle (FULL)
 
 **Datum:** 2026-02-13
 **Type:** v44 + v45 + v46 in één pakketje. Non-invasief. `pwa-v463-*.js` NIET aangepast.
@@ -7,10 +7,10 @@
 
 ### 1. Affiliate auto-tagger (`js/affiliate-tagger-v1.js`)
 - Detecteert outbound links naar Zalando, Bol, AboutYou, Wehkamp, H&M, ASOS, Omoda, Sacha, Zara
-- Voegt automatisch jouw affiliate-tag toe (idempotent — bewaart originele href)
+- Voegt automatisch jouw affiliate-tag toe (idempotent bewaart originele href)
 - Logt elke click naar Firestore `kai_events` collection (`eventType: 'affiliate_click'`)
 - Werkt ook op links die later dynamisch in feed-cards verschijnen (MutationObserver)
-- **Configureerbaar** via `window.DY.affiliateConfig` — overschrijf default params/values:
+- **Configureerbaar** via `window.DY.affiliateConfig` overschrijf default params/values:
   ```js
   window.DY.affiliateConfig = {
     enabled: true,
@@ -108,7 +108,7 @@ Alle 9 publieke API's actief. 0 fouten. ✅
 
 ## Upload instructie
 
-1. Upload **alleen** de bestanden in deze ZIP — overschrijf bestaande.
+1. Upload **alleen** de bestanden in deze ZIP overschrijf bestaande.
 2. **Niet** `pwa-v463-*.js` aanraken.
 3. Na deploy → open `/vernieuw.html` één keer op test-device → forceert SW purge.
 4. Verifieer DevTools → Application → SW status `pp-static-v46-…`.

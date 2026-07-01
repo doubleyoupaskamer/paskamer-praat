@@ -1451,11 +1451,11 @@ async function _doLoadAnalytics() {
     var metLengte = 0, metBouw = 0, metMaat = 0;
 
     var lengteCats = [
-      { label:'150–160cm', min:150, max:160 },
-      { label:'160–170cm', min:160, max:170 },
-      { label:'170–180cm', min:170, max:180 },
-      { label:'180–190cm', min:180, max:190 },
-      { label:'190–200cm', min:190, max:200 },
+      { label:'150-160cm', min:150, max:160 },
+      { label:'160-170cm', min:160, max:170 },
+      { label:'170-180cm', min:170, max:180 },
+      { label:'180-190cm', min:180, max:190 },
+      { label:'190-200cm', min:190, max:200 },
       { label:'200+ cm',   min:200, max:999 }
     ];
     var maatOrder = ['XS','S','M','L','XL','XXL','2XL','3XL','4XL','5XL'];
@@ -1482,7 +1482,7 @@ async function _doLoadAnalytics() {
       // Schoenmaat (groepeer per 2)
       var s = parseInt(u.schoen);
       if (!isNaN(s) && s > 30 && s < 60) {
-        var sg = (Math.floor(s/2)*2) + '–' + (Math.floor(s/2)*2+1);
+        var sg = (Math.floor(s/2)*2) + '-' + (Math.floor(s/2)*2+1);
         bySchoen[sg] = (bySchoen[sg]||0)+1;
       }
     });

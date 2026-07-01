@@ -60,7 +60,7 @@
   // ────────── HANDLER: back ──────────
   function backFromMerken() {
     try {
-      // Voorkeur: history.back() — gebruikt eigen navigatie-context
+      // Voorkeur: history.back() gebruikt eigen navigatie-context
       if (window.history && history.length > 1) return history.back();
     } catch (_) {}
     // Safe fallback

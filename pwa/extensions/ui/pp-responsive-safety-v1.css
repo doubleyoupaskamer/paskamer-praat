@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PASKAMER PRAAT — Responsive Safety Layer (v1.0.1 — minimal safe)
+ * PASKAMER PRAAT Responsive Safety Layer (v1.0.1 minimal safe)
  * ═══════════════════════════════════════════════════════════════════════
  * v1.0.0 (2026-07-01): eerste release met 12 layers
- * v1.0.1 (2026-07-01): STRIPPED — v1.0.0 veroorzaakte size-regressies op
+ * v1.0.1 (2026-07-01): STRIPPED v1.0.0 veroorzaakte size-regressies op
  *   feed challenges-bar, filter-buttons en feed card images. Alleen de
  *   ECHT veilige regels behouden: horizontal overflow prevention + iOS
  *   safe-area voor bottom-nav + focus-visible + reduced-motion.

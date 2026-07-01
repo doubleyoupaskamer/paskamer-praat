@@ -1,5 +1,5 @@
 /**
- * PASKAMER PRAAT — Merken pakketten "Naar merkenportaal" → Coming soon popup
+ * PASKAMER PRAAT Merken pakketten "Naar merkenportaal" → Coming soon popup
  * -----------------------------------------------------------------
  * Non-breaking, additief. Op de /?pagina=merken_pakketten pagina intercepten
  * we de "Naar merkenportaal" CTA op elk pakket-card (€25/€50/€100/€250) en
@@ -7,7 +7,7 @@
  * (welke fallbackt naar feed).
  *
  * We LATEN de bestaande hooks (pp-brand-pkg-activate-v1.js +
- * pp-route-safety-v1.js) ongemoeid — die bewaren nog steeds de pakket-keuze
+ * pp-route-safety-v1.js) ongemoeid die bewaren nog steeds de pakket-keuze
  * in Firestore in capture-phase, VOOR onze intercept. Dus geen data-verlies.
  */
 (function () {
@@ -31,7 +31,7 @@
         // 1. Verwijder inline onclick (die navigeert naar 'merken' → feed fallback)
         if (cta.hasAttribute('onclick')) cta.removeAttribute('onclick');
 
-        // 2. Attach onze listener — capture-phase zodat we altijd winnen
+        // 2. Attach onze listener capture-phase zodat we altijd winnen
         cta.addEventListener('click', function (e) {
           e.preventDefault();
           e.stopImmediatePropagation();
@@ -51,7 +51,7 @@
               // Fallback als coming-soon module (nog) niet geladen is
               try {
                 if (window.DY && DY.toast) DY.toast('Binnenkort beschikbaar', false);
-                else alert('Binnenkort beschikbaar — het merkenportaal is momenteel in ontwikkeling.');
+                else alert('Binnenkort beschikbaar het merkenportaal is momenteel in ontwikkeling.');
               } catch (_) {}
             }
           } catch (err) { log('show cs failed', err && err.message); }

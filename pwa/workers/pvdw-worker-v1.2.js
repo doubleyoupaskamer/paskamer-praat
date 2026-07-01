@@ -1,5 +1,5 @@
 /**
- * POST VAN DE WEEK — Cloudflare Worker
+ * POST VAN DE WEEK Cloudflare Worker
  * DoubleYou / Paskamer Praat  •  v1.2.0 (februari 2026)
  *
  * v1.2.0 wijzigingen:
@@ -228,9 +228,9 @@ async function sendAdminMail(db, adminEmail, winnaar, weekId, bereik) {
   try {
     const uid = winnaar.userId || winnaar.authorId || 'onbekend';
     const naam = winnaar.authorName || winnaar.displayName || 'Onbekend';
-    const subject = `[Paskamer Praat] Post van de Week winnaar — ${weekId}`;
-    const html = `<h2>Post van de Week — winnaar geselecteerd</h2><p><strong>Week:</strong> ${weekId} (${bereik.startIso.slice(0,10)} t/m ${bereik.endIso.slice(0,10)})</p><p><strong>Winnaar:</strong> ${naam} (uid: <code>${uid}</code>)</p><p><strong>Post:</strong> <code>${winnaar._id}</code></p><p><strong>Likes:</strong> ${winnaar._likesCount}</p><p><strong>DSP-bonus uitgekeerd:</strong> ${DSP_BONUS}</p><p><strong>Reden:</strong> Hoogste likes ≥ ${MIN_LIKES}, niet verborgen/gemodereerd</p><hr><p style="color:#888;font-size:12px">Automatisch verzonden door pvdw-worker v1.2.0</p>`;
-    await db.addDoc('mail', { to: [adminEmail], message: { subject, html, text: `Winnaar Post van de Week ${weekId}: ${naam} (${uid}) — post ${winnaar._id} met ${winnaar._likesCount} likes. DSP +${DSP_BONUS}.` } });
+    const subject = `[Paskamer Praat] Post van de Week winnaar ${weekId}`;
+    const html = `<h2>Post van de Week winnaar geselecteerd</h2><p><strong>Week:</strong> ${weekId} (${bereik.startIso.slice(0,10)} t/m ${bereik.endIso.slice(0,10)})</p><p><strong>Winnaar:</strong> ${naam} (uid: <code>${uid}</code>)</p><p><strong>Post:</strong> <code>${winnaar._id}</code></p><p><strong>Likes:</strong> ${winnaar._likesCount}</p><p><strong>DSP-bonus uitgekeerd:</strong> ${DSP_BONUS}</p><p><strong>Reden:</strong> Hoogste likes ≥ ${MIN_LIKES}, niet verborgen/gemodereerd</p><hr><p style="color:#888;font-size:12px">Automatisch verzonden door pvdw-worker v1.2.0</p>`;
+    await db.addDoc('mail', { to: [adminEmail], message: { subject, html, text: `Winnaar Post van de Week ${weekId}: ${naam} (${uid}) post ${winnaar._id} met ${winnaar._likesCount} likes. DSP +${DSP_BONUS}.` } });
   } catch (e) { console.error('[pvdw] admin mail mislukt:', e.message); }
 }
 
@@ -312,7 +312,7 @@ async function verwerkWeek(db, weekId, bereik, env) {
   await db.setDoc('weekly_rankings', weekId, winnaarsData);
   const auteurId = winnaar.userId || winnaar.authorId;
   if (auteurId) {
-    await db.addDoc('dsp_log', { uid: auteurId, actie: 'pvdw_winnaar', pts: DSP_BONUS, label: `Post van de Week (${weekId}) — ${DSP_BONUS} DSP bonus`, postId: winnaar._id, weekId, ts: new Date().toISOString() }).catch(e => console.error('[pvdw] dsp_log fout:', e.message));
+    await db.addDoc('dsp_log', { uid: auteurId, actie: 'pvdw_winnaar', pts: DSP_BONUS, label: `Post van de Week (${weekId}) ${DSP_BONUS} DSP bonus`, postId: winnaar._id, weekId, ts: new Date().toISOString() }).catch(e => console.error('[pvdw] dsp_log fout:', e.message));
     await db.incrementFields('users', auteurId, { dsp_lifetime: DSP_BONUS, dsp_seizoen: DSP_BONUS }).catch(e => console.error('[pvdw] DSP totals fout:', e.message));
   }
   await Promise.all([

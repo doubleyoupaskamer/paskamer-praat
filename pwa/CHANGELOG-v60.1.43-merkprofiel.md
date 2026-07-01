@@ -1,30 +1,30 @@
-# v60.1.43 — Brand Portal Full System Stabilisatie + Merkprofiel
+# v60.1.43 Brand Portal Full System Stabilisatie + Merkprofiel
 
 ## Scope
 End-to-end audit + minimale stabilisatie + ontbrekend merkprofiel toegevoegd.
 Geen redesign, geen refactor buiten scope, geen verwijderde functionaliteit.
 
 ═══════════════════════════════════════════════════════════════════════
-FASE 1 — END-TO-END FLOW AUDIT
+FASE 1 END-TO-END FLOW AUDIT
 ═══════════════════════════════════════════════════════════════════════
 
-### BRAND USER FLOW — Status
+### BRAND USER FLOW Status
 | # | Flow                          | Status na v60.1.43 |
 |---|-------------------------------|--------------------|
 | 1 | Registratie                   | ✅ Werkend (renderRegister) |
 | 2 | Login                         | ✅ Werkend (delegeert naar DY.login) |
 | 3 | Dashboard toegang             | ✅ Werkend (renderDashboard) |
-| 4 | **Merkprofiel openen**        | 🆕 **FIX v60.1.43** — was: gerouteerd naar register-form. Nu: dedicated brand_profiel pagina |
-| 5 | **Merkprofiel bewerken**      | 🆕 **NIEUW v60.1.43** — volledige edit-form |
-| 6 | **Logo uploaden**             | 🆕 **NIEUW v60.1.43** — live preview + Firebase Storage upload |
-| 7 | Bedrijfsgegevens beheren     | 🆕 **NIEUW v60.1.43** — naam/contact/email/telefoon/website/social/categorie/btw/omschrijving |
+| 4 | **Merkprofiel openen**        | 🆕 **FIX v60.1.43** was: gerouteerd naar register-form. Nu: dedicated brand_profiel pagina |
+| 5 | **Merkprofiel bewerken**      | 🆕 **NIEUW v60.1.43** volledige edit-form |
+| 6 | **Logo uploaden**             | 🆕 **NIEUW v60.1.43** live preview + Firebase Storage upload |
+| 7 | Bedrijfsgegevens beheren     | 🆕 **NIEUW v60.1.43** naam/contact/email/telefoon/website/social/categorie/btw/omschrijving |
 | 8 | Producten beheren             | ✅ Werkend (renderProducten + renderProductForm) |
 | 9 | Campagnes aanmaken            | ✅ Werkend (renderCampagneForm) |
 | 10| Campagnes beheren             | ✅ Werkend (renderCampagnes + pause/resume) |
 | 11| Analytics bekijken            | ✅ Werkend (renderAnalytics + CSV export) |
 | 12| Logout / re-login             | ✅ Werkend (Firebase Auth) |
 
-### ADMIN FLOW — Status
+### ADMIN FLOW Status
 | # | Flow                          | Status |
 |---|-------------------------------|--------|
 | 1 | Login                         | ✅ Werkend |
@@ -35,7 +35,7 @@ FASE 1 — END-TO-END FLOW AUDIT
 | 6 | Analytics / inkomsten         | ✅ Werkend (renderAdminInkomsten) |
 
 ═══════════════════════════════════════════════════════════════════════
-FASE 2 — ROOT CAUSE ANALYSE
+FASE 2 ROOT CAUSE ANALYSE
 ═══════════════════════════════════════════════════════════════════════
 
 | # | Probleem | Oorzaak | Impact | Fix | Locatie |
@@ -47,7 +47,7 @@ FASE 2 — ROOT CAUSE ANALYSE
 | 5 | Headings overflowen | Geen `word-break` op h1/h2 | Lange merknamen overflowen | `word-break: break-word; overflow-wrap: anywhere` | brand-portal.css: global |
 
 ═══════════════════════════════════════════════════════════════════════
-FASE 3 — MERKPROFIEL IMPLEMENTATIE
+FASE 3 MERKPROFIEL IMPLEMENTATIE
 ═══════════════════════════════════════════════════════════════════════
 
 ### Route
@@ -93,7 +93,7 @@ brand-profiel-omschr, brand-profiel-submit
 ```
 
 ═══════════════════════════════════════════════════════════════════════
-FASE 4 — KNOPPEN & FUNCTIONALITEIT VALIDATIE
+FASE 4 KNOPPEN & FUNCTIONALITEIT VALIDATIE
 ═══════════════════════════════════════════════════════════════════════
 
 Alle interactieve elementen gecontroleerd:
@@ -104,10 +104,10 @@ Alle interactieve elementen gecontroleerd:
 - ✅ Submit buttons disabled tijdens save → re-enable bij fout
 
 ═══════════════════════════════════════════════════════════════════════
-FASE 5 — MOBILE RESPONSIVE FIXES
+FASE 5 MOBILE RESPONSIVE FIXES
 ═══════════════════════════════════════════════════════════════════════
 
-Geen redesign — alleen breakpoint correcties:
+Geen redesign alleen breakpoint correcties:
 
 ```css
 @media (max-width: 600px) {
@@ -127,7 +127,7 @@ Geen redesign — alleen breakpoint correcties:
 Desktop layout 100% ongewijzigd.
 
 ═══════════════════════════════════════════════════════════════════════
-FASE 6 — STABILITY & ROUTING
+FASE 6 STABILITY & ROUTING
 ═══════════════════════════════════════════════════════════════════════
 
 - ✅ `BP_PAGES` lookup: `brand_profiel` toegevoegd op 3 plekken (initial declaration, directKey lookup, eind-registration)
@@ -138,12 +138,12 @@ FASE 6 — STABILITY & ROUTING
 - ✅ Brand-bestaand-guard: geen brand-doc → redirect naar brand_register
 
 ═══════════════════════════════════════════════════════════════════════
-FASE 8 — PRODUCT THINKING (Optionele UX-gaten, NIET geïmplementeerd)
+FASE 8 PRODUCT THINKING (Optionele UX-gaten, NIET geïmplementeerd)
 ═══════════════════════════════════════════════════════════════════════
 
 Voorstellen voor toekomstige iteraties (alleen rapporteren, geen actie):
 
-1. **Account-email wijzigen** vereist Firebase Auth re-authentication — momenteel
+1. **Account-email wijzigen** vereist Firebase Auth re-authentication momenteel
    alleen `contactEmail` (display-veld in brand-doc) wijzigbaar.
 2. **"Bekijk als klant"-knop** op merkprofiel → preview hoe je merk-detail page eruit
    ziet voor bezoekers.

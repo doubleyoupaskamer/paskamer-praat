@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * Doubleyou — Live Module (Start Live Sheet + Camera Preview) v1.0.0
+ * Doubleyou Live Module (Start Live Sheet + Camera Preview) v1.0.0
  * ═══════════════════════════════════════════════════════════════════════
  *
  * NON-BREAKING additieve module. Bouwt het #pp-live-start modal (bottom
@@ -26,7 +26,7 @@
   var VERSION = '1.0.0';
   var PP_Live = window.PP_Live || (window.PP_Live = {});
 
-  // Studio formats — de 5 premium categorieën
+  // Studio formats de 5 premium categorieën
   var STUDIO_FORMATS = [
     { key: 'live',     label: 'Studio Live',     emoji: '🔴', desc: 'Live fashion & interactie' },
     { key: 'talks',    label: 'Studio Talks',    emoji: '🎙️', desc: 'Interviews met creators & merken' },
@@ -371,7 +371,7 @@
     }
     var f = db();
     if (!f) {
-      showError('Verbinding niet beschikbaar — probeer opnieuw.');
+      showError('Verbinding niet beschikbaar probeer opnieuw.');
       return;
     }
 
@@ -402,7 +402,7 @@
           return batch.commit();
         })
         .catch(function (e) {
-          // Als de query faalt (bijv. ontbrekende index) niet blokkeren —
+          // Als de query faalt (bijv. ontbrekende index) niet blokkeren 
           // sessie gewoon aanmaken. Cron worker ruimt eventuele stale wel op.
           log('stale-session cleanup skipped', e && e.message);
           return null;
@@ -506,7 +506,7 @@
   }
 
   // ───────────── Followers notify bij schedule ─────────────
-  // Best-effort — als de "volgers" collectie niet bestaat of query faalt,
+  // Best-effort als de "volgers" collectie niet bestaat of query faalt,
   // gaat de scheduling gewoon door. Cron worker verstuurt T-15 reminders.
   function notifyFollowersOfSchedule(f, u, sessionId, sessionDoc) {
     try {

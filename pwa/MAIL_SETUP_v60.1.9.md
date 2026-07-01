@@ -1,11 +1,11 @@
-# Mail Setup voor Brand Portal — v60.1.9
+# Mail Setup voor Brand Portal v60.1.9
 
 ## Wat is er veranderd?
 De vorige versie probeerde via een Cloudflare Worker (`black-grass-c05c.doubleyou-journal.workers.dev/mail`) te mailen. **Die worker is offline / DNS-onbereikbaar**, daarom faalden de mails met `TypeError: Failed to fetch`.
 
-Vanaf v60.1.9 schrijven we de mail in plaats daarvan naar een **Firestore `mail` collection**. Dit is de officiële standaard van de **Firebase "Trigger Email" Extension** — geen CORS, geen DNS-issues, gewoon een Firestore-write.
+Vanaf v60.1.9 schrijven we de mail in plaats daarvan naar een **Firestore `mail` collection**. Dit is de officiële standaard van de **Firebase "Trigger Email" Extension** geen CORS, geen DNS-issues, gewoon een Firestore-write.
 
-## Stap 1 — Update Firestore rules (REQUIRED)
+## Stap 1 Update Firestore rules (REQUIRED)
 Voeg deze rule toe aan je `firestore.rules` (staat al klaar in de ZIP):
 
 ```firestore
@@ -22,7 +22,7 @@ Deploy:
 firebase deploy --only firestore:rules
 ```
 
-## Stap 2 — Installeer de "Trigger Email" extension (REQUIRED voor echte verzending)
+## Stap 2 Installeer de "Trigger Email" extension (REQUIRED voor echte verzending)
 Zonder deze extension wordt de mail wél in Firestore opgeslagen maar **niet daadwerkelijk verstuurd**.
 
 ```bash
@@ -37,14 +37,14 @@ Of via de Firebase Console:
      - SendGrid: `smtps://apikey:JE_SENDGRID_KEY@smtp.sendgrid.net:465`
      - Resend SMTP: `smtps://resend:JE_RESEND_KEY@smtp.resend.com:465`
      - Gmail SMTP: `smtps://JE_EMAIL:APP_PASSWORD@smtp.gmail.com:465`
-   - **Email documents collection**: `mail` (DEFAULT — laat zo)
+   - **Email documents collection**: `mail` (DEFAULT laat zo)
    - **Default FROM address**: `Paskamer Praat <info@doubleyousmallandtall.nl>`
    - **Users collection** (optioneel): laat leeg
    - **Templates collection** (optioneel): laat leeg
 
-4. Klik **Install extension** (duurt 3–5 minuten)
+4. Klik **Install extension** (duurt 3-5 minuten)
 
-## Stap 3 — Test
+## Stap 3 Test
 1. Open een Incognito venster → `/?pagina=brand_register`
 2. Vul het formulier in met een echt mailadres
 3. Klik **Aanvraag versturen**

@@ -1,4 +1,4 @@
-# Placements System — pp-placements-v1.js
+# Placements System pp-placements-v1.js
 
 ## Wat het is
 Centrale helper-module om campaign-plaatsingen te gaten zonder bestaande
@@ -44,4 +44,4 @@ real-time updates. Bij latere init: roep handmatig
 - `user.plaatsingen` ontbreekt → alle placements aan (huidig gedrag)
 - `user.plaatsingen` lege array → alle aan (sane default)
 - `admin_settings.placements_enabled.X` ontbreekt → placement actief
-- Bestaande campaign queries blijven werken — placement filtering is opt-in
+- Bestaande campaign queries blijven werken placement filtering is opt-in

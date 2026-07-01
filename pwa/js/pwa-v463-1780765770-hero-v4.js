@@ -146,10 +146,10 @@ DY._VERSION = 'v1779170400-seo-v358';
 
 // ── SEO: Dynamische meta-tags per pagina ─────────────────────────
 DY._seoMetaConfig = {
-  feed:             { title: 'Community Feed | Pasvorm Ervaringen & Fitchecks - Doubleyou', desc: 'Bekijk de nieuwste pasvorm ervaringen, fitchecks en outfit verhalen van tall (1.85m+) en plus size (XL–5XL) fashion fans in Nederland. Gratis community.' },
-  lookbook:         { title: 'Outfit Inspiratie Tall & Plus Size | Lookbook - Doubleyou', desc: 'Outfit inspiratie van echte mensen, gefilterd op jouw lengte (1.85m–2.00m+) en maat (XL–5XL). Zie hoe kleding écht staat op een lichaam als het jouwe.' },
-  reviews:          { title: 'Pasvorm Reviews | Kleding voor Lange & Plus Size Mensen - Doubleyou', desc: 'Eerlijke pasvorm reviews van kledingmerken voor tall (1.85m+) en plus size (XL–5XL). Ontdek welke merken goed passen bij jouw lengte en bouw.' },
-  winkel:           { title: 'DoubleYou Winkel | Kleding voor Tall & Plus Size - Doubleyou', desc: 'Kleding gemaakt voor tall mensen (1.85m+) en plus size mensen (XL–5XL). Nederlandse ateliers, eerlijke pasvorm. Ontdek de DoubleYou collectie.' },
+  feed:             { title: 'Community Feed | Pasvorm Ervaringen & Fitchecks - Doubleyou', desc: 'Bekijk de nieuwste pasvorm ervaringen, fitchecks en outfit verhalen van tall (1.85m+) en plus size (XL-5XL) fashion fans in Nederland. Gratis community.' },
+  lookbook:         { title: 'Outfit Inspiratie Tall & Plus Size | Lookbook - Doubleyou', desc: 'Outfit inspiratie van echte mensen, gefilterd op jouw lengte (1.85m-2.00m+) en maat (XL-5XL). Zie hoe kleding écht staat op een lichaam als het jouwe.' },
+  reviews:          { title: 'Pasvorm Reviews | Kleding voor Lange & Plus Size Mensen - Doubleyou', desc: 'Eerlijke pasvorm reviews van kledingmerken voor tall (1.85m+) en plus size (XL-5XL). Ontdek welke merken goed passen bij jouw lengte en bouw.' },
+  winkel:           { title: 'DoubleYou Winkel | Kleding voor Tall & Plus Size - Doubleyou', desc: 'Kleding gemaakt voor tall mensen (1.85m+) en plus size mensen (XL-5XL). Nederlandse ateliers, eerlijke pasvorm. Ontdek de DoubleYou collectie.' },
   challenges:       { title: 'Fashion Challenges voor Tall & Plus Size | Win DSP Punten - Doubleyou', desc: 'Doe mee aan wekelijkse fashion challenges voor tall en plus size mensen. Verdien DSP punten, stijg in rang en win community erkenning.' },
   ovdw:             { title: 'Post van de Week | Beste Pasvorm Bijdrage - Doubleyou', desc: 'De best beoordeelde community bijdrage van afgelopen week. Elke week kiezen Doubleyou leden de mooiste fitcheck of pasvorm review.' },
   kleuren_ai:       { title: 'AI Outfit Vergelijker | Stijladvies voor Tall & Plus Size - Doubleyou', desc: 'Vergelijk outfits met AI en ontvang persoonlijk stijladvies op basis van jouw lengte, maat en lichaamsprofiel. Gratis AI stylist voor tall en plus size mensen.' },
@@ -215,7 +215,7 @@ DY._updateSEOMeta = function(pagina) {
 
 
 // ── BOUW NORMALISATIE - render-laag backward compatibility ──────
-// Converteert legacy bouw-waarden naar nieuwe XL–5XL standaard
+// Converteert legacy bouw-waarden naar nieuwe XL-5XL standaard
 DY._normBouw = function(bouw) {
   if (!bouw) return bouw;
   var map = {
@@ -606,7 +606,7 @@ DY.onAuthReady = function(user) {
       clearTimeout(_profielTimeout);
       if (doc.exists) {
         var _profileData = doc.data();
-        // Normaliseer legacy bouw-waarden naar nieuwe XL–5XL standaard
+        // Normaliseer legacy bouw-waarden naar nieuwe XL-5XL standaard
         if (_profileData && _profileData.bouw) _profileData.bouw = DY._normBouw(_profileData.bouw);
         DY.profile = _profileData;
         // Laad volgend - ondersteun zowel { uid: true } als { uid: { naam: ... } }
@@ -1641,9 +1641,9 @@ DY.renderVindMensen = async function() {
             '<div class="dy-oc-chips" id="dy-oc-lengte-chips">' +
               '<button class="dy-oc-chip active" data-lengte="alle">Alle</button>' +
               '<button class="dy-oc-chip" data-lengte="170min">‹ 170cm</button>' +
-              '<button class="dy-oc-chip" data-lengte="170-180">170–180cm</button>' +
-              '<button class="dy-oc-chip" data-lengte="180-190">180–190cm</button>' +
-              '<button class="dy-oc-chip" data-lengte="190-200">190–200cm</button>' +
+              '<button class="dy-oc-chip" data-lengte="170-180">170-180cm</button>' +
+              '<button class="dy-oc-chip" data-lengte="180-190">180-190cm</button>' +
+              '<button class="dy-oc-chip" data-lengte="190-200">190-200cm</button>' +
               '<button class="dy-oc-chip" data-lengte="200plus">200+ cm</button>' +
             '</div>' +
           '</div>' +
@@ -2208,7 +2208,7 @@ DY.toonBposOverlay = function() {
       '</div>' +
       '<div class="dy-bpos-hero">' +
         '<span class="dy-bpos-w">W</span>' +
-        '<h1 class="dy-bpos-hoofdtitel">Body Positivity<br><em>Reglement – Paskamerpraat</em></h1>' +
+        '<h1 class="dy-bpos-hoofdtitel">Body Positivity<br><em>Reglement - Paskamerpraat</em></h1>' +
         '<p class="dy-bpos-intro">Welkom bij Paskamerpraat. Onze community draait om <strong>zelfvertrouwen, respect en inclusiviteit</strong> en het respecteren van iedere lichaamsvorm, lengte en stijl. Om een veilige en positieve omgeving te behouden vragen we iedere gebruiker zich aan onderstaande richtlijnen te houden.</p>' +
       '</div>' +
       '<div class="dy-bpos-regels-lijst">' + regelHTML + '</div>' +
@@ -7423,7 +7423,7 @@ DY.renderDSP = function() {
       <span class="dy-dsp-niveau-emoji">${n.emoji}</span>
       <div class="dy-dsp-niveau-info">
         <strong>${n.naam}${isHuidig ? ' <span class="dy-dsp-niveau-badge-jij">Jij</span>' : ''}</strong>
-        <span class="dy-dsp-niveau-range">${n.min.toLocaleString('nl')} – ${n.max === Infinity ? '∞' : n.max.toLocaleString('nl')} DSP lifetime</span>
+        <span class="dy-dsp-niveau-range">${n.min.toLocaleString('nl')} - ${n.max === Infinity ? '∞' : n.max.toLocaleString('nl')} DSP lifetime</span>
         <span class="dy-dsp-niveau-voordeel-tekst">${n.voordelen}</span>
       </div>
     </div>`;
@@ -7436,7 +7436,7 @@ DY.renderDSP = function() {
       <span class="dy-dsp-niveau-emoji">${n.emoji}</span>
       <div class="dy-dsp-niveau-info">
         <strong>${n.naam}${isHuidig ? ' <span class="dy-dsp-niveau-badge-jij">Jij</span>' : ''}</strong>
-        <span class="dy-dsp-niveau-range">${n.min.toLocaleString('nl')} – ${n.max === Infinity ? '∞' : n.max.toLocaleString('nl')} DSP dit seizoen</span>
+        <span class="dy-dsp-niveau-range">${n.min.toLocaleString('nl')} - ${n.max === Infinity ? '∞' : n.max.toLocaleString('nl')} DSP dit seizoen</span>
         <span class="dy-dsp-niveau-voordeel-tekst">${n.voordelen}</span>
       </div>
     </div>`;
@@ -8552,7 +8552,7 @@ DY.fitConfidenceHTML = function(score, aantalReviews, badges) {
 
 // ══════════════════════════════════════════════════════════════════════
 // MAAT MATCHER ENGINE - v1.0
-// Berekent relevantie-score (0–100) tussen jouw profiel en content
+// Berekent relevantie-score (0-100) tussen jouw profiel en content
 // ══════════════════════════════════════════════════════════════════════
 
 DY.maatMatchScore = function(mijnProfiel, andereData) {
@@ -9020,18 +9020,18 @@ DY._renderKleurGrid = function(container) {
       '</select>' +
       '<select class="dy-ks-select" id="ks-lengte" aria-label="Lengte">' +
         '<option value="">Lengte</option>' +
-        '<option value="150-165">150–165 cm</option>' +
-        '<option value="165-175">165–175 cm</option>' +
-        '<option value="175-185">175–185 cm</option>' +
-        '<option value="185-195">185–195 cm</option>' +
+        '<option value="150-165">150-165 cm</option>' +
+        '<option value="165-175">165-175 cm</option>' +
+        '<option value="175-185">175-185 cm</option>' +
+        '<option value="185-195">185-195 cm</option>' +
         '<option value="195+">195+ cm</option>' +
       '</select>' +
       '<select class="dy-ks-select" id="ks-leeftijd" aria-label="Leeftijd">' +
         '<option value="">Leeftijd</option>' +
-        '<option value="16-20">16–20</option>' +
-        '<option value="21-25">21–25</option>' +
-        '<option value="26-30">26–30</option>' +
-        '<option value="31-40">31–40</option>' +
+        '<option value="16-20">16-20</option>' +
+        '<option value="21-25">21-25</option>' +
+        '<option value="26-30">26-30</option>' +
+        '<option value="31-40">31-40</option>' +
         '<option value="40+">40+</option>' +
       '</select>' +
     '</div>';
@@ -14666,7 +14666,7 @@ DY.pkToonResultaat = function() {
   panel3.innerHTML =
     '<div class="dy-pk-resultaat-hero">' +
     '<div class="dy-pk-maat-badge">' + volleMaat + '</div>' +
-    '<p class="dy-pk-maat-uitleg">' + ltype.desc + ' &mdash; aanbevolen op basis van jouw maten.</p>' +
+    '<p class="dy-pk-maat-uitleg">' + ltype.desc + '   aanbevolen op basis van jouw maten.</p>' +
     '</div>' +
     '<div class="dy-form-wrap" style="padding-top:16px">' +
 
@@ -17862,10 +17862,10 @@ DY._adminTab = function(btn, tabId) {
 DY._adminTabOverzicht = function(el) {
   el.innerHTML =
     '<div class="dy-admin-kpi-grid">' +
-      '<div class="dy-admin-kpi" id="kpi-users"><div class="dy-admin-kpi-val">–</div><div class="dy-admin-kpi-lbl">Gebruikers</div></div>' +
-      '<div class="dy-admin-kpi" id="kpi-stories"><div class="dy-admin-kpi-val">–</div><div class="dy-admin-kpi-lbl">Verhalen</div></div>' +
-      '<div class="dy-admin-kpi" id="kpi-reviews"><div class="dy-admin-kpi-val">–</div><div class="dy-admin-kpi-lbl">Reviews</div></div>' +
-      '<div class="dy-admin-kpi" id="kpi-pwa-install"><div class="dy-admin-kpi-val">–</div><div class="dy-admin-kpi-lbl">PWA installs</div></div>' +
+      '<div class="dy-admin-kpi" id="kpi-users"><div class="dy-admin-kpi-val">-</div><div class="dy-admin-kpi-lbl">Gebruikers</div></div>' +
+      '<div class="dy-admin-kpi" id="kpi-stories"><div class="dy-admin-kpi-val">-</div><div class="dy-admin-kpi-lbl">Verhalen</div></div>' +
+      '<div class="dy-admin-kpi" id="kpi-reviews"><div class="dy-admin-kpi-val">-</div><div class="dy-admin-kpi-lbl">Reviews</div></div>' +
+      '<div class="dy-admin-kpi" id="kpi-pwa-install"><div class="dy-admin-kpi-val">-</div><div class="dy-admin-kpi-lbl">PWA installs</div></div>' +
     '</div>' +
     '<div class="dy-admin-sectie-titel">Realtime actief</div>' +
     '<div id="dy-admin-online-list" class="dy-admin-online-list"><div class="dy-admin-laden">Laden…</div></div>';
@@ -17941,9 +17941,9 @@ DY._adminTabOverzicht = function(el) {
             }).catch(function(){});
           })(doc.id);
         }
-        var route = d.route || '–';
-        var device = d.device || '–';
-        var ts = d.lastSeenMs ? new Date(d.lastSeenMs).toLocaleTimeString('nl-NL', {hour:'2-digit',minute:'2-digit'}) : '–';
+        var route = d.route || '-';
+        var device = d.device || '-';
+        var ts = d.lastSeenMs ? new Date(d.lastSeenMs).toLocaleTimeString('nl-NL', {hour:'2-digit',minute:'2-digit'}) : '-';
         html += '<div class="dy-admin-online-rij">' +
           '<span class="dy-admin-online-dot"></span>' +
           '<span class="dy-admin-online-naam" data-admin-naam-uid="' + DY.escapeHtml(doc.id) + '">' + DY.escapeHtml(naam) + '</span>' +
@@ -17982,11 +17982,11 @@ DY._adminTabGebruikers = function(el) {
           || (d.naam || null)
           || 'Onbekend';
         var naam = DY.escapeHtml(naamRaw);
-        var email = DY.escapeHtml(d.email || '–');
-        var maat = DY.escapeHtml(DY._normBouw ? DY._normBouw(d.bouw || '–') : (d.bouw || '–'));
-        var lengte = d.lengte ? d.lengte + 'cm' : '–';
+        var email = DY.escapeHtml(d.email || '-');
+        var maat = DY.escapeHtml(DY._normBouw ? DY._normBouw(d.bouw || '-') : (d.bouw || '-'));
+        var lengte = d.lengte ? d.lengte + 'cm' : '-';
         var dsp = d.dsp_lifetime || 0;
-        var ts = d.createdAt ? (d.createdAt.toDate ? d.createdAt.toDate().toLocaleDateString('nl-NL') : '–') : '–';
+        var ts = d.createdAt ? (d.createdAt.toDate ? d.createdAt.toDate().toLocaleDateString('nl-NL') : '-') : '-';
         html += '<tr><td>' + naam + '</td><td>' + email + '</td><td>' + maat + '</td>' +
           '<td>' + lengte + '</td><td>' + dsp + '</td><td>' + ts + '</td></tr>';
       });
@@ -18002,10 +18002,10 @@ DY._adminTabGebruikers = function(el) {
 DY._adminTabPWA = function(el) {
   el.innerHTML =
     '<div class="dy-admin-kpi-grid">' +
-      '<div class="dy-admin-kpi" id="pwa-kpi-total"><div class="dy-admin-kpi-val">–</div><div class="dy-admin-kpi-lbl">Totaal installs</div></div>' +
-      '<div class="dy-admin-kpi" id="pwa-kpi-android"><div class="dy-admin-kpi-val">–</div><div class="dy-admin-kpi-lbl">Android</div></div>' +
-      '<div class="dy-admin-kpi" id="pwa-kpi-ios"><div class="dy-admin-kpi-val">–</div><div class="dy-admin-kpi-lbl">iOS</div></div>' +
-      '<div class="dy-admin-kpi" id="pwa-kpi-removed"><div class="dy-admin-kpi-val">–</div><div class="dy-admin-kpi-lbl">Verwijderd</div></div>' +
+      '<div class="dy-admin-kpi" id="pwa-kpi-total"><div class="dy-admin-kpi-val">-</div><div class="dy-admin-kpi-lbl">Totaal installs</div></div>' +
+      '<div class="dy-admin-kpi" id="pwa-kpi-android"><div class="dy-admin-kpi-val">-</div><div class="dy-admin-kpi-lbl">Android</div></div>' +
+      '<div class="dy-admin-kpi" id="pwa-kpi-ios"><div class="dy-admin-kpi-val">-</div><div class="dy-admin-kpi-lbl">iOS</div></div>' +
+      '<div class="dy-admin-kpi" id="pwa-kpi-removed"><div class="dy-admin-kpi-val">-</div><div class="dy-admin-kpi-lbl">Verwijderd</div></div>' +
     '</div>' +
     '<div class="dy-admin-sectie-titel">Recente PWA events</div>' +
     '<div id="dy-admin-pwa-list" class="dy-admin-pwa-list"><div class="dy-admin-laden">Laden…</div></div>';
@@ -18029,7 +18029,7 @@ DY._adminTabPWA = function(el) {
         if (d.type === 'removed') totals.removed++;
         if (d.platform === 'android') totals.android++;
         if (d.platform === 'ios') totals.ios++;
-        var ts = d.ts ? new Date(d.ts).toLocaleString('nl-NL', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '–';
+        var ts = d.ts ? new Date(d.ts).toLocaleString('nl-NL', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
         var icon = d.type === 'installed' ? '✅' : '🗑';
         // v60.1.37: toon username i.p.v. UID-code. Async lookup + DOM patch.
         var uidLabel;
@@ -18053,8 +18053,8 @@ DY._adminTabPWA = function(el) {
         }
         rows += '<div class="dy-admin-pwa-rij">' +
           '<span>' + icon + '</span>' +
-          '<span>' + DY.escapeHtml(d.type || '–') + '</span>' +
-          '<span>' + DY.escapeHtml(d.platform || '–') + '</span>' +
+          '<span>' + DY.escapeHtml(d.type || '-') + '</span>' +
+          '<span>' + DY.escapeHtml(d.platform || '-') + '</span>' +
           '<span data-admin-pwa-uid="' + DY.escapeHtml(d.uid || '') + '">' + DY.escapeHtml(uidLabel) + '</span>' +
           '<span class="dy-admin-pwa-ts">' + ts + '</span>' +
         '</div>';
@@ -19019,7 +19019,7 @@ DY._kaiImprovementEngine = async function(analyse) {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 400,
-        system: 'Je bent een persoonlijke stylist. Je analyseert UITSLUITEND kleding en accessoires die de persoon draagt. Negeer achtergrond en omgeving volledig. Je schrijft uitsluitend in gewoon Nederlands. Je gebruikt NOOIT em-dashes (-), en-dashes (–) of dubbele koppeltekens (--). Reageer ALTIJD en UITSLUITEND met een geldig JSON-object of JSON-array zonder markdown.',
+        system: 'Je bent een persoonlijke stylist. Je analyseert UITSLUITEND kleding en accessoires die de persoon draagt. Negeer achtergrond en omgeving volledig. Je schrijft uitsluitend in gewoon Nederlands. Je gebruikt NOOIT em-dashes (-), en-dashes (-) of dubbele koppeltekens (--). Reageer ALTIJD en UITSLUITEND met een geldig JSON-object of JSON-array zonder markdown.',
         messages: [{ role: 'user', content: prompt }]
       })
     });

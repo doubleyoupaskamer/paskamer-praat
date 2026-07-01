@@ -208,7 +208,7 @@
         '<h2 class="pp-topup-cs-titel" id="pp-topup-cs-titel">Binnenkort beschikbaar</h2>' +
         '<p class="pp-topup-cs-tekst">' +
           'Opwaarderen is pas mogelijk na de officiële lancering. ' +
-          'We zetten op dit moment de laatste puntjes op de i — heel binnenkort ' +
+          'We zetten op dit moment de laatste puntjes op de i heel binnenkort ' +
           'kun je hier je wallet opwaarderen.' +
         '</p>' +
         progressBlock +

@@ -1,7 +1,7 @@
-# v60.1-skeletons-fix — Lege blokken op homepage opgelost
+# v60.1-skeletons-fix Lege blokken op homepage opgelost
 
 **Datum:** 2026-02-14 (na v60.1-brand-portal-v1)
-**Type:** Bugfix — geen feature changes, geen redesign
+**Type:** Bugfix geen feature changes, geen redesign
 **Scope:** Uitsluitend herstel van zichtbaarheidsbug; brand-portal-v1 onaangetast.
 
 ---
@@ -22,9 +22,9 @@ function findFeedRoot() {
 
 Wanneer geen van de feed-specifieke selectors matchte (op homepage, profielpagina, brand-portal, voorwaarden, etc.) viel de functie terug op `<main>` = `#dy-main`. Daarna:
 
-1. `feedHasContent(main)` checkt op `.dy-feed-card`, `.dy-reel-content`, `[data-post-id]` — niets daarvan bestaat op niet-feed pagina's.
+1. `feedHasContent(main)` checkt op `.dy-feed-card`, `.dy-reel-content`, `[data-post-id]` niets daarvan bestaat op niet-feed pagina's.
 2. Na 1500ms appendt `showSkeletons()` drie cream `.dy-skeleton-card` blokken (background `#fefcf5`, klassieke skeleton-loader stijl) in `#dy-main`, **na de hero**.
-3. De `MutationObserver` zoekt naar feed-specifieke content om de skeletons te verwijderen — die komt nooit op de homepage → skeletons blijven **30 seconden** zichtbaar tot de safety-timeout.
+3. De `MutationObserver` zoekt naar feed-specifieke content om de skeletons te verwijderen die komt nooit op de homepage → skeletons blijven **30 seconden** zichtbaar tot de safety-timeout.
 
 ### Waarom dit nu pas zichtbaar werd
 
@@ -57,19 +57,19 @@ Op de **feed-pagina** functioneerde de module wel correct (skeletons → echte f
 | `sw.js` | VERSION bump → `v60.1-20260214-brand-portal-skeletons-fix` |
 
 ### Wat NIET aangepast
-- `js/pwa-v463-1780765770.js` — onaangeraakt
-- `js/brand-portal-v1.js` — onaangeraakt
-- `brand-portal.css` — onaangeraakt
-- `app.css` — onaangeraakt
-- Alle overige modules — onaangeraakt
-- Homepage HTML/layout — exact identiek
+- `js/pwa-v463-1780765770.js` onaangeraakt
+- `js/brand-portal-v1.js` onaangeraakt
+- `brand-portal.css` onaangeraakt
+- `app.css` onaangeraakt
+- Alle overige modules onaangeraakt
+- Homepage HTML/layout exact identiek
 
 ---
 
 ## 3. WAAROM DE ZICHTBAARHEIDSBUG ONTSTOND
 
 1. **Te ruime fallback selector** in `findFeedRoot()`: `document.querySelector('main')` is een **catch-all** die op elke pagina een match oplevert, niet alleen op de feed.
-2. **Geen context-check**: de skeleton-module veronderstelde stilzwijgend dat als er geen feed-content is, het rechtvaardig is om feed-skeletons te tonen — een aanname die alleen klopt **als de gebruiker op de feed-pagina is**.
+2. **Geen context-check**: de skeleton-module veronderstelde stilzwijgend dat als er geen feed-content is, het rechtvaardig is om feed-skeletons te tonen een aanname die alleen klopt **als de gebruiker op de feed-pagina is**.
 3. **Cache-laag verstopte het probleem**: voorheen werd door een ongewijzigde `?v=60` query string en SW-cache de pre-existing buggy versie consistent geserveerd; gebruikers met cache van vóór v46-introductie zagen het niet. De v60.1 cache-invalidatie heeft het probleem zichtbaar gemaakt.
 
 ---
@@ -77,10 +77,10 @@ Op de **feed-pagina** functioneerde de module wel correct (skeletons → echte f
 ## 4. VALIDATIE RESULTATEN
 
 ### Statische checks
-- ✅ JS-syntax `skeletons-v1.js` — OK
-- ✅ JS-syntax `brand-portal-v1.js` (regressie) — OK
-- ✅ JS-syntax `sw.js` — OK
-- ✅ 9/9 inline scripts in `index.html` — OK
+- ✅ JS-syntax `skeletons-v1.js` OK
+- ✅ JS-syntax `brand-portal-v1.js` (regressie) OK
+- ✅ JS-syntax `sw.js` OK
+- ✅ 9/9 inline scripts in `index.html` OK
 
 ### Gedragsverificatie (per route)
 | Route | Verwacht | Resultaat |
@@ -151,4 +151,4 @@ Mogelijke vervolg-verbeteringen voor `skeletons-v1.js`:
 - **Bezuinigen op de safety timeout** van 30s naar 10s
 - **Telemetry** om te tracken hoe vaak skeletons getoond worden (om feed-laadtijd te monitoren)
 
-Deze zijn **bewust niet in deze fix** — pure herstel-actie.
+Deze zijn **bewust niet in deze fix** pure herstel-actie.

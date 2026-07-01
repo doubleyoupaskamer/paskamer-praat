@@ -31,7 +31,7 @@
     return false;
   }
 
-  // Vang beforeinstallprompt (DELEN met andere scripts — niet preventDefault)
+  // Vang beforeinstallprompt (DELEN met andere scripts niet preventDefault)
   var _deferred = null;
   window.addEventListener('beforeinstallprompt', function (e) {
     _deferred = e;

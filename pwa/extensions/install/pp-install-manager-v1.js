@@ -18,7 +18,7 @@
  *   2. Als geïnstalleerd: zet localStorage flag PERMANENT + hide beide
  *      popup-systemen (inline #dy-install-banner + bottom-sheet #dy-a2hs-prompt).
  *   3. MutationObserver vangt popups die toch nog opduiken na detectie.
- *   4. Re-check elke 5s en bij focus/visibilitychange — als gebruiker tab
+ *   4. Re-check elke 5s en bij focus/visibilitychange als gebruiker tab
  *      switcht naar de geïnstalleerde PWA en terug, status updaten.
  *
  * NIETS gewijzigd aan bestaande inline-banner of a2hs-prompt scripts.
@@ -80,7 +80,7 @@
     return null;
   }
 
-  // navigator.getInstalledRelatedApps() — Chrome desktop + Android only.
+  // navigator.getInstalledRelatedApps() Chrome desktop + Android only.
   // Detecteert of de PWA elders (in standalone-window) is geïnstalleerd
   // ook al zit user nu in een gewone browser-tab.
   function checkRelatedApps() {
@@ -152,7 +152,7 @@
       // is daarmee STALE (bv. app gedeïnstalleerd, of andere browser-profiel).
       // We clearen die flag zodat de install-button weer kan verschijnen.
       try {
-        // Alleen clearen als API beschikbaar is — anders kunnen we niet
+        // Alleen clearen als API beschikbaar is anders kunnen we niet
         // betrouwbaar zeggen dat hij niet geïnstalleerd is.
         if (typeof navigator !== 'undefined' &&
             typeof navigator.getInstalledRelatedApps === 'function') {
@@ -201,7 +201,7 @@
     });
 
     // beforeinstallprompt: als app al als installed gemarkeerd is, niet tonen
-    // Note: we vangen het NIET met preventDefault — andere scripts (inline-banner +
+    // Note: we vangen het NIET met preventDefault andere scripts (inline-banner +
     // a2hs-prompt) doen dat. We hebben enkel de suppression van hun popups via
     // de MutationObserver.
 

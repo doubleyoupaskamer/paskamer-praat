@@ -1,4 +1,4 @@
-# Shopify Wallet Top-up — Setup Guide
+# Shopify Wallet Top-up Setup Guide
 
 **Versie:** 1.0  •  **Datum:** 14 feb 2026  •  **Voor:** Doubleyou Merkenportaal
 
@@ -25,14 +25,14 @@ Shopify een unieke **Variant-ID** die we in de PWA invullen.
    ```
 
    Of, gemakkelijker: hover boven de "More actions" knop rechtsboven, klik en
-   kies **"Preview"**. De preview-URL bevat dan `variants=NUMBERS` — dat is je ID.
+   kies **"Preview"**. De preview-URL bevat dan `variants=NUMBERS` dat is je ID.
 
 ### 1B. Via de admin-tabel (aanbevolen)
 1. Ga naar **Products** → **All products**
 2. Klik op het product "Wallet top-up €25"
 3. Scroll naar **Pricing & inventory** → onder "Variants" zie je: SKU + een
    ID-getal in lichtgrijs (bv. `45623891234567`).
-4. **Kopieer dat getal** — dat is de Variant-ID.
+4. **Kopieer dat getal** dat is de Variant-ID.
 
 ### 1C. Via de Shopify API (voor power-users)
 ```bash
@@ -89,7 +89,7 @@ In de Firestore console → collectie `admin_settings` → document `global`:
   }
 }
 ```
-De PWA leest dit overzicht bij elke load — geen redeploy nodig.
+De PWA leest dit overzicht bij elke load geen redeploy nodig.
 
 ---
 
@@ -100,7 +100,7 @@ Hierdoor wordt de Wallet automatisch bijgeschreven na een betaling.
 1. Shopify Admin → **Settings** → **Notifications** → scroll naar **Webhooks**
 2. Klik **Create webhook**
 3. Vul in:
-   * **Event**: `Order payment` (of `Order paid` — beide werken)
+   * **Event**: `Order payment` (of `Order paid` beide werken)
    * **Format**: `JSON`
    * **URL**: `https://<JOUW_BACKEND>/api/wallet/webhook/shopify`
      * Bijv: `https://api.doubleyou.app/api/wallet/webhook/shopify`

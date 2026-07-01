@@ -1,11 +1,11 @@
-# v60.1.10 — Separation of Duties (Self-Approval Block)
+# v60.1.10 Separation of Duties (Self-Approval Block)
 
 ## 🔴 Kritieke security fix
 Een admin (of in geval van foutieve rules: een gebruiker) kon z'n eigen merkaanvraag goedkeuren. Dit is een **separation-of-duties violation** en is nu volledig geblokkeerd op **drie lagen**.
 
 ## Wat is er gewijzigd?
 
-### Laag 1 — Firestore Rules (server-side, échte beveiliging)
+### Laag 1 Firestore Rules (server-side, échte beveiliging)
 
 `/brands/{brandId}` update:
 ```
@@ -31,18 +31,18 @@ allow update: if (
 allow delete: if isAdmin() && resource.data.brandId != request.auth.uid;
 ```
 
-### Laag 2 — UI (defense in depth)
+### Laag 2 UI (defense in depth)
 
 In `renderAdminBrands`:
 - Voor elke merkrij waar `b.id === DY.user.uid` worden de knoppen **Goedkeuren / Afwijzen / Blokkeer** weggelaten
-- In plaats daarvan een grijze badge: **"⚠ Eigen aanvraag — vereist tweede admin"**
+- In plaats daarvan een grijze badge: **"⚠ Eigen aanvraag vereist tweede admin"**
 
 In `renderAdminCampagnes`:
 - Idem voor campagnes waar `c.brandId === DY.user.uid`
 - Knoppen Goedkeur/Pauzeer/Hervat/Beëindig/Budget worden weggelaten
-- Badge: **"⚠ Eigen campagne — vereist tweede admin"**
+- Badge: **"⚠ Eigen campagne vereist tweede admin"**
 
-### Laag 3 — JS Guards (UX feedback voor de admin)
+### Laag 3 JS Guards (UX feedback voor de admin)
 
 In `BP.adminBrand`:
 ```js
@@ -87,7 +87,7 @@ Alle bovenstaande regels worden **server-side** afgedwongen door Firestore Rules
 ## Acceptatiecriteria
 
 ✅ Gebruiker kan nooit eigen aanvraag goedkeuren (UI + JS + Firestore Rules blokkeren alle 3)
-✅ Admin kan z'n eigen aanvraag NIET goedkeuren (separation of duties — server-side geforceerd)
+✅ Admin kan z'n eigen aanvraag NIET goedkeuren (separation of duties server-side geforceerd)
 ✅ Admin ziet duidelijke melding waarom z'n eigen aanvraag niet goedkeurbaar is
 ✅ Rollen werken correct (zie matrix hierboven)
 ✅ Geen JS errors (`node --check` OK)

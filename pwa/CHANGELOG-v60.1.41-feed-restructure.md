@@ -1,15 +1,15 @@
-# v60.1.41 — Feed Card/Overlay Menu Restructure
+# v60.1.41 Feed Card/Overlay Menu Restructure
 
 ## Doel
-Gecontroleerde herschikking knopstructuur. **Geen redesign, geen logica wijziging — alleen UI-verplaatsingen + verwijderingen.**
+Gecontroleerde herschikking knopstructuur. **Geen redesign, geen logica wijziging alleen UI-verplaatsingen + verwijderingen.**
 
 ## Wijzigingen
 
 ### Feed kaart (DY.verhaalKaart, ~r4750)
 - ❌ **Verwijderd**: Delen-knop (papieren vliegtuig)
 - ❌ **Verwijderd**: Rapporteren-knop (cirkel met uitroepteken)
-- ❌ **Verwijderd via patch**: Outfit Analyse-knop (ster) — was injected
-- ❌ **Verwijderd via patch**: Opslaan-knop (bookmark) — was injected
+- ❌ **Verwijderd via patch**: Outfit Analyse-knop (ster) was injected
+- ❌ **Verwijderd via patch**: Opslaan-knop (bookmark) was injected
 - ✅ **Behouden**: Like-knop, Direct Message-knop (volgorde: Like boven Bericht)
 
 ### Feed overlay (DY.toonVerhaalPopup, ~r5292)
@@ -26,7 +26,7 @@ Gecontroleerde herschikking knopstructuur. **Geen redesign, geen logica wijzigin
 - ✅ **Behouden**: Probeer aan, Deel deze look, Bewaar, Vergelijkbaar zoeken, AI Style Assistent, Notificaties, Verberg, Rapporteren, Blokkeer
 
 ### Card-actions handler (card-actions-v1.js)
-- ✅ **Toegevoegd**: `outfit_analyse(kaart)` handler — leest docId + foto uit kaart-DOM, roept bestaande `DY._feedOutfitReview(docId, foto)` aan
+- ✅ **Toegevoegd**: `outfit_analyse(kaart)` handler leest docId + foto uit kaart-DOM, roept bestaande `DY._feedOutfitReview(docId, foto)` aan
 - ✅ **Behouden**: alle bestaande handlers (tryon, score, share, bewaar, similar, verberg, report, block)
 
 ## Behouden functionaliteit (verified via code inspectie)
@@ -42,12 +42,12 @@ Gecontroleerde herschikking knopstructuur. **Geen redesign, geen logica wijzigin
 
 ## Risico's / regressies geverifieerd
 - Node `--check` op alle 3 gewijzigde bestanden: ✅
-- Geen verwijderde handlers/imports/utilities — alleen UI-elementen verwijderd
+- Geen verwijderde handlers/imports/utilities alleen UI-elementen verwijderd
 - Backwards-compat: `dy-ai-trigger` listener block in patch blijft (no-op als element niet bestaat)
 
 ## Files
-- `/app/pwa/js/pwa-v463-1780765770.js` — 5 edits
-- `/app/pwa/js/extra-menu-v3.js` — 1 edit (score → outfit_analyse)
-- `/app/pwa/js/card-actions-v1.js` — 1 edit (add outfit_analyse handler)
-- `/app/pwa/index.html` — cache `?v=60.1.41-feed-restructure`
-- `/app/pwa/sw.js` — VERSION bumped
+- `/app/pwa/js/pwa-v463-1780765770.js` 5 edits
+- `/app/pwa/js/extra-menu-v3.js` 1 edit (score → outfit_analyse)
+- `/app/pwa/js/card-actions-v1.js` 1 edit (add outfit_analyse handler)
+- `/app/pwa/index.html` cache `?v=60.1.41-feed-restructure`
+- `/app/pwa/sw.js` VERSION bumped

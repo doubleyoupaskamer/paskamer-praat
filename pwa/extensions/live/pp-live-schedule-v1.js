@@ -1,5 +1,5 @@
 /**
- * PASKAMER PRAAT — Scheduled Live module (additief)
+ * PASKAMER PRAAT Scheduled Live module (additief)
  * -----------------------------------------------------------------
  * Non-breaking. Bouwt bovenop pp-live-tab-v1.js + pp-live-start-v1.js.
  *
@@ -354,7 +354,7 @@
             var emo = document.getElementById('pp-live-player-emoji');
             if (v) { v.srcObject = stream; v.style.display = ''; v.muted = true; v.play().catch(function(){}); }
             if (emo) emo.style.display = 'none';
-          }).catch(function () { /* camera denied — player toont pulse */ });
+          }).catch(function () { /* camera denied player toont pulse */ });
         } catch (_) {}
       }
     }).catch(function (e) {

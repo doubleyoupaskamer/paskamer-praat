@@ -1,4 +1,4 @@
-# Paskamer Praat — v53 Release Notes
+# Paskamer Praat v53 Release Notes
 ## (Guest Anonymous Auth + Premium-knop verplaatst + Contrast audit)
 
 **Release date:** 2026-02-13
@@ -21,7 +21,7 @@ backend.** Geen redesign, geen refactors, geen layout-wijzigingen.
 | Premium-compat | ✅ uid bindt premium aan device | ❌ Geen consistente key |
 | UX | ✅ Geen login-scherm | ✅ Geen login-scherm |
 
-### Implementatie — `js/guest-auth-v1.js` (nieuw)
+### Implementatie `js/guest-auth-v1.js` (nieuw)
 - Laadt **vóór** `ai-fit-chat-v3.js` (zie volgorde in `index.html`)
 - Bij DOMContentLoaded:
   1. Wacht max 8 s op `window.firebase.auth`
@@ -37,12 +37,12 @@ backend.** Geen redesign, geen refactors, geen layout-wijzigingen.
 ### Test scenarios gedekt
 | Scenario | Gedrag |
 |---|---|
-| Mobile / Tablet / Desktop | Identiek — Firebase Auth abstraheert |
+| Mobile / Tablet / Desktop | Identiek Firebase Auth abstraheert |
 | Private browser | Persistence valt terug naar SESSION |
 | Refresh | IndexedDB restore → geen re-auth |
 | Reconnect (offline→online) | `currentUser` blijft, geen prompt |
 | Anonymous niet aan in console | Harde stop, AI Chat toont bestaande error message |
-| Bestaande user ingelogd | Niets gewijzigd — auth pad onveranderd |
+| Bestaande user ingelogd | Niets gewijzigd auth pad onveranderd |
 
 ### Verificatie
 Gemeten op preview: `signInAnonymously()` succesvol, uid =
@@ -55,7 +55,7 @@ Anonymous → Enable**. Zonder dit faalt anon-auth met
 
 ---
 
-## 2. Premium-knop verplaatst — **floating pill verwijderd**
+## 2. Premium-knop verplaatst **floating pill verwijderd**
 
 ### Probleem
 De v52 floating Premium-pill rechtsonder overlapte de bottom-tab-navigatie
@@ -102,7 +102,7 @@ De hub-popover is `position:fixed` en wordt alleen on-demand getoond.
 - Garderobe-CTA dark: `#f0c569` op donkere bg = 8.7:1 ✅
 
 ### **Niet gewijzigd** (al WCAG AA conform)
-- Notification-skin gradient `#c67d06→#a56605→#7a4a04` (witte tekst — 4.0+ ratio op midtone, 7+ op donkere kant)
+- Notification-skin gradient `#c67d06→#a56605→#7a4a04` (witte tekst 4.0+ ratio op midtone, 7+ op donkere kant)
 - Weekly-stylist banner (overschreven door notification-skin)
 - Bestaande PWA tab-iconen, hamburger-items en card-hub icons (al volledig black-on-cream contrast)
 
@@ -140,10 +140,10 @@ Live smoke screenshot toont:
 - Geen floating pill meer rechtsonder
 - Anonymous auth firet succesvol (uid verkregen)
 - Hub-popover render-pad onveranderd (Premium item wordt **dynamisch**
-  ingevoegd zodra de popover de eerste keer DOM-mounted is — geen
+  ingevoegd zodra de popover de eerste keer DOM-mounted is geen
   hardcoded HTML-mutatie in `extra-menu-v3.js`)
 - Premium-modal opent, alle perks zichtbaar, email-input render correct
-- Stylist-brief banner zichtbaar in midden van screen — bestaande UX
+- Stylist-brief banner zichtbaar in midden van screen bestaande UX
 
 ---
 

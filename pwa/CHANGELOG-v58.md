@@ -1,10 +1,10 @@
-# Paskamer Praat — v58 Changelog
+# Paskamer Praat v58 Changelog
 **Datum:** 13 februari 2026
-**Type:** Rollback — alleen responsive shims terug naar v56-niveau
+**Type:** Rollback alleen responsive shims terug naar v56-niveau
 
 ## ⏪ Rollback
 
-Op verzoek: de `responsive-shims-v1.css` uit v57 (item G — touch-targets,
+Op verzoek: de `responsive-shims-v1.css` uit v57 (item G touch-targets,
 safe-area-insets, 100dvh, reduced-motion etc.) is **volledig verwijderd**.
 
 **Wat is teruggedraaid:**
@@ -31,5 +31,5 @@ safe-area-insets, 100dvh, reduced-motion etc.) is **volledig verwijderd**.
 ## 🧪 Verificatie post-deploy
 1. Upload v58 ZIP naar hosting root
 2. Hard refresh (Cmd+Shift+R)
-3. DevTools Network — geen 404 op `/css/responsive-shims-v1.css`
+3. DevTools Network geen 404 op `/css/responsive-shims-v1.css`
 4. Visuele responsiveness van je layout = **identiek aan v56**

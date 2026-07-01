@@ -1,4 +1,4 @@
-# Paskamer Praat — v51 Card Actions RCA Fixes (2026-02-13)
+# Paskamer Praat v51 Card Actions RCA Fixes (2026-02-13)
 
 > **Volledige functionele audit** uitgevoerd op alle v50 hub-menu items. Alle dead-routes en placeholder-implementaties zijn nu volledig end-to-end werkend. **Geen wijzigingen aan UX, layout of business logic.**
 
@@ -6,11 +6,11 @@
 
 ## 🔍 Root Cause Analyse + Fixes
 
-### KNOP 1 — "Probeer aan" → ✅ FIXED
+### KNOP 1 "Probeer aan" → ✅ FIXED
 **Root cause:** `fetch(imgUrl)` op een Firebase Storage / CDN URL → CORS-error → `Failed to fetch`.
 
 **Fix:**
-1. Vervangen `fetch()` door `<img crossorigin="anonymous">` + `canvas.toDataURL()` — bypassed CORS voor cross-origin images.
+1. Vervangen `fetch()` door `<img crossorigin="anonymous">` + `canvas.toDataURL()` bypassed CORS voor cross-origin images.
 2. Bij tainted canvas (image laadde zonder CORS-header) → **server-side proxy** via nieuwe `/api/proxy-image?url=` endpoint
 3. Bij finale fout → vriendelijke hint in upload-slot ("Outfit-foto kon niet automatisch worden geladen, tik om handmatig te uploaden")
 4. 7s timeout per probeer-stap, geen unhandled promises meer
@@ -19,7 +19,7 @@
 
 ---
 
-### KNOP 2 — "Vraag Style Score" → ✅ FIXED
+### KNOP 2 "Vraag Style Score" → ✅ FIXED
 **Root cause:** `window.DY.outfitScore.scoreCard()` bestond niet als public API. Fallback in card-actions deed `location.reload()` → terug naar feed.
 
 **Fix:**
@@ -27,19 +27,19 @@
    ```js
    window.DY.outfitScore.scoreCard(card, {force:true})
    ```
-2. `card-actions-v1.js` roept nu deze methode direct aan — geen reload, geen redirect.
+2. `card-actions-v1.js` roept nu deze methode direct aan geen reload, geen redirect.
 3. Toast bevestigt: "AI analyseert je look... ✨"
 4. Wipet cache (`dy_outfit_score_{pid}`) + bestaande pill → forceert verse analyse
 5. Behoudt vorige auto-mode setting (stille restore na 100ms)
 
 ---
 
-### KNOP 3 — "Deel deze look" → ✅ REGRESSIE-OK
+### KNOP 3 "Deel deze look" → ✅ REGRESSIE-OK
 Werkte al, geen wijzigingen. Console-clean, Web Share API + clipboard fallback intact.
 
 ---
 
-### KNOP 4 — "Bewaar" → ✅ FIXED
+### KNOP 4 "Bewaar" → ✅ FIXED
 **Root cause:** Save schreef alleen `pid` in LocalStorage; geen UI om opgeslagen items terug te vinden.
 
 **Fix:**
@@ -58,8 +58,8 @@ Werkte al, geen wijzigingen. Console-clean, Web Share API + clipboard fallback i
 
 ---
 
-### KNOP 5 — "Vergelijkbaar zoeken" → ✅ FIXED
-**Root cause:** URL gebruikte oude pad `/catalog/?q=` — Zalando heeft dit in 2024 verwijderd → 404/redirect.
+### KNOP 5 "Vergelijkbaar zoeken" → ✅ FIXED
+**Root cause:** URL gebruikte oude pad `/catalog/?q=` Zalando heeft dit in 2024 verwijderd → 404/redirect.
 
 **Fix:**
 1. URL bijgewerkt naar huidige Zalando NL zoek-route: `https://www.zalando.nl/?q=<query>`
@@ -69,12 +69,12 @@ Werkte al, geen wijzigingen. Console-clean, Web Share API + clipboard fallback i
 
 ---
 
-### KNOP 6 — "AI Style Assistant" → ✅ REGRESSIE-OK
+### KNOP 6 "AI Style Assistant" → ✅ REGRESSIE-OK
 Geen wijzigingen, intact gelaten.
 
 ---
 
-### KNOP 7 — "Rapporteren" → ✅ FIXED
+### KNOP 7 "Rapporteren" → ✅ FIXED
 **Root cause:** Firestore write zonder auth faalt stilletjes; geen server-side queue → "Bedankt" was nep-bevestiging.
 
 **Fix:**
@@ -91,7 +91,7 @@ Geen wijzigingen, intact gelaten.
 
 ---
 
-### KNOP 8 — "Blokkeer gebruiker" → ✅ FIXED
+### KNOP 8 "Blokkeer gebruiker" → ✅ FIXED
 **Root cause:** Filter alleen `.dy-reel-item .dy-reel-auteur` → stories, zoekresultaten, profielen, messaging niet gefilterd.
 
 **Fix:**
@@ -101,14 +101,14 @@ Geen wijzigingen, intact gelaten.
    - `.dy-bericht-rij, .dy-message-row`
    - `[data-author], [data-author-uid]`
 2. **MutationObserver** (throttled met requestAnimationFrame) past filter live toe op nieuwe DOM-nodes
-3. **Dual matching:** zowel op `author` (text) als `authorUid` (id) — robuust tegen username-changes
+3. **Dual matching:** zowel op `author` (text) als `authorUid` (id) robuust tegen username-changes
 4. **`dy-user-blocked` CustomEvent** dispatched zodat messaging-module en andere subscribers kunnen reageren
 5. **Block-state persistent:** LocalStorage `dy_blocked_users` + Firestore `users/{uid}/blocked/{key}` met `{key, author, authorUid, ts}`
 6. **`data-pp-blocked="1"` markering** zodat developers/QA blokkeer-status visueel kunnen verifiëren
 
 ---
 
-## 🎨 CONTRAST FIX — Modal popup leesbaarheid
+## 🎨 CONTRAST FIX Modal popup leesbaarheid
 
 **Root cause:** In dark-mode kreeg de `.dy-card-modal-frame` een donker oppervlak via notification-skin v49, maar inline `style="color:var(--ink-soft)"` op de body bleef donker → text vs background contrast onder 3:1.
 

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * Doubleyou — Reviews Relocate (v1.0.0)
+ * Doubleyou Reviews Relocate (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * NON-BREAKING additieve module. Verplaatst de visuele locatie van de
@@ -18,7 +18,7 @@
  *    Hetzelfde route-target: `DY.navigeer('reviews')` (geen functionele
  *    of route-wijziging).
  *
- * Strict additief — raakt geen legacy code, geen routing, geen permissies.
+ * Strict additief raakt geen legacy code, geen routing, geen permissies.
  *
  * Public API:
  *   PP_Reviews.VERSION
@@ -116,7 +116,7 @@
       '  .dy-nav .dy-nav-item[data-pagina="kleuren_ai"] { order: 5 !important; }' +
       '  .dy-nav .dy-nav-item[data-pagina="profiel"]    { order: 6 !important; }' +
       '}' +
-      /* Desktop sidebar: Reviews + originele volgorde blijft staan — niets te doen */
+      /* Desktop sidebar: Reviews + originele volgorde blijft staan niets te doen */
       '';
     document.head.appendChild(s);
   }

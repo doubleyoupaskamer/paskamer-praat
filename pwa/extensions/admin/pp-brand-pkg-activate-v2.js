@@ -136,7 +136,7 @@
         }, { merge: true });
       });
 
-      // Audit log (buiten transaction — niet-kritisch voor consistency)
+      // Audit log (buiten transaction niet-kritisch voor consistency)
       try {
         await db().collection('admin_logs').add({
           adminId:       'system',

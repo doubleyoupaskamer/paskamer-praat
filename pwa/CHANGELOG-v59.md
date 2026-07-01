@@ -1,4 +1,4 @@
-# Paskamer Praat — v59 Changelog (Productie-fixes Button 72 & Probeer Aan)
+# Paskamer Praat v59 Changelog (Productie-fixes Button 72 & Probeer Aan)
 **Datum:** 13 februari 2026
 **Type:** P0 root-cause fixes
 
@@ -8,11 +8,11 @@ styling, routing of bestaande functionaliteit.
 
 ---
 
-## 🔴 Bug 1 — Button 72 toonde advies van VERKEERDE outfit
+## 🔴 Bug 1 Button 72 toonde advies van VERKEERDE outfit
 
 ### Root cause (3 lagen tegelijk)
 
-**Laag 1 — Cache-key collision in `localStorage`:**
+**Laag 1 Cache-key collision in `localStorage`:**
 ```js
 // Voor v59
 saveCached(postId, data)  // key = LS_PREFIX + postId
@@ -23,12 +23,12 @@ terechtkomen. Resultaat: outfit-A's analyse werd onder key `score_postX`
 opgeslagen, daarna kreeg outfit-B óók key `score_postX` → analyse van A
 werd op B getoond.
 
-**Laag 2 — Geen request/response-koppeling:**
+**Laag 2 Geen request/response-koppeling:**
 De frontend stuurde geen unieke request-marker mee, dus zelfs als de juiste
 afbeelding was geüpload kon een verlate respons van een eerdere request
 worden toegepast op een nieuw geopende kaart (race condition).
 
-**Laag 3 — Recycled cards behielden `data-pp-score="done"`:**
+**Laag 3 Recycled cards behielden `data-pp-score="done"`:**
 DOM-element kreeg attribute `data-pp-score="done"` na eerste analyse.
 Bij recycling werd dat attribute niet gereset → `processCard()` sloeg de
 nieuwe scan over en toonde de oude pill.
@@ -69,7 +69,7 @@ score: 0
 
 ---
 
-## 🔴 Bug 2 — Probeer Aan "Server 404: 404 page not found"
+## 🔴 Bug 2 Probeer Aan "Server 404: 404 page not found"
 
 ### Root cause
 
@@ -121,9 +121,9 @@ Curl-test alle relevante endpoints:
 ---
 
 ## 📦 Build artifacts
-- `js/outfit-score-v1.js` — content-hash cache, request_id, recycle detection
-- `js/virtual-tryon-v1.js` — absolute URL forceren, 404-retry
-- `ai_router.py` — OutfitScoreRequest+Response uitgebreid met echo velden
+- `js/outfit-score-v1.js` content-hash cache, request_id, recycle detection
+- `js/virtual-tryon-v1.js` absolute URL forceren, 404-retry
+- `ai_router.py` OutfitScoreRequest+Response uitgebreid met echo velden
 - `sw.js` VERSION: `v59-20260213-button72-cache-mismatch-tryon-404-fix`
 - `index.html` cache-busters: 27× `?v=59`
 - Core bundle `pwa-v463-1780765770.js` **ongewijzigd**
@@ -133,20 +133,20 @@ Curl-test alle relevante endpoints:
 
 ## 🧪 Post-deploy test scenario's
 
-**Test 1 — Button 72 op recycled cards:**
+**Test 1 Button 72 op recycled cards:**
 1. Open feed, scroll naar post A (bv. lila overhemd) → klik Button 72 → noteer score
 2. Scroll snel verder naar post B (bv. zwarte tracksuit) → klik Button 72
 3. Verwacht: post B krijgt EIGEN analyse over zwarte tracksuit, niet over lila overhemd
-4. In DevTools Console: zoek naar `[outfit-score]` logs — geen `cache rejected` of `mismatch` warnings bij gewone flow
+4. In DevTools Console: zoek naar `[outfit-score]` logs geen `cache rejected` of `mismatch` warnings bij gewone flow
 
-**Test 2 — Probeer Aan:**
+**Test 2 Probeer Aan:**
 1. Klik Probeer Aan op een outfit
 2. Upload je foto (of skip)
 3. Klik "Genereer try-on"
 4. Verwacht: AI-gegenereerde foto verschijnt, **geen** "Server 404" meer
 5. DevTools Network: POST naar `https://fitting-chat-app.preview.emergentagent.com/api/tryon` (absolute URL)
 
-**Test 3 — Stale cache opruimen (eenmalig na upgrade):**
+**Test 3 Stale cache opruimen (eenmalig na upgrade):**
 Eerste keer na v59-upload kan v58-cache nog stale entries hebben. Druk in
 DevTools Console:
 ```js

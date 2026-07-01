@@ -1,4 +1,4 @@
-# Paskamer Praat — v49 Notification Skin (2026-02-13)
+# Paskamer Praat v49 Notification Skin (2026-02-13)
 
 > **Visual-only update.** Alle notificaties (push + in-app) zijn nu volledig brand-aligned met de AI Style Assistant en Crown/Premium overlays. **Geen wijzigingen aan logica, permissies, routing of state.**
 
@@ -46,7 +46,7 @@ border: 1px solid rgba(198,125,6,.18);
 `sw.js` push-listener uitgebreid met:
 - **Icon:** `apple-touch-icon-180.png` (premium 180×180 app-icon ipv generieke 192×192)
 - **Badge:** behoudt `icon-192.png` (mono badge op iOS/Android)
-- **Vibrate:** `[60, 40, 60]` — subtiele dubbel-tik in plaats van standaard buzz
+- **Vibrate:** `[60, 40, 60]` subtiele dubbel-tik in plaats van standaard buzz
 - **Actions:** "Bekijk" / "Later" knoppen (Android desktop)
 - **Rich image:** ondersteunt `image` payload voor preview-thumbnails
 - **Smart re-focus:** klik op notif hergebruikt bestaand venster (geen tweede tab)
@@ -114,4 +114,4 @@ M sw.js                         (VERSION + premium push payload handling)
 1. Pak `paskamerpraat-pwa-v49-COMPLETE.zip` uit
 2. Upload naar paskamerpraat.nl root
 3. iPhone PWA: open eenmalig `vernieuw.html`
-4. Klaar — alle notificaties hebben nu de premium look
+4. Klaar alle notificaties hebben nu de premium look

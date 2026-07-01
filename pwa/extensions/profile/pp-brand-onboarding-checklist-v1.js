@@ -119,7 +119,7 @@
     container.setAttribute(INJECTED_FLAG, '1');
 
     var titel = allDone
-      ? 'Onboarding compleet — je bent klaar om te schalen.'
+      ? 'Onboarding compleet je bent klaar om te schalen.'
       : 'Maak je merkprofiel compleet';
     var sub = allDone
       ? 'Alle stappen afgerond. Je kunt nu volop campagnes draaien.'

@@ -26,7 +26,7 @@
  *  4. Voor PUBLIC-pagina's verwijdert het de noindex weer.
  *
  * Public API:
- *   PP_SEO.applyForPage(pagina, id)   — handmatige trigger
+ *   PP_SEO.applyForPage(pagina, id)   handmatige trigger
  *   PP_SEO.VERSION
  * ═══════════════════════════════════════════════════════════════════════ */
 (function () {
@@ -218,13 +218,13 @@
     if (!b) return null;
     var naam = b.naam || 'Merk';
     var beschr = (b.beschrijving || '').trim().slice(0, 160) ||
-      naam + ' op Doubleyou — tall & plus size mode in Nederland. Bekijk de collectie en reviews van echte mensen.';
+      naam + ' op Doubleyou tall & plus size mode in Nederland. Bekijk de collectie en reviews van echte mensen.';
     var slug = slugify(naam) || b._id;
     var url = BASE_URL + '/bedrijf/' + slug + '?id=' + b._id;
     var img = b.logo || b.coverFoto || (BASE_URL + '/icons/pp-512.png');
 
     return {
-      title: naam + ' — Tall & Plus Size mode | Doubleyou',
+      title: naam + ' Tall & Plus Size mode | Doubleyou',
       desc: beschr,
       url: url,
       image: img,
@@ -245,7 +245,7 @@
     if (!c) return null;
     var naam = c.naam || c.brandNaam || 'Campagne';
     var beschr = (c.beschrijving || '').trim().slice(0, 160) ||
-      naam + ' — ontdek deze campagne van ' + (c.brandNaam || 'een merk') + ' op Doubleyou.';
+      naam + ' ontdek deze campagne van ' + (c.brandNaam || 'een merk') + ' op Doubleyou.';
     var slug = slugify(naam) || c._id;
     var url = BASE_URL + '/campagne/' + slug + '?id=' + c._id;
     var img = (c.banner || c.coverFoto || c.afbeelding || (BASE_URL + '/icons/pp-512.png'));
@@ -272,7 +272,7 @@
     if (!p) return null;
     var naam = p.titel || p.naam || 'Product';
     var beschr = (p.beschrijving || '').trim().slice(0, 160) ||
-      naam + ' van ' + (p.brandNaam || 'een merk') + ' — bij Doubleyou.';
+      naam + ' van ' + (p.brandNaam || 'een merk') + ' bij Doubleyou.';
     var slug = slugify(naam) || p._id;
     var url = BASE_URL + '/product/' + slug + '?id=' + p._id;
     var img = (p.afbeeldingen && p.afbeeldingen[0]) || p.foto || (BASE_URL + '/icons/pp-512.png');
@@ -290,7 +290,7 @@
     }
 
     return {
-      title: naam + ' — ' + (p.brandNaam || 'Doubleyou'),
+      title: naam + ' ' + (p.brandNaam || 'Doubleyou'),
       desc: beschr,
       url: url,
       image: img,
@@ -311,7 +311,7 @@
     if (!u) return null;
     var naam = u.gebruikersnaam || u.naam || 'Profiel';
     var beschr = (u.bio || '').trim().slice(0, 160) ||
-      'Profiel van ' + naam + ' op Doubleyou — de tall & plus size fashion community.';
+      'Profiel van ' + naam + ' op Doubleyou de tall & plus size fashion community.';
     var slug = slugify(naam) || u._id;
     var url = BASE_URL + '/profiel/' + slug + '?id=' + u._id;
     var img = u.profielFoto || (BASE_URL + '/icons/pp-512.png');
@@ -339,7 +339,7 @@
     var hostNaam = s.hostName || 'iemand';
     if (hostNaam && hostNaam.charAt(0) === '@') hostNaam = hostNaam.substring(1);
     var tagsStr = Array.isArray(s.tags) ? s.tags.join(', ') : '';
-    var beschr = ('🔴 LIVE — ' + naam + ' met @' + hostNaam +
+    var beschr = ('🔴 LIVE ' + naam + ' met @' + hostNaam +
       (tagsStr ? ' · ' + tagsStr : '') +
       ' op Doubleyou Paskamerpraat.').slice(0, 200);
     var slug = slugify(naam) || s._id;
@@ -348,7 +348,7 @@
     var isLive = s.status === 'live';
 
     return {
-      title: (isLive ? '🔴 LIVE: ' : '') + naam + ' — Doubleyou',
+      title: (isLive ? '🔴 LIVE: ' : '') + naam + ' Doubleyou',
       desc: beschr,
       url: url,
       image: img,
@@ -414,7 +414,7 @@
     var orig = DY.navigeer.bind(DY);
     DY.navigeer = function (pagina, id) {
       var result = orig(pagina, id);
-      // Wacht 1 tick voordat we entity-data lookupen — DOM moet eerst loaden
+      // Wacht 1 tick voordat we entity-data lookupen DOM moet eerst loaden
       setTimeout(function () { applyForPage(pagina, id); }, 60);
       return result;
     };

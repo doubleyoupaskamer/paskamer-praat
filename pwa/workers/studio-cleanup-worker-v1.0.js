@@ -1,5 +1,5 @@
 /**
- * PASKAMER STUDIO — Stale Sessions Cleanup Worker
+ * PASKAMER STUDIO Stale Sessions Cleanup Worker
  * DoubleYou / Paskamer Praat  •  v1.0.0 (juli 2026)
  *
  * DOEL
@@ -20,14 +20,14 @@
  *   WORKER_SECRET         = <random secret voor /run>
  *
  * DREMPELS (aanpasbaar via env, defaults hieronder):
- *   MAX_SESSION_MS   = 6 uur     (harde absolute limiet — geen live gaat langer)
+ *   MAX_SESSION_MS   = 6 uur     (harde absolute limiet geen live gaat langer)
  *   STALE_MS         = 30 min    (geen recente update = dood)
  *
  * SCHRIJFT NAAR:
  *   live_sessions/{id}    → status='ended', endedAt=<iso>, endedReason='auto_stale'
  *   worker_audit_log      → 1 entry per run met counters
  *
- * OPTIONEEL — CHAT/REACTIONS CLEANUP:
+ * OPTIONEEL CHAT/REACTIONS CLEANUP:
  *   Standaard blijven chat/reactions bewaard voor replay-doeleinden (fase 2).
  *   Zet env DELETE_SUBCOLLECTIONS='true' om ook alle chat/reactions te wissen
  *   na sessie-sluiting (zwaardere run, ~1 write per doc).
@@ -258,7 +258,7 @@ async function runStudioCleanup(env) {
       const session = docToObject(row.document);
       if (!session) continue;
 
-      // Bepaal "hoe oud" — startedAt is Timestamp
+      // Bepaal "hoe oud" startedAt is Timestamp
       const startedAt = session.startedAt instanceof Date ? session.startedAt.getTime() : null;
       const updateTime = session._updateTime ? new Date(session._updateTime).getTime() : null;
 

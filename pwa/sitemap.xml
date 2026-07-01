@@ -10,8 +10,8 @@
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://paskamerpraat.nl/hero-model.png</image:loc>
-      <image:title>Doubleyou — Tall en Plus Size Fashion Community</image:title>
-      <image:caption>Doubleyou — Tailored for Tall &amp; Plus Size. Eerlijke pasvorm reviews, outfit inspiratie en AI stijladvies voor tall (1.85m+) en plus size mode in Nederland.</image:caption>
+      <image:title>Doubleyou Tall en Plus Size Fashion Community</image:title>
+      <image:caption>Doubleyou Tailored for Tall &amp; Plus Size. Eerlijke pasvorm reviews, outfit inspiratie en AI stijladvies voor tall (1.85m+) en plus size mode in Nederland.</image:caption>
     </image:image>
   </url>
 
@@ -31,7 +31,7 @@
     <priority>0.85</priority>
   </url>
 
-  <!-- Lookbook — outfit inspiratie -->
+  <!-- Lookbook outfit inspiratie -->
   <url>
     <loc>https://paskamerpraat.nl/looks</loc>
     <lastmod>2026-06-18</lastmod>

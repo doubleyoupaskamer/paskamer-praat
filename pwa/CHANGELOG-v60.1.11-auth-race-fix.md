@@ -1,4 +1,4 @@
-# v60.1.11 — Auth Race Condition Fix (CRITICAL)
+# v60.1.11 Auth Race Condition Fix (CRITICAL)
 
 ## 🔴 Root Cause
 Niet-hoofdaccounts konden wél inloggen via Firebase, maar werden binnen 500-1200ms teruggestuurd naar de loginpagina.
@@ -22,14 +22,14 @@ Niet-hoofdaccounts konden wél inloggen via Firebase, maar werden binnen 500-120
 ```
 
 **Waarom werkt het hoofdaccount wel?**
-Het hoofdaccount heeft een **persistente Firebase sessie** in IndexedDB die al hersteld is voordat dy-presence's null-state fire kan triggeren. Bij elke initial pageload van het hoofdaccount is `fbAuth.currentUser` direct beschikbaar — geen null window, geen race.
+Het hoofdaccount heeft een **persistente Firebase sessie** in IndexedDB die al hersteld is voordat dy-presence's null-state fire kan triggeren. Bij elke initial pageload van het hoofdaccount is `fbAuth.currentUser` direct beschikbaar geen null window, geen race.
 
 **Waarom faalden brand-portal accounts?**
 Vers gemaakte accounts via `createUserWithEmailAndPassword` hebben nog géén persistente sessie tijdens hun éérste login. Ze gaan altijd door de race-conditie heen.
 
 ## ✅ Fix (3 lagen)
 
-### Laag 1 — `dy-presence.js`
+### Laag 1 `dy-presence.js`
 ```js
 var _anonSignInTimer = null;  // ← nieuwe handle
 
@@ -45,7 +45,7 @@ _anonSignInTimer = setTimeout(_anonSignIn, 500);  // ← bewaar handle
 
 Zodra een echte user verschijnt, wordt de pending `_anonSignIn` direct geannuleerd.
 
-### Laag 2 — `dy-presence.js` `_anonSignIn()` defensieve guard
+### Laag 2 `dy-presence.js` `_anonSignIn()` defensieve guard
 ```js
 function _anonSignIn() {
   // CRITICAL: check vlak vóór signInAnonymously of er ondertussen
@@ -56,7 +56,7 @@ function _anonSignIn() {
 }
 ```
 
-### Laag 3 — `guest-auth-v1.js` parallel guard
+### Laag 3 `guest-auth-v1.js` parallel guard
 Zelfde defensieve check in `signInAnon()` en `init()` zodat als de 1200ms wait halverwege wordt onderbroken door een real-user login, we niet alsnog anon inloggen.
 
 ## Acceptatiecriteria
@@ -81,7 +81,7 @@ Zelfde defensieve check in `signInAnon()` en `init()` zodat als de 1200ms wait h
 Als deze fix problemen veroorzaakt:
 1. Vervang `dy-presence.js` en `guest-auth-v1.js` met versies uit v60.1.10 ZIP
 2. Bump `sw.js` VERSION zodat browser oude cache invalideert
-3. Beide files zijn additieve patches — origineel gedrag blijft beschikbaar door alleen 3 regels te verwijderen
+3. Beide files zijn additieve patches origineel gedrag blijft beschikbaar door alleen 3 regels te verwijderen
 
 ## Tests
 - **Test 1**: Login met hoofdaccount → blijf ingelogd ✓

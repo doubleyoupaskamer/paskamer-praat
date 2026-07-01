@@ -43,13 +43,13 @@
   }
 
   function buildCSV(rows) {
-    // v1.4.0: hiërarchisch — per campagne 1 TOTAAL-rij + 5 placement-rijen
+    // v1.4.0: hiërarchisch per campagne 1 TOTAAL-rij + 5 placement-rijen
     var headers = ['Campagne','Merk','Status','Plaatsing','Start','Eind',
                    'Rendert_in_feed','Impressies','Kliks','CTR_%','Likes','CampagneId','BrandId'];
     var lines = [headers.join(';')];
 
     rows.forEach(function (r) {
-      // Skip de "hulp-velden" entries — alleen echte data
+      // Skip de "hulp-velden" entries alleen echte data
       if (!r.Campagne) return;
       var totImpr = r.Impressies || 0;
       var totClick = r.Kliks || 0;
@@ -91,7 +91,7 @@
   function exportCSV(campaignId) {
     try {
       if (!_lastExportRows.length) {
-        if (window.DY && DY.toast) DY.toast('Geen data om te exporteren — laad eerst de diagnose.');
+        if (window.DY && DY.toast) DY.toast('Geen data om te exporteren laad eerst de diagnose.');
         return;
       }
       // Optioneel: filter op 1 specifieke campagne
@@ -214,7 +214,7 @@
       var campaignDocs = [];
       snap.forEach(function (d) { campaignDocs.push(d); });
 
-      // v1.1.0: engagement-maps parallel laden — niet-blocking, fallback naar 0
+      // v1.1.0: engagement-maps parallel laden niet-blocking, fallback naar 0
       var engagement = await loadEngagementMaps(campaignDocs);
 
       var rows = [];
@@ -242,7 +242,7 @@
         var inWindow = (!startMs || nuTs >= startMs) && (!eindMs || nuTs <= eindMs);
         if (inWindow) stats.binnen_window++;
 
-        // v1.0.12: status='live' is supreme. eindDatum is soft — backend
+        // v1.0.12: status='live' is supreme. eindDatum is soft backend
         // hoort transitie te doen. Als status nog live is, rendert het.
         var statusLive = (c.status === 'live');
         var heeftFeed = (plaats.indexOf('feed') !== -1 || !plaats.length);

@@ -1,8 +1,8 @@
-# Brand Portal v1 — Self-Service Merkenportaal — Wijzigingsoverzicht
+# Brand Portal v1 Self-Service Merkenportaal Wijzigingsoverzicht
 
 **Release:** v60.1-brand-portal-v1
 **Datum:** 2026-02-14
-**Type:** Pure uitbreiding — additief, geen verwijderde code, geen breaking changes
+**Type:** Pure uitbreiding additief, geen verwijderde code, geen breaking changes
 **Scope:** Fase 1 MVP (zoals afgesproken: 1A + 2A + 3B + 4A + 5A)
 
 ---
@@ -14,37 +14,37 @@
 |---|---|---|
 | `js/brand-portal-v1.js` | Volledige portal-logica (router-wrapper, alle pagina's, RBAC) | ~970 |
 | `brand-portal.css` | Geïsoleerde stijlen onder `bp-` prefix (geen overrides) | ~410 |
-| `BRAND_PORTAL_FIRESTORE_RULES.md` | Additieve Firestore + Storage rules om te deployen | — |
-| `CHANGELOG-v60.1-brand-portal-v1.md` | Dit document | — |
+| `BRAND_PORTAL_FIRESTORE_RULES.md` | Additieve Firestore + Storage rules om te deployen | |
+| `CHANGELOG-v60.1-brand-portal-v1.md` | Dit document | |
 
 ### Gewijzigde bestanden (chirurgisch, 4 regels totaal)
 | Bestand | Wijziging |
 |---|---|
 | `index.html` | +2 regels: `<link>` voor CSS + `<script>` voor JS |
 
-### Bestaande bestanden — ongewijzigd
-✅ `js/pwa-v463-1780765770.js` — **niet aangeraakt**
-✅ `js/firebase-1778591866.js` — **niet aangeraakt**
-✅ `js/extra-menu-v3.js` — **niet aangeraakt**
-✅ Alle overige bestaande modules — **niet aangeraakt**
-✅ `sw.js` cache-strategie — **niet aangeraakt** (nieuwe files worden vanzelf opgepakt door bestaande patterns voor `.js` en `.css`)
+### Bestaande bestanden ongewijzigd
+✅ `js/pwa-v463-1780765770.js` **niet aangeraakt**
+✅ `js/firebase-1778591866.js` **niet aangeraakt**
+✅ `js/extra-menu-v3.js` **niet aangeraakt**
+✅ Alle overige bestaande modules **niet aangeraakt**
+✅ `sw.js` cache-strategie **niet aangeraakt** (nieuwe files worden vanzelf opgepakt door bestaande patterns voor `.js` en `.css`)
 
 ### Hamburger-/profielmenu entry
-Een knop **"Merkenportaal"** wordt automatisch geïnjecteerd in de `.dy-profiel-acties` sectie van de bestaande profielpagina — via een `MutationObserver` van het brand-portal module zelf, **zonder de profielpagina-code te wijzigen**.
+Een knop **"Merkenportaal"** wordt automatisch geïnjecteerd in de `.dy-profiel-acties` sectie van de bestaande profielpagina via een `MutationObserver` van het brand-portal module zelf, **zonder de profielpagina-code te wijzigen**.
 
 ---
 
 ## 2. ARCHITECTUURBESLUIT
 
 ### Hoofdprincipes
-1. **Volledig geïsoleerde module** — alle logica in één bestand (`brand-portal-v1.js`), alle styling in één bestand (`brand-portal.css`), beide met eigen prefix om naamconflicten uit te sluiten.
-2. **Router-wrapper, geen route-tabel mutatie** — `DY.toonPagina` wordt gewrapped (zoals andere modules al doen, bv. auth-tab op regel 24879). Onbekende routes worden door-gedelegeerd naar de originele router → geen kans op route-conflicts.
-3. **RBAC via Firestore + client-side checks** — `users/{uid}.role = 'brand'` markeert brand-accounts; `brands/{uid}.status` bepaalt acces; `DY._isAdmin()` hergebruikt voor admin-routes. Server-side enforcement via Firestore Security Rules.
+1. **Volledig geïsoleerde module** alle logica in één bestand (`brand-portal-v1.js`), alle styling in één bestand (`brand-portal.css`), beide met eigen prefix om naamconflicten uit te sluiten.
+2. **Router-wrapper, geen route-tabel mutatie** `DY.toonPagina` wordt gewrapped (zoals andere modules al doen, bv. auth-tab op regel 24879). Onbekende routes worden door-gedelegeerd naar de originele router → geen kans op route-conflicts.
+3. **RBAC via Firestore + client-side checks** `users/{uid}.role = 'brand'` markeert brand-accounts; `brands/{uid}.status` bepaalt acces; `DY._isAdmin()` hergebruikt voor admin-routes. Server-side enforcement via Firestore Security Rules.
 4. **Feature flag op 2 niveaus**:
    - Client: `localStorage.setItem('dy_brand_portal','0')` → module-IIFE returnt vroeg, geen UI, geen routes geregistreerd.
-   - Server: het module-laden is een aparte `<script defer>` tag — kan zonder PWA-rebuild verwijderd worden om de feature volledig te deactiveren.
-5. **Geen impact op bestaande feed/UX** — keuze 3B: brand-content leeft uitsluitend in een nieuwe `/merken` tab; de organische feed is niet aangeraakt.
-6. **Storage in Firebase Storage** (keuze 5A) — past bij bestaande Firebase stack; geen extra leverancier.
+   - Server: het module-laden is een aparte `<script defer>` tag kan zonder PWA-rebuild verwijderd worden om de feature volledig te deactiveren.
+5. **Geen impact op bestaande feed/UX** keuze 3B: brand-content leeft uitsluitend in een nieuwe `/merken` tab; de organische feed is niet aangeraakt.
+6. **Storage in Firebase Storage** (keuze 5A) past bij bestaande Firebase stack; geen extra leverancier.
 
 ### RBAC matrix
 | Rol | USER | BRAND (pending) | BRAND (approved) | ADMIN |
@@ -52,14 +52,14 @@ Een knop **"Merkenportaal"** wordt automatisch geïnjecteerd in de `.dy-profiel-
 | Bekijken `/merken` (publiek) | ✅ | ✅ | ✅ | ✅ |
 | Brand-detail / producten zien | ✅ | ✅ | ✅ | ✅ |
 | `/brand_register` openen | ✅ | (redirect → pending) | (redirect → dashboard) | ✅ |
-| `/brand_pending` | — | ✅ | (redirect → dashboard) | ✅ |
-| `/brand_dashboard` | — | (redirect → pending) | ✅ | ✅ |
-| Producten/campagnes CRUD | — | — | ✅ (eigen) | ✅ (alle) |
-| `/admin_brands` (approve/reject) | — | — | — | ✅ |
-| `/admin_campagnes` (pause/end/budget) | — | — | — | ✅ |
-| `/admin_inkomsten` | — | — | — | ✅ |
+| `/brand_pending` | | ✅ | (redirect → dashboard) | ✅ |
+| `/brand_dashboard` | | (redirect → pending) | ✅ | ✅ |
+| Producten/campagnes CRUD | | | ✅ (eigen) | ✅ (alle) |
+| `/admin_brands` (approve/reject) | | | | ✅ |
+| `/admin_campagnes` (pause/end/budget) | | | | ✅ |
+| `/admin_inkomsten` | | | | ✅ |
 
-Server-side enforcement: alle routes hebben Firestore-rules die owner+admin afdwingen — client-side checks zijn defense-in-depth.
+Server-side enforcement: alle routes hebben Firestore-rules die owner+admin afdwingen client-side checks zijn defense-in-depth.
 
 ### Route structuur (nieuw)
 ```
@@ -159,7 +159,7 @@ Server-side enforcement: alle routes hebben Firestore-rules die owner+admin afdw
 }
 ```
 
-#### `campaign_events/{eventId}` — append-only
+#### `campaign_events/{eventId}` append-only
 ```
 {
   type: 'impression' | 'product_click' | 'campaign_click',
@@ -170,7 +170,7 @@ Server-side enforcement: alle routes hebben Firestore-rules die owner+admin afdw
 }
 ```
 
-#### `brand_admin_log/{logId}` — audit
+#### `brand_admin_log/{logId}` audit
 ```
 {
   type: 'brand_registered' | 'brand_approve' | 'brand_reject' | 'brand_suspend'
@@ -191,10 +191,10 @@ Server-side enforcement: alle routes hebben Firestore-rules die owner+admin afdw
 
 ### Wijzigingen aan bestaande collections
 **Geen breaking changes.** Eén additief veld:
-- `users/{uid}.role`: optioneel veld, alleen gezet voor brand-accounts (`'brand'`). Bestaande user-docs blijven werken zonder dit veld. Het bestaande security-rule blok `match /users/{userId}` staat updates door eigenaar toe (`isEigenDoc(userId)`) — het role-veld valt daaronder en hoeft niet aan `alleenPubliekeSocialVelden()` toegevoegd te worden omdat alleen de eigenaar zichzelf upgrade naar brand-rol.
+- `users/{uid}.role`: optioneel veld, alleen gezet voor brand-accounts (`'brand'`). Bestaande user-docs blijven werken zonder dit veld. Het bestaande security-rule blok `match /users/{userId}` staat updates door eigenaar toe (`isEigenDoc(userId)`) het role-veld valt daaronder en hoeft niet aan `alleenPubliekeSocialVelden()` toegevoegd te worden omdat alleen de eigenaar zichzelf upgrade naar brand-rol.
 
 ### Migrations
-**Geen migrations vereist** — alle nieuwe collections worden lazy aangemaakt door eerste schrijfactie. Bestaande data is ongewijzigd.
+**Geen migrations vereist** alle nieuwe collections worden lazy aangemaakt door eerste schrijfactie. Bestaande data is ongewijzigd.
 
 ### Indexes (aanbevolen, niet verplicht)
 Zie `BRAND_PORTAL_FIRESTORE_RULES.md` § Firestore Indexes.
@@ -239,7 +239,7 @@ Zie `BRAND_PORTAL_FIRESTORE_RULES.md` § Firestore Indexes.
 ⚠️ **MOCKED testing:** E2E browser-tests in de pod-sandbox kunnen niet bij Firebase Storage / Auth productie. **Functional acceptance test door eindgebruiker** op productie-deployment is daarom de testbasis.
 
 ### Regressie-check (bestaande flows ongewijzigd)
-✅ `DY.toonPagina` wrapper delegeert alle niet-brand routes naar origineel — bestaande pagina's (feed, profiel, login, etc.) gedragen zich identiek.
+✅ `DY.toonPagina` wrapper delegeert alle niet-brand routes naar origineel bestaande pagina's (feed, profiel, login, etc.) gedragen zich identiek.
 ✅ Geen mutatie van bestaande globals / DY-functies.
 ✅ Geen CSS-overrides (alle nieuwe classes `bp-` prefixed).
 ✅ Geen wijziging in service worker / cache strategie.
@@ -255,7 +255,7 @@ Zie `BRAND_PORTAL_FIRESTORE_RULES.md` § Firestore Indexes.
 | **Firestore-rules nog niet gedeployed** door eindgebruiker | Brand-registratie faalt met `permission-denied` | Stap-voor-stap deploy-instructie in `BRAND_PORTAL_FIRESTORE_RULES.md` |
 | **Firebase Storage rules nog niet gedeployed** | Logo/product image upload faalt | Idem (zelfde document) |
 | **Spam-registraties** | Pending lijst loopt vol | MVP: rate-limit (8s) + e-mail-uniqueness + handmatige admin-approval. Later: reCAPTCHA toevoegen. |
-| **Analytics zijn nog niet real-time aggregated** | `impressies/clicks/spend` velden worden in MVP nog NIET vanuit `campaign_events` opgesomd; ze blijven 0 totdat een cloud function / cron-job ze aggregeert | Status-veld in MVP: telt op directe `event.create` met `transaction.update({impressies: increment(1)})` — kan in volgende release toegevoegd worden. Voor nu: lege analytics tonen graceful empty state. |
+| **Analytics zijn nog niet real-time aggregated** | `impressies/clicks/spend` velden worden in MVP nog NIET vanuit `campaign_events` opgesomd; ze blijven 0 totdat een cloud function / cron-job ze aggregeert | Status-veld in MVP: telt op directe `event.create` met `transaction.update({impressies: increment(1)})` kan in volgende release toegevoegd worden. Voor nu: lege analytics tonen graceful empty state. |
 | **Brand kan geen wachtwoord resetten** via portal-UI | Brand moet de standaard "wachtwoord vergeten"-flow van het bestaande login-scherm gebruiken | Documentatie in admin-onboarding mail. |
 | **Geen e-mailnotificaties** bij approve/reject | Brand merkt niet wanneer status verandert | MVP-keuze. SendGrid/Resend-integratie kan in volgende release toegevoegd worden. |
 | **Geen drag-and-drop upload** | Standaard `<input type=file>` voor producten/logo | Bewuste MVP-keuze conform scope 1A. |
@@ -275,12 +275,12 @@ Zie `BRAND_PORTAL_FIRESTORE_RULES.md` § Firestore Indexes.
    - `js/brand-portal-v1.js`
    - `brand-portal.css`
 3. Bump `sw.js` VERSION zodat caches geleegd worden.
-4. **Firestore data blijft staan** — geen destructieve actie.
+4. **Firestore data blijft staan** geen destructieve actie.
 5. Brand-portal Firestore rules kunnen optioneel verwijderd worden uit `firestore.rules` (zie `BRAND_PORTAL_FIRESTORE_RULES.md` § Rollback).
 
-### Soft-rollback (feature flag uit — instant)
+### Soft-rollback (feature flag uit instant)
 - **Per gebruiker** (testing): `localStorage.setItem('dy_brand_portal','0')` → module wordt niet geactiveerd, geen UI.
-- **Globaal** (instant via Firestore zonder deploy): admin schrijft naar `app_config/brand_portal_v1` met `{ enabled: false }` — kan in volgende release via lazy-check geconsumeerd worden.
+- **Globaal** (instant via Firestore zonder deploy): admin schrijft naar `app_config/brand_portal_v1` met `{ enabled: false }` kan in volgende release via lazy-check geconsumeerd worden.
 
 ### Data-rollback
 Firestore-data blijft veilig staan. Voor permanente verwijdering:
@@ -300,10 +300,10 @@ firebase firestore:delete --recursive brand_admin_log
 ## 7. ACCEPTATIE-CHECKLIST (volgens jouw prompt)
 
 ✅ Geen bestaande functionaliteit verwijderd, herschreven of vervangen
-✅ Geen breaking changes — bestaande user flows ongewijzigd
+✅ Geen breaking changes bestaande user flows ongewijzigd
 ✅ Feature flag aanwezig (lokaal + script-tag verwijderbaar)
 ✅ Productiegeschikte implementatie (rate limits, validaties, RBAC, audit-log, soft-delete)
-✅ Responsive (mobiel/tablet/desktop — CSS-grids + media queries)
+✅ Responsive (mobiel/tablet/desktop CSS-grids + media queries)
 ✅ Cross-browser / cross-platform (gebruikt enkel Web Standards + Firebase SDK al aanwezig)
 ✅ Accessibility: `aria-live`, `data-testid` voor QA, `focus-visible` outlines, semantic HTML
 ✅ Geen route-conflicts (router-wrapper delegeert onbekende routes)
@@ -311,7 +311,7 @@ firebase firestore:delete --recursive brand_admin_log
 ✅ Geen dubbele renders (router-wrapper respecteert v60.1 stability guards)
 ✅ Geen memory leaks (één MutationObserver, opgeschoond als #dy-main herrendert)
 ✅ Geen console errors / Promise rejections (alle async paths wrapped in try/catch)
-✅ Geen hydration mismatches (static PWA — geen SSR)
+✅ Geen hydration mismatches (static PWA geen SSR)
 ✅ Audit log voor admin-acties (`brand_admin_log` collectie)
 ✅ RBAC server-side enforced via Firestore Rules
 ✅ Soft delete voor producten (`status: 'verwijderd'`)
@@ -324,7 +324,7 @@ firebase firestore:delete --recursive brand_admin_log
 # 1. Codebase deploy (Cloudflare Pages)
 # Upload de ZIP of git push naar je Pages-project
 
-# 2. Firebase rules deploy (CRITICAL — anders krijg je permission-denied)
+# 2. Firebase rules deploy (CRITICAL anders krijg je permission-denied)
 firebase deploy --only firestore:rules,storage
 
 # 3. (Optioneel) Composite indexes aanmaken
@@ -342,7 +342,7 @@ firebase deploy --only firestore:rules,storage
 
 ---
 
-## 9. NEXT-PHASE BACKLOG (NIET in deze release — zoals afgesproken)
+## 9. NEXT-PHASE BACKLOG (NIET in deze release zoals afgesproken)
 
 - 💳 **Stripe Connect** voor brand-billing + budget-engine (keuze 2B)
 - 📧 E-mail notificaties (SendGrid/Resend) bij status-changes

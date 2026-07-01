@@ -1,10 +1,10 @@
-# Cloudflare Workers — Paskamer Praat
+# Cloudflare Workers Paskamer Praat
 
 **4 productieklare workers** dekken alle server-side cron functionaliteiten. Backend cron (`weekly_reports.py` via APScheduler) blijft parallel actief voor brand-email flows.
 
 ---
 
-## 1. `pvdw-worker-v1.2.js` — Post van de Week ⭐ (UPGRADE v1.1 → v1.2)
+## 1. `pvdw-worker-v1.2.js` Post van de Week ⭐ (UPGRADE v1.1 → v1.2)
 
 **Vervang** bestaande `doubleyou-pvdw-worker`.
 
@@ -22,13 +22,13 @@ Selecteert wekelijks de post met de meeste likes (min. 25), keert DSP-bonus uit,
 FIREBASE_PROJECT_ID   = doubleyou-journal
 FIREBASE_SERVICE_KEY  = <base64 service account JSON>
 WORKER_SECRET         = <random secret>
-WORKER_ADMIN_EMAIL    = admin@paskamerpraat.nl   (optioneel — admin mail)
-WORKER_APP_URL        = https://paskamerpraat.nl (optioneel — deeplink)
+WORKER_ADMIN_EMAIL    = admin@paskamerpraat.nl   (optioneel admin mail)
+WORKER_APP_URL        = https://paskamerpraat.nl (optioneel deeplink)
 ```
 
 ---
 
-## 2. `brand-autocomplete-worker-v1.0.js` — Brand Campaign Auto-Complete
+## 2. `brand-autocomplete-worker-v1.0.js` Brand Campaign Auto-Complete
 
 Zet elke campagne automatisch op `status='completed'` zodra `eindDatum` gepasseerd is.
 
@@ -38,7 +38,7 @@ Zet elke campagne automatisch op `status='completed'` zodra `eindDatum` gepassee
 
 ---
 
-## 3. `post-boosts-expire-worker-v1.0.js` — Post Boosts Expire 🆕 v1.0
+## 3. `post-boosts-expire-worker-v1.0.js` Post Boosts Expire 🆕 v1.0
 
 **Nieuw:** zonder deze worker blijven geboostte posts eeuwig `boost_active=true`, ook nadat de `boost_until` datum gepasseerd is.
 
@@ -47,13 +47,13 @@ Zet elke campagne automatisch op `status='completed'` zodra `eindDatum` gepassee
 - Patch `boost_active=false`, `boost_expired_at=<iso>`
 - Update gekoppelde `post_boosts/{boostId}` naar `status='expired'`
 
-**Cron:** `0 * * * *` (elk uur) — uurprecisie is voldoende
+**Cron:** `0 * * * *` (elk uur) uurprecisie is voldoende
 
 **Environment variables:** zelfde als PVDW.
 
 ---
 
-## 4. `studio-cleanup-worker-v1.0.js` — Paskamer Studio Stale Sessions 🆕 v1.0
+## 4. `studio-cleanup-worker-v1.0.js` Paskamer Studio Stale Sessions 🆕 v1.0
 
 **Nieuw:** live_sessions kunnen "stale" worden als de host tab crasht (mobiel Safari, iOS, netwerk-drop). Zonder cleanup blijven ze eeuwig als `status='live'` in de grid staan.
 
@@ -69,8 +69,8 @@ Zet elke campagne automatisch op `status='completed'` zodra `eindDatum` gepassee
 FIREBASE_PROJECT_ID       = doubleyou-journal
 FIREBASE_SERVICE_KEY      = <base64 service account JSON>
 WORKER_SECRET             = <random secret>
-MAX_SESSION_MS            = 21600000    (optioneel — 6u default)
-STALE_MS                  = 1800000     (optioneel — 30m default)
+MAX_SESSION_MS            = 21600000    (optioneel 6u default)
+STALE_MS                  = 1800000     (optioneel 30m default)
 DELETE_SUBCOLLECTIONS     = false       (true = ook chat/reactions wissen)
 ```
 
@@ -132,4 +132,4 @@ curl -X POST https://doubleyou-boost-expire.<jouw>.workers.dev/run \
 | Post boosts expire | 1×/uur | post-boosts-expire v1.0 🆕 | ✅ |
 | Studio stale sessions cleanup | 1×/15 min | studio-cleanup v1.0 🆕 | ✅ |
 | Weekly brand reports mail | 1×/week | backend APScheduler | ✅ (backend) |
-| Stories 24h expire | — | Client-side filter | ⚠️ Optioneel |
+| Stories 24h expire | | Client-side filter | ⚠️ Optioneel |

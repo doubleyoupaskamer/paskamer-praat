@@ -1,5 +1,5 @@
 /**
- * PASKAMER PRAAT — Sidebar + Topbar Home Button (v1.1.0)
+ * PASKAMER PRAAT Sidebar + Topbar Home Button (v1.1.0)
  * -----------------------------------------------------------------
  * v1.0: Home-icoon in sidebar (desktop) naast BETA badge
  * v1.1: Home-icoon ook links in mobiele topbar + auto-scroll-to-top

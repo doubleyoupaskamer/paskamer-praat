@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * Doubleyou — Live Module (Player Modal + Realtime Chat + Reactions) v1.0.0
+ * Doubleyou Live Module (Player Modal + Realtime Chat + Reactions) v1.0.0
  * ═══════════════════════════════════════════════════════════════════════
  *
  * NON-BREAKING additieve module. Bouwt EENMALIG het #pp-live-player modal
@@ -102,13 +102,13 @@
     modal.querySelector('#pp-live-chat-input').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); sendChat(); }
     });
-    // Rapporteren / modereren — hergebruikt bestaande DY._toonMeldModal flow
+    // Rapporteren / modereren hergebruikt bestaande DY._toonMeldModal flow
     var reportBtn = modal.querySelector('#pp-live-report-btn');
     if (reportBtn) reportBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       openReport();
     });
-    // Backdrop click does NOT close (full-screen modal, only X button) — by design
+    // Backdrop click does NOT close (full-screen modal, only X button) by design
 
     // ESC key closes
     document.addEventListener('keydown', function (e) {
@@ -204,7 +204,7 @@
         if (!box) return;
         var existing = box.getAttribute('data-loaded') === '1';
         if (!existing) {
-          // First load — paint all in reverse order (asc)
+          // First load paint all in reverse order (asc)
           var rows = [];
           snap.forEach(function (d) { rows.push(d.data()); });
           rows.reverse();
@@ -250,7 +250,7 @@
     if (!text) return;
     var u = currentUser();
     if (!u || u.isAnonymous) {
-      // Not logged in (of anonymous guest) — local optimistic message + login prompt
+      // Not logged in (of anonymous guest) local optimistic message + login prompt
       appendMsg({ userName: '@gast', text: text });
       input.value = '';
       try { if (window.DY && DY.toonLoginPrompt) DY.toonLoginPrompt('Log in om mee te chatten in de Paskamer Studio.'); } catch (_) {}
@@ -324,7 +324,7 @@
       state.unsubscribeSession = f.collection('live_sessions').doc(sessionId)
         .onSnapshot(function (doc) {
           if (!doc.exists) {
-            // Session was deleted — close gracefully
+            // Session was deleted close gracefully
             log('session vanished', sessionId);
             closePlayer();
             return;
@@ -454,7 +454,7 @@
       if (!u || !state.sessionData.hostUid || state.sessionData.hostUid !== u.uid) return;
       var f = db();
       if (!f) return;
-      // Synchrone update poging — Firestore SDK gebruikt intern XHR, dat kan
+      // Synchrone update poging Firestore SDK gebruikt intern XHR, dat kan
       // afgebroken worden. Beste garantie: schrijf direct.
       f.collection('live_sessions').doc(state.sessionId).update({
         status: 'ended',
@@ -462,7 +462,7 @@
       }).catch(function () {});
     } catch (_) {}
   }
-  // Registreer 1x (module scope) — geen dubbele listeners
+  // Registreer 1x (module scope) geen dubbele listeners
   if (!window.__ppLiveUnloadHooked) {
     window.__ppLiveUnloadHooked = true;
     window.addEventListener('beforeunload', endSessionOnUnload);

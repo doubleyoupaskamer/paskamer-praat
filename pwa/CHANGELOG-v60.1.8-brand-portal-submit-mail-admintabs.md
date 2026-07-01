@@ -1,4 +1,4 @@
-# Paskamer Praat — Brand Portal v60.1.8
+# Paskamer Praat Brand Portal v60.1.8
 
 ## Wijzigingen in deze release
 
@@ -20,7 +20,7 @@ Cloudflare mail-worker (`black-grass-c05c.doubleyou-journal.workers.dev/mail`):
    - Onderwerp: `Nieuwe merkaanvraag: <bedrijfsnaam>`
    - Bevat alle ingevulde velden + directe link naar `?pagina=admin_brands`
 
-E-mails zijn *best-effort* — een mislukte mail blokkeert de registratie niet
+E-mails zijn *best-effort* een mislukte mail blokkeert de registratie niet
 (de Firestore-write is leidend).
 
 ### 🛠️ Admin-tabs zichtbaar in bestaand admin-dashboard
@@ -32,7 +32,7 @@ DOM-injectie:
 - **📢 Campagnes** → navigeert naar `?pagina=admin_campagnes` (pauzeren/hervatten/budget)
 - **€ Inkomsten** → navigeert naar `?pagina=admin_inkomsten` (revenue dashboard)
 
-Geen wijzigingen aan `pwa-v463-*.js` — de tabs worden ge-injecteerd vanuit
+Geen wijzigingen aan `pwa-v463-*.js` de tabs worden ge-injecteerd vanuit
 `brand-portal-v1.js` zodra `DY.pagina === 'admin'`.
 
 ## Gewijzigde bestanden

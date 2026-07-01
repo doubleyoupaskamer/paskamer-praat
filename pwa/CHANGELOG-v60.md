@@ -1,4 +1,4 @@
-# Paskamer Praat — v60 Changelog
+# Paskamer Praat v60 Changelog
 
 ## ✨ Nieuw: Server-side Client Errors in Admin Panel
 
@@ -25,7 +25,7 @@ het bestaande admin panel onder tab **Errors**.
 | Bestand | Wijziging |
 |---|---|
 | `admin.html` | `<script src="js/admin-errors-v1.js?v=60">` toegevoegd |
-| `js/admin-errors-v1.js` | **NIEUW** — companion script, ~270 regels |
+| `js/admin-errors-v1.js` | **NIEUW** companion script, ~270 regels |
 | `backend/server.py` | GET uitgebreid + 2 DELETE-routes |
 | `index.html` | Alle `?v=59` → `?v=60` |
 | `sw.js` | `VERSION = 'v60-…'` |

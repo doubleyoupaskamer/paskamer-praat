@@ -35,7 +35,7 @@
   function uid() { var u = window.firebase && firebase.auth && firebase.auth().currentUser; return u ? u.uid : null; }
   function toast(msg, err) { try { window.DY && DY.toast && DY.toast(msg, !!err); } catch (e) {} }
 
-  // Audit log — elke beheeractie wordt persistent vastgelegd.
+  // Audit log elke beheeractie wordt persistent vastgelegd.
   function logAdminAction(action, target, oldValue, newValue) {
     try {
       db().collection('admin_logs').add({

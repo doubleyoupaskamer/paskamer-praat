@@ -1,4 +1,4 @@
-# PaskamerPraat — Extensions Pack v1.0.0
+# PaskamerPraat Extensions Pack v1.0.0
 **Datum**: 14 februari 2026
 **Doel**: Production-ready uitbreiding zonder bestaande code te wijzigen.
 
@@ -37,10 +37,10 @@ INHOUD VAN DE PACK
 HARDE GARANTIES
 ═══════════════════════════════════════════════════════════════════════
 - ❌ Geen enkele regel in bestaande code gewijzigd (verifieer met `git diff`)
-- ❌ Geen breaking changes — alles is additive
+- ❌ Geen breaking changes alles is additive
 - ✅ Alle modules werken met `window.PP_*` namespaces
 - ✅ Routes geregistreerd via wrapper, niet via BP_PAGES mutatie
-- ✅ Backend routers worden geïncludeerd met 1 regel — server.py niet herschreven
+- ✅ Backend routers worden geïncludeerd met 1 regel server.py niet herschreven
 - ✅ Idempotent backend logic (aggregator + Shopify webhook)
 - ✅ Schaalbaar (Cloud Worker + batched Firestore writes)
 
@@ -48,7 +48,7 @@ HARDE GARANTIES
 DEPLOY-STAPPEN (in volgorde)
 ═══════════════════════════════════════════════════════════════════════
 
-## STAP 1 — Firestore Schema Updates
+## STAP 1 Firestore Schema Updates
 Voeg de gerecommendeerde indexes toe via Firebase CLI:
 
 ```bash
@@ -73,7 +73,7 @@ fs.writeFileSync('/tmp/firestore.indexes.json', JSON.stringify({ indexes: all, f
 firebase deploy --only firestore:indexes
 ```
 
-## STAP 2 — Firestore Rules update (handmatig)
+## STAP 2 Firestore Rules update (handmatig)
 Voor elke `data_contract.json`, kopieer de "rules_changes_required" naar je
 `firestore.rules` file. Voorbeeld voor users:
 
@@ -106,7 +106,7 @@ match /outfits/{id} {
 
 Daarna: `firebase deploy --only firestore:rules`
 
-## STAP 3 — Event Aggregator deployen
+## STAP 3 Event Aggregator deployen
 ```bash
 cd /app/pwa/extensions/analytics
 yarn install
@@ -130,7 +130,7 @@ curl -X POST https://pp-event-aggregator.<jouwsubdomain>.workers.dev/run-now \
   -H "X-Admin-Secret: <ADMIN_TRIGGER_SECRET>"
 ```
 
-## STAP 4 — Placements helper aanzetten
+## STAP 4 Placements helper aanzetten
 Voeg ÉÉN regel toe vóór `</body>` in je deployment van `index.html`:
 
 ```html
@@ -143,13 +143,13 @@ PP_Placements.isPlacementEnabled(currentUser, 'stories');
 PP_Placements.isPlacementActive('ai_assist');
 ```
 
-## STAP 5 — AI Engine hooks
+## STAP 5 AI Engine hooks
 Frontend:
 ```html
 <script defer src="/extensions/hooks/pp-engine-hooks-v1.js?v=1.0.0"></script>
 ```
 
-Backend — voeg 2 regels toe aan `/app/backend/server.py`:
+Backend voeg 2 regels toe aan `/app/backend/server.py`:
 ```python
 from extensions.hooks.extensions_ai import ai_router
 app.include_router(ai_router)
@@ -159,8 +159,8 @@ app.include_router(ai_router)
 - Run `integration_playbook_expert_v2` voor "gemini-3-pro vision" → krijg
   emergentintegrations code → vervang de 501-stubs met echte Gemini calls.
 
-## STAP 6 — Wallet + Shopify Payments
-Backend — voeg toe aan `/app/backend/server.py`:
+## STAP 6 Wallet + Shopify Payments
+Backend voeg toe aan `/app/backend/server.py`:
 ```python
 from extensions.payments.extensions_wallet import wallet_router
 app.include_router(wallet_router)
@@ -204,7 +204,7 @@ firebase_admin.initialize_app(cred)
 fdb = fa_firestore.client()
 ```
 
-## STAP 7 — Admin Panel Modules
+## STAP 7 Admin Panel Modules
 Voeg toe vóór `</body>` in `index.html`:
 ```html
 <link rel="stylesheet" href="/extensions/admin/pp-admin-ext.css?v=1.0.0">
@@ -216,7 +216,7 @@ Daarna navigeer-bare routes:
 - `?pagina=admin_payments`   → Shopify orders overview
 - `?pagina=admin_placements` → Per-placement kill-switches
 
-## STAP 8 — Verifieer
+## STAP 8 Verifieer
 ```bash
 # Frontend modules geladen
 curl https://paskamerpraat.nl/ -s | grep -E "pp-placements|pp-engine-hooks|pp-admin-ext"
@@ -240,7 +240,7 @@ ENVIRONMENT VARIABLES OVERZICHT
 ### Backend (FastAPI .env)
 | Var | Type | Bron |
 |-----|------|------|
-| EMERGENT_LLM_KEY | string | Reeds aanwezig — voor AI hooks |
+| EMERGENT_LLM_KEY | string | Reeds aanwezig voor AI hooks |
 | SHOPIFY_SHOP_DOMAIN | string | Shopify admin → Domain |
 | SHOPIFY_ADMIN_API_TOKEN | string | Custom app → Admin API token |
 | SHOPIFY_WEBHOOK_SECRET | string | Shopify webhook signing secret |
@@ -269,7 +269,7 @@ WAT NOG OPEN STAAT (handoff voor latere fases)
    Voeg button "Saldo opwaarderen" toe in user-profiel die `/api/wallet/topup/checkout`
    aanroept en de `checkout_url` opent.
 
-5. **Outfit Review UI** koppeling — `PP_Engine.scoreOutfit()` is API-ready maar
+5. **Outfit Review UI** koppeling `PP_Engine.scoreOutfit()` is API-ready maar
    nog niet aangeroepen vanuit bestaande outfit-detail pagina.
 
 ═══════════════════════════════════════════════════════════════════════

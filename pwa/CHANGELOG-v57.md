@@ -1,4 +1,4 @@
-# Paskamer Praat — v57 Changelog (Enterprise Audit — Items D/E/F/G/H)
+# Paskamer Praat v57 Changelog (Enterprise Audit Items D/E/F/G/H)
 **Datum:** 13 februari 2026
 **Type:** Multi-feature enterprise hardening (non-invasief)
 
@@ -14,7 +14,7 @@ Voltooi alle resterende items uit jouw enterprise audit:
 
 ---
 
-## 🟢 H. Productie Logging — `error-logger-v1.js`
+## 🟢 H. Productie Logging `error-logger-v1.js`
 
 Nieuw companion script (~7 KB) dat **alle** frontend-fouten centraal afvangt.
 
@@ -44,7 +44,7 @@ window.DY.errorLogger.send({kind:'manual', message:'…'})  // handmatig loggen
 
 ---
 
-## 🟠 D. Knoppen-watchdog — `button-watchdog-v1.js`
+## 🟠 D. Knoppen-watchdog `button-watchdog-v1.js`
 
 Nieuw companion script (~5 KB) voor **stuck-button recovery** zonder bestaande
 click-handlers aan te raken.
@@ -62,7 +62,7 @@ hangt 12 seconden, dan stond de knop vroeger "Bezig..." vast. Nu herstelt
 'ie automatisch en kan de user opnieuw klikken. Event wordt gelogd zodat
 jij ziet welke Firestore-call traag is.
 
-**Geen interferentie** met bestaande handlers — werkt parallel.
+**Geen interferentie** met bestaande handlers werkt parallel.
 
 ---
 
@@ -75,7 +75,7 @@ Lint-audit van alle `/app/output/pwa/js/*.js`:
 | Nieuwe v57 (error-logger, button-watchdog) | 2 | ✅ Clean |
 | Admin panel (admin-logic-v177) | 1 | ⚠️ Pre-existing `mlLaad*` undefined funcs |
 | Empty catch warnings | 18 files | ℹ️ Intentioneel (silent-fail pattern) |
-| `firebase`/`DY` undefined | many | ℹ️ Globals via CDN — false positive |
+| `firebase`/`DY` undefined | many | ℹ️ Globals via CDN false positive |
 
 **Admin panel issues** (niet user-facing, niet kritiek):
 - `admin-logic-v177.js`: undefined functies `mlLaad`, `mlFilter`, `mlLaadLog`,
@@ -107,7 +107,7 @@ te wachten.
 - ⚡ Stripe Checkout opent ~150ms sneller (DNS pre-resolved)
 - ⚡ Avatar images van Google (`lh3...`) laden sneller
 
-**LCP/CLS/INP** kunnen niet zonder real-user metrics worden gemeten — daarvoor
+**LCP/CLS/INP** kunnen niet zonder real-user metrics worden gemeten daarvoor
 gebruik je nu de `error-logger` + custom telemetry. Voorstel later: Web Vitals
 companion script (`web-vitals-v1.js`).
 
@@ -116,17 +116,17 @@ core-bundle wijzigingen).
 
 ---
 
-## 🟢 G. Responsive Audit — `responsive-shims-v1.css`
+## 🟢 G. Responsive Audit `responsive-shims-v1.css`
 
 Nieuw CSS-bestand (~3 KB) met **non-invasieve cross-device shims**:
 
 1. **iOS safe-area-insets** (`env(safe-area-inset-*)`) voor notch/home-bar.
    Werkt op klassen `.nav-bottom`, `.fixed-bottom`, `.header-top`, etc.
-2. **Dynamic viewport** (`100dvh`) — fix voor iOS Safari adresbalk-jump.
+2. **Dynamic viewport** (`100dvh`) fix voor iOS Safari adresbalk-jump.
    Progressive enhancement: alleen browsers die `dvh` ondersteunen.
 3. **Touch-target minimum** 44×44px op `pointer: coarse` (WCAG 2.5.5 / Apple HIG).
    Uitzondering: feed-action icons mogen 40×40px.
-4. **Tablet modal max-width** (768–1024px landscape) → max 720px breed.
+4. **Tablet modal max-width** (768-1024px landscape) → max 720px breed.
 5. **Horizontale scroll fix** `overflow-x: hidden` op `html, body`.
 6. **Reduced-motion** respect (`prefers-reduced-motion`).
 7. **Focus-visible** outline voor toetsenbord-navigatie (a11y).
@@ -178,8 +178,8 @@ Nieuw CSS-bestand (~3 KB) met **non-invasieve cross-device shims**:
 ## 🧪 Post-deploy verificatie
 1. Upload `paskamerpraat-pwa-v57-COMPLETE.zip` naar hosting root
 2. Hard refresh (Cmd+Shift+R / Ctrl+Shift+R)
-3. Open DevTools Console — moet leeg blijven
-4. Open DevTools Network — zie je `client-error` POSTs als er ergens een error optreedt?
+3. Open DevTools Console moet leeg blijven
+4. Open DevTools Network zie je `client-error` POSTs als er ergens een error optreedt?
 5. Bekijk laatste errors: `GET https://fitting-chat-app.preview.emergentagent.com/api/client-error/recent?limit=20`
 6. Test stuck-button: open je app, klik op Like, hou DevTools Network open → na 10s zonder respons reset de knop automatisch.
 

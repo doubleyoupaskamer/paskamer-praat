@@ -1,5 +1,5 @@
 /**
- * POST BOOSTS EXPIRE — Cloudflare Worker
+ * POST BOOSTS EXPIRE Cloudflare Worker
  * DoubleYou / Paskamer Praat  •  v1.0.0 (juli 2026)
  *
  * DOEL

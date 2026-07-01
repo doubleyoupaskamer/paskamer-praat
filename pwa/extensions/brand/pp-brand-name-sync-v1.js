@@ -17,8 +17,8 @@
  * Geen legacy rewrites. Geen wijziging aan pp-feedtabs-v1.js of brand-portal.
  *
  * Public API:
- *   PP_BrandNameSync.brandNameFor(brandId) — Promise<string|null>
- *   PP_BrandNameSync.refresh(brandId)      — invalidate cache + retrigger
+ *   PP_BrandNameSync.brandNameFor(brandId) Promise<string|null>
+ *   PP_BrandNameSync.refresh(brandId)      invalidate cache + retrigger
  *   PP_BrandNameSync.VERSION
  * ═══════════════════════════════════════════════════════════════════════ */
 (function () {
@@ -28,7 +28,7 @@
 
   var TAG = '[brand-name-sync]';
   var NAME_CACHE = {};       // brandId → { naam: string|null, ts: number }
-  var TTL_MS = 2 * 60 * 1000; // 2 minuten — kort genoeg voor verse naam, lang genoeg om reads te beperken
+  var TTL_MS = 2 * 60 * 1000; // 2 minuten kort genoeg voor verse naam, lang genoeg om reads te beperken
 
   function db() {
     return (window.firebase && firebase.firestore) ? firebase.firestore() : null;
@@ -185,7 +185,7 @@
     // Indien gebruiker terugkeert naar tab/pagina → refresh
     document.addEventListener('visibilitychange', function () {
       if (document.visibilityState === 'visible') {
-        // Forceer hydratie opnieuw zonder cache te legen — laat TTL bepalen
+        // Forceer hydratie opnieuw zonder cache te legen laat TTL bepalen
         scanAndPatch(true);
       }
     });

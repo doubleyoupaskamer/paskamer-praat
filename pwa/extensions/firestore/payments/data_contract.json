@@ -11,7 +11,7 @@
     "idempotency_strategy": "idempotency_key uniqueness enforced via Cloud Function pre-write check; double-webhook reject with 200 (already processed)",
     "compliance": {
       "PSD2": "Strong Customer Authentication via Shopify Checkout",
-      "PCI_DSS": "No card data stored — Shopify handles tokenization",
+      "PCI_DSS": "No card data stored Shopify handles tokenization",
       "GDPR": "Retain 7 years for financial audit, then pseudonymize uid"
     },
     "refund_policy": "Manual via admin panel → triggers Shopify Admin API refund + wallet debit"

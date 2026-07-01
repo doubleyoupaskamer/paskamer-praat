@@ -1,4 +1,4 @@
-# v60.1.12 — BrandPartnerCTA op Homepage + Lege-Ruimte Fix
+# v60.1.12 BrandPartnerCTA op Homepage + Lege-Ruimte Fix
 
 ## 🔴 Root cause lege ruimte op homepage
 `.dy-hm-wrap` had `min-height: 100dvh` (en op desktop ook in een tweede media query) terwijl `.dy-hm-hero` zelf `height: calc(100dvh - topbar - nav)` is. Resultaat: de wrap reserveerde ALTIJD 100dvh, maar de hero vulde alleen viewport-min-topbar-nav → er bleef ~120px lege donkere ruimte onder waar je heen kon scrollen.
@@ -23,12 +23,12 @@ CSS hergebruikt bestaande huisstijl tokens:
 Hergebruikt het bestaande `dy-bpos-*` overlay-patroon (Body Positivity Reglement). Zelfde layouttaal, zelfde drag-bar, zelfde animatie.
 
 6 secties:
-1. **Introductie** — community context
-2. **Voor wie** — tall, plus, schoenen, lingerie, accessoires, ontwerpers
-3. **Hoe werkt het** — 5-stappen flow (aanmelden → goedkeuring → producten → campagne → analytics)
-4. **Campagne-mogelijkheden** — grid met 4 plaatsingen (Merken-tab, Story-ring, Outfit Review, AI Stylist)
-5. **Voorwaarden** — KvK, BTW, body-positive copy, realistische foto's, manuele facturatie
-6. **CTA** — "Naar merkenportaal" → `DY.brandPortal.openPortaal()`
+1. **Introductie** community context
+2. **Voor wie** tall, plus, schoenen, lingerie, accessoires, ontwerpers
+3. **Hoe werkt het** 5-stappen flow (aanmelden → goedkeuring → producten → campagne → analytics)
+4. **Campagne-mogelijkheden** grid met 4 plaatsingen (Merken-tab, Story-ring, Outfit Review, AI Stylist)
+5. **Voorwaarden** KvK, BTW, body-positive copy, realistische foto's, manuele facturatie
+6. **CTA** "Naar merkenportaal" → `DY.brandPortal.openPortaal()`
 
 **Sluit-mechanismen**:
 - × knop rechtsboven
@@ -57,10 +57,10 @@ Geen route-cause errors. Geen 404. Geen login-loop.
 - Firestore rules
 
 ## Gewijzigde bestanden
-- `js/pwa-v463-1780765770.js` — `DY.renderHome` uitgebreid + `DY.toonSamenwerkingenOverlay` + `DY.sluitSamenwerkingenOverlay` toegevoegd (~140 regels)
-- `app.css` — `dy-hm-partner-*` + `dy-sw-*` styles toegevoegd, `dy-hm-wrap` `min-height:100dvh` verwijderd (~150 regels)
-- `index.html` — `?v=60.1.12-home-partner` cache bumps
-- `sw.js` — `VERSION` bump
+- `js/pwa-v463-1780765770.js` `DY.renderHome` uitgebreid + `DY.toonSamenwerkingenOverlay` + `DY.sluitSamenwerkingenOverlay` toegevoegd (~140 regels)
+- `app.css` `dy-hm-partner-*` + `dy-sw-*` styles toegevoegd, `dy-hm-wrap` `min-height:100dvh` verwijderd (~150 regels)
+- `index.html` `?v=60.1.12-home-partner` cache bumps
+- `sw.js` `VERSION` bump
 
 ## Rollback
 Vervang alleen `DY.renderHome` met v60.1.11-versie en verwijder de twee nieuwe functies (`toonSamenwerkingenOverlay`, `sluitSamenwerkingenOverlay`). CSS-rollback: zet `min-height: 100dvh` terug op `.dy-hm-wrap`.

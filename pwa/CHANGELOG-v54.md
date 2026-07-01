@@ -1,4 +1,4 @@
-# Paskamer Praat — v54 Release Notes
+# Paskamer Praat v54 Release Notes
 ## Premium LIVE met Stripe Subscription + Customer Portal
 
 **Release date:** 2026-02-13
@@ -6,7 +6,7 @@
 
 ---
 
-## 1. Premium is nu LIVE — €4,99/maand recurring
+## 1. Premium is nu LIVE €4,99/maand recurring
 
 ### Backend wijzigingen (`premium_router.py`)
 - Stripe key vervangen door `sk_live_...` (in `.env`)
@@ -20,7 +20,7 @@
 - Fallback amount in code: `4.99` (consistent met dashboard prijs)
 
 ### Frontend (premium-v1.js)
-- Email-veld in upgrade modal is optioneel — Stripe vraagt zelf op de hosted checkout pagina
+- Email-veld in upgrade modal is optioneel Stripe vraagt zelf op de hosted checkout pagina
 - Geen wijzigingen aan UX-flow, alleen backend nu live
 
 ### Live checkout-URL voorbeeld
@@ -43,8 +43,8 @@
 - Users kunnen: opzeggen, betaalmethode wijzigen, facturen downloaden
 
 ### Public API
-- `window.DY.premium.openPortal()` — open portal direct
-- `window.DY.premium.openUpgrade()` — open upgrade modal (zoals voorheen)
+- `window.DY.premium.openPortal()` open portal direct
+- `window.DY.premium.openUpgrade()` open upgrade modal (zoals voorheen)
 
 ---
 
@@ -58,7 +58,7 @@ Voordat alles werkt moet je **TWEE** dingen in je Stripe Dashboard doen (eenmali
 3. Configureer minimaal:
    - **Headline:** "Beheer je Paskamer Praat Premium"
    - **Allow customers to:** ✅ Cancel subscriptions · ✅ Update payment methods · ✅ View invoices
-   - **Cancellation:** "Cancel at end of billing period" (zachte cancel — meer retention dan instant)
+   - **Cancellation:** "Cancel at end of billing period" (zachte cancel meer retention dan instant)
 4. Klik **Save**
 
 ### B) Anonymous Auth in Firebase (was al genoemd)
@@ -73,7 +73,7 @@ Voordat alles werkt moet je **TWEE** dingen in je Stripe Dashboard doen (eenmali
 1. Upload `paskamerpraat-pwa-v54-COMPLETE.zip` naar je hosting
 2. Wacht 5-10s voor service worker update
 3. Open een feed-kaart → 3-puntjes menu → "👑 Upgrade naar Premium"
-4. Vul je email in (optioneel — kan ook op Stripe pagina)
+4. Vul je email in (optioneel kan ook op Stripe pagina)
 5. Klik "Start Premium →"
 6. Op Stripe-pagina: vul email + echte betaalkaart in
 7. Bevestig betaling → redirect terug naar PWA met success-toast
@@ -87,7 +87,7 @@ Voordat alles werkt moet je **TWEE** dingen in je Stripe Dashboard doen (eenmali
 
 ```
 Backend:
-  ~ premium_router.py           (~430 regels — Stripe SDK direct, subscription + portal)
+  ~ premium_router.py           (~430 regels Stripe SDK direct, subscription + portal)
   ~ .env                        (STRIPE_API_KEY = sk_live_, STRIPE_PRICE_PREMIUM_MONTHLY = price_)
 
 Frontend (changed):
@@ -103,7 +103,7 @@ Frontend (changed):
 ## 6. Bekend gedrag / belangrijk om te weten
 
 - **Email validatie:** Stripe LIVE rejecteert fake/example domains (`@example.com`, `@test.com`). Echte users hebben hier geen last van.
-- **Test in LIVE mode:** geen `4242 4242 4242 4242` mogelijk — alleen echte kaarten.
+- **Test in LIVE mode:** geen `4242 4242 4242 4242` mogelijk alleen echte kaarten.
 - **Customer Portal config:** als nog niet geconfigureerd, geeft endpoint een duidelijke error.
-- **31-dagen TTL:** premium verloopt na 31 dagen tenzij webhook een nieuwe paid sessie binnenkrijgt. Voor robuustere subscription-tracking (auto-renewal) raden we aan om in een volgende update Stripe webhook `customer.subscription.updated` te wiren naar `expires_ts` update — voor nu is polling + 31-dagen TTL prima werkbaar.
-- **Webhook secret nog niet geconfigureerd** (jouw keuze 4b). Activation gebeurt via polling — werkt prima, alleen een fractie minder failsafe als de browser direct na betaling crasht.
+- **31-dagen TTL:** premium verloopt na 31 dagen tenzij webhook een nieuwe paid sessie binnenkrijgt. Voor robuustere subscription-tracking (auto-renewal) raden we aan om in een volgende update Stripe webhook `customer.subscription.updated` te wiren naar `expires_ts` update voor nu is polling + 31-dagen TTL prima werkbaar.
+- **Webhook secret nog niet geconfigureerd** (jouw keuze 4b). Activation gebeurt via polling werkt prima, alleen een fractie minder failsafe als de browser direct na betaling crasht.

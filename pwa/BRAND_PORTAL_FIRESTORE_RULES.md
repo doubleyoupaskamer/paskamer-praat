@@ -1,4 +1,4 @@
-# Firestore Security Rules — Brand Portal v1 (ADDITIEF)
+# Firestore Security Rules Brand Portal v1 (ADDITIEF)
 
 Voeg de onderstaande regels toe aan je bestaande `firestore.rules` (v10), **vóór de afsluitende `}` van `match /databases/{database}/documents`**.
 
@@ -6,7 +6,7 @@ Voeg de onderstaande regels toe aan je bestaande `firestore.rules` (v10), **vó�
 
 ```javascript
     // ══════════════════════════════════════════════════════════════════
-    // BRAND PORTAL v1 — additieve regels (geen impact op bestaande paden)
+    // BRAND PORTAL v1 additieve regels (geen impact op bestaande paden)
     // ══════════════════════════════════════════════════════════════════
 
     // ── Helpers brand-portal ──────────────────────────────────────────
@@ -34,7 +34,7 @@ Voeg de onderstaande regels toe aan je bestaande `firestore.rules` (v10), **vó�
       allow create: if isBrandOwner(brandId)
                     && request.resource.data.status == 'pending';
       allow update: if (
-                      // Eigenaar mag eigen profielvelden updaten — NIET status
+                      // Eigenaar mag eigen profielvelden updaten NIET status
                       isBrandOwner(brandId)
                       && !(request.resource.data.diff(resource.data).affectedKeys()
                             .hasAny(['status','moderatedBy','moderatedAt',
@@ -93,7 +93,7 @@ Voeg de onderstaande regels toe aan je bestaande `firestore.rules` (v10), **vó�
 
     // ── CAMPAIGN_EVENTS (append-only impressie/click log) ─────────────
     match /campaign_events/{eventId} {
-      // Iedereen mag een event loggen (impressie/click) — write-only voor users.
+      // Iedereen mag een event loggen (impressie/click) write-only voor users.
       // Lezen alleen admin (en de eigenaar via de campagne-aggregaten).
       allow read:   if isAdmin();
       allow create: if request.resource.data.keys().hasAny(['type'])
@@ -115,7 +115,7 @@ Voeg de onderstaande regels toe aan je bestaande `firestore.rules` (v10), **vó�
 
 ---
 
-## Firebase Storage rules — additie
+## Firebase Storage rules additie
 
 Voeg toe aan je `storage.rules` (binnen `match /b/{bucket}/o`):
 
@@ -139,18 +139,18 @@ Voeg toe aan je `storage.rules` (binnen `match /b/{bucket}/o`):
 
 ---
 
-## Firestore Indexes — aanbevolen (niet verplicht)
+## Firestore Indexes aanbevolen (niet verplicht)
 
 Maak in Firebase Console → Indexes onderstaande composite indexes aan:
 
 | Collectie | Velden | Order |
 |---|---|---|
-| `brand_products` | `brandId` (asc), `aangemaakt` (desc) | — |
-| `brand_products` | `brandId` (asc), `status` (asc) | — |
-| `campaigns` | `brandId` (asc), `aangemaakt` (desc) | — |
-| `brands` | `status` (asc), `aangemaakt` (desc) | — |
+| `brand_products` | `brandId` (asc), `aangemaakt` (desc) | |
+| `brand_products` | `brandId` (asc), `status` (asc) | |
+| `campaigns` | `brandId` (asc), `aangemaakt` (desc) | |
+| `brands` | `status` (asc), `aangemaakt` (desc) | |
 
-Firebase Console toont automatisch een "create index"-link als een query een ontbrekende index nodig heeft — je kunt ook gewoon één query uitvoeren en op die link klikken.
+Firebase Console toont automatisch een "create index"-link als een query een ontbrekende index nodig heeft je kunt ook gewoon één query uitvoeren en op die link klikken.
 
 ---
 

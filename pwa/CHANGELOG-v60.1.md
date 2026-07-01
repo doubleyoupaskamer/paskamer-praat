@@ -1,11 +1,11 @@
-# PaskamerPraat.nl — v60.1 Stability Recovery Audit (geen redesign, geen features)
+# PaskamerPraat.nl v60.1 Stability Recovery Audit (geen redesign, geen features)
 
 **Datum:** 2026-02-14
-**Type:** Pure bugfix / stabiliteit — geen functionele wijzigingen, geen UI redesign, geen verwijderde code.
+**Type:** Pure bugfix / stabiliteit geen functionele wijzigingen, geen UI redesign, geen verwijderde code.
 
 ---
 
-## KRITIEKE BUG 1 — Dubbele onboarding / dubbele pagina renders → OPGELOST
+## KRITIEKE BUG 1 Dubbele onboarding / dubbele pagina renders → OPGELOST
 
 ### Oorzaak (root cause)
 1. **Service Worker werd 2× geregistreerd** (in `index.html` + `js/sw-auto-update-v1.js`) → bij elke deploy konden er meerdere `controllerchange` events vuren met meerdere `window.location.reload()` calls.
@@ -28,7 +28,7 @@
 
 ---
 
-## KRITIEKE BUG 2 — iOS "Voeg toe"-knop werkt niet → OPGELOST
+## KRITIEKE BUG 2 iOS "Voeg toe"-knop werkt niet → OPGELOST
 
 ### Oorzaak (root cause)
 1. **Twee concurrerende install-prompts** op iOS: de inline `#dy-install-banner` (z-index 890, in `index.html`) én de `#dy-a2hs-prompt` overlay (z-index 2147483643, in `a2hs-prompt-v1.js`). De a2hs-overlay lag bovenop → blokkeerde de "Hoe?"-knop van de inline banner.
@@ -50,7 +50,7 @@
 
 ---
 
-## KRITIEKE BUG 3 — PWA "Voeg toe aan startscherm" verschijnt op Samsung terwijl al geïnstalleerd → OPGELOST
+## KRITIEKE BUG 3 PWA "Voeg toe aan startscherm" verschijnt op Samsung terwijl al geïnstalleerd → OPGELOST
 
 ### Oorzaak (root cause)
 De `isStandalone()`-detectie checkte uitsluitend:
@@ -58,7 +58,7 @@ De `isStandalone()`-detectie checkte uitsluitend:
 window.matchMedia('(display-mode: standalone)').matches || navigator.standalone
 ```
 
-Samsung Internet rapporteert echter geïnstalleerde PWA's **regelmatig als `minimal-ui` of `fullscreen`** i.p.v. `standalone` — en de manifest gebruikt `display_override: ["standalone", "minimal-ui"]` waardoor Samsung Internet kan kiezen voor `minimal-ui`. Daarnaast werd er geen rekening gehouden met:
+Samsung Internet rapporteert echter geïnstalleerde PWA's **regelmatig als `minimal-ui` of `fullscreen`** i.p.v. `standalone` en de manifest gebruikt `display_override: ["standalone", "minimal-ui"]` waardoor Samsung Internet kan kiezen voor `minimal-ui`. Daarnaast werd er geen rekening gehouden met:
 - Android TWA / WebAPK installs (`document.referrer === 'android-app://…'`)
 - `display-mode: fullscreen` (Samsung Galaxy fold/edge)
 - `display-mode: window-controls-overlay`
