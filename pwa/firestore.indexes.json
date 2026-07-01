@@ -17,6 +17,14 @@
       ]
     },
     {
+      "collectionGroup": "live_sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "hostUid", "order": "ASCENDING" },
+        { "fieldPath": "status",  "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "chat",
       "queryScope": "COLLECTION",
       "fields": [

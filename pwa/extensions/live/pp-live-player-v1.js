@@ -395,8 +395,65 @@
     log('opened', sessionId);
   }
 
+  // ───────────── Host-side end-session ─────────────
+  // Cruciaal voor data-integriteit: wanneer de HOST de player sluit, MOETEN
+  // we het session-doc bijwerken naar status='ended' + endedAt=serverTs.
+  // Anders blijft de sessie eeuwig als 'live' in Firestore staan tot de
+  // studio-cleanup cron worker het pas na 30 min alsnog afsluit.
+  function endSessionIfHost(sessionId, sessionData) {
+    var f = db();
+    var u = currentUser();
+    if (!f || !u || !sessionId) return;
+    // Alleen de host mag zijn eigen sessie beëindigen (Firestore rules
+    // vangen dit ook af, maar frontend voorkomt onnodige rejected writes).
+    var hostUid = sessionData && sessionData.hostUid;
+    if (!hostUid || hostUid !== u.uid) return;
+    // Skip wanneer al ended
+    if (sessionData && sessionData.status === 'ended') return;
+    try {
+      f.collection('live_sessions').doc(sessionId).update({
+        status: 'ended',
+        endedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(function () {
+        log('host ended session', sessionId);
+      }).catch(function (e) {
+        log('endSession update failed', e && e.message);
+      });
+    } catch (e) { log('endSession threw', e); }
+  }
+
+  // Best-effort: bij window unload (tab-close, browser-close, page reload)
+  // proberen we via sendBeacon het session-doc te sluiten. Beacon werkt in de
+  // meeste browsers ook tijdens unload, in tegenstelling tot XHR/fetch.
+  // Fallback: pagehide event (Safari iOS).
+  function endSessionOnUnload() {
+    try {
+      if (!state.sessionId || !state.sessionData) return;
+      var u = currentUser();
+      if (!u || !state.sessionData.hostUid || state.sessionData.hostUid !== u.uid) return;
+      var f = db();
+      if (!f) return;
+      // Synchrone update poging — Firestore SDK gebruikt intern XHR, dat kan
+      // afgebroken worden. Beste garantie: schrijf direct.
+      f.collection('live_sessions').doc(state.sessionId).update({
+        status: 'ended',
+        endedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(function () {});
+    } catch (_) {}
+  }
+  // Registreer 1x (module scope) — geen dubbele listeners
+  if (!window.__ppLiveUnloadHooked) {
+    window.__ppLiveUnloadHooked = true;
+    window.addEventListener('beforeunload', endSessionOnUnload);
+    window.addEventListener('pagehide', endSessionOnUnload);
+  }
+
   function closePlayer(opts) {
     opts = opts || {};
+    // BELANGRIJK: eerst status='ended' schrijven als host, VOOR we listeners
+    // detachen en state resetten (anders raken we sessionData kwijt).
+    endSessionIfHost(state.sessionId, state.sessionData);
+
     var modal = document.getElementById('pp-live-player');
     if (modal) modal.classList.remove('pp-live-open');
     document.body.style.overflow = '';

@@ -225,6 +225,34 @@
     if (btn) btn.disabled = true;
     if (lbl) lbl.textContent = 'Bezig…';
 
+    // ─── Dubbele-sessie preventie ────────────────────────────────
+    // Als deze host al een actieve live-sessie heeft, die eerst netjes
+    // afsluiten (status='ended') voordat we een nieuwe aanmaken. Anders
+    // krijg je "ghost lives" die eindeloos in het grid blijven staan.
+    function endOldSessionsAndCreate() {
+      return f.collection('live_sessions')
+        .where('hostUid', '==', u.uid)
+        .where('status', '==', 'live')
+        .limit(10)
+        .get()
+        .then(function (snap) {
+          if (snap.empty) return null;
+          var batch = f.batch();
+          var endTs = firebase.firestore.FieldValue.serverTimestamp();
+          snap.forEach(function (d) {
+            batch.update(d.ref, { status: 'ended', endedAt: endTs });
+          });
+          log('closing ' + snap.size + ' stale session(s) for host ' + u.uid);
+          return batch.commit();
+        })
+        .catch(function (e) {
+          // Als de query faalt (bijv. ontbrekende index) niet blokkeren —
+          // sessie gewoon aanmaken. Cron worker ruimt eventuele stale wel op.
+          log('stale-session cleanup skipped', e && e.message);
+          return null;
+        });
+    }
+
     var profile = (window.DY && DY.profile) || {};
     var hostName = profile.gebruikersnaam || profile.naam || u.displayName || (u.email && u.email.split('@')[0]) || 'gebruiker';
     if (hostName && hostName.charAt(0) !== '@') hostName = '@' + hostName;
@@ -249,7 +277,9 @@
       scheduledFor: null
     };
 
-    f.collection('live_sessions').add(sessionDoc).then(function (ref) {
+    endOldSessionsAndCreate().then(function () {
+      return f.collection('live_sessions').add(sessionDoc);
+    }).then(function (ref) {
       state.activeSessionId = ref.id;
       state.isStarting = false;
       if (btn) btn.disabled = false;
