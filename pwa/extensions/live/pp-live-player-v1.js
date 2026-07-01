@@ -459,6 +459,21 @@
     document.body.style.overflow = '';
     document.body.classList.remove('pp-live-player-active');
 
+    // Media stream cleanup: video element ontkoppelen zodat bij een volgende
+    // openPlayer geen oude MediaStream frame blijft hangen. Camera-tracks
+    // zelf worden gestopt door pp-live-start-v1.js:endMyLive (via hookClosePlayer).
+    try {
+      var v = document.getElementById('pp-live-player-video');
+      if (v) {
+        try { v.pause(); } catch (_) {}
+        v.srcObject = null;
+        v.removeAttribute('src');
+        v.style.display = 'none';
+      }
+      var emo = document.getElementById('pp-live-player-emoji');
+      if (emo) emo.style.display = '';
+    } catch (_) {}
+
     if (state.sessionId) bumpViewerCount(state.sessionId, -1);
     unsubscribeChat();
     unsubscribeSession();
@@ -466,6 +481,7 @@
     state.sessionId = null;
     state.sessionData = null;
     state.isOpen = false;
+    state._loginPromptShown = false;
 
     if (!opts.skipHistory) {
       // Update URL back to /?pagina=live (not full nav, just URL)

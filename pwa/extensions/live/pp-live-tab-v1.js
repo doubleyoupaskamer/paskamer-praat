@@ -439,7 +439,11 @@
           stopGridSubscription();
           if (PP_Live.closePlayer) PP_Live.closePlayer({ skipHistory: true });
         }
-        return orig(pagina);
+        var result = orig(pagina);
+        // Direct tab-highlight sync ipv wachten op 1.5s interval (voorkomt
+        // "hangende tab" UX-glitch bij snelle route changes).
+        try { syncNavActive(); } catch (_) {}
+        return result;
       };
       wrapped.__ppLiveWrapped = true;
       DY.navigeer = wrapped;
@@ -473,7 +477,9 @@
           stopGridSubscription();
           if (PP_Live.closePlayer) PP_Live.closePlayer({ skipHistory: true });
         }
-        return origToon(pagina);
+        var resultT = origToon(pagina);
+        try { syncNavActive(); } catch (_) {}
+        return resultT;
       };
       wrappedToon.__ppLiveWrapped = true;
       DY.toonPagina = wrappedToon;
