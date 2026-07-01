@@ -68,6 +68,25 @@
       + '.pp-legal-inline-sep {'
       +   'color: rgba(198,125,6,0.35);'
       +   'font-size: 0.7rem;'
+      + '}'
+      /* Powered by link onderaan */
+      + '.pp-legal-inline-powered {'
+      +   'margin-top: 12px;'
+      +   'text-align: center;'
+      +   'font-size: 0.72rem;'
+      +   'line-height: 1.5;'
+      + '}'
+      + '.pp-legal-inline-powered a {'
+      +   'color: #d67c06;'
+      +   'text-decoration: none;'
+      +   'font-weight: 500;'
+      +   'letter-spacing: 0.01em;'
+      +   'transition: color 0.18s ease, text-shadow 0.18s ease;'
+      + '}'
+      + '.pp-legal-inline-powered a:hover {'
+      +   'color: #f0952a;'
+      +   'text-decoration: underline;'
+      +   'text-shadow: 0 0 12px rgba(214,124,6,0.35);'
       + '}';
     var s = document.createElement('style');
     s.id = 'pp-legal-relocate-styles';
@@ -91,6 +110,9 @@
       +   '<a href="/voorwaarden/#av" data-testid="legal-inline-av">Algemene Voorwaarden</a>'
       +   '<span class="pp-legal-inline-sep">·</span>'
       +   '<a href="/voorwaarden/#campagnes" data-testid="legal-inline-campagnes">Campagnevoorwaarden</a>'
+      + '</div>'
+      + '<div class="pp-legal-inline-powered">'
+      +   '<a href="https://www.doubleyoufashion.nl" target="_blank" rel="noopener noreferrer" data-testid="legal-inline-powered">Powered by Doubleyou Tailored for Tall &amp; Plus size 2026</a>'
       + '</div>';
     return wrap;
   }
