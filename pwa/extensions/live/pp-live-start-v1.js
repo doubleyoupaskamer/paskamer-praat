@@ -194,6 +194,14 @@
       try { if (window.DY && DY.toonLoginPrompt) DY.toonLoginPrompt('Log in om live te gaan.'); } catch (_) {}
       return;
     }
+    // Firestore rules eisen echt-ingelogde user (niet anonymous). Guest-auth
+    // maakt een anonymous session aan, die mag WEL lezen/kijken maar niet zelf
+    // een live starten. Beter feedback dan de "Missing or insufficient permissions" error.
+    if (u.isAnonymous) {
+      showError('Je moet ingelogd zijn om zelf live te gaan. Anoniem kijken kan wel.');
+      try { if (window.DY && DY.toonLoginPrompt) DY.toonLoginPrompt('Log in om live te gaan.'); } catch (_) {}
+      return;
+    }
     var titleEl = document.getElementById('pp-live-title-input');
     var title = (titleEl && titleEl.value || '').trim();
     if (!title) {
