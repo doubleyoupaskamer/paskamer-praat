@@ -212,18 +212,16 @@
         var frag = document.createElement('div');
         frag.innerHTML = html;
         var el = frag.firstChild;
-        // Positie: NA campagne-banner indien aanwezig, anders NA "Over het merk", anders vóór filters/grid
+        // Positie: NA filter-bar indien aanwezig, anders NA campagne/over-blok, anders vóór grid
+        var filters = page.querySelector('.pp-bp-filters');
         var camp = page.querySelector('.pp-bp-camp');
         var over = page.querySelector('.pp-bp-over');
-        if (el && camp && camp.parentNode) {
-          camp.parentNode.insertBefore(el, camp.nextSibling);
-        } else if (el && over && over.parentNode) {
-          over.parentNode.insertBefore(el, over.nextSibling);
+        var anchorAfter = filters || camp || over;
+        if (el && anchorAfter && anchorAfter.parentNode) {
+          anchorAfter.parentNode.insertBefore(el, anchorAfter.nextSibling);
         } else {
-          var filters = page.querySelector('.pp-bp-filters');
           var grid = page.querySelector('.bp-prod-grid');
-          var anchor = filters || grid;
-          if (el && anchor && anchor.parentNode) anchor.parentNode.insertBefore(el, anchor);
+          if (el && grid && grid.parentNode) grid.parentNode.insertBefore(el, grid);
         }
       })
       .catch(function (err) { log('collecties load error: ' + (err && err.message)); });
