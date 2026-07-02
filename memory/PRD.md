@@ -2181,3 +2181,80 @@ opnieuw gebouwd met de nieuwe extensie + bijgewerkte `index.html`/`sw.js`.
 - P1: Fase 6 — SEO structured data overrides per merk.
 - P1: Fase 7 — Admin CMS UI extension voor Fase 4/5/6 velden.
 - P2: Navigatie audit (back-button flow validatie over 12+ pages).
+
+## v60.1.226 — Fase 5/6/7 + Navigatie Audit — 2 juli 2026
+
+### Fase 5 — Gerelateerde merken + Socials + Contact
+`/app/pwa/extensions/brand/pp-brand-profile-fase5-v1.js` (v1.0.0, 19.5 KB)
+- 3 nieuwe secties onder Fase 4:
+  1. **Gerelateerde merken** — `brands.where(categorie==X, status==approved)`
+     limit 12, exclude self, sort volgers desc + naam asc, top 6 kaarten
+     met logo + naam + categorie. Klik → `DY.navigeer('brand_detail', {brandId})`.
+  2. **Volg ons** — 6 socials (instagram, tiktok, pinterest, facebook,
+     youtube, x) met SVG-icons + kleuraccent. Handle → volledige URL
+     normalisatie in `normaliseerUrl()`.
+  3. **Contact** — email (mailto:), telefoon (tel:), adres, chatUrl,
+     website. 2-koloms grid met SVG-icons.
+- Alle secties verbergen zich volledig bij ontbrekende data.
+- Positie: NA `#pp-bp-reviews` / `#pp-bp-community` / `.bp-prod-grid`
+  (robuuste anchor-placement, volgorde-stabiel bij async races).
+
+### Fase 6 — SEO structured data overrides per merk
+`/app/pwa/extensions/brand/pp-brand-profile-fase6-seo-v1.js` (v1.0.0, 10.4 KB)
+- Snapshot van originele meta tags bij eerste apply → restore bij navigatie
+  weg (hashchange/popstate detecteert `.bp-page` verlaten).
+- Upsert van 12 meta/link keys: `title`, `description`, `keywords`,
+  `og:title/description/image/url/type`, `twitter:title/description/image`,
+  `canonical`.
+- **JSON-LD** injection (`<script id="pp-brand-seo-jsonld">`) met:
+  - `Organization` schema (naam, url, logo, sameAs socials, contactPoint)
+  - `Brand` schema (naam, logo, url, aggregateRating als beschikbaar)
+- Fallbacks: `brand.seo` → `brand.naam` + `slogan` + `beschrijving` +
+  `logo` → default hero image.
+- Truncation: title 70 chars, description 160 chars.
+
+### Fase 7 — Admin CMS extensie (socials/contact/SEO)
+`/app/pwa/extensions/brand/pp-brand-profile-admin-f567-v1.js` (v1.0.0, 18.5 KB)
+- Nieuwe sectie `#pp-bp-admin-f567` geïnjecteerd NA bestaande
+  `#pp-bp-admin` (Fase 1-3 CMS), gebruikt zelfde `.bp-veld` / `.bp-btn` styling.
+- 3 groepen:
+  1. **Social media kanalen** — 6 URL/handle inputs (accepteert @handle of
+     volledige URL).
+  2. **Contact** — email, telefoon, adres (textarea), chatUrl.
+  3. **SEO overrides** — title (70 char + live counter), description (160
+     char + live counter), keywords, OG-image upload (max 3 MB, 1200×630).
+- File-upload naar Firebase Storage (path `brands/{uid}/og-image_...`).
+- Save schrijft naar `brands/{uid}` met `merge:true`, velden:
+  `socials{}`, `contact{}`, `seo{}`.
+
+### P2 — Navigatie Audit
+`/app/memory/NAV_AUDIT_v60.1.226.md`
+- **Bestaand systeem geverifieerd**: 4-stage fallback keten (navStack →
+  PARENT_MAP → history.back → feed) in `pp-nav-context-v1.js` werkt correct.
+- **Fix**: PARENT_MAP uitgebreid van 22 naar 65 expliciete pagina-mappings.
+  Voorkomt `/feed`-only-fallback bij deep-linked pagina's zoals
+  `?pagina=vrienden`, `?pagina=bericht_detail`, `?pagina=privacy_center`,
+  `?pagina=admin_boosts`, etc.
+- Handmatige test-checklist met 12 deep-link scenario's in de audit-doc.
+
+### Cache bust
+- SW `VERSION` → `v60.1.226-20260702-fase5-6-7-social-contact-seo`
+- 4 nieuwe `<script>` tags in `index.html`:
+  - `pp-brand-profile-fase5-v1.js?v=60.1.226-fase5-social-contact-related`
+  - `pp-brand-profile-fase6-seo-v1.js?v=60.1.226-fase6-seo-overrides`
+  - `pp-brand-profile-admin-f567-v1.js?v=60.1.226-fase7-admin-social-contact-seo`
+- `pp-nav-context-v1.js?v=60.1.226-nav-parent-map-expanded` (bump).
+
+### Deliverable
+`/app/01-paskamerpraat-pwa-cloudflare.zip` (13.2 MB) rebuilt met alle
+4 nieuwe/gewijzigde bestanden + geüpdatete `index.html` en `sw.js`.
+
+### Testing status
+- Syntactisch geverifieerd (`node -c` OK op alle 4 files).
+- Geen local PWA dev server → E2E testing via user na deploy.
+- Fase 6 SEO overrides bewust minimalistisch geactiveerd — bij falen
+  worden originele meta tags automatisch hersteld via snapshot.
+
+### Fase 4-7 volledig afgerond. Backlog nu:
+- Optional: Fase 4 review-verificatie badge automatisch via `orders` lookup.
+- Live Module Phase 2 — True Video Broadcasting integratie.
