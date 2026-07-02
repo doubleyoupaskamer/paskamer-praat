@@ -677,6 +677,22 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // v60.1.216: brand_followers – users can follow/unfollow brands
+    // Read: publiek (voor stats zoals aantal volgers)
+    // Create: alleen ingelogde user, mag alleen zichzelf toevoegen
+    // Update: nooit (delete + create in plaats van update)
+    // Delete: alleen eigen record OR admin
+    match /brand_followers/{followId} {
+      allow read:   if true;
+      allow create: if isIngelogd()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.brandId is string
+                    && request.resource.data.brandId.size() > 0;
+      allow update: if false;
+      allow delete: if (isIngelogd() && resource.data.uid == request.auth.uid)
+                    || isAdmin();
+    }
+
 
     // ══════════════════════════════════════════════════════════════
     // EXTENSIONS v1.0.0 — Admin Settings, Payments, Events
