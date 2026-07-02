@@ -1,0 +1,33 @@
+{
+  "summary": "Re-verification of v60.1.222 DOM-order fix via static trace across all 6 async orderings x 2 campaign scenarios = 12 permutations. Fix at /app/pwa/extensions/brand/pp-brand-profile-v1.js:512 (candidates reordered so '.pp-bp-camp' is first) is CONFIRMED CORRECT. All 12 permutations converge on the desired final DOM: Hero -> CTA -> Stats -> Over -> [Camp] -> Filters -> Collecties -> Grid. The race-condition bug from iteration_17 (Camp landing before Over when Fase 3 wins the race) is resolved.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Fix verified at /app/pwa/extensions/brand/pp-brand-profile-v1.js line 512: candidates = ['.pp-bp-camp', '.pp-bp-filters', '.pp-bp-collecties', '.bp-prod-grid']. Correct: Camp now has highest anchor priority, so Fase 1 always inserts Over BEFORE any pre-placed Camp regardless of async ordering.",
+    "Fase 2 filter-bar anchor logic (fase2 lines 314-324) uses `anchorAfter = camp || over` then falls back to `before = coll || grid`. Correct for all 12 permutations because either (a) camp/over is already placed when Fase 2 runs, or (b) Fase 1 will insert Over BEFORE filters via its updated candidate list.",
+    "Fase 3 camp insertion (fase3 lines 187-194) uses `over.nextSibling` when over exists, else `BEFORE filters||grid`. In races where Fase 3 wins first, camp lands BEFORE filters/grid; Fase 1's updated candidate list then correctly inserts Over BEFORE camp. No regression.",
+    "Fase 3 collecties insertion (fase3 lines 216-225) uses `anchorAfter = filters || camp || over` then `BEFORE grid`. Verified correct for all 12 permutations.",
+    "Note: MutationObserver in each phase can re-trigger enhancement, but each phase guards with a dataset flag (dataset.ppEnhanced / dataset.ppFase2 / dataset.ppFase3), so double-insertion is prevented.",
+    "Minor observation (non-blocking): Fase 3 has TWO independent Firestore promises (campaigns + brands.doc) that can resolve in either order. Both were traced individually; collecties-insertion always respects camp/over/filters anchors, so no additional race exists.",
+    "No hardcoded URLs, no env leaks, no legacy element mutation. Additive-only constraint preserved."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "N/A (backend not requested)",
+    "frontend": "12/12 static permutations produce correct DOM order (6/6 with campaign, 6/6 without campaign)"
+  },
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "STATIC-REVIEW ONLY re-verification of iteration_17 fix. PWA is served from paskamerpraat.nl (Cloudflare Pages), not from preview URL, so no live Playwright testing was possible. Trace was performed manually across all 6 orderings (1->2->3, 1->3->2, 2->1->3, 2->3->1, 3->1->2, 3->2->1) for BOTH scenarios (with and without live campaign). All 12 cases produce the canonical order: Hero -> CTA-bar -> Stats -> Over -> optional Camp -> Filters -> Collecties -> Grid. Fix is minimal (single array-literal reorder) and does not affect the no-campaign path (Camp selector simply doesn't match, list falls through). If user deploys the new build and reports any lingering order issue, next agent should Playwright-test the live URL directly and diff against this trace table.",
+  "rca of the issue": "PREVIOUS BUG (iteration_17): Fase 1 candidate list was ['.pp-bp-filters', '.pp-bp-collecties', '.pp-bp-camp', '.bp-prod-grid']. When Fase 3's campaign fetch resolved before Fase 1's render, .pp-bp-camp was inserted via Fase 3's fallback branch (BEFORE filters/grid). Fase 1 later ran and matched .pp-bp-filters/.pp-bp-collecties first (both null in that race), then fell through to grid — but by then camp was already between Stats and grid, and Over was inserted BEFORE grid but AFTER camp. FIX APPLIED: Moving '.pp-bp-camp' to first position in the candidate list means Fase 1 now always sees camp (when present) before falling to any other anchor, so Over is inserted BEFORE camp. VERIFIED: Traced through all 12 permutations; no permutation places Over after Camp, and no permutation places Camp after Filters/Collecties/Grid. Fix is minimal, correct, and race-safe."
+}

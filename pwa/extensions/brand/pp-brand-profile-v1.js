@@ -505,10 +505,11 @@
       var overFrag = document.createElement('div');
       overFrag.innerHTML = overHtml;
       var overEl = overFrag.firstChild;
-      // Zoek de eerste "post-over" anker: filters > collecties > campagne > grid
-      // (stats blijft VOOR over het merk zoals gewenst)
+      // Zoek de eerste "post-over" anker: campagne > filters > collecties > grid
+      // .pp-bp-camp krijgt HOOGSTE prioriteit zodat Over altijd VOOR campagne komt
+      // ongeacht welk async blok eerst rendert (fix voor race condition)
       var page = document.querySelector('.bp-page');
-      var candidates = ['.pp-bp-filters', '.pp-bp-collecties', '.pp-bp-camp', '.bp-prod-grid'];
+      var candidates = ['.pp-bp-camp', '.pp-bp-filters', '.pp-bp-collecties', '.bp-prod-grid'];
       var anchor = null;
       for (var i = 0; i < candidates.length; i++) {
         anchor = page ? page.querySelector(candidates[i]) : document.querySelector(candidates[i]);
