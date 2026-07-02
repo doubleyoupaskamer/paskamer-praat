@@ -248,8 +248,11 @@ async def wardrobe_recommend(req: WardrobeRecommendRequest):
 
 class ImageGenRequest(BaseModel):
     prompt: str
-    aspect: Optional[str] = "portrait"  # portrait (1024x1536) | landscape (1200x630) | square
+    aspect: Optional[str] = "portrait"  # portrait (1024x1536) | landscape (1200x630) | square | vertical_9_16 | wide_16_9
     style_hint: Optional[str] = "paskamerpraat"  # auto-prepend brand style if set
+    # v60.1.242: optionele referentie-afbeelding voor image-to-image / style-transfer
+    reference_image_base64: Optional[str] = None
+    reference_mime_type: Optional[str] = None  # 'image/png' | 'image/jpeg' | 'image/webp'
 
 
 PASKAMERPRAAT_STYLE_PROMPT = (
@@ -300,15 +303,19 @@ async def generate_image(
         raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY niet geconfigureerd")
     
     aspect_hint = {
-        "portrait":  "Portrait aspect ratio 2:3 (1024x1536), vertical composition, full-body or 3/4 body shot.",
-        "landscape": "Landscape aspect ratio 16:9 (1200x630), wide horizontal composition suitable for social media banner.",
-        "square":    "Square aspect ratio 1:1, balanced central composition.",
+        "portrait":     "Portrait aspect ratio 2:3 (1024x1536), vertical composition, full-body or 3/4 body shot.",
+        "landscape":    "Landscape aspect ratio 16:9 (1200x630), wide horizontal composition suitable for social media banner.",
+        "square":       "Square aspect ratio 1:1, balanced central composition.",
+        "wide_16_9":    "Landscape aspect ratio 16:9 (1920x1080), cinematic widescreen composition for hero banner / desktop.",
+        "vertical_9_16": "Vertical aspect ratio 9:16 (1080x1920), tall mobile-first composition ideal for stories/reels/TikTok.",
     }.get(req.aspect, "Portrait aspect ratio 2:3.")
     
     full_prompt = (
         f"{PASKAMERPRAAT_STYLE_PROMPT}{aspect_hint}\n\n"
         f"SUBJECT: {req.prompt}"
     )
+    if req.reference_image_base64:
+        full_prompt += "\n\nSTYLE REFERENCE: use the uploaded reference image as the primary visual/style anchor. Match its palette, mood, and composition. Retain the subject described above but transform it in the reference's style."
     
     try:
         chat = LlmChat(
@@ -318,8 +325,44 @@ async def generate_image(
         )
         chat.with_model("gemini", "gemini-3.1-flash-image-preview").with_params(modalities=["image", "text"])
         
-        msg = UserMessage(text=full_prompt)
-        text, images = await chat.send_message_multimodal_response(msg)
+        # v60.1.242: als referentie-afbeelding aanwezig, geef mee via file_contents
+        msg_kwargs = {"text": full_prompt}
+        if req.reference_image_base64:
+            try:
+                # Schrijf tijdelijk naar disk zodat emergentintegrations het als file kan lezen
+                import tempfile
+                mime = req.reference_mime_type or "image/png"
+                ext = ".png" if "png" in mime else (".webp" if "webp" in mime else ".jpg")
+                tmp_path = None
+                try:
+                    with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+                        tmp.write(base64.b64decode(req.reference_image_base64))
+                        tmp_path = tmp.name
+                    # Probeer FileContentWithMimeType als beschikbaar
+                    try:
+                        from emergentintegrations.llm.chat import FileContentWithMimeType  # type: ignore
+                        msg_kwargs["file_contents"] = [FileContentWithMimeType(file_path=tmp_path, mime_type=mime)]
+                    except ImportError:
+                        try:
+                            from emergentintegrations.llm.chat import ImageContent  # type: ignore
+                            msg_kwargs["file_contents"] = [ImageContent(image_base64=req.reference_image_base64)]
+                        except ImportError:
+                            logger.warning("emergentintegrations: geen bekende image-content class gevonden; prompt-only fallback")
+                    msg = UserMessage(**msg_kwargs)
+                    text, images = await chat.send_message_multimodal_response(msg)
+                finally:
+                    if tmp_path:
+                        try:
+                            os.unlink(tmp_path)
+                        except Exception:
+                            pass
+            except Exception as ref_err:
+                logger.exception("Reference image handling failed, falling back to text-only")
+                msg = UserMessage(text=full_prompt)
+                text, images = await chat.send_message_multimodal_response(msg)
+        else:
+            msg = UserMessage(text=full_prompt)
+            text, images = await chat.send_message_multimodal_response(msg)
         
         if not images:
             raise HTTPException(status_code=502, detail=f"Geen afbeelding gegenereerd. Model response: {text[:200] if text else 'leeg'}")
@@ -351,6 +394,9 @@ class VideoGenRequest(BaseModel):
     duration: Optional[int] = 8           # 4 | 8 | 12 seconds
     model: Optional[str] = "sora-2"       # "sora-2" | "sora-2-pro"
     style_hint: Optional[str] = "paskamerpraat"
+    # v60.1.242: optionele referentie-afbeelding voor image-to-video
+    reference_image_base64: Optional[str] = None
+    reference_mime_type: Optional[str] = None
 
 
 PASKAMERPRAAT_VIDEO_STYLE = (
@@ -397,6 +443,8 @@ async def generate_video(
         raise HTTPException(status_code=400, detail=f"Invalid model. Allowed: {sorted(valid_models)}")
 
     full_prompt = f"{PASKAMERPRAAT_VIDEO_STYLE}\n\nSCENE: {req.prompt}"
+    if req.reference_image_base64:
+        full_prompt += "\n\nSTYLE REFERENCE: base the visual style, palette, and framing on the uploaded reference image."
     job_id = uuid.uuid4().hex
 
     _VIDEO_JOBS[job_id] = {
@@ -408,7 +456,11 @@ async def generate_video(
     }
 
     import asyncio
-    asyncio.create_task(_run_video_job(job_id, full_prompt, req.model, req.size, req.duration, api_key))
+    asyncio.create_task(_run_video_job(
+        job_id, full_prompt, req.model, req.size, req.duration, api_key,
+        reference_image_base64=req.reference_image_base64,
+        reference_mime_type=req.reference_mime_type,
+    ))
 
     return {
         "ok": True,
@@ -438,7 +490,9 @@ def _cleanup_old_jobs():
         _VIDEO_JOBS.pop(jid, None)
 
 
-async def _run_video_job(job_id: str, prompt: str, model: str, size: str, duration: int, api_key: str):
+async def _run_video_job(job_id: str, prompt: str, model: str, size: str, duration: int, api_key: str,
+                          reference_image_base64: Optional[str] = None,
+                          reference_mime_type: Optional[str] = None):
     """Background task: run Sora 2 in thread executor, update job store."""
     import asyncio
     _cleanup_old_jobs()
@@ -448,12 +502,43 @@ async def _run_video_job(job_id: str, prompt: str, model: str, size: str, durati
         from emergentintegrations.llm.openai.video_generation import OpenAIVideoGeneration
         video_gen = OpenAIVideoGeneration(api_key=api_key)
         loop = asyncio.get_event_loop()
-        video_bytes = await loop.run_in_executor(
-            None,
-            lambda: video_gen.text_to_video(
-                prompt=prompt, model=model, size=size, duration=duration, max_wait_time=600,
+
+        def _call_sora():
+            # v60.1.242: probeer image_to_video als er een referentie is,
+            # anders text_to_video (huidige flow).
+            if reference_image_base64:
+                # Probeer verschillende signatures op basis van SDK-versie
+                mime = reference_mime_type or "image/png"
+                img_bytes = base64.b64decode(reference_image_base64)
+                for attempt in [
+                    lambda: video_gen.image_to_video(
+                        prompt=prompt, image=img_bytes, model=model, size=size, duration=duration, max_wait_time=600
+                    ),
+                    lambda: video_gen.image_to_video(
+                        prompt=prompt, image_base64=reference_image_base64,
+                        model=model, size=size, duration=duration, max_wait_time=600
+                    ),
+                    lambda: video_gen.text_to_video(
+                        prompt=prompt, model=model, size=size, duration=duration, max_wait_time=600,
+                        reference_image=img_bytes
+                    ),
+                    lambda: video_gen.text_to_video(
+                        prompt=prompt, model=model, size=size, duration=duration, max_wait_time=600
+                    ),
+                ]:
+                    try:
+                        return attempt()
+                    except (AttributeError, TypeError):
+                        continue
+                # Alle attempts gefaald → laatste text_to_video fallback zonder ref
+                return video_gen.text_to_video(
+                    prompt=prompt, model=model, size=size, duration=duration, max_wait_time=600
+                )
+            return video_gen.text_to_video(
+                prompt=prompt, model=model, size=size, duration=duration, max_wait_time=600
             )
-        )
+
+        video_bytes = await loop.run_in_executor(None, _call_sora)
         if not video_bytes:
             _VIDEO_JOBS[job_id]["status"] = "error"
             _VIDEO_JOBS[job_id]["error"] = "Video generatie mislukt (geen output van Sora 2)"

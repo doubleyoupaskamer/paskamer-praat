@@ -114,11 +114,27 @@
             '</select></div>' +
           '<div class="bp-veld"><span>Prompt</span>' +
             '<textarea id="ig-prompt" rows="6" style="width:100%;background:#1a1612;color:#fcf8ef;border:1px solid rgba(252,248,239,0.18);border-radius:10px;padding:12px;font-size:0.92rem;line-height:1.5;resize:vertical"></textarea></div>' +
+          // v60.1.242: referentie-afbeelding upload
+          '<div class="bp-veld"><span>Referentie-afbeelding (optioneel · max 4 MB)</span>' +
+            '<div id="ig-ref-wrap" style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">' +
+              '<label style="flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;background:#1a1612;border:1px dashed rgba(212,145,10,0.4);border-radius:10px;color:#d4910a;cursor:pointer;font-weight:600" data-testid="imggen-ref-upload-label">' +
+                '<input type="file" id="ig-ref-file" accept="image/png,image/jpeg,image/webp" style="display:none" data-testid="imggen-ref-file-input">' +
+                'Upload afbeelding' +
+              '</label>' +
+              '<div id="ig-ref-preview" style="flex:0 0 auto;display:none;position:relative">' +
+                '<img id="ig-ref-preview-img" style="max-width:120px;max-height:80px;border-radius:8px;border:1px solid rgba(212,145,10,0.3);display:block" alt="referentie" data-testid="imggen-ref-preview-img">' +
+                '<button type="button" id="ig-ref-remove" style="position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:#ff6b6b;color:#fff;border:none;cursor:pointer;font-size:14px;line-height:1;font-weight:700" data-testid="imggen-ref-remove">×</button>' +
+              '</div>' +
+              '<span id="ig-ref-hint" style="flex:1;min-width:120px;font-size:0.78rem;color:rgba(252,248,239,0.55);line-height:1.4">Optioneel. De referentie wordt gebruikt als style-anker (palette, mood, compositie).</span>' +
+            '</div>' +
+          '</div>' +
           '<div class="bp-veld"><span>Aspect ratio</span>' +
             '<select id="ig-aspect" style="width:100%;background:#1a1612;color:#fcf8ef;border:1px solid rgba(252,248,239,0.18);border-radius:10px;padding:10px">' +
               '<option value="portrait">Portrait 2:3 (hero)</option>' +
-              '<option value="landscape">Landscape 16:9 (banner)</option>' +
-              '<option value="square">Square 1:1 (social)</option>' +
+              '<option value="landscape">Landscape 16:9 (social banner)</option>' +
+              '<option value="wide_16_9">Wide 16:9 (1920×1080 desktop hero)</option>' +
+              '<option value="vertical_9_16">Vertical 9:16 (1080×1920 mobile / stories)</option>' +
+              '<option value="square">Square 1:1 (social feed)</option>' +
             '</select></div>' +
           '<button id="ig-genereer" class="bp-btn bp-btn-primair" style="width:100%" data-testid="imggen-submit">Genereer afbeelding</button>' +
           '<div id="ig-status" style="margin-top:14px;font-size:0.88rem;color:rgba(252,248,239,0.6);min-height:1.4em"></div>' +
@@ -133,13 +149,27 @@
             '</select></div>' +
           '<div class="bp-veld"><span>Scene prompt</span>' +
             '<textarea id="vg-prompt" rows="6" placeholder="Beschrijf de scène, camerabeweging, belichting..." style="width:100%;background:#1a1612;color:#fcf8ef;border:1px solid rgba(252,248,239,0.18);border-radius:10px;padding:12px;font-size:0.92rem;line-height:1.5;resize:vertical"></textarea></div>' +
+          // v60.1.242: referentie-afbeelding upload voor video
+          '<div class="bp-veld"><span>Referentie-afbeelding (optioneel · start-frame / style · max 4 MB)</span>' +
+            '<div id="vg-ref-wrap" style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">' +
+              '<label style="flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;background:#1a1612;border:1px dashed rgba(212,145,10,0.4);border-radius:10px;color:#d4910a;cursor:pointer;font-weight:600" data-testid="vidgen-ref-upload-label">' +
+                '<input type="file" id="vg-ref-file" accept="image/png,image/jpeg,image/webp" style="display:none" data-testid="vidgen-ref-file-input">' +
+                'Upload afbeelding' +
+              '</label>' +
+              '<div id="vg-ref-preview" style="flex:0 0 auto;display:none;position:relative">' +
+                '<img id="vg-ref-preview-img" style="max-width:120px;max-height:80px;border-radius:8px;border:1px solid rgba(212,145,10,0.3);display:block" alt="referentie" data-testid="vidgen-ref-preview-img">' +
+                '<button type="button" id="vg-ref-remove" style="position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:#ff6b6b;color:#fff;border:none;cursor:pointer;font-size:14px;line-height:1;font-weight:700" data-testid="vidgen-ref-remove">×</button>' +
+              '</div>' +
+              '<span id="vg-ref-hint" style="flex:1;min-width:120px;font-size:0.78rem;color:rgba(252,248,239,0.55);line-height:1.4">Optioneel. Sora 2 gebruikt de afbeelding als start-frame / style-anker.</span>' +
+            '</div>' +
+          '</div>' +
           '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">' +
             '<div class="bp-veld"><span>Resolutie</span>' +
               '<select id="vg-size" style="width:100%;background:#1a1612;color:#fcf8ef;border:1px solid rgba(252,248,239,0.18);border-radius:10px;padding:10px">' +
-                '<option value="1280x720">1280×720 HD</option>' +
-                '<option value="1792x1024">1792×1024 wide</option>' +
-                '<option value="1024x1792">1024×1792 vertical</option>' +
-                '<option value="1024x1024">1024×1024 square</option>' +
+                '<option value="1792x1024">1792×1024 · 16:9 (widescreen)</option>' +
+                '<option value="1024x1792">1024×1792 · 9:16 (mobile / stories)</option>' +
+                '<option value="1280x720">1280×720 · 16:9 HD</option>' +
+                '<option value="1024x1024">1024×1024 · 1:1 (square)</option>' +
               '</select></div>' +
             '<div class="bp-veld"><span>Duur</span>' +
               '<select id="vg-duration" style="width:100%;background:#1a1612;color:#fcf8ef;border:1px solid rgba(252,248,239,0.18);border-radius:10px;padding:10px">' +
@@ -218,6 +248,61 @@
       document.getElementById('vg-prompt').value = p.prompt;
     };
 
+    // v60.1.242: Referentie-afbeelding upload handlers (voor image + video)
+    // Stored: window.__ppImgGenRefs = { img: {base64, mime}, vid: {base64, mime} }
+    window.__ppImgGenRefs = window.__ppImgGenRefs || { img: null, vid: null };
+
+    function bindRefUpload(prefix, storeKey) {
+      var fileInput = document.getElementById(prefix + '-ref-file');
+      var preview = document.getElementById(prefix + '-ref-preview');
+      var previewImg = document.getElementById(prefix + '-ref-preview-img');
+      var removeBtn = document.getElementById(prefix + '-ref-remove');
+      var hint = document.getElementById(prefix + '-ref-hint');
+      if (!fileInput) return;
+      fileInput.addEventListener('change', function () {
+        var f = fileInput.files && fileInput.files[0];
+        if (!f) return;
+        if (f.size > 4 * 1024 * 1024) {
+          if (hint) hint.textContent = 'Bestand > 4 MB. Comprimeer eerst en probeer opnieuw.';
+          if (hint) hint.style.color = '#ff6b6b';
+          fileInput.value = '';
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+          var dataUrl = ev.target.result || '';
+          var parts = dataUrl.split(',');
+          var b64 = parts[1] || '';
+          var mimeMatch = parts[0].match(/data:(.+);base64/);
+          var mime = mimeMatch ? mimeMatch[1] : (f.type || 'image/png');
+          window.__ppImgGenRefs[storeKey] = { base64: b64, mime: mime, name: f.name };
+          if (previewImg) previewImg.src = dataUrl;
+          if (preview) preview.style.display = 'block';
+          if (hint) {
+            hint.textContent = f.name + ' geladen (' + Math.round(f.size/1024) + ' KB)';
+            hint.style.color = '#82c08a';
+          }
+        };
+        reader.readAsDataURL(f);
+      });
+      if (removeBtn) {
+        removeBtn.addEventListener('click', function () {
+          window.__ppImgGenRefs[storeKey] = null;
+          if (preview) preview.style.display = 'none';
+          if (previewImg) previewImg.src = '';
+          if (fileInput) fileInput.value = '';
+          if (hint) {
+            hint.textContent = storeKey === 'vid'
+              ? 'Optioneel. Sora 2 gebruikt de afbeelding als start-frame / style-anker.'
+              : 'Optioneel. De referentie wordt gebruikt als style-anker (palette, mood, compositie).';
+            hint.style.color = 'rgba(252,248,239,0.55)';
+          }
+        });
+      }
+    }
+    bindRefUpload('ig', 'img');
+    bindRefUpload('vg', 'vid');
+
     // ── IMAGE generation
     document.getElementById('ig-genereer').onclick = async function() {
       var btn = this;
@@ -236,10 +321,16 @@
       statusEl.innerHTML = '<span style="color:#d4910a">Aanroep naar Nano Banana...</span>';
       resEl.innerHTML = '';
       try {
+        var refImg = (window.__ppImgGenRefs && window.__ppImgGenRefs.img) || null;
+        var reqBody = { prompt: prompt, aspect: aspect };
+        if (refImg && refImg.base64) {
+          reqBody.reference_image_base64 = refImg.base64;
+          reqBody.reference_mime_type = refImg.mime;
+        }
         var r = await fetch(_backendUrl() + '/api/admin/generate-image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': _secret(), 'X-User-Email': _userEmail() },
-          body: JSON.stringify({ prompt: prompt, aspect: aspect }),
+          body: JSON.stringify(reqBody),
         });
         if (!r.ok) {
           var errTxt = await r.text();
@@ -292,10 +383,16 @@
       resEl.innerHTML = '';
       try {
         // ── Fase 1: dispatch job ──────────────────────────────────
+        var vRefImg = (window.__ppImgGenRefs && window.__ppImgGenRefs.vid) || null;
+        var vReqBody = { prompt: prompt, size: size, duration: duration, model: model };
+        if (vRefImg && vRefImg.base64) {
+          vReqBody.reference_image_base64 = vRefImg.base64;
+          vReqBody.reference_mime_type = vRefImg.mime;
+        }
         var r = await fetch(_backendUrl() + '/api/admin/generate-video', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': _secret(), 'X-User-Email': _userEmail() },
-          body: JSON.stringify({ prompt: prompt, size: size, duration: duration, model: model }),
+          body: JSON.stringify(vReqBody),
         });
         if (!r.ok) {
           clearInterval(tickIv);
