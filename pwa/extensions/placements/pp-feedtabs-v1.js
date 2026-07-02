@@ -146,7 +146,7 @@
       btn.className = 'dy-filter';
       btn.setAttribute('data-filter', 'uitgelicht');
       btn.setAttribute('data-testid', 'feed-tab-uitgelicht');
-      btn.textContent = 'Uitgelicht 📣';
+      btn.textContent = 'Onze merkpartners 📣';
       btn.addEventListener('click', function(e) {
         e.preventDefault();
         handleUitgelichtClick(btn);
