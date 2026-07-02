@@ -276,7 +276,9 @@
   }
 
   // ─── Injectie: NA #pp-bp-admin (bestaande CMS sectie) ───────────────
+  var __injecting = false;
   function injectSection() {
+    if (__injecting) return false;
     if (document.getElementById('pp-bp-admin-f567')) return true;
     var anchor = document.getElementById('pp-bp-admin');
     // Wacht tot de bestaande CMS sectie is geïnjecteerd
@@ -290,7 +292,10 @@
     var d = db();
     if (!uid || !d) return false;
     injectCss();
+    __injecting = true;
     d.collection('brands').doc(uid).get().then(function (snap) {
+      // Double-check: mogelijk is een ander injectie-pad ondertussen klaar
+      if (document.getElementById('pp-bp-admin-f567')) return;
       var brand = (snap && snap.exists) ? (snap.data() || {}) : {};
       var wrap = document.createElement('div');
       wrap.innerHTML = buildSection(brand);
@@ -300,7 +305,8 @@
       attachOgHandlers(section);
       attachCounters(section);
       attachSave(section);
-    }).catch(function (err) { log('load err: ' + (err && err.message)); });
+    }).catch(function (err) { log('load err: ' + (err && err.message)); })
+      .finally(function () { __injecting = false; });
     return true;
   }
 
