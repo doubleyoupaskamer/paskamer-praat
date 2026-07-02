@@ -185,13 +185,13 @@
 
   // ─── Render: CTA bar ──────────────────────────────────────────────────
   function buildCtas(b, brandId) {
-    var uid = currentUid();
-    var isFollowing = false; // wordt async gecontroleerd
     var out = '<div class="pp-bp-cta-bar" data-testid="pp-bp-cta-bar">';
-    // Volgen
-    out += '<button class="pp-bp-cta pp-bp-cta-primary" type="button" data-action="follow" data-brand-id="' + esc(brandId) + '" data-testid="pp-bp-cta-follow">' +
-      ICONS.heart + ' <span data-role="label">Volgen</span>' +
-    '</button>';
+    // Volgen — alleen als brandId bekend (anders sla over)
+    if (brandId) {
+      out += '<button class="pp-bp-cta pp-bp-cta-primary" type="button" data-action="follow" data-brand-id="' + esc(brandId) + '" data-testid="pp-bp-cta-follow">' +
+        ICONS.heart + ' <span data-role="label">Volgen</span>' +
+      '</button>';
+    }
     // Ontdek collectie (scroll to product grid)
     out += '<button class="pp-bp-cta pp-bp-cta-ghost" type="button" data-action="scroll-products" data-testid="pp-bp-cta-collectie">' +
       ICONS.grid + ' Ontdek collectie' +
@@ -207,8 +207,9 @@
       ICONS.share + ' Delen' +
     '</button>';
     // Contact (mailto:) - alleen als e-mail bekend
-    if (b.email && String(b.email).trim()) {
-      out += '<a class="pp-bp-cta pp-bp-cta-ghost" href="mailto:' + esc(b.email) + '" data-testid="pp-bp-cta-contact">' +
+    var contactEmail = b.contactEmail || b.email;
+    if (contactEmail && String(contactEmail).trim()) {
+      out += '<a class="pp-bp-cta pp-bp-cta-ghost" href="mailto:' + esc(contactEmail) + '" data-testid="pp-bp-cta-contact">' +
         ICONS.mail + ' Contact' +
       '</a>';
     }
@@ -407,33 +408,41 @@
     }
   }
 
+  // ─── Wrap BP.toonMerkDetail om brandId te capturen ─────────────────────
+  function wrapToonMerkDetail() {
+    try {
+      if (!window.DY || !DY.brandPortal || typeof DY.brandPortal.toonMerkDetail !== 'function') return false;
+      if (DY.brandPortal.__ppWrapped) return true;
+      var orig = DY.brandPortal.toonMerkDetail;
+      DY.brandPortal.__ppWrapped = true;
+      DY.brandPortal.toonMerkDetail = function (brandId) {
+        try { window.__ppCurrentBrandId = brandId; } catch (_) {}
+        return orig.apply(this, arguments);
+      };
+      return true;
+    } catch (_) { return false; }
+  }
+
   // ─── Injectie: vind .bp-merk-hero en enhance omheen ───────────────────
   function enhanceMerkDetail() {
     var hero = document.querySelector('.bp-page .bp-merk-hero');
     if (!hero || hero.dataset.ppEnhanced === '1') return;
     hero.dataset.ppEnhanced = '1';
 
-    // Zoek brandId uit context
-    // Kans 1: URL query
+    // Zoek brandId uit context (meerdere strategieën)
     var brandId = '';
-    try {
-      var u = new URL(window.location.href);
-      brandId = u.searchParams.get('merkId') || u.searchParams.get('brandId') || '';
-    } catch (_) {}
-    // Kans 2: uit DY.currentBrandId of DY.pageParams
+    try { brandId = window.__ppCurrentBrandId || ''; } catch (_) {}
+    if (!brandId) {
+      try {
+        var u = new URL(window.location.href);
+        brandId = u.searchParams.get('merkId') || u.searchParams.get('brandId') || '';
+      } catch (_) {}
+    }
     try {
       if (!brandId && window.DY) {
         brandId = DY.currentBrandId || (DY.pageParams && DY.pageParams.merkId) || '';
       }
     } catch (_) {}
-    if (!brandId) {
-      // Fallback: extract uit een van de product-cards data-testid
-      var prodEl = document.querySelector('[data-testid^="brand-product-"]');
-      if (prodEl) {
-        // niet ideaal maar sla stap over
-      }
-    }
-    // Als geen brandId → alleen visueel enhancen zonder follow-actie
     injectCss();
 
     // Fetch brand doc voor extra velden (async, wachten op resultaat vóór injecteren)
@@ -481,9 +490,9 @@
       }
     }
 
-    // 3. CTA bar NA de hero
-    if (brandId) {
-      var ctaHtml = buildCtas(b, brandId);
+    // 3. CTA bar NA de hero (rendert altijd, follow-button alleen als brandId bekend)
+    var ctaHtml = buildCtas(b, brandId);
+    if (ctaHtml) {
       var ctaFrag = document.createElement('div');
       ctaFrag.innerHTML = ctaHtml;
       var ctaEl = ctaFrag.firstChild;
@@ -580,6 +589,11 @@
   // ─── Init: MutationObserver op body ───────────────────────────────────
   function init() {
     injectCss();
+    // Probeer BP.toonMerkDetail te wrappen (herhaal tot BP klaar is)
+    var wrapAttempts = 0;
+    var wrapInterval = setInterval(function () {
+      if (wrapToonMerkDetail() || wrapAttempts++ > 40) clearInterval(wrapInterval);
+    }, 250);
     var obs = new MutationObserver(function () {
       try { enhanceMerkDetail(); } catch (e) { log('enhance error: ' + (e && e.message)); }
     });
