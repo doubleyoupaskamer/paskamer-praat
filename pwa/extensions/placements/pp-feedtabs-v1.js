@@ -88,6 +88,15 @@
         'text-transform:uppercase;color:rgba(212,145,10,.95);background:rgba(212,145,10,.12);' +
         'padding:5px 9px;border-radius:100px;white-space:nowrap}' +
       '.pp-uitg-cta{display:inline-block;margin-top:8px;font:600 .78rem/1 "DM Sans",sans-serif;color:#d4910a;letter-spacing:.02em}' +
+      // v60.1.214: uitgebreide partnerkaart-velden + intro-sectie
+      '.pp-uitg-intro{margin:0 0 22px;padding:16px 18px;background:linear-gradient(155deg,rgba(212,145,10,0.10),rgba(20,16,12,0.4));border:1px solid rgba(212,145,10,0.22);border-radius:14px}' +
+      '.pp-uitg-intro-titel{font:400 clamp(1.05rem,2.6vw,1.35rem)/1.25 "DM Serif Display","Cormorant Garamond",Georgia,serif;color:#fcf8ef;margin:0 0 6px;letter-spacing:-.01em}' +
+      '.pp-uitg-intro-tekst{font:400 .85rem/1.5 "DM Sans",sans-serif;color:rgba(252,248,239,.72);margin:0}' +
+      '.pp-uitg-kaart-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:6px;font:500 .72rem/1.2 "DM Sans",sans-serif}' +
+      '.pp-uitg-kaart-categorie{color:#d4910a;letter-spacing:.04em;text-transform:uppercase;font-size:.66rem;font-weight:700}' +
+      '.pp-uitg-kaart-productcount{color:rgba(252,248,239,.55)}' +
+      '.pp-uitg-kaart-desc{font:400 .78rem/1.4 "DM Sans",sans-serif;color:rgba(252,248,239,.72);margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}' +
+      '.pp-uitg-badge-populair{position:absolute;bottom:12px;right:14px;font:700 9px/1 "DM Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#0f0c08;background:linear-gradient(135deg,#f0b340,#d4910a);padding:5px 9px;border-radius:100px;white-space:nowrap;box-shadow:0 2px 8px rgba(212,145,10,0.35)}' +
       '.pp-uitg-leeg{text-align:center;padding:60px 20px;color:rgba(252,248,239,.65)}' +
       '.pp-uitg-leeg h3{font:400 1.3rem/1.2 "DM Serif Display","Cormorant Garamond",serif;color:#fcf8ef;margin:0 0 8px}' +
       '.pp-uitg-leeg p{font:400 14px/1.5 "DM Sans",sans-serif;margin:0 auto;max-width:340px;color:rgba(252,248,239,.6)}' +
@@ -305,6 +314,19 @@
         '<h2 class="pp-uitg-titel">Gesponsord door onze partners</h2>' +
       '</div>';
 
+    // v60.1.214: introductiesectie (CMS-beheerbaar via window.PP_UITG_INTRO)
+    var introCfg = (window.PP_UITG_INTRO && typeof window.PP_UITG_INTRO === 'object') ? window.PP_UITG_INTRO : {};
+    var introEnabled = introCfg.enabled !== false; // default aan
+    var introTitel = introCfg.titel || 'Ontdek exclusieve merken, collecties en aanbiedingen';
+    var introTekst = introCfg.tekst || 'Ontdek exclusieve merken, collecties en aanbiedingen speciaal geselecteerd voor de Tall & Plus Size Community.';
+    if (introEnabled && (introTitel || introTekst)) {
+      html +=
+        '<div class="pp-uitg-intro" data-testid="pp-uitg-intro">' +
+          (introTitel ? '<h3 class="pp-uitg-intro-titel">' + esc(introTitel) + '</h3>' : '') +
+          (introTekst ? '<p class="pp-uitg-intro-tekst">' + esc(introTekst) + '</p>' : '') +
+        '</div>';
+    }
+
     if (actief.length) {
       html += '<div class="pp-uitg-list">';
       actief.forEach(function(c) {
@@ -312,6 +334,20 @@
         var msg = esc(c.boodschap || c.naam || '');
         var cid = esc(c._id || '');
         var bid = esc(c.brandId || '');
+        // v60.1.214: optionele extra velden — automatisch verborgen indien leeg
+        var beschrijving = (typeof c.beschrijving === 'string' && c.beschrijving.trim()) ? c.beschrijving.trim() : '';
+        var categorie = (typeof c.categorie === 'string' && c.categorie.trim()) ? c.categorie.trim() : '';
+        var productAantal = (typeof c.productAantal === 'number' && c.productAantal > 0) ? c.productAantal : null;
+        var populair = c.populair === true;
+        var metaHtml = '';
+        if (categorie || productAantal != null) {
+          metaHtml = '<div class="pp-uitg-kaart-meta">';
+          if (categorie) metaHtml += '<span class="pp-uitg-kaart-categorie">' + esc(categorie) + '</span>';
+          if (productAantal != null) metaHtml += '<span class="pp-uitg-kaart-productcount">' + productAantal + ' producten</span>';
+          metaHtml += '</div>';
+        }
+        var descHtml = beschrijving ? '<div class="pp-uitg-kaart-desc">' + esc(beschrijving) + '</div>' : '';
+        var popHtml = populair ? '<span class="pp-uitg-badge-populair" data-testid="pp-uitg-badge-populair">Populair</span>' : '';
         html +=
           '<a class="pp-uitg-kaart" href="javascript:void(0)" ' +
             'data-testid="pp-uitg-' + cid + '" ' +
@@ -320,9 +356,12 @@
             '<div class="pp-uitg-info">' +
               '<div class="pp-uitg-merk">' + esc(c.brandNaam || 'Merk') + '</div>' +
               '<div class="pp-uitg-msg">' + msg + '</div>' +
-              '<span class="pp-uitg-cta">Bekijk merk →</span>' +
+              descHtml +
+              metaHtml +
+              '<span class="pp-uitg-cta">Ontdek merk →</span>' +
             '</div>' +
             '<span class="pp-uitg-tag">Gesponsord</span>' +
+            popHtml +
           '</a>';
       });
       html += '</div>';
