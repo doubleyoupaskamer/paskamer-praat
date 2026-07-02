@@ -1,0 +1,244 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * PASKAMER PRAAT — Mobile polish + Uitgelicht intro-text remover (v1.0.0)
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * CSS-only additive override. Raakt géén JS/logica aan.
+ *
+ * 1) Verwijdert de intro-tekstline "Ontdek exclusieve merken, collecties
+ *    en aanbiedingen" + subtitel uit de merkpartners-teaser (alle devices).
+ *    Behoudt de A-Z filter toggle en de collapsible alfabet-navigatie.
+ *
+ * 2) Compacteert het teaser-blok tot een "Filter A-Z"-chip zodat gebruikers
+ *    de filter nog steeds kunnen bereiken (zonder de storende lege ruimte).
+ *
+ * 3) Mobile-first optimalisaties voor merkpartners feed:
+ *    - Kleinere logo's (44 → 52 px) op mobile
+ *    - Compactere padding op sponsored kaarten
+ *    - Header-titel iets kleiner
+ *    - Voorkomt text overflow op lange merknamen
+ *    - Kaart-hoogte 96 → 88 min-height op smalle schermen
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── 1 + 2: Teaser intro-text verbergen + compacte chip ─────────────── */
+#pp-uitg-teaser .pp-merken-teaser-titel,
+#pp-uitg-teaser .pp-merken-teaser-text {
+  display: none !important;
+}
+
+#pp-uitg-teaser {
+  padding: 8px 12px !important;
+  margin: 8px 0 12px !important;
+  min-height: 0 !important;
+  background: rgba(212, 145, 10, 0.06) !important;
+  border: 1px solid rgba(212, 145, 10, 0.22) !important;
+  border-radius: 999px !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+}
+
+#pp-uitg-teaser .pp-merken-teaser-head {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+}
+
+#pp-uitg-teaser .pp-merken-teaser-body {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 !important;
+}
+
+/* Pseudo-label naast de chevron */
+#pp-uitg-teaser .pp-merken-teaser-body::before {
+  content: 'Filter A–Z';
+  font: 600 12px/1 'DM Sans', system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d4910a;
+}
+
+#pp-uitg-teaser .pp-merken-teaser-toggle {
+  width: 26px !important;
+  height: 26px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: none !important;
+  color: #d4910a !important;
+  cursor: pointer !important;
+  transition: transform 0.2s ease !important;
+}
+
+#pp-uitg-teaser[data-open="true"] .pp-merken-teaser-toggle {
+  transform: rotate(180deg);
+}
+
+#pp-uitg-teaser .pp-merken-teaser-toggle svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Alfabet-strip: alleen tonen als open */
+#pp-uitg-teaser .pp-merken-teaser-az {
+  display: none !important;
+  gap: 4px !important;
+  flex-wrap: wrap !important;
+  width: 100% !important;
+  padding-top: 6px !important;
+  border-top: 1px solid rgba(212, 145, 10, 0.15) !important;
+  margin-top: 4px !important;
+}
+#pp-uitg-teaser[data-open="true"] .pp-merken-teaser-az {
+  display: flex !important;
+}
+#pp-uitg-teaser .pp-merken-teaser-az button {
+  min-width: 26px !important;
+  height: 26px !important;
+  padding: 0 6px !important;
+  font: 700 11px/1 'DM Sans', sans-serif !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(212, 145, 10, 0.24) !important;
+  border-radius: 6px !important;
+  color: #d4910a !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+#pp-uitg-teaser .pp-merken-teaser-az button:hover,
+#pp-uitg-teaser .pp-merken-teaser-az button:focus-visible {
+  background: rgba(212, 145, 10, 0.16) !important;
+  outline: none !important;
+}
+
+/* ─── 3: Mobile-first proportions voor merkpartners feed ─────────────── */
+@media (max-width: 640px) {
+  /* Sectie header (Uitgelicht / Gesponsord door onze partners) */
+  .pp-uitg-header {
+    padding: 6px 2px 12px !important;
+    margin-bottom: 12px !important;
+  }
+  .pp-uitg-eyebrow {
+    font-size: 10px !important;
+    letter-spacing: 0.12em !important;
+    margin-bottom: 4px !important;
+  }
+  .pp-uitg-titel {
+    font-size: 1.25rem !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Sponsored partnerkaart: compacter, betere logo-verhouding */
+  .pp-uitg-kaart {
+    padding: 12px 14px !important;
+    gap: 10px !important;
+    min-height: 84px !important;
+    border-radius: 12px !important;
+  }
+  .pp-uitg-logo {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+  }
+  .pp-uitg-info {
+    padding-right: 68px !important;
+  }
+  .pp-uitg-merk {
+    font-size: 0.95rem !important;
+    line-height: 1.2 !important;
+    white-space: normal !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    word-break: break-word !important;
+  }
+  .pp-uitg-msg,
+  .pp-uitg-kaart-desc {
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
+    -webkit-line-clamp: 2 !important;
+  }
+  .pp-uitg-tag {
+    top: 10px !important;
+    right: 10px !important;
+    font-size: 8.5px !important;
+    padding: 4px 7px !important;
+  }
+  .pp-uitg-cta {
+    font-size: 0.75rem !important;
+    margin-top: 6px !important;
+  }
+  .pp-uitg-kaart-meta {
+    gap: 4px 8px !important;
+    margin-top: 4px !important;
+  }
+  .pp-uitg-kaart-categorie {
+    font-size: 9px !important;
+  }
+  .pp-uitg-kaart-productcount {
+    font-size: 10.5px !important;
+  }
+  .pp-uitg-badge-populair {
+    font-size: 8.5px !important;
+    padding: 4px 7px !important;
+    bottom: 10px !important;
+    right: 10px !important;
+  }
+
+  /* Product-overview grid onder de merkkaarten */
+  .pp-uitg-feed-grid {
+    gap: 8px !important;
+  }
+  .pp-uitg-feed-header {
+    padding: 20px 2px 10px !important;
+    margin-top: 16px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* Intro-blok (fallback als sommige merken hem toch tonen) */
+  .pp-uitg-intro {
+    padding: 12px 14px !important;
+    margin-bottom: 16px !important;
+  }
+  .pp-uitg-intro-titel {
+    font-size: 1.02rem !important;
+  }
+  .pp-uitg-intro-tekst {
+    font-size: 0.8rem !important;
+  }
+
+  /* Feed tabs balk: iets kleiner op mobile zodat "Onze merkpartners" past */
+  #dy-filterbar .dy-filter,
+  .dy-filterbar .dy-filter {
+    font-size: 12.5px !important;
+    padding: 7px 12px !important;
+  }
+}
+
+/* Extra small screens (≤ 380 px) */
+@media (max-width: 380px) {
+  .pp-uitg-kaart {
+    padding: 10px 12px !important;
+    gap: 9px !important;
+  }
+  .pp-uitg-logo {
+    width: 48px !important;
+    height: 48px !important;
+  }
+  .pp-uitg-info {
+    padding-right: 60px !important;
+  }
+  .pp-uitg-merk {
+    font-size: 0.88rem !important;
+  }
+  .pp-uitg-titel {
+    font-size: 1.15rem !important;
+  }
+}
