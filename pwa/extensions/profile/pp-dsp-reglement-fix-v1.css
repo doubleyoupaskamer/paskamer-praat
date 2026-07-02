@@ -1,0 +1,112 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * PASKAMER PRAAT — DSP Reglement text-overflow herstel (v1.0.0)
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * CSS-only additive override. Raakt géén JS/HTML aan.
+ *
+ * Root cause: `.dy-dsp-reglement-label` heeft in app.css:21179 `flex:1`
+ * zonder `min-width:0`. Combineren met `.dy-dsp-reglement-pts` (nowrap)
+ * en de parent `.dy-collapse-sectie { overflow:hidden }` clipt lange
+ * labels waardoor tekst "wegvalt".
+ *
+ * Fix:
+ *   - `min-width:0` op label + rij zodat flex-children mogen shrinken
+ *   - `flex-wrap:wrap` op de rij als vangnet voor extreem lange labels
+ *   - Wrap-friendly typography (line-height, word-break)
+ *   - Extra mobile-optimalisaties: iets grotere font, betere padding
+ *
+ * v1.0.0 — 2 juli 2026
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── Row: sta wrappen toe + min-width 0 voor flex-children ─────────── */
+.dy-dsp-reglement-rij {
+  flex-wrap: wrap !important;
+  gap: 6px 10px !important;
+  min-width: 0 !important;
+  align-items: baseline !important;
+}
+
+/* ─── Label: mag krimpen, wrappen op lange woorden ──────────────────── */
+.dy-dsp-reglement-label {
+  min-width: 0 !important;
+  flex: 1 1 60% !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  line-height: 1.4 !important;
+  padding-right: 4px !important;
+  hyphens: auto !important;
+}
+
+/* ─── Points chip: shrink toestaan zodat het niet blijft duwen ──────── */
+.dy-dsp-reglement-pts {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  align-items: baseline !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+}
+
+/* ─── Limit-badge: mag ook wrappen als naast pts geen ruimte is ─────── */
+.dy-dsp-reglement-limit {
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.3 !important;
+}
+
+/* ─── Categorie-titel: iets meer ademruimte ─────────────────────────── */
+.dy-dsp-reglement-titel {
+  padding: 12px 16px 6px !important;
+  line-height: 1.3 !important;
+}
+
+/* ─── Container: safety padding-bottom zodat laatste rij niet clipt ──── */
+.dy-dsp-reglement {
+  padding: 4px 0 12px !important;
+}
+
+/* ─── Extra veiligheid: als de sectie geopend is, mag body wél
+ *     content tonen die tijdens de open-animatie de 800 px overschrijdt.
+ *     JS zet na 310 ms al max-height:none, dit is een extra vangnet
+ *     zonder inbreuk te doen op het bestaande openings-flow. ─────────── */
+.dy-collapse-sectie.open .dy-collapse-body {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Sectie-parent: content boven 100% breedte niet clippen bij open state */
+.dy-collapse-sectie.open {
+  overflow: visible !important;
+}
+
+/* ─── Mobile-specifieke tweaks (≤ 640 px) ───────────────────────────── */
+@media (max-width: 640px) {
+  .dy-dsp-reglement-rij {
+    padding: 8px 14px !important;
+  }
+  .dy-dsp-reglement-label {
+    font-size: 0.82rem !important;
+    line-height: 1.42 !important;
+  }
+  .dy-dsp-reglement-pts {
+    font-size: 0.76rem !important;
+  }
+  .dy-dsp-reglement-limit {
+    font-size: 0.66rem !important;
+  }
+  .dy-dsp-reglement-titel {
+    font-size: 0.68rem !important;
+    padding: 12px 14px 6px !important;
+  }
+}
+
+/* Extra small screens (≤ 380 px): forceer twee-regel layout label/pts */
+@media (max-width: 380px) {
+  .dy-dsp-reglement-label {
+    flex: 1 1 100% !important;
+    padding-right: 0 !important;
+  }
+  .dy-dsp-reglement-pts {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+  }
+}
