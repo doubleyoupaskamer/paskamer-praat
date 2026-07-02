@@ -2107,3 +2107,77 @@ ServiceWorker" was de combinatie van:
   ge-bumped SW + JS cache strings.
 - **Status**: Wacht op user deploy naar Cloudflare Pages + verificatie
   op desktop/mobile/social preview.
+
+## v60.1.225 — Premium Brand Profile Fase 4 (Community + Reviews) — 2 juli 2026
+
+**Wat werd toegevoegd**:
+- Nieuwe extensie `/app/pwa/extensions/brand/pp-brand-profile-fase4-v1.js` (v1.1.0, 34 KB)
+  actief geladen via `index.html` (regel 1053) met cache-buster
+  `?v=60.1.225-fase4-community-reviews`.
+- Twee nieuwe secties, ingepositioneerd NA `.bp-prod-grid` in vaste volgorde
+  `grid → community → reviews`, met robuuste anchor-placement zodat race
+  conditions in async data-fetch geen visuele swap veroorzaken.
+
+**Community sectie ("Gedragen door de community")**:
+- Union-query over `posts` + `feed_posts` collecties met dedupe op
+  `<source>:<id>`.
+- Merk-koppeling via 5 parallelle queries:
+  A) `posts.taggedBrands array-contains brandId`
+  B) `posts.brandId == brandId`
+  C) `feed_posts.taggedBrands array-contains brandId`
+  D) `feed_posts.brandId == brandId`
+  E) product-lookup fallback: `brand_products` → `productIds[]` →
+     `posts/feed_posts.productIds array-contains-any <max10>`.
+- Alleen posts mét image en zonder `verborgen==true|status='hidden'`
+  worden getoond. Client-side sort op ts desc, plafond `COMM_MAX_TOTAL=60`.
+- Grid 3-kolom (responsief), hover-overlay met user-naam + likes + comments.
+- Paginatie: eerste 9 items, "Toon meer" knop laadt 9 per klik.
+- Klik op item probeert `DY.navigeer('post_detail', {postId})` →
+  `DY.openPost(pid)` → `location.hash = '#post/'+pid` (fallback ketting).
+
+**Reviews sectie ("Reviews")**:
+- Query `reviews.brandId == brandId` `orderBy(ts desc)` met client-side
+  fallback (zonder orderBy) als index ontbreekt.
+- Aggregeert reviews per merk (alle producten van het merk), plafond
+  `REV_MAX_TOTAL=40`.
+- Gemiddelde ster-rating badge in header (bijv. "★ 4,3").
+- Kaart-layout 2-koloms (desktop), 1-koloms (mobile): avatar, naam,
+  "Geverifieerde aankoop" badge, datum, 5-sterren, tekst, max 4 foto's.
+- Paginatie: eerste 5 items, "Toon meer" knop laadt 5 per klik.
+- "Schrijf review" knop → modal met sterren-rating (1-5), naam-veld,
+  1000-char textarea. Server-side write naar `reviews` collectie
+  volgens bestaande Firestore rules (regels 365-373).
+
+**Empty states**:
+- Community: "Nog geen community posts — Wees de eerste die dit merk
+  in een outfit tagt om hier te verschijnen."
+- Reviews: "Nog geen reviews — Wees de eerste die dit merk beoordeelt."
+  (bij ingelogd), anders "Log in om als eerste een review te schrijven."
+
+**Cache bust**:
+- SW `VERSION` → `v60.1.225-20260702-fase4-community-reviews`
+- Nieuwe script-tag in `index.html`.
+- Alle bestaande caches (`pp-static`, `pp-runtime`, `pp-images`, `pp-fonts`)
+  worden op eerstvolgende SW-activation door de VERSION-bump gepurged.
+
+**Deliverable**: `/app/01-paskamerpraat-pwa-cloudflare.zip` (13.2 MB)
+opnieuw gebouwd met de nieuwe extensie + bijgewerkte `index.html`/`sw.js`.
+
+**Testing status**:
+- Syntactisch geverifieerd (`node -c` OK).
+- Geen local PWA-dev-server aanwezig (React `/app/frontend` is stub);
+  end-to-end verificatie gebeurt door user na deploy naar Cloudflare Pages.
+- Handmatige QA-checklist voor user:
+  1. Bezoek een goedgekeurd merkprofiel (bijv. `?merk=<brandId>`).
+  2. Verify volgorde: hero → CTA-bar → over-het-merk → stats → campagne →
+     filters → collecties → product-grid → **community** → **reviews**.
+  3. Bij merk zonder posts/reviews: verify empty states worden getoond.
+  4. Klik "Toon meer" → verify +9 posts / +5 reviews per klik.
+  5. Klik "Schrijf review" (ingelogd) → verify modal opent, sterren
+     werken, submit met tekst ≥10 chars slaagt.
+
+**Volgende fasen (backlog)**:
+- P0: Fase 5 — Gerelateerde merken, Social Media kanalen, Contact sectie.
+- P1: Fase 6 — SEO structured data overrides per merk.
+- P1: Fase 7 — Admin CMS UI extension voor Fase 4/5/6 velden.
+- P2: Navigatie audit (back-button flow validatie over 12+ pages).
