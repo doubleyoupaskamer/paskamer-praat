@@ -106,8 +106,10 @@
     }).join('');
     // v60.1.215: intro-tekst + A-Z collapsible samengevoegd
     // Configureerbaar via window.PP_UITG_INTRO (Firestore config/uitgelicht_intro)
+    // v60.1.233: H3-titel bewust hard uitgeschakeld op verzoek van user
+    //            (subtitel + A-Z dropdown blijven behouden)
     var introCfg = (window.PP_UITG_INTRO && typeof window.PP_UITG_INTRO === 'object') ? window.PP_UITG_INTRO : {};
-    var introTitel = introCfg.titel || 'Ontdek exclusieve merken, collecties en aanbiedingen';
+    var introTitel = '';
     var introTekst = introCfg.tekst || 'Ontdek exclusieve merken, collecties en aanbiedingen speciaal geselecteerd voor de Tall & Plus Size Community.';
     box.innerHTML =
       '<div class="pp-merken-teaser-head">' +
