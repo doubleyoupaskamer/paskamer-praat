@@ -371,17 +371,20 @@ async def generate_video(
     x_admin_secret: Optional[str] = Header(None),
     x_user_email: Optional[str] = Header(None),
 ):
-    """Admin-only Sora 2 text-to-video generation.
-    
-    Auth: X-Admin-Secret + X-User-Email (defense in depth).
-    Long-running (2-5 min synchronous). Returns base64-encoded MP4.
+    """Admin-only Sora 2 text-to-video generation — ASYNC JOB PATTERN.
+
+    v60.1.241: Sync request van 2-5 min blokkeert de proxy/ingress
+    (Cloudflare/K8s geven 502 na ~60-100s). Nu:
+      - POST retourneert direct { job_id, status:'pending' }
+      - GET /api/admin/video-job/{job_id} pollt status
+      - Achterin loopt de Sora 2 call in een background task
     """
     _check_admin_access(x_admin_secret, x_user_email)
-    
+
     api_key = os.environ.get('EMERGENT_LLM_KEY')
     if not api_key:
         raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY niet geconfigureerd")
-    
+
     # Validate inputs
     valid_sizes = {"1280x720", "1792x1024", "1024x1792", "1024x1024"}
     valid_durations = {4, 8, 12}
@@ -392,17 +395,145 @@ async def generate_video(
         raise HTTPException(status_code=400, detail=f"Invalid duration. Allowed: {sorted(valid_durations)}")
     if req.model not in valid_models:
         raise HTTPException(status_code=400, detail=f"Invalid model. Allowed: {sorted(valid_models)}")
-    
+
     full_prompt = f"{PASKAMERPRAAT_VIDEO_STYLE}\n\nSCENE: {req.prompt}"
-    
+    job_id = uuid.uuid4().hex
+
+    _VIDEO_JOBS[job_id] = {
+        "status": "pending",
+        "created": datetime.now(timezone.utc).isoformat(),
+        "model": req.model,
+        "size": req.size,
+        "duration": req.duration,
+    }
+
+    import asyncio
+    asyncio.create_task(_run_video_job(job_id, full_prompt, req.model, req.size, req.duration, api_key))
+
+    return {
+        "ok": True,
+        "job_id": job_id,
+        "status": "pending",
+        "poll_url": f"/api/admin/video-job/{job_id}",
+        "estimated_seconds": 180,
+    }
+
+
+# In-memory job store (admin-only, single-instance is prima; oude jobs auto-cleaned)
+_VIDEO_JOBS: dict = {}
+
+
+def _cleanup_old_jobs():
+    """Verwijder klaar/fout jobs ouder dan 1 uur."""
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=1)
+    stale = []
+    for jid, j in _VIDEO_JOBS.items():
+        try:
+            created = datetime.fromisoformat(j.get("created", ""))
+            if created < cutoff and j.get("status") in ("done", "error"):
+                stale.append(jid)
+        except Exception:
+            pass
+    for jid in stale:
+        _VIDEO_JOBS.pop(jid, None)
+
+
+async def _run_video_job(job_id: str, prompt: str, model: str, size: str, duration: int, api_key: str):
+    """Background task: run Sora 2 in thread executor, update job store."""
+    import asyncio
+    _cleanup_old_jobs()
+    _VIDEO_JOBS[job_id]["status"] = "running"
+    _VIDEO_JOBS[job_id]["started"] = datetime.now(timezone.utc).isoformat()
     try:
-        # Per playbook: nieuwe instance per request
+        from emergentintegrations.llm.openai.video_generation import OpenAIVideoGeneration
+        video_gen = OpenAIVideoGeneration(api_key=api_key)
+        loop = asyncio.get_event_loop()
+        video_bytes = await loop.run_in_executor(
+            None,
+            lambda: video_gen.text_to_video(
+                prompt=prompt, model=model, size=size, duration=duration, max_wait_time=600,
+            )
+        )
+        if not video_bytes:
+            _VIDEO_JOBS[job_id]["status"] = "error"
+            _VIDEO_JOBS[job_id]["error"] = "Video generatie mislukt (geen output van Sora 2)"
+            return
+        b64 = base64.b64encode(video_bytes).decode('ascii')
+        _VIDEO_JOBS[job_id]["status"] = "done"
+        _VIDEO_JOBS[job_id]["finished"] = datetime.now(timezone.utc).isoformat()
+        _VIDEO_JOBS[job_id]["mime_type"] = "video/mp4"
+        _VIDEO_JOBS[job_id]["base64"] = b64
+        _VIDEO_JOBS[job_id]["size_bytes"] = len(video_bytes)
+        _VIDEO_JOBS[job_id]["prompt_used"] = prompt
+    except Exception as e:
+        logger.exception(f"Video generation background task failed (job_id={job_id})")
+        _VIDEO_JOBS[job_id]["status"] = "error"
+        _VIDEO_JOBS[job_id]["error"] = f"{type(e).__name__}: {str(e)[:400]}"
+
+
+@api_router.get("/admin/video-job/{job_id}")
+async def video_job_status(
+    job_id: str,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    """Poll de status van een video-generation job."""
+    _check_admin_access(x_admin_secret, x_user_email)
+    _cleanup_old_jobs()
+    job = _VIDEO_JOBS.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job {job_id} niet gevonden of verlopen")
+    # Bij 'done' return het volledige payload; anders alleen status
+    if job.get("status") == "done":
+        return {
+            "ok": True,
+            "job_id": job_id,
+            "status": "done",
+            "mime_type": job["mime_type"],
+            "base64": job["base64"],
+            "size_bytes": job["size_bytes"],
+            "prompt_used": job.get("prompt_used"),
+            "size": job.get("size"),
+            "duration": job.get("duration"),
+            "model": job.get("model"),
+        }
+    if job.get("status") == "error":
+        return {"ok": False, "job_id": job_id, "status": "error", "error": job.get("error")}
+    # pending / running
+    return {"ok": True, "job_id": job_id, "status": job.get("status", "pending"), "created": job.get("created"), "started": job.get("started")}
+
+
+# ─── Legacy synchronous fallback (voor backwards compat) ─────────────
+@api_router.post("/admin/generate-video-sync")
+async def generate_video_sync(
+    req: VideoGenRequest,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    """DEPRECATED: sync versie. Gebruik /admin/generate-video (async) i.p.v. deze.
+    Blijft beschikbaar voor als er directe scripts zijn die de oude vorm gebruiken."""
+    _check_admin_access(x_admin_secret, x_user_email)
+
+    api_key = os.environ.get('EMERGENT_LLM_KEY')
+    if not api_key:
+        raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY niet geconfigureerd")
+
+    valid_sizes = {"1280x720", "1792x1024", "1024x1792", "1024x1024"}
+    valid_durations = {4, 8, 12}
+    valid_models = {"sora-2", "sora-2-pro"}
+    if req.size not in valid_sizes:
+        raise HTTPException(status_code=400, detail=f"Invalid size. Allowed: {sorted(valid_sizes)}")
+    if req.duration not in valid_durations:
+        raise HTTPException(status_code=400, detail=f"Invalid duration. Allowed: {sorted(valid_durations)}")
+    if req.model not in valid_models:
+        raise HTTPException(status_code=400, detail=f"Invalid model. Allowed: {sorted(valid_models)}")
+
+    full_prompt = f"{PASKAMERPRAAT_VIDEO_STYLE}\n\nSCENE: {req.prompt}"
+
+    try:
         from emergentintegrations.llm.openai.video_generation import OpenAIVideoGeneration
         import asyncio
         video_gen = OpenAIVideoGeneration(api_key=api_key)
-        
-        # Sora 2 generation is synchronous + long (2-5 min). Use thread executor
-        # zodat asyncio event loop niet blokkeert.
         loop = asyncio.get_event_loop()
         video_bytes = await loop.run_in_executor(
             None,
@@ -411,13 +542,13 @@ async def generate_video(
                 model=req.model,
                 size=req.size,
                 duration=req.duration,
-                max_wait_time=600,  # 10 min max
+                max_wait_time=600,
             )
         )
-        
+
         if not video_bytes:
             raise HTTPException(status_code=502, detail="Video generatie mislukt (geen output)")
-        
+
         b64 = base64.b64encode(video_bytes).decode('ascii')
         return {
             "ok": True,

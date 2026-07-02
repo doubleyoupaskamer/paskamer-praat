@@ -288,30 +288,91 @@
         var sec = Math.round((Date.now() - startTs) / 1000);
         btn.textContent = 'Genereren... ' + Math.floor(sec/60) + ':' + String(sec % 60).padStart(2, '0');
       }, 1000);
-      statusEl.innerHTML = '<span style="color:#d4910a">Aanroep naar Sora 2. Dit kan 2 tot 5 minuten duren. Houd dit tabblad open.</span>';
+      statusEl.innerHTML = '<span style="color:#d4910a">Job aanmaken bij Sora 2… (2-5 min totaal, we pollen automatisch)</span>';
       resEl.innerHTML = '';
       try {
+        // ── Fase 1: dispatch job ──────────────────────────────────
         var r = await fetch(_backendUrl() + '/api/admin/generate-video', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': _secret(), 'X-User-Email': _userEmail() },
           body: JSON.stringify({ prompt: prompt, size: size, duration: duration, model: model }),
         });
-        clearInterval(tickIv);
         if (!r.ok) {
+          clearInterval(tickIv);
           var errTxt = await r.text();
           var extra = '';
           if (r.status === 404) {
             try { localStorage.removeItem('dy.imggen.url'); } catch (_) {}
-            extra = '<br><small style="color:#f0b340">Backend URL is gereset naar de default. Klik nogmaals op "Genereer video".</small>';
+            extra = '<br><small style="color:#f0b340">Backend URL is gereset. Klik nogmaals op "Genereer video".</small>';
           } else if (r.status === 502 || r.status === 504) {
-            extra = '<br><small style="color:#f0b340">Backend te lang bezig. Probeer een kortere duur (4 of 8 sec) of sora-2 (sneller).</small>';
+            extra = '<br><small style="color:#f0b340">Proxy weigerde de request. Probeer opnieuw over enkele seconden.</small>';
           } else if (r.status === 500) {
-            extra = '<br><small style="color:#f0b340">Server-fout. Controleer of EMERGENT_LLM_KEY nog geldig is + saldo heeft.</small>';
+            extra = '<br><small style="color:#f0b340">Server-fout. Controleer of EMERGENT_LLM_KEY saldo heeft.</small>';
+          } else if (r.status === 403) {
+            extra = '<br><small style="color:#f0b340">Admin secret verkeerd of geen toegang. Klik "Reset secret" en probeer opnieuw.</small>';
           }
           statusEl.innerHTML = '<span style="color:#ff6b6b">Fout HTTP ' + r.status + ': ' + esc(errTxt.substring(0,300)) + '</span>' + extra;
           return;
         }
-        var data = await r.json();
+        var dispatch = await r.json();
+        if (!dispatch.job_id) {
+          // Backend geeft nog geen job_id (oude sync-versie draait) → gebruik direct de response
+          clearInterval(tickIv);
+          var totalSec0 = Math.round((Date.now() - startTs) / 1000);
+          var sizeMB0 = (dispatch.size_bytes / (1024*1024)).toFixed(1);
+          statusEl.innerHTML = '<span style="color:#82c08a">Klaar in ' + totalSec0 + ' sec. ' + sizeMB0 + ' MB</span>';
+          var url0 = 'data:' + dispatch.mime_type + ';base64,' + dispatch.base64;
+          var filename0 = 'paskamerpraat-video-' + duration + 's-' + Date.now() + '.mp4';
+          resEl.innerHTML =
+            '<video src="' + url0 + '" controls autoplay loop muted playsinline style="max-width:100%;border-radius:12px;display:block;margin-bottom:12px;background:#000" data-testid="vidgen-result-video"></video>' +
+            '<a href="' + url0 + '" download="' + filename0 + '" class="bp-btn bp-btn-primair" style="display:inline-block;text-decoration:none" data-testid="vidgen-download-btn">Download ' + filename0 + '</a>';
+          return;
+        }
+
+        // ── Fase 2: pollen tot done/error (max 12 min) ──────────────
+        var jobId = dispatch.job_id;
+        statusEl.innerHTML = '<span style="color:#d4910a">Sora 2 werkt aan job ' + esc(jobId.slice(0,8)) + '… (auto-poll iedere 5 sec)</span>';
+        var pollStart = Date.now();
+        var MAX_POLL_MS = 12 * 60 * 1000;
+        var pollInterval = 5000;
+        var data = null;
+        while (Date.now() - pollStart < MAX_POLL_MS) {
+          await new Promise(function (res) { setTimeout(res, pollInterval); });
+          var pr;
+          try {
+            pr = await fetch(_backendUrl() + '/api/admin/video-job/' + encodeURIComponent(jobId), {
+              method: 'GET',
+              headers: { 'X-Admin-Secret': _secret(), 'X-User-Email': _userEmail() },
+            });
+          } catch (netErr) {
+            // Netwerk hikje — negeer en probeer opnieuw
+            continue;
+          }
+          if (pr.status === 404) {
+            clearInterval(tickIv);
+            statusEl.innerHTML = '<span style="color:#ff6b6b">Job verlopen of backend gerestart. Probeer opnieuw.</span>';
+            return;
+          }
+          if (!pr.ok) {
+            var pt = await pr.text();
+            clearInterval(tickIv);
+            statusEl.innerHTML = '<span style="color:#ff6b6b">Poll-fout HTTP ' + pr.status + ': ' + esc(pt.substring(0,200)) + '</span>';
+            return;
+          }
+          var pd = await pr.json();
+          if (pd.status === 'done') { data = pd; break; }
+          if (pd.status === 'error') {
+            clearInterval(tickIv);
+            statusEl.innerHTML = '<span style="color:#ff6b6b">Sora 2 error: ' + esc(String(pd.error || 'onbekend')) + '</span>';
+            return;
+          }
+          // pending / running: continue tick (status update wordt via btn.textContent gedaan)
+        }
+        clearInterval(tickIv);
+        if (!data) {
+          statusEl.innerHTML = '<span style="color:#ff6b6b">Timeout na 12 min. Sora 2 antwoordt niet. Probeer een kortere duur of sora-2 (sneller).</span>';
+          return;
+        }
         var totalSec = Math.round((Date.now() - startTs) / 1000);
         var sizeMB = (data.size_bytes / (1024*1024)).toFixed(1);
         statusEl.innerHTML = '<span style="color:#82c08a">Klaar in ' + totalSec + ' sec. ' + sizeMB + ' MB</span>';
