@@ -1,141 +1,174 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PASKAMER PRAAT — DSP Reglement text-overflow + contrast herstel (v1.1.0)
+ * PASKAMER PRAAT — DSP Punten-verdienen contrast + overflow herstel (v2.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * CSS-only additive override. Raakt géén JS/HTML aan.
  *
- * v1.1.0 (2 juli 2026):
- *   - Root cause 2: DSP reglement box heeft een cream/beige achtergrond
- *     door theme-inheritance, terwijl de labels lichte kleuren gebruiken.
- *     → Force dark achtergrond zodat bestaande light-label-kleuren zichtbaar
- *       zijn, EN maak labels contrast-onafhankelijk (dubbele veiligheid
- *       via text-shadow + explicit color).
+ * v2.0.0 (FINAL FIX — 2 juli 2026):
  *
- *   - Root cause 1 (v1.0.0): flex-child overflow bij lange labels.
+ * DEEP-DIVE ROOT CAUSE:
+ * ─────────────────────
+ * De DSP-pagina ("PUNTEN VERDIENEN" sectie) rendert via klassen:
+ *   .dy-dsp-cat            → panel-wrapper (background: var(--white) = cream)
+ *   .dy-dsp-cat-titel      → categorie-titel (Community/Aankopen/etc)
+ *   .dy-dsp-actie-rij      → rij per actie
+ *   .dy-dsp-actie-label    → LABEL (in app.css:3221 kleur = near-white!)
+ *   .dy-dsp-pts            → punten (+15, +5, etc.) - kleur = clay/orange
+ *   .dy-dsp-limit          → limit-chip (bv "3/dag")
+ *
+ * BUG in core app.css:3219-3226:
+ *   .dy-dsp-actie-label { color: rgba(253,248,240,0.70); ... }
+ *
+ * Combineert met .dy-dsp-cat panel `background: var(--white)` (cream).
+ * Near-wit tekst op cream → **onzichtbaar**.
+ *
+ * NB: mijn v1.0.0 en v1.1.0 targetten ".dy-dsp-reglement-*" — die
+ * classes worden alleen gebruikt in de profiel-pagina collapse
+ * (#col-dsp), NIET op de dedicated DSP-pagina. Dus mijn fix miste
+ * doel. Nu wél correct.
+ *
+ * FIX:
+ *   1) Label-kleur → var(--ink) (donker) zodat leesbaar op cream
+ *   2) Wrap-friendly: word-break, overflow-wrap, hyphens
+ *   3) flex-wrap:wrap op rij als vangnet
+ *   4) Categorie-titel: extra padding op mobile
+ *   5) Punten & limit: expliciete kleur boost (contrast op cream)
+ *   6) Mobile responsiveness (font-size, padding)
  *
  * ═══════════════════════════════════════════════════════════════════════ */
 
-/* ─── 1) Force dark achtergrond op de DSP reglement panel ────────────── */
-.dy-dsp-reglement,
-.dy-collapse-sectie#col-dsp,
-.dy-collapse-sectie#col-dsp .dy-collapse-body,
-.dy-collapse-sectie#col-dsp .dy-collapse-header {
-  background: rgba(18,14,5,0.98) !important;
-  color: rgba(253,248,240,0.88) !important;
+/* ─── 1) FINAL FIX: Label kleur → donker (was: near-white) ───────────── */
+.dy-dsp-actie-label {
+  color: var(--ink, #1e1a0f) !important;
+  font-weight: 500 !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  hyphens: auto !important;
+  line-height: 1.45 !important;
+  padding-right: 6px !important;
 }
 
-/* ─── 2) Row: sta wrappen toe + min-width 0 voor flex-children ──────── */
+/* ─── 2) Row: sta wrappen toe voor lange combinaties ────────────────── */
+.dy-dsp-actie-rij {
+  flex-wrap: wrap !important;
+  gap: 6px 10px !important;
+  min-width: 0 !important;
+  align-items: baseline !important;
+}
+
+/* ─── 3) Rechter-blok: mag krimpen indien nodig ─────────────────────── */
+.dy-dsp-actie-rechts {
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  align-items: baseline !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+/* ─── 4) Punten: sterker contrast op cream + wrap-safe ──────────────── */
+.dy-dsp-pts {
+  color: var(--clay, #c67d06) !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+/* ─── 5) Limit chip: leesbaar op cream ──────────────────────────────── */
+.dy-dsp-limit {
+  color: var(--ink-muted, #7a6a3a) !important;
+  background: rgba(198,125,6,0.10) !important;
+  border: 1px solid rgba(198,125,6,0.18) !important;
+  white-space: nowrap !important;
+  font-weight: 600 !important;
+}
+
+/* ─── 6) Categorie-titel: extra ademruimte + duidelijke separator ───── */
+.dy-dsp-cat-titel {
+  padding: 12px 16px 8px !important;
+  line-height: 1.3 !important;
+}
+
+/* ─── 7) Panel (cat): geen clipping bij overflow van wrapping labels ── */
+.dy-dsp-cat {
+  overflow: visible !important;
+}
+
+/* ─── 8) Category rij afscheiders subtiel donkerder op cream ────────── */
+.dy-dsp-actie-rij {
+  border-bottom-color: rgba(30,26,15,0.06) !important;
+}
+
+/* ─── Mobile ≤ 640 px ────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .dy-dsp-actie-rij {
+    padding: 10px 14px !important;
+  }
+  .dy-dsp-actie-label {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+  }
+  .dy-dsp-pts {
+    font-size: 0.82rem !important;
+  }
+  .dy-dsp-limit {
+    font-size: 0.68rem !important;
+    padding: 2px 7px !important;
+  }
+  .dy-dsp-cat-titel {
+    font-size: 0.70rem !important;
+    padding: 12px 14px 8px !important;
+  }
+}
+
+/* ─── Extra small ≤ 380 px: label krijgt volle rij ───────────────────── */
+@media (max-width: 380px) {
+  .dy-dsp-actie-label {
+    flex: 1 1 100% !important;
+    padding-right: 0 !important;
+  }
+  .dy-dsp-actie-rechts {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * OUD gedeelte: DSP-collapse in het profiel (backwards compatible)
+ * .dy-dsp-reglement-* klassen worden nog gebruikt in de collapse
+ * op de profiel-pagina (#col-dsp). Zelfde patch als DSP-pagina.
+ * ═══════════════════════════════════════════════════════════════════════ */
 .dy-dsp-reglement-rij {
   flex-wrap: wrap !important;
   gap: 6px 10px !important;
   min-width: 0 !important;
   align-items: baseline !important;
-  background: transparent !important;
-  border-top: 1px solid rgba(198,125,6,0.10) !important;
 }
-
-/* ─── 3) Label: mag krimpen, wrappen, en heeft nu forced light color ─── */
 .dy-dsp-reglement-label {
   min-width: 0 !important;
-  flex: 1 1 60% !important;
+  flex: 1 1 auto !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
-  line-height: 1.4 !important;
-  padding-right: 4px !important;
   hyphens: auto !important;
-  color: rgba(253,248,240,0.88) !important;
-  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  padding-right: 6px !important;
 }
-
-/* ─── 4) Points chip: forced dark-orange color, shrink toestaan ─────── */
 .dy-dsp-reglement-pts {
   flex: 0 0 auto !important;
-  min-width: 0 !important;
-  align-items: baseline !important;
   flex-wrap: wrap !important;
   gap: 4px !important;
-  color: #f0b340 !important;
-  font-weight: 700 !important;
+  align-items: baseline !important;
 }
-
-/* ─── 5) Limit-badge: forced light color op dark chip ────────────────── */
 .dy-dsp-reglement-limit {
-  white-space: normal !important;
-  word-break: break-word !important;
-  line-height: 1.3 !important;
-  background: rgba(198,125,6,0.20) !important;
-  color: rgba(253,248,240,0.75) !important;
-  border: 1px solid rgba(198,125,6,0.25) !important;
+  white-space: nowrap !important;
 }
 
-/* ─── 6) Categorie-titel: iets meer ademruimte + gouden accent ──────── */
-.dy-dsp-reglement-titel {
-  padding: 12px 16px 6px !important;
-  line-height: 1.3 !important;
-  color: #d4910a !important;
-  background: rgba(212,145,10,0.06) !important;
-  border-top: 1px solid rgba(212,145,10,0.20) !important;
-}
-
-/* ─── 7) Container: safety padding-bottom zodat laatste rij niet clipt ─ */
-.dy-dsp-reglement {
-  padding: 4px 0 12px !important;
-}
-
-/* ─── 8) Sectie open state: geen clipping ────────────────────────────── */
+/* Collapse: geen clipping bij open state (was empty rule in core) */
 .dy-collapse-sectie.open .dy-collapse-body {
   max-height: none !important;
   overflow: visible !important;
 }
 .dy-collapse-sectie.open {
   overflow: visible !important;
-}
-
-/* ─── 9) Collapse-header van #col-dsp: label + preview mooi leesbaar ─── */
-.dy-collapse-sectie#col-dsp .dy-collapse-label,
-.dy-collapse-sectie#col-dsp .dy-collapse-label span,
-.dy-collapse-sectie#col-dsp .dy-dsp-label {
-  color: #f0b340 !important;
-}
-.dy-collapse-sectie#col-dsp .dy-collapse-pts-preview {
-  color: #f0b340 !important;
-  background: rgba(212,145,10,0.10) !important;
-  border-color: rgba(212,145,10,0.30) !important;
-}
-.dy-collapse-sectie#col-dsp .dy-collapse-chevron {
-  color: rgba(240,179,64,0.75) !important;
-}
-
-/* ─── 10) Mobile-specifieke tweaks (≤ 640 px) ─────────────────────────── */
-@media (max-width: 640px) {
-  .dy-dsp-reglement-rij {
-    padding: 9px 14px !important;
-  }
-  .dy-dsp-reglement-label {
-    font-size: 0.84rem !important;
-    line-height: 1.42 !important;
-  }
-  .dy-dsp-reglement-pts {
-    font-size: 0.78rem !important;
-  }
-  .dy-dsp-reglement-limit {
-    font-size: 0.68rem !important;
-    padding: 2px 6px !important;
-  }
-  .dy-dsp-reglement-titel {
-    font-size: 0.70rem !important;
-    padding: 12px 14px 6px !important;
-  }
-}
-
-/* Extra small screens (≤ 380 px): forceer twee-regel layout label/pts */
-@media (max-width: 380px) {
-  .dy-dsp-reglement-label {
-    flex: 1 1 100% !important;
-    padding-right: 0 !important;
-  }
-  .dy-dsp-reglement-pts {
-    flex: 0 0 auto !important;
-    margin-left: auto !important;
-  }
 }
