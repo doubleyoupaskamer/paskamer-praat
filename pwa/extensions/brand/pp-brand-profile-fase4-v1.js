@@ -535,6 +535,7 @@
         '<label class="bp-veld"><span>Jouw ervaring</span>' +
           '<textarea name="tekst" rows="4" maxlength="1000" placeholder="Wat vond je van dit merk?" data-testid="pp-bp-rev-modal-tekst"></textarea>' +
         '</label>' +
+        '<div class="pp-bp-mod-err" data-role="err" data-testid="pp-bp-rev-modal-err" style="display:none;margin:4px 0 0;padding:8px 10px;border-radius:8px;background:rgba(242,140,140,0.10);border:1px solid rgba(242,140,140,0.35);color:#f28c8c;font:500 12.5px/1.4 \'DM Sans\',sans-serif"></div>' +
         '<div class="pp-bp-mod-acties">' +
           '<button type="button" class="bp-btn bp-btn-ghost" data-role="cancel" data-testid="pp-bp-rev-modal-cancel">Annuleren</button>' +
           '<button type="button" class="bp-btn bp-btn-primair" data-role="submit" data-testid="pp-bp-rev-modal-submit">Plaats review</button>' +
@@ -569,15 +570,22 @@
     document.addEventListener('keydown', escHandler);
     // Submit
     ov.querySelector('[data-role="submit"]').addEventListener('click', function () {
+      var errEl = ov.querySelector('[data-role="err"]');
+      function showErr(msg) {
+        if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+        toast(msg, true);
+      }
+      function clearErr() { if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; } }
+      clearErr();
       var rating = parseInt(ratingEl.getAttribute('data-value'), 10) || 0;
-      if (rating < 1) { toast('Kies eerst een aantal sterren', true); return; }
+      if (rating < 1) { showErr('Kies eerst een aantal sterren.'); return; }
       var naamEl = ov.querySelector('[name="user-naam"]');
       var tekstEl = ov.querySelector('[name="tekst"]');
       var tekst = (tekstEl.value || '').trim();
-      if (tekst.length < 10) { toast('Review moet minimaal 10 tekens bevatten', true); return; }
+      if (tekst.length < 3) { showErr('Review moet minimaal 3 tekens bevatten.'); return; }
       var u = currentUid();
       var d = db();
-      if (!u || !d) { toast('Niet ingelogd of database offline', true); return; }
+      if (!u || !d) { showErr('Niet ingelogd of database offline.'); return; }
       var submitBtn = ov.querySelector('[data-role="submit"]');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Bezig...';
@@ -602,7 +610,7 @@
         })
         .catch(function (err) {
           log('submit review error: ' + (err && err.message));
-          toast('Kon review niet plaatsen: ' + (err && err.message ? err.message : 'onbekend'), true);
+          showErr('Kon review niet plaatsen: ' + (err && err.message ? err.message : 'onbekend'));
           submitBtn.disabled = false;
           submitBtn.textContent = 'Plaats review';
         });
