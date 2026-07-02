@@ -10,7 +10,7 @@
 // Strategie is bewust simpel + bestand-naam-gebaseerd zodat een nieuwe deploy
 // (nieuwe versioned filename) automatisch niet uit cache komt.
 
-const VERSION       = 'v60.1.231-20260702-mobile-polish-no-intro';
+const VERSION       = 'v60.1.232-20260702-tag-fix-keep-subtitel';
 const STATIC_CACHE  = 'pp-static-' + VERSION;
 const RUNTIME_CACHE = 'pp-runtime-' + VERSION;
 const IMG_CACHE     = 'pp-images-' + VERSION;
