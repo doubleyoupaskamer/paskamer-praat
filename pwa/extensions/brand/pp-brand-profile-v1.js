@@ -499,17 +499,25 @@
       if (ctaEl && hero.parentNode) hero.parentNode.insertBefore(ctaEl, hero.nextSibling);
     }
 
-    // 4. "Over het merk" blok NA CTA bar (voor product-grid)
+    // 4. "Over het merk" blok — plaats VOOR eventuele filters/collecties/camp/statistieken, anders voor .bp-prod-grid
     var overHtml = buildOverBlok(b);
     if (overHtml) {
       var overFrag = document.createElement('div');
       overFrag.innerHTML = overHtml;
       var overEl = overFrag.firstChild;
-      // Plaats vóór .bp-prod-grid (indien aanwezig) of aan het eind
-      var grid = document.querySelector('.bp-page .bp-prod-grid');
-      if (overEl) {
-        if (grid && grid.parentNode) grid.parentNode.insertBefore(overEl, grid);
-        else hero.parentNode.appendChild(overEl);
+      // Zoek de eerste "post-over" anker: filters > collecties > campagne > grid
+      // (stats blijft VOOR over het merk zoals gewenst)
+      var page = document.querySelector('.bp-page');
+      var candidates = ['.pp-bp-filters', '.pp-bp-collecties', '.pp-bp-camp', '.bp-prod-grid'];
+      var anchor = null;
+      for (var i = 0; i < candidates.length; i++) {
+        anchor = page ? page.querySelector(candidates[i]) : document.querySelector(candidates[i]);
+        if (anchor) break;
+      }
+      if (overEl && anchor && anchor.parentNode) {
+        anchor.parentNode.insertBefore(overEl, anchor);
+      } else if (overEl && hero.parentNode) {
+        hero.parentNode.appendChild(overEl);
       }
     }
 

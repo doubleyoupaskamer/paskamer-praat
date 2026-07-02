@@ -1,0 +1,52 @@
+{
+  "summary": "Static code review of v60.1.221 DOM-order fix across 3 extension modules (Fase 1/2/3). Traced insertion-anchor logic for all 6 async race orderings. Fix is CORRECT when no campaign exists (all 6 orderings produce desired order Over → Filters → Collecties → Grid). Fix has a RACE-CONDITION BUG when a campaign exists AND Fase 3 resolves before Fase 1: in 3 of 6 orderings the .pp-bp-camp block lands BEFORE .pp-bp-over instead of after it.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "pp-brand-profile-v1.js renderEnhancement (Over-het-merk anchor selection, lines 502-522)",
+        "issue": "Anchor priority list is ['.pp-bp-filters', '.pp-bp-collecties', '.pp-bp-camp', '.bp-prod-grid']. When Fase 3 inserts .pp-bp-camp BEFORE Fase 1 runs (async race: Firestore resolves before Fase 1 render), camp lands just after Stats via Fase 3's fallback path (`over ? after over : BEFORE filters/grid`). Fase 1 then finds .pp-bp-filters or .pp-bp-collecties first and inserts Over BEFORE that anchor — but AFTER the already-placed camp. Result: Stats → Camp → Over → Filters → Coll → Grid (WRONG; desired Stats → Over → Camp → Filters → Coll → Grid).",
+        "selector": ".pp-bp-over / .pp-bp-camp",
+        "priority": "MEDIUM"
+      },
+      {
+        "component": "pp-brand-profile-fase2-v1.js enhanceFase2 (filter-bar anchor, lines 314-324)",
+        "issue": "In race ordering 3→1→2 the filter-bar can land AFTER camp but BEFORE .pp-bp-over (which was inserted between camp and coll by a mis-anchored Fase 1). Result: Stats → Camp → Filters → Over → Coll → Grid. This is a downstream symptom of the Fase 1 candidate-order issue above; fixing Fase 1's candidate list resolves it.",
+        "selector": ".pp-bp-filters",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Merkenprofiel initial render with campaign active",
+        "issue": "Order violation depends on which Firestore promise resolves first (Fase 2 products query vs Fase 3 campagne/collecties queries) relative to Fase 1's synchronous render. In practice Fase 1 (sync) usually wins the race, but network/cache variability can still trigger the bug (e.g., Firestore SDK cache-hit resolves microtask-fast).",
+        "affected_selectors": [".pp-bp-over", ".pp-bp-camp", ".pp-bp-filters", ".pp-bp-collecties"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "In /app/pwa/extensions/brand/pp-brand-profile-v1.js line 511, reorder Fase 1 anchor candidates to put .pp-bp-camp FIRST: `var candidates = ['.pp-bp-camp', '.pp-bp-filters', '.pp-bp-collecties', '.bp-prod-grid'];` — this guarantees Over is always inserted BEFORE camp regardless of async ordering. All 6 orderings then produce the desired DOM (Over → Camp → Filters → Coll → Grid).",
+    "Alternative/defensive fix: after each Fase inserts a block, add a small `normalizeOrder()` post-pass that re-parents nodes into the canonical order using explicit DOM position checks. This is more robust against future additions but bigger change.",
+    "Optional: keep sync/async guarantee explicit — since Fase 1 is synchronous, ensure Fase 1 is `import`ed/loaded BEFORE Fase 3 in the HTML, so Fase 3's Firestore fetch cannot start until after Fase 1 has already inserted .pp-bp-over. Combined with the candidate-order fix, this makes the race practically impossible."
+  ],
+  "critical_code_review_comments": [
+    "Fase 1 anchor priority [filters, collecties, camp, grid] is incorrect: .pp-bp-camp should have HIGHEST priority so Over is inserted before camp when camp is already present. Current order treats camp as low-priority anchor, which breaks the race case.",
+    "Fase 3 camp insertion has a hardcoded assumption that .pp-bp-over is present. The `else` branch (`BEFORE filters/grid`) places camp too high in the DOM (just after Stats), which is the trigger for the race bug.",
+    "The 3 extension files correctly respect the additive-only constraint: they only READ legacy anchors (.bp-page, .bp-prod-grid) and insert sibling nodes; no legacy element is mutated/removed. ✅",
+    "All insertion helpers correctly guard against null parentNode. ✅",
+    "Node syntax check: files parse cleanly (pre-verified by main agent). ✅",
+    "No hardcoded URLs/env leaks in extension files. ✅"
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (backend not tested — static review only)", "frontend": "3/6 async orderings correct with campaign present; 6/6 correct without campaign"},
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Only STATIC review was performed — the PWA is served from Cloudflare Pages (paskamerpraat.nl) and the preview environment serves only a download-zip landing page. Live browser/Playwright testing is not possible in this environment. Next testing agent should either (a) wait until user deploys new zip to paskamerpraat.nl and then Playwright-test the live URL, or (b) simulate the race by loading the 3 modules with staggered delays in a local static server. Files reviewed: /app/pwa/extensions/brand/pp-brand-profile-v1.js (lines 502-522), /app/pwa/extensions/brand/pp-brand-profile-fase2-v1.js (lines 297-325), /app/pwa/extensions/brand/pp-brand-profile-fase3-v1.js (lines 175-227).",
+  "rca of the issue": "ROOT CAUSE: Fase 1's anchor-candidate list at /app/pwa/extensions/brand/pp-brand-profile-v1.js:511 lists '.pp-bp-camp' as 3rd priority (after filters and collecties). When Fase 3's Firestore promise for the campagne resolves BEFORE Fase 1's synchronous render (e.g., due to Firestore cache-hit or JS module load order), .pp-bp-camp is inserted into the DOM via Fase 3's fallback branch (fase3 line 189-193: `over? insertBefore(el, over.nextSibling) : insertBefore(el, filters||grid)`), landing between Stats and Grid. Fase 1 then runs and its candidate lookup returns .pp-bp-filters or .pp-bp-collecties (if already placed by Fase 2/3) BEFORE it would ever match .pp-bp-camp, so Over is inserted before those anchors — but AFTER the pre-placed camp. Final DOM: Stats → Camp → Over → Filters → Coll → Grid, violating desired Stats → Over → Camp → Filters → Coll → Grid. REPRODUCTION: Load merkenprofiel with a brand that has an active campagne while the Firestore SDK has cached the campagne doc (subsequent visits after first load). MITIGATION: reorder Fase 1 candidates array to `['.pp-bp-camp', '.pp-bp-filters', '.pp-bp-collecties', '.bp-prod-grid']` — 1-line change, no other impact. All 6 async orderings then produce the correct DOM order."
+}
