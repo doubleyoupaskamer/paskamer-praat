@@ -10,8 +10,20 @@
   'use strict';
   if (!window.DY) window.DY = {};
 
+  var _BACKEND_FALLBACK = 'https://paskamer-stability.preview.emergentagent.com';
   function _backendUrl() {
-    return localStorage.getItem('dy.imggen.url') || 'https://paskamer-stability.preview.emergentagent.com';
+    var v = localStorage.getItem('dy.imggen.url');
+    // v60.1.240: guard tegen stale/invalid localStorage waardes.
+    // - Alleen accepteren als het een geldige HTTPS URL is
+    // - Niet gelijk aan huidige hostname (Cloudflare Pages heeft geen backend)
+    // - Anders: automatisch opruimen + fallback naar de emergentagent preview
+    if (!v || !/^https:\/\//i.test(v) || v.indexOf(location.hostname) >= 0) {
+      if (v) {
+        try { localStorage.removeItem('dy.imggen.url'); } catch (_) {}
+      }
+      return _BACKEND_FALLBACK;
+    }
+    return v.replace(/\/+$/, '');
   }
   function _secret() {
     return localStorage.getItem('dy.imggen.secret') || '';
@@ -231,7 +243,12 @@
         });
         if (!r.ok) {
           var errTxt = await r.text();
-          statusEl.innerHTML = '<span style="color:#ff6b6b">Fout HTTP ' + r.status + ': ' + esc(errTxt.substring(0,200)) + '</span>';
+          var extraImg = '';
+          if (r.status === 404) {
+            try { localStorage.removeItem('dy.imggen.url'); } catch (_) {}
+            extraImg = '<br><small style="color:#f0b340">Backend URL is gereset. Klik nogmaals op "Genereer afbeelding".</small>';
+          }
+          statusEl.innerHTML = '<span style="color:#ff6b6b">Fout HTTP ' + r.status + ': ' + esc(errTxt.substring(0,200)) + '</span>' + extraImg;
           return;
         }
         var data = await r.json();
@@ -282,7 +299,16 @@
         clearInterval(tickIv);
         if (!r.ok) {
           var errTxt = await r.text();
-          statusEl.innerHTML = '<span style="color:#ff6b6b">Fout HTTP ' + r.status + ': ' + esc(errTxt.substring(0,300)) + '</span>';
+          var extra = '';
+          if (r.status === 404) {
+            try { localStorage.removeItem('dy.imggen.url'); } catch (_) {}
+            extra = '<br><small style="color:#f0b340">Backend URL is gereset naar de default. Klik nogmaals op "Genereer video".</small>';
+          } else if (r.status === 502 || r.status === 504) {
+            extra = '<br><small style="color:#f0b340">Backend te lang bezig. Probeer een kortere duur (4 of 8 sec) of sora-2 (sneller).</small>';
+          } else if (r.status === 500) {
+            extra = '<br><small style="color:#f0b340">Server-fout. Controleer of EMERGENT_LLM_KEY nog geldig is + saldo heeft.</small>';
+          }
+          statusEl.innerHTML = '<span style="color:#ff6b6b">Fout HTTP ' + r.status + ': ' + esc(errTxt.substring(0,300)) + '</span>' + extra;
           return;
         }
         var data = await r.json();
