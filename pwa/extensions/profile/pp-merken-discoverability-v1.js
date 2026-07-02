@@ -27,15 +27,20 @@
   var TEASER_ID  = 'pp-merken-teaser-uitg';
   var BACK_BTN_ID = 'pp-merken-back-btn';
 
+  function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
+
   // ────────── INJECT CSS (eenmalig) ──────────
   function injectCss() {
     if (document.getElementById('pp-merken-disc-css')) return;
     var s = document.createElement('style');
     s.id = 'pp-merken-disc-css';
     s.textContent =
-      '#' + TEASER_ID + '{margin:8px 0 18px;padding:14px 16px;background:linear-gradient(155deg,rgba(212,145,10,0.08),rgba(20,16,12,0.4));border:1px solid rgba(212,145,10,0.22);border-radius:14px}' +
-      '#' + TEASER_ID + ' .pp-merken-teaser-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 0}' +
-      '#' + TEASER_ID + ' .pp-merken-teaser-text{font-size:13px;color:rgba(245,236,224,0.78);margin:0;line-height:1.4;flex:1;min-width:0}' +
+      '#' + TEASER_ID + '{margin:8px 0 18px;padding:16px 18px;background:linear-gradient(155deg,rgba(212,145,10,0.10),rgba(20,16,12,0.4));border:1px solid rgba(212,145,10,0.22);border-radius:14px}' +
+      '#' + TEASER_ID + ' .pp-merken-teaser-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:0}' +
+      '#' + TEASER_ID + ' .pp-merken-teaser-body{flex:1;min-width:0}' +
+      '#' + TEASER_ID + ' .pp-merken-teaser-titel{font:400 clamp(1.05rem,2.6vw,1.35rem)/1.25 "DM Serif Display","Cormorant Garamond",Georgia,serif;color:#fcf8ef;margin:0 0 6px;letter-spacing:-.01em}' +
+      '#' + TEASER_ID + ' .pp-merken-teaser-text{font-size:13px;color:rgba(245,236,224,0.72);margin:0;line-height:1.5}' +
+      '#' + TEASER_ID + ' .pp-merken-teaser-toggle{flex:0 0 auto;background:transparent;border:1px solid rgba(245,236,224,0.18);border-radius:999px;color:rgba(245,236,224,0.82);width:32px;height:32px;padding:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.18s ease;font-family:inherit;margin-top:2px}' +
       '#' + TEASER_ID + ' .pp-merken-teaser-toggle{flex:0 0 auto;background:transparent;border:1px solid rgba(245,236,224,0.18);border-radius:999px;color:rgba(245,236,224,0.82);width:32px;height:32px;padding:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.18s ease;font-family:inherit}' +
       '#' + TEASER_ID + ' .pp-merken-teaser-toggle:hover{background:rgba(212,145,10,0.15);border-color:rgba(212,145,10,0.55);color:#f0b340}' +
       '#' + TEASER_ID + ' .pp-merken-teaser-toggle svg{width:14px;height:14px;transition:transform 0.22s ease}' +
@@ -99,9 +104,17 @@
     var azHtml = LETTERS.map(function (l) {
       return '<button type="button" data-letter="' + l + '" data-testid="uitg-az-' + l + '">' + l + '</button>';
     }).join('');
+    // v60.1.215: intro-tekst + A-Z collapsible samengevoegd
+    // Configureerbaar via window.PP_UITG_INTRO (Firestore config/uitgelicht_intro)
+    var introCfg = (window.PP_UITG_INTRO && typeof window.PP_UITG_INTRO === 'object') ? window.PP_UITG_INTRO : {};
+    var introTitel = introCfg.titel || 'Ontdek exclusieve merken, collecties en aanbiedingen';
+    var introTekst = introCfg.tekst || 'Ontdek exclusieve merken, collecties en aanbiedingen speciaal geselecteerd voor de Tall & Plus Size Community.';
     box.innerHTML =
       '<div class="pp-merken-teaser-head">' +
-        '<p class="pp-merken-teaser-text">Ontdek merken die speciaal voor de Tall &amp; Plus Size community ontworpen zijn.</p>' +
+        '<div class="pp-merken-teaser-body">' +
+          (introTitel ? '<h3 class="pp-merken-teaser-titel">' + esc(introTitel) + '</h3>' : '') +
+          (introTekst ? '<p class="pp-merken-teaser-text">' + esc(introTekst) + '</p>' : '') +
+        '</div>' +
         '<button type="button" class="pp-merken-teaser-toggle" data-testid="uitg-az-toggle" aria-expanded="false" aria-label="Toon alfabet filter" title="Toon alfabet filter">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
         '</button>' +

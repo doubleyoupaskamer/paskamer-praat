@@ -314,18 +314,9 @@
         '<h2 class="pp-uitg-titel">Gesponsord door onze partners</h2>' +
       '</div>';
 
-    // v60.1.214: introductiesectie (CMS-beheerbaar via window.PP_UITG_INTRO)
-    var introCfg = (window.PP_UITG_INTRO && typeof window.PP_UITG_INTRO === 'object') ? window.PP_UITG_INTRO : {};
-    var introEnabled = introCfg.enabled !== false; // default aan
-    var introTitel = introCfg.titel || 'Ontdek exclusieve merken, collecties en aanbiedingen';
-    var introTekst = introCfg.tekst || 'Ontdek exclusieve merken, collecties en aanbiedingen speciaal geselecteerd voor de Tall & Plus Size Community.';
-    if (introEnabled && (introTitel || introTekst)) {
-      html +=
-        '<div class="pp-uitg-intro" data-testid="pp-uitg-intro">' +
-          (introTitel ? '<h3 class="pp-uitg-intro-titel">' + esc(introTitel) + '</h3>' : '') +
-          (introTekst ? '<p class="pp-uitg-intro-tekst">' + esc(introTekst) + '</p>' : '') +
-        '</div>';
-    }
+    // v60.1.215: intro-sectie verplaatst naar pp-merken-discoverability
+    // (nu samengevoegd met A-Z collapsible bar boven "Gesponsord door
+    // onze partners"). Zie /extensions/profile/pp-merken-discoverability-v1.js
 
     if (actief.length) {
       html += '<div class="pp-uitg-list">';
