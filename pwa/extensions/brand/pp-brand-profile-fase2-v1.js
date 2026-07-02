@@ -307,11 +307,21 @@
     try { brandId = window.__ppCurrentBrandId || ''; } catch (_) {}
     if (!brandId) return; // zonder brandId kunnen we geen product-data ophalen
 
-    // Bouw filter bar en plaats VOOR de grid
+    // Bouw filter bar en plaats NA collecties/campagne/over-blok (indien aanwezig), anders VOOR de grid
     var bar = document.createElement('div');
     bar.innerHTML = buildFilterBar();
     var barEl = bar.firstChild;
-    if (barEl && grid.parentNode) grid.parentNode.insertBefore(barEl, grid);
+    if (barEl) {
+      var coll = document.querySelector('.bp-page .pp-bp-collecties');
+      var camp = document.querySelector('.bp-page .pp-bp-camp');
+      var over = document.querySelector('.bp-page .pp-bp-over');
+      var anchorAfter = coll || camp || over;
+      if (anchorAfter && anchorAfter.parentNode) {
+        anchorAfter.parentNode.insertBefore(barEl, anchorAfter.nextSibling);
+      } else if (grid.parentNode) {
+        grid.parentNode.insertBefore(barEl, grid);
+      }
+    }
 
     // Delegated click voor filter buttons
     if (barEl) {

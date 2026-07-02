@@ -182,11 +182,16 @@
         var frag = document.createElement('div');
         frag.innerHTML = html;
         var el = frag.firstChild;
-        // Plaats VOOR de bestaande product-grid, NA de Fase 1 "Over het merk" of Statistieken
-        var grid = page.querySelector('.bp-prod-grid');
-        var filters = page.querySelector('.pp-bp-filters');
-        var anchor = filters || grid;
-        if (el && anchor && anchor.parentNode) anchor.parentNode.insertBefore(el, anchor);
+        // Positie: DIRECT NA "Over het merk" (indien aanwezig), anders vóór filters/grid
+        var over = page.querySelector('.pp-bp-over');
+        if (el && over && over.parentNode) {
+          over.parentNode.insertBefore(el, over.nextSibling);
+        } else {
+          var filters = page.querySelector('.pp-bp-filters');
+          var grid = page.querySelector('.bp-prod-grid');
+          var anchor = filters || grid;
+          if (el && anchor && anchor.parentNode) anchor.parentNode.insertBefore(el, anchor);
+        }
         // Start countdown timer
         var cd = el.querySelector('.pp-bp-camp-countdown');
         if (cd) {
@@ -207,11 +212,19 @@
         var frag = document.createElement('div');
         frag.innerHTML = html;
         var el = frag.firstChild;
-        // Plaats VOOR de filter-bar of product-grid
-        var filters = page.querySelector('.pp-bp-filters');
-        var grid = page.querySelector('.bp-prod-grid');
-        var anchor = filters || grid;
-        if (el && anchor && anchor.parentNode) anchor.parentNode.insertBefore(el, anchor);
+        // Positie: NA campagne-banner indien aanwezig, anders NA "Over het merk", anders vóór filters/grid
+        var camp = page.querySelector('.pp-bp-camp');
+        var over = page.querySelector('.pp-bp-over');
+        if (el && camp && camp.parentNode) {
+          camp.parentNode.insertBefore(el, camp.nextSibling);
+        } else if (el && over && over.parentNode) {
+          over.parentNode.insertBefore(el, over.nextSibling);
+        } else {
+          var filters = page.querySelector('.pp-bp-filters');
+          var grid = page.querySelector('.bp-prod-grid');
+          var anchor = filters || grid;
+          if (el && anchor && anchor.parentNode) anchor.parentNode.insertBefore(el, anchor);
+        }
       })
       .catch(function (err) { log('collecties load error: ' + (err && err.message)); });
   }
