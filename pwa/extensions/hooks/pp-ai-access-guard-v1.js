@@ -32,14 +32,25 @@
   window.__ppAiAccessGuardInit = true;
 
   var FREE_LIMIT = 5;
+  // v60.1.247: EXPLICIETE lijst van user-initiated AI-generation endpoints
+  // die tegen de limiet tellen. Passive endpoints (health, embedding
+  // matching, prefetch) mogen ALTIJD door - anders blokkeert de guard
+  // menu-open flows voor gasten.
   var AI_ENDPOINT_PATTERNS = [
-    /\/api\/ai\//i,
     /\/api\/tryon(\?|$)/i,
     /\/api\/outfit-score(\?|$)/i,
     /\/api\/wardrobe\/recommend(\?|$)/i,
     /\/api\/weekly-stylist(\?|$)/i,
+    /\/api\/ai\/style-assistant(\?|$)/i,
+    /\/api\/ai\/score-outfit(\?|$)/i,
   ];
-  // Admin endpoints zijn al beschermd met X-Admin-Secret; we skippen ze hier.
+  // Expliciete whitelist (passieve/health/prefetch endpoints - nooit guarden)
+  var AI_ENDPOINT_WHITELIST = [
+    /\/api\/ai\/health(\?|$)/i,
+    /\/api\/ai\/similar-items(\?|$)/i,
+    /\/api\/ai\/embed(\?|$)/i,
+    /\/api\/ai\/config(\?|$)/i,
+  ];
 
   function log(m) { try { console.info('[ai-guard]', m); } catch (_) {} }
   function db()  { try { return (window.DY && DY.db) || null; } catch (_) { return null; } }
@@ -264,6 +275,10 @@
   function isAiEndpoint(url) {
     try {
       var s = typeof url === 'string' ? url : (url && url.url) || '';
+      if (!s) return false;
+      // v60.1.247: whitelist heeft voorrang - passieve/health endpoints
+      // mogen altijd door zonder guard-popup, ook voor gasten.
+      if (AI_ENDPOINT_WHITELIST.some(function (r) { return r.test(s); })) return false;
       return AI_ENDPOINT_PATTERNS.some(function (r) { return r.test(s); });
     } catch (_) { return false; }
   }
