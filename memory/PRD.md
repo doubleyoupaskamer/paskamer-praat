@@ -2491,3 +2491,47 @@ tijd rendert de kleuren_ai / outfit-vergelijker pagina zichtbaar.
 ✅ Geen AI-API-calls of uploads zonder autorisatie (backend 401 defense-in-depth)
 ✅ Vloeiend UX, geen flash of vertraging (native paint-first pattern)
 ✅ Geen regressies (curl-verified backend endpoints, HTML/JS syntax OK)
+
+---
+
+## v60.1.255 (2026-02-12) — Premium-Verloop Auto-Downgrade
+
+### Doel
+Acceptatiecriterium invullen: *"Na afloop van Premium wordt automatisch
+teruggevallen naar het gratis gebruiksmodel."* Voorheen bleef `is_premium=true`
+staan zolang niemand de flag verlaagde → verlopen gebruikers hadden
+onbeperkte AI-toegang (business/revenu risico).
+
+### Wijzigingen (backend only, geen frontend impact)
+- **`_ai_parse_expiry()`**: nieuwe helper. Parse ISO 8601 met/zonder Z-suffix
+  naar UTC datetime, returns None bij invalid.
+- **`_ai_is_premium(uid, email)`**: verifieert nu `expires_at`:
+  - Geen `expires_at` → lifetime (blijft premium)
+  - `expires_at > now` → geldig
+  - `expires_at <= now` → auto-downgrade (`is_premium=false`,
+    `downgraded_by=ai_guard_auto`) + return false
+- **`GET /api/premium/status`**: idem auto-downgrade bij verlopen. Response
+  bevat nu ook `expires_at` zodat frontend kan tonen "verloopt op ...".
+
+### Testing (curl-verified) — ALL PASS
+Drie scenarios geseed in Mongo:
+- `TEST_UID_ACTIVE` (expires +30d) → `is_premium: true` ✓
+- `TEST_UID_EXPIRED` (expires -5d) → `is_premium: false` ✓
+  - DB-verificatie: `is_premium=False, downgraded_by="premium_status_endpoint",
+    expired_at_check="2026-07-04T18:18:51..."` ✓
+- `TEST_UID_LIFETIME` (geen expires_at) → `is_premium: true` ✓
+- Non-existent uid → `{is_premium: false}` (geen crash) ✓
+- Regressie: `/api/tryon` zonder token → 401, `/api/ai/health` → 200 ✓
+
+### Audit Trail
+Iedere auto-downgrade laat in de DB achter:
+- `is_premium: false`
+- `downgraded_by`: `"premium_status_endpoint"` of `"ai_guard_auto"`
+- `expired_at_check`: ISO timestamp
+
+### Acceptatiecriteria — bevestigd
+✅ Actieve Premium blijft onbeperkt tot verloop
+✅ Verlopen Premium → automatisch teruggezet naar gratis 5/maand model
+✅ Lifetime (geen expires_at) blijft actief
+✅ Zichtbaar in de audit-trail welke endpoint de downgrade deed
+✅ Geen regressie op andere endpoints

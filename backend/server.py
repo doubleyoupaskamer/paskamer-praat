@@ -220,8 +220,29 @@ def _ai_check_admin_email(email: str) -> bool:
     return email in admin_set
 
 
+def _ai_parse_expiry(raw) -> Optional[datetime]:
+    """Parse expires_at (ISO string of datetime) naar UTC datetime.
+    Returns None bij ontbrekend/invalide waarde."""
+    if not raw:
+        return None
+    if isinstance(raw, datetime):
+        return raw if raw.tzinfo else raw.replace(tzinfo=timezone.utc)
+    try:
+        # Support ISO 8601 met Z suffix
+        s = str(raw).strip().replace("Z", "+00:00")
+        dt = datetime.fromisoformat(s)
+        return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
+
+
 async def _ai_is_premium(uid: str, email: Optional[str]) -> bool:
-    """Check Premium via Mongo `premium_users` (bestaande collection)."""
+    """Check Premium via Mongo `premium_users` (bestaande collection).
+
+    v60.1.255: expires_at wordt geverifieerd. Verlopen premium →
+    is_premium flag wordt automatisch verlaagd zodat de user direct
+    terugvalt op het gratis 5/maand model.
+    """
     if _ai_check_admin_email(email or ""):
         return True
     if not uid and not email:
@@ -231,8 +252,33 @@ async def _ai_is_premium(uid: str, email: Optional[str]) -> bool:
         if uid:
             rec = await db.premium_users.find_one({"user_key": uid})
         if not rec and email:
-            rec = await db.premium_users.find_one({"email": email.lower().strip()})
-        return bool(rec and rec.get("is_premium"))
+            rec = await db.premium_users.find_one({"email": (email or "").lower().strip()})
+        if not rec:
+            return False
+        if not rec.get("is_premium"):
+            return False
+        # v60.1.255: check expires_at
+        expiry = _ai_parse_expiry(rec.get("expires_at"))
+        if expiry is None:
+            # Geen expiry-datum bekend → interpreteer als lifetime/actief
+            return True
+        now = datetime.now(timezone.utc)
+        if expiry > now:
+            return True  # nog geldig
+        # Verlopen → downgrade automatisch zodat verdere calls direct 5/maand quota gebruiken
+        try:
+            await db.premium_users.update_one(
+                {"_id": rec.get("_id")},
+                {"$set": {
+                    "is_premium": False,
+                    "expired_at_check": now.isoformat(),
+                    "downgraded_by": "ai_guard_auto",
+                }},
+            )
+            logger.info("[ai-guard] premium verlopen voor uid=%s email=%s (was %s)", uid, email, expiry.isoformat())
+        except Exception as e:
+            logger.warning("[ai-guard] downgrade-write faalde: %s", e)
+        return False
     except Exception:
         return False
 
@@ -846,10 +892,28 @@ async def premium_status(user_key: str, email: Optional[str] = None):
         rec = await db.premium_users.find_one({"email": email})
     if not rec:
         return {"is_premium": False}
+    # v60.1.255: verify expires_at → auto-downgrade bij verlopen premium
+    now = datetime.now(timezone.utc)
+    is_premium_flag = bool(rec.get("is_premium"))
+    expiry = _ai_parse_expiry(rec.get("expires_at"))
+    if is_premium_flag and expiry is not None and expiry <= now:
+        try:
+            await db.premium_users.update_one(
+                {"_id": rec.get("_id")},
+                {"$set": {
+                    "is_premium": False,
+                    "expired_at_check": now.isoformat(),
+                    "downgraded_by": "premium_status_endpoint",
+                }},
+            )
+        except Exception:
+            pass
+        is_premium_flag = False
     return {
-        "is_premium": bool(rec.get("is_premium")),
+        "is_premium": is_premium_flag,
         "plan": rec.get("plan"),
         "activated_at": rec.get("activated_at"),
+        "expires_at": rec.get("expires_at"),
         "email": rec.get("email"),
     }
 
