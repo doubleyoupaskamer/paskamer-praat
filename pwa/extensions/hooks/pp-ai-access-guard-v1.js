@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PASKAMER PRAAT — AI Access Guard (v1.0.0)
+ * PASKAMER PRAAT . AI Access Guard (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
- * Centrale autorisatielaag voor ALLE AI-modules. Volledig additief —
+ * Centrale autorisatielaag voor ALLE AI-modules. Volledig additief .
  * geen bestaande module wordt aangeraakt. Werkt via een wereldwijde
  * fetch-hijack die AI-endpoints herkent en pre-flight controles doet.
  *
@@ -34,13 +34,13 @@
   var FREE_LIMIT = 5;
   // v60.1.247/252: EXPLICIETE lijst van user-initiated AI-generation endpoints
   // die tegen de limiet tellen. Passive endpoints (health, embedding
-  // matching, prefetch) mogen ALTIJD door - anders blokkeert de guard
+  // matching, prefetch) mogen ALTIJD door, anders blokkeert de guard
   // menu-open flows voor gasten.
   //
   // v60.1.252 KRITIEKE UITBREIDING: legacy modules (Outfit Vergelijker /
   // Kleuranalyse / AI Chat improvement engine) roepen `api.anthropic.com`
   // DIRECT aan, buiten onze backend om. Deze moeten OOK gecontroleerd
-  // worden — anders bypassen ze de gehele autorisatielaag.
+  // worden . anders bypassen ze de gehele autorisatielaag.
   var AI_ENDPOINT_PATTERNS = [
     // ─── Backend AI endpoints ──────────────────────────────────────────
     /\/api\/tryon(\?|$)/i,
@@ -55,7 +55,7 @@
     /^https?:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/[^/]+:(generateContent|streamGenerateContent|embedContent)/i,
     /^https?:\/\/doubleyou-patroon-server\.onrender\.com\/patroon/i,
   ];
-  // Expliciete whitelist (passieve/health/prefetch endpoints - nooit guarden)
+  // Expliciete whitelist (passieve/health/prefetch endpoints, nooit guarden)
   var AI_ENDPOINT_WHITELIST = [
     /\/api\/ai\/health(\?|$)/i,
     /\/api\/ai\/similar-items(\?|$)/i,
@@ -88,7 +88,7 @@
     return fb;
   }
   function isGuest() {
-    // v60.1.248: strict check — Firebase Auth is bron van waarheid
+    // v60.1.248: strict check . Firebase Auth is bron van waarheid
     var a = fbAuth();
     if (!a) return true;
     var u = a.currentUser;
@@ -100,7 +100,7 @@
 
   // v60.1.248: Premium status cache met invalidatie bij auth-change
   var _premCache = { uid: null, isPrem: false, at: 0 };
-  var PREM_CACHE_MS = 60 * 1000; // 60 sec — kort genoeg om vervalcheck relevant te houden
+  var PREM_CACHE_MS = 60 * 1000; // 60 sec   kort genoeg om vervalcheck relevant te houden
   async function isPremium() {
     var currentUid = uid();
     if (!currentUid) { _premCache = { uid: null, isPrem: false, at: 0 }; return false; }
@@ -180,7 +180,7 @@
       '.pp-aig-box h3{margin:0 0 10px;font:400 1.4rem/1.2 "DM Serif Display","Cormorant Garamond",serif;color:#f0b340;padding-right:36px}' +
       '.pp-aig-box p{margin:0 0 14px;color:#fdf5e3;line-height:1.6;font-size:.95rem}' +
       '.pp-aig-box .pp-aig-badge{display:inline-block;padding:5px 11px;border-radius:999px;background:rgba(212,145,10,.20);border:1px solid rgba(212,145,10,.45);color:#f0b340;font:700 11px/1 "DM Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}' +
-      // X-close button — hoog contrast, groot klikgebied
+      // X-close button . hoog contrast, groot klikgebied
       '.pp-aig-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(240,179,64,.45);color:#f0b340;cursor:pointer;font:700 22px/1 "DM Sans",sans-serif;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;padding:0;transition:all .15s ease;line-height:1}' +
       '.pp-aig-x:hover,.pp-aig-x:focus-visible{background:rgba(240,179,64,.20);color:#fff;transform:scale(1.08);outline:none;box-shadow:0 0 0 3px rgba(240,179,64,.28)}' +
       '.pp-aig-x:active{transform:scale(.94)}' +
@@ -511,7 +511,7 @@
   function showQuotaBanner() {
     renderUsageBanner(FREE_LIMIT, FREE_LIMIT);
   }
-  // Nieuwe publieke helper — wordt aangeroepen na module-open voor
+  // Nieuwe publieke helper . wordt aangeroepen na module-open voor
   // non-premium users. Skipt bij premium (die krijgen NOOIT een banner).
   async function maybeShowUsageBanner() {
     try {
@@ -536,7 +536,7 @@
       showLoginPrompt();
       return false;
     }
-    // STAP 2: Premium bypass — onbeperkte toegang
+    // STAP 2: Premium bypass . onbeperkte toegang
     if (await isPremium()) return true;
     // STAP 3: Voorkom parallelle popups tijdens gelijktijdige requests
     if (_inflight) return false;
@@ -570,7 +570,7 @@
     try {
       var s = typeof url === 'string' ? url : (url && url.url) || '';
       if (!s) return false;
-      // v60.1.247: whitelist heeft voorrang - passieve/health endpoints
+      // v60.1.247: whitelist heeft voorrang, passieve/health endpoints
       // mogen altijd door zonder guard-popup, ook voor gasten.
       if (AI_ENDPOINT_WHITELIST.some(function (r) { return r.test(s); })) return false;
       return AI_ENDPOINT_PATTERNS.some(function (r) { return r.test(s); });
@@ -579,7 +579,7 @@
 
   // v60.1.252: Herken alleen ONZE eigen /api/ endpoints (voor token-injectie).
   //   Externe providers zoals api.anthropic.com krijgen GEEN Bearer token
-  //   (die hebben hun eigen auth) — maar worden nog steeds guard-gecheckt.
+  //   (die hebben hun eigen auth) . maar worden nog steeds guard-gecheckt.
   function isOurBackendApi(url) {
     try {
       var s = String(url || '');
@@ -675,7 +675,7 @@
       try {
         _premCache = { uid: null, isPrem: false, at: 0 };
         _inflight = false;
-        // Alleen verversen als banner al zichtbaar was — geen surprise-popups
+        // Alleen verversen als banner al zichtbaar was . geen surprise-popups
         if (document.querySelector('.pp-aig-banner')) {
           setTimeout(function () { try { maybeShowUsageBanner(); } catch (_) {} }, 100);
         }
@@ -691,7 +691,7 @@
     });
   } catch (_) {}
 
-  // v60.1.249: Firebase Auth state listener — instant invalidatie bij logout
+  // v60.1.249: Firebase Auth state listener . instant invalidatie bij logout
   function installAuthListener() {
     var a = fbAuth();
     if (!a) return false;
@@ -705,13 +705,13 @@
         } catch (_) {}
         // v60.1.251: verwijder ook eventuele usage-banner bij logout/switch
         try { removeBanner(); } catch (_) {}
-        log(u ? ('Auth: uid=' + u.uid + (u.isAnonymous ? ' (anon)' : '')) : 'Auth: logged out — caches gewist');
+        log(u ? ('Auth: uid=' + u.uid + (u.isAnonymous ? ' (anon)' : '')) : 'Auth: logged out   caches gewist');
       });
       return true;
     } catch (_) { return false; }
   }
 
-  // v60.1.249: Module-open hooks — blokkeer AI-UI vóór rendering voor gasten.
+  // v60.1.249: Module-open hooks . blokkeer AI-UI vóór rendering voor gasten.
   //   Wraps de publieke open() functies van elke AI-module.
   //   v60.1.250 UPDATE: bij quota-op laat UI WEL openen (per user-keuze) en
   //   toon een niet-blokkerende banner. Fetch-guard blijft het echte
@@ -761,7 +761,7 @@
   }
 
   // Registreer bekende AI-module open-functies. Ontbrekende worden gewoon
-  // overgeslagen — polling zorgt dat late-init modules alsnog gewrapt worden.
+  // overgeslagen . polling zorgt dat late-init modules alsnog gewrapt worden.
   var MODULE_HOOKS = [
     ['DY.tryOn', 'open'],
     ['DY.tryOn', 'openWithOutfit'],
@@ -827,7 +827,7 @@
             try { showLoginPrompt(); } catch (_) {}
             return; // pagina niet renderen
           }
-          // Non-premium mag door — de banner + fetch-guard handelen quota af
+          // Non-premium mag door . de banner + fetch-guard handelen quota af
           return orig.apply(this, arguments);
         };
         DY['__ppGuarded_' + fn] = true;
@@ -847,7 +847,7 @@
   var _initAttempts = 0;
   var _initIv = setInterval(function () {
     var ok1 = installAuthListener();
-    installModuleHooks(); // best-effort elke tick — voegt late modules toe
+    installModuleHooks(); // best-effort elke tick   voegt late modules toe
     wrapPageRouter();      // v60.1.252: wrap router zodra DY.toonPagina bestaat
     if (ok1 || _initAttempts++ > 80) clearInterval(_initIv);
   }, 250);
@@ -892,7 +892,7 @@
           try { showLoginPrompt(); } catch (_) {}
           // Blokkeer render van kleuren_ai op DOM-niveau: verwijder de
           // pagina-container als die intussen door legacy-init is
-          // aangemaakt (defensief - normaal komt hij hier nog niet)
+          // aangemaakt (defensief, normaal komt hij hier nog niet)
           try {
             var pageEl = document.getElementById('kleuren_ai') || document.querySelector('[data-pagina="kleuren_ai"]');
             if (pageEl) pageEl.style.display = 'none';

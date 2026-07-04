@@ -1,11 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PASKAMER PRAAT — Realtime Profile Sync (v1.0.0)
+ * PASKAMER PRAAT . Realtime Profile Sync (v1.0.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * DOEL
  * Alle profielwijzigingen (avatar, naam, bio, stad, socials, ...) direct
- * zichtbaar in ALLE geopende weergaves — topbar, feed-header, reactie-
- * input, DM header, profielpagina — zonder page-refresh en over meerdere
+ * zichtbaar in ALLE geopende weergaves . topbar, feed-header, reactie-
+ * input, DM header, profielpagina . zonder page-refresh en over meerdere
  * browser-tabs synchroon.
  *
  * ARCHITECTUUR (100% additief, geen legacy code aanraken)
@@ -19,7 +19,7 @@
  *      profielpagina bevindt.
  *   4. Nieuwe render-hint attributen (`data-pp-live-avatar` /
  *      `data-pp-live-name` / `data-pp-live-bio`) worden automatisch
- *      geüpdate — future-proof voor nieuwe componenten.
+ *      geüpdate . future-proof voor nieuwe componenten.
  *   5. Cross-tab sync via BroadcastChannel `pp-profile-sync` met
  *      localStorage-fallback voor Safari <=15.
  *
@@ -87,7 +87,7 @@
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
   function initialsColor(uid) {
-    // Deterministisch — zelfde uid = zelfde kleur
+    // Deterministisch . zelfde uid = zelfde kleur
     var hash = 0;
     var s = String(uid || 'x');
     for (var i = 0; i < s.length; i++) hash = ((hash << 5) - hash + s.charCodeAt(i)) | 0;
@@ -274,7 +274,7 @@
           }
         },
         function (err) {
-          // Firestore-fout — behoud bestaande DY.profile, geen crash
+          // Firestore-fout . behoud bestaande DY.profile, geen crash
           log('onSnapshot error: ' + (err && err.message));
         }
       );

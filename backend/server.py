@@ -154,7 +154,7 @@ async def download_bundle(filename: str):
 
 
 # ════════════════════════════════════════════════════════════════
-# v60.1.46 - AI Health + Wardrobe Recommend endpoints
+# v60.1.46, AI Health + Wardrobe Recommend endpoints
 # Geactiveerd om "Wat te dragen deze week"-popup netwerkfout op te lossen.
 # ════════════════════════════════════════════════════════════════
 class WardrobeRecommendRequest(BaseModel):
@@ -177,7 +177,7 @@ async def ai_health():
 
 
 # ════════════════════════════════════════════════════════════════════════
-# v60.1.252 — CENTRALE AI AUTORISATIE (server-side defense-in-depth)
+# v60.1.252 . CENTRALE AI AUTORISATIE (server-side defense-in-depth)
 #
 # Verifieert de Bearer ID-token, checkt Premium status, en beheert de
 # maandelijkse quota-teller in Firestore `ai_usage/{uid}_{YYYY-MM}`.
@@ -310,7 +310,7 @@ def _ai_get_usage_and_inc(firestore_client, uid: str) -> int:
 
 
 def _ai_check_and_inc_atomic(firestore_client, uid: str, limit: int) -> tuple:
-    """v60.1.256 — Transactional check-and-increment.
+    """v60.1.256   Transactional check-and-increment.
 
     Voorkomt race condition bij gelijktijdige requests: leest count en
     verhoogt hem alleen als count < limit, allemaal in één Firestore
@@ -381,7 +381,7 @@ async def _verify_ai_access(authorization: Optional[str], *, endpoint: str = "ai
     if fs is None:
         if AI_STRICT_AUTH:
             raise HTTPException(503, "Firebase Admin niet geconfigureerd; AI-toegang tijdelijk niet beschikbaar")
-        logger.warning("[ai-guard] geen Firebase — %s call zonder auth toegestaan", endpoint)
+        logger.warning("[ai-guard] geen Firebase   %s call zonder auth toegestaan", endpoint)
         return {"uid": None, "email": None, "premium": False, "count": 0, "strict": False}
 
     if not authorization or not authorization.startswith("Bearer "):
@@ -495,8 +495,8 @@ async def wardrobe_recommend(req: WardrobeRecommendRequest, authorization: Optio
 
 
 # ════════════════════════════════════════════════════════════════
-# PASKAMERPRAAT - Admin Image Generator (Gemini Nano Banana)
-# v60.1.14 - admin-only hero/banner generator via EMERGENT_LLM_KEY
+# PASKAMERPRAAT, Admin Image Generator (Gemini Nano Banana)
+# v60.1.14, admin-only hero/banner generator via EMERGENT_LLM_KEY
 # ════════════════════════════════════════════════════════════════
 
 class ImageGenRequest(BaseModel):
@@ -637,7 +637,7 @@ async def generate_image(
 
 
 # ════════════════════════════════════════════════════════════════
-# v60.1.44 - Admin Video Generator (Sora 2 via EMERGENT_LLM_KEY)
+# v60.1.44, Admin Video Generator (Sora 2 via EMERGENT_LLM_KEY)
 # Text-to-video, UGC/editorial quality, admin-only
 # ════════════════════════════════════════════════════════════════
 
@@ -670,7 +670,7 @@ async def generate_video(
     x_admin_secret: Optional[str] = Header(None),
     x_user_email: Optional[str] = Header(None),
 ):
-    """Admin-only Sora 2 text-to-video generation — ASYNC JOB PATTERN.
+    """Admin-only Sora 2 text-to-video generation   ASYNC JOB PATTERN.
 
     v60.1.241: Sync request van 2-5 min blokkeert de proxy/ingress
     (Cloudflare/K8s geven 502 na ~60-100s). Nu:
@@ -906,7 +906,7 @@ async def generate_video_sync(
 
 
 # ════════════════════════════════════════════════════════════════════════
-# PREMIUM SUBSCRIPTION (v60.1.119) - volledig via Shopify (zie shopify_wallet.py)
+# PREMIUM SUBSCRIPTION (v60.1.119), volledig via Shopify (zie shopify_wallet.py)
 # Stripe is verwijderd; alle Premium-betalingen lopen nu via Shopify Cart
 # attributes (premium_user_key, premium_email, premium_plan). Deze sectie
 # behoudt enkel de read-only endpoints + admin-grant/revoke flows.
@@ -965,7 +965,7 @@ async def premium_status(user_key: str, email: Optional[str] = None):
 
 @api_router.post("/billing/portal")
 async def billing_portal(user_key: str):
-    # Shopify Customer Account portal - zelfservice voor abonnement-beheer.
+    # Shopify Customer Account portal, zelfservice voor abonnement-beheer.
     shop_domain = os.environ.get("SHOPIFY_SHOP_DOMAIN") or "doubleyousmallandtall.nl"
     return {
         "url": f"https://{shop_domain}/account",
@@ -975,7 +975,7 @@ async def billing_portal(user_key: str):
 
 
 # ════════════════════════════════════════════════════════════════════════
-# Outfit Score - Echte Gemini Vision implementatie (v60.1.76)
+# Outfit Score, Echte Gemini Vision implementatie (v60.1.76)
 # Analyseert kledingoutfit foto via Gemini 3.1 Pro Preview vision model.
 # Fallback naar deterministic placeholder bij key/parse fout zodat de
 # frontend nooit een lege state krijgt.
@@ -1045,7 +1045,7 @@ async def outfit_score(req: OutfitScoreRequest, authorization: Optional[str] = H
         out["photo_source"] = photo_source
         return out
 
-    # v60.1.92: sanity check - b64 payload moet redelijke image-grootte
+    # v60.1.92: sanity check, b64 payload moet redelijke image-grootte
     # hebben. Te klein = placeholder/icon/avatar = niet scoren.
     try:
         import base64 as _b64check
@@ -1128,7 +1128,7 @@ async def outfit_score(req: OutfitScoreRequest, authorization: Optional[str] = H
         reply = await chat.send_message(msg)
         text = reply if isinstance(reply, str) else getattr(reply, "content", str(reply))
 
-        # Parse JSON - strip eventuele markdown code fences
+        # Parse JSON, strip eventuele markdown code fences
         import json
         import re
         cleaned = text.strip()
@@ -1156,7 +1156,7 @@ async def outfit_score(req: OutfitScoreRequest, authorization: Optional[str] = H
         stijl = str(data.get("stijl", "")).lower().strip()
         kledingstukken = [str(k)[:60] for k in (data.get("kledingstukken") or [])][:8]
 
-        # v60.1.87: Safety net - bij sportief/casual mogen tips NIET
+        # v60.1.87: Safety net, bij sportief/casual mogen tips NIET
         # gaan over formele kleding-elementen (stropdas, dasknoop, boord,
         # manchet, colbert, etc.). Dit was de bron van klacht "AI niet
         # accuraat" wanneer Gemini incidenteel formele tips opdiste bij
@@ -1203,7 +1203,7 @@ async def outfit_score(req: OutfitScoreRequest, authorization: Optional[str] = H
 
 
 # ════════════════════════════════════════════════════════════════════════
-# ADMIN PREMIUM MANAGEMENT (v60.1.57) - Full entitlement system
+# ADMIN PREMIUM MANAGEMENT (v60.1.57), Full entitlement system
 # ════════════════════════════════════════════════════════════════════════
 def _mask(key: Optional[str]) -> str:
     if not key:
@@ -1327,7 +1327,7 @@ async def admin_premium_transactions(
 
 
 # ════════════════════════════════════════════════════════════════════════
-# v60.1.257 — Admin AI Usage Management
+# v60.1.257 . Admin AI Usage Management
 #   Endpoints om support-vragen als "mijn AI-quota klopt niet" snel af te
 #   handelen: kijk stand op, en reset teller indien nodig. Alle acties
 #   worden gelogd naar `premium_audit` collection voor traceerbaarheid.
@@ -1523,7 +1523,7 @@ async def admin_premium_entitlements(
 
 
 # ════════════════════════════════════════════════════════════════════════
-# STABILIZATION STUBS (v60.1.58) - silences 404 noise van legacy endpoints.
+# STABILIZATION STUBS (v60.1.58), silences 404 noise van legacy endpoints.
 # Deze endpoints zijn referenced in frontend code maar nog niet gekoppeld
 # aan echte features. Returnen graceful empty/no-op responses zodat console
 # errors verdwijnen en flows niet crashen.
@@ -1584,7 +1584,7 @@ async def recent_client_errors(limit: int = 200):
     return {"errors": out, "count": len(out)}
 
 
-# ── AI prefetch hooks (PP_Engine, niet UI-gekoppeld - graceful stub) ────
+# ── AI prefetch hooks (PP_Engine, niet UI-gekoppeld, graceful stub) ────
 class AiScoreBody(BaseModel):
     outfit_id: Optional[str] = None
     image_url: Optional[str] = None
@@ -1642,7 +1642,7 @@ async def ai_style_assistant(body: AiAssistBody, authorization: Optional[str] = 
         return {"reply": "Style Assistant tijdelijk niet beschikbaar (config missing).", "messages": [], "session_id": body.session_id}
 
     system_prompt = (
-        "Je bent de Paskamer Praat Style Assistant — een warme, deskundige Nederlandstalige "
+        "Je bent de Paskamer Praat Style Assistant   een warme, deskundige Nederlandstalige "
         "personal stylist gespecialiseerd in Tall (1.85m+) en Plus Size mode. "
         "\n"
         "FOCUS-DIRECTIVE: Richt je advies UITSLUITEND op:\n"
@@ -1673,7 +1673,7 @@ async def ai_style_assistant(body: AiAssistBody, authorization: Optional[str] = 
     except Exception as e:
         logger.warning(f"Style Assistant Claude call failed: {e}")
         return {
-            "reply": "Ik kan even geen advies geven — probeer het straks opnieuw.",
+            "reply": "Ik kan even geen advies geven   probeer het straks opnieuw.",
             "messages": [],
             "session_id": body.session_id,
             "error_hint": str(e)[:120],
@@ -1691,9 +1691,9 @@ async def ai_similar_items(body: AiSimilarBody):
     return {"items": [], "outfit_id": body.outfit_id}
 
 
-# ── Overige legacy stubs - voorkomen 404 spam ──────────────────────────
+# ── Overige legacy stubs, voorkomen 404 spam ──────────────────────────
 class TryonBody(BaseModel):
-    # v60.1.244: uitgebreid schema — accepteert nu ook base64 payloads
+    # v60.1.244: uitgebreid schema . accepteert nu ook base64 payloads
     # zoals virtual-tryon-v1.js verstuurt.
     base_image_url: Optional[str] = None
     garment_image_url: Optional[str] = None
@@ -1715,7 +1715,7 @@ async def virtual_tryon(body: TryonBody, authorization: Optional[str] = Header(N
     Compose user photo + outfit reference into a realistic try-on image.
     Focus EXCLUSIVELY on the person and their clothing/silhouette.
 
-    Returns: { ok, image_b64, mime_type, caption } — matching frontend contract.
+    Returns: { ok, image_b64, mime_type, caption }   matching frontend contract.
     """
     await _verify_ai_access(authorization, endpoint="tryon")
     api_key = os.environ.get('EMERGENT_LLM_KEY')
@@ -1866,7 +1866,7 @@ async def weekly_stylist_stub(body: WeeklyStylistBody, authorization: Optional[s
 
 # ── AI health (compatibility shim) ─────────────────────────────────────
 # Pre-existing /api/ai/health is reeds gedefinieerd boven (regel 111).
-# Geen duplicaat nodig - oude shim verwijderd.
+# Geen duplicaat nodig, oude shim verwijderd.
 
 
 # Include the router in the main app
@@ -1990,7 +1990,7 @@ async def admin_backfill_emails(
         "examples": []
     }
 
-    # 1) Brands ophalen — vul email uit users.email als brand.email leeg is
+    # 1) Brands ophalen . vul email uit users.email als brand.email leeg is
     try:
         for bd in db.collection("brands").limit(500).stream():
             summary["brands_scanned"] += 1
@@ -2018,7 +2018,7 @@ async def admin_backfill_emails(
     except Exception as e:
         raise HTTPException(500, f"brand-scan mislukte: {e}")
 
-    # 2) Campaigns — vul email uit brands.email als campaign.email leeg is
+    # 2) Campaigns . vul email uit brands.email als campaign.email leeg is
     try:
         brand_emails = {}
         for bd in db.collection("brands").limit(500).stream():

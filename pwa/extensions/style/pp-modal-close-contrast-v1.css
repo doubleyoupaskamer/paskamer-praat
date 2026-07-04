@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════
- * PASKAMER PRAAT — Modal Close Button Contrast Fix (v1.0)
+ * PASKAMER PRAAT . Modal Close Button Contrast Fix (v1.0)
  * ═══════════════════════════════════════════════════════════════════════
  *
  * WCAG AA/AAA compliant contrast voor alle sluitknoppen (×) in modals.
- * Volledig additief — geen legacy CSS wordt aangeraakt.
+ * Volledig additief . geen legacy CSS wordt aangeraakt.
  *
  * Doel: minimum 4.5:1 contrast ratio (WCAG AA) op X-glyph, met visible
  * focus-ring én hover-state die duidelijk zichtbaar is voor alle
@@ -135,7 +135,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
- * v60.1.253 — Premium modal boven ALLES
+ * v60.1.253 . Premium modal boven ALLES
  *
  * Legacy modals in pwa-v463 gebruiken z-index 99999 waardoor de premium
  * modal (10050) eronder verdween. We bumpen naar één stap onder onze

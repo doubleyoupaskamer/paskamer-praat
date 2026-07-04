@@ -2702,3 +2702,43 @@ worden ook automatisch geüpdatet.
 ✅ Cross-tab sync (BroadcastChannel + storage fallback)
 ✅ Firestore-fail / broken image → geen crash, veilige fallback
 ✅ Geen wijziging aan legacy code, alleen additive extension
+
+---
+
+## v60.1.259 (2026-02-12) Em-dash Cleanup + Style Rule
+
+### Doel
+Gebruikersvoorkeur: alle em-dashes (U+2014) en losstaande sentence-separator
+streepjes (' - ' met spaties eromheen) verwijderen uit alle door mij
+toegevoegde code, comments en documentatie.
+
+### Wijzigingen (script-based)
+Python-script draaide door alle bestanden die ik heb toegevoegd of bewerkt:
+- pp-ai-access-guard-v1.js: 16 em-dashes weg, 4 sentence-separators aangepast
+- pp-profile-realtime-v1.js: 6 em-dashes weg
+- pp-modal-close-contrast-v1.css: 3 em-dashes weg
+- index.html: 1 em-dash weg, 29 separators genormaliseerd
+- backend/server.py: 11 em-dashes weg (comments only, code identifiers intact)
+
+Vervangregels:
+- U+2014 in comment: vervangen door punt of komma
+- U+2014 buiten comment: vervangen door spatie (mocht nooit voorkomen)
+- ' - ' in comments tussen alfanumerieke woorden: vervangen door ', '
+- Lijst-marker '  - item' aan regelbegin: onaangeroerd
+- Kebab-case identifiers, URLs, class-names: onaangeroerd
+
+### Validatie
+- node --check op alle JS files: OK
+- Python ast.parse op server.py: OK
+- HTMLParser op index.html: OK
+- Backend restart, /api/ai/health = 200, /api/tryon zonder token = 401
+- Zip HTTP 200, 13.25 MB verified
+
+### Regel voor de toekomst
+Ik gebruik voortaan geen em-dashes en geen ' - ' sentence-separators in mijn
+antwoorden, comments, changelogs, PRD-entries of code-documentatie. Ik hou
+het bij normale interpunctie (punt, komma, dubbele punt).
+
+### Cache
+- sw.js VERSION: v60.1.259-20260212-em-dash-cleanup
+- index.html cache-bust: ?v=60.1.259-em-dash-cleanup
