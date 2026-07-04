@@ -1326,6 +1326,143 @@ async def admin_premium_transactions(
     return {"transactions": txns, "count": len(txns)}
 
 
+# ════════════════════════════════════════════════════════════════════════
+# v60.1.257 — Admin AI Usage Management
+#   Endpoints om support-vragen als "mijn AI-quota klopt niet" snel af te
+#   handelen: kijk stand op, en reset teller indien nodig. Alle acties
+#   worden gelogd naar `premium_audit` collection voor traceerbaarheid.
+# ════════════════════════════════════════════════════════════════════════
+class AiUsageResetBody(BaseModel):
+    uid: Optional[str] = None
+    email: Optional[str] = None
+    month: Optional[str] = None  # 'YYYY-MM'; default = huidige maand
+    note: Optional[str] = None
+
+
+async def _resolve_uid_from_email(email: str) -> Optional[str]:
+    """Zoek Firebase uid op basis van email (via Firebase Admin Auth)."""
+    email = (email or "").strip().lower()
+    if not email:
+        return None
+    try:
+        import shopify_wallet
+        from firebase_admin import auth as fb_auth
+        user = fb_auth.get_user_by_email(email, app=shopify_wallet._fb_app)
+        return user.uid if user else None
+    except Exception:
+        return None
+
+
+@api_router.get("/admin/ai-usage/lookup")
+async def admin_ai_usage_lookup(
+    uid: Optional[str] = None,
+    email: Optional[str] = None,
+    month: Optional[str] = None,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    """Bekijk de huidige AI-usage teller van een user (support-tool)."""
+    _check_admin_access(x_admin_secret, x_user_email)
+    if not uid and not email:
+        raise HTTPException(400, "uid of email is vereist")
+    resolved_uid = uid
+    if not resolved_uid and email:
+        resolved_uid = await _resolve_uid_from_email(email)
+    if not resolved_uid:
+        raise HTTPException(404, "Geen Firebase-user gevonden voor deze email/uid")
+    fs = _ai_get_firestore()
+    if not fs:
+        raise HTTPException(503, "Firestore niet beschikbaar")
+    month = (month or _ai_month_key()).strip()
+    doc_id = f"{resolved_uid}_{month}"
+    try:
+        snap = fs.collection("ai_usage").document(doc_id).get()
+        data = snap.to_dict() if snap and snap.exists else None
+    except Exception as e:
+        raise HTTPException(500, f"Firestore fetch faalde: {e}")
+    return {
+        "uid": resolved_uid,
+        "email": email,
+        "month": month,
+        "doc_id": doc_id,
+        "exists": data is not None,
+        "count": int((data or {}).get("count") or 0),
+        "limit": AI_FREE_LIMIT,
+        "remaining": max(0, AI_FREE_LIMIT - int((data or {}).get("count") or 0)),
+        "firstShown": bool((data or {}).get("firstShown")),
+        "laatsteUpdate": str((data or {}).get("laatsteUpdate") or ""),
+    }
+
+
+@api_router.post("/admin/ai-usage/reset")
+async def admin_ai_usage_reset(
+    body: AiUsageResetBody,
+    x_admin_secret: Optional[str] = Header(None),
+    x_user_email: Optional[str] = Header(None),
+):
+    """Reset de AI-usage teller van een user voor huidige (of opgegeven) maand.
+    Zet count=0 en firstShown=false zodat de user opnieuw start.
+    Wordt gelogd in premium_audit voor traceerbaarheid."""
+    _check_admin_access(x_admin_secret, x_user_email)
+    if not body.uid and not body.email:
+        raise HTTPException(400, "uid of email is vereist")
+    resolved_uid = body.uid
+    if not resolved_uid and body.email:
+        resolved_uid = await _resolve_uid_from_email(body.email)
+    if not resolved_uid:
+        raise HTTPException(404, "Geen Firebase-user gevonden voor deze email/uid")
+    fs = _ai_get_firestore()
+    if not fs:
+        raise HTTPException(503, "Firestore niet beschikbaar")
+    month = (body.month or _ai_month_key()).strip()
+    doc_id = f"{resolved_uid}_{month}"
+    # Haal huidige stand op vóór reset (voor audit trail)
+    prev_count = 0
+    try:
+        prev = fs.collection("ai_usage").document(doc_id).get()
+        if prev.exists:
+            prev_count = int((prev.to_dict() or {}).get("count") or 0)
+    except Exception:
+        pass
+    # Reset naar 0 (behoud month/userId, verwijder firstShown zodat user opnieuw
+    # de first-use popup ziet).
+    try:
+        fs.collection("ai_usage").document(doc_id).set({
+            "userId": resolved_uid,
+            "month": month,
+            "count": 0,
+            "firstShown": False,
+            "resetBy": x_user_email,
+            "resetAt": datetime.now(timezone.utc).isoformat(),
+            "resetNote": (body.note or "")[:200],
+        }, merge=False)  # merge=False = volledig overschrijven
+    except Exception as e:
+        raise HTTPException(500, f"Firestore reset faalde: {e}")
+    # Audit log naar Mongo
+    try:
+        await db.premium_audit.insert_one({
+            "action": "ai_usage_reset",
+            "target_uid": resolved_uid,
+            "target_email": body.email,
+            "month": month,
+            "prev_count": prev_count,
+            "actor": x_user_email,
+            "at": datetime.now(timezone.utc).isoformat(),
+            "note": body.note,
+        })
+    except Exception:
+        pass
+    return {
+        "ok": True,
+        "uid": resolved_uid,
+        "email": body.email,
+        "month": month,
+        "prev_count": prev_count,
+        "new_count": 0,
+        "remaining": AI_FREE_LIMIT,
+    }
+
+
 @api_router.get("/admin/premium/webhooks")
 async def admin_premium_webhooks(
     limit: int = 50,

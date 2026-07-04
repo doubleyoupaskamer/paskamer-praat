@@ -2590,3 +2590,38 @@ Tab A gebruikt AI → count 3. Tab B toonde stale count 2 uit `_premCache`.
 ✅ Cross-tab consistency via visibility+storage listeners
 ✅ First-use popup werkt via zowel module-open als fetch-hijack path
 ✅ Backend blijft strict: 401 zonder token (regressie verified)
+
+---
+
+## v60.1.257 (2026-02-12) — Admin AI-Usage Management Endpoints
+
+### Doel
+Support-tool voor "mijn AI-quota klopt niet"-vragen zonder handmatig
+Firestore-console gepiel.
+
+### Nieuwe endpoints (admin-gated via `X-Admin-Secret` + `X-User-Email`)
+1. **`GET /api/admin/ai-usage/lookup?uid=…|email=…&month=YYYY-MM`**
+   Bekijk huidige AI-usage teller van een gebruiker. Response:
+   `{uid, email, month, doc_id, exists, count, limit, remaining, firstShown, laatsteUpdate}`
+2. **`POST /api/admin/ai-usage/reset`** (body: `{uid?, email?, month?, note?}`)
+   Reset count=0 en firstShown=false zodat user opnieuw start met 5 gratis
+   analyses + eerste-gebruik popup. Response includes `prev_count` voor context.
+
+### Feature details
+- Email → uid resolutie via Firebase Admin Auth
+- Reset zet firstShown expliciet op false (user ziet weer info-popup)
+- Volledige audit-trail in `premium_audit` collection:
+  `{action:"ai_usage_reset", target_uid, target_email, month, prev_count, actor, at, note}`
+- Verkeerd/ontbrekend admin secret → 403; onbekende user → 404
+- Kan naast huidige maand ook oudere maanden bekijken/resetten (via `month=YYYY-MM`)
+
+### Testing (curl-verified — ALL PASS)
+- Zonder creds: 403 "Forbidden: invalid admin secret" ✓
+- Lookup met creds: correct data (count/limit/remaining/firstShown) ✓
+- Reset: `prev_count: 3, new_count: 0, remaining: 5` ✓
+- Post-reset lookup: count=0, firstShown=false ✓
+- Audit-log record in `premium_audit` compleet met actor + timestamp ✓
+- Cleanup verified
+
+### Deliverable
+**Backend-only** (geen PWA-zip wijziging). Zip blijft op v60.1.256.
