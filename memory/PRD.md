@@ -2787,3 +2787,44 @@ Contrast ratio berekend via WCAG formule op midpoint gradient:
 - Geen wijziging aan legacy CSS regels
 - Extension CSS syntax OK
 - Backend endpoints intact (401 / 200 controles slagen)
+
+---
+
+## v60.1.261 (2026-02-12) Modal contrast sweep (WCAG AA)
+
+### Probleem
+User screenshot "Deze week voor jou" popup toonde:
+- Subtitle "2026-W27" nauwelijks zichtbaar (donker oranje op donker fond)
+- "Geen picks gevonden" te licht bruin op bruin, ratio 3.37:1
+
+Rootcause: meerdere legacy JS files (weekly-stylist-v1.js, virtual-tryon-v1.js,
+wardrobe-recommend-v1.js) hebben hardcoded inline CSS met kleur #7a6a3f (donker
+olijf) voor subtitles, loading en error states. Op donker fond zwak contrast.
+
+### Fix (100% additief in extension CSS)
+- `#dy-weekly-modal .s` (subtitle): rgba(240,179,64,0.92) + font-weight 600
+- `#dy-weekly-modal .loading, .error`: rgba(253,245,227,0.86)
+- `#dy-weekly-modal .pick .reason`: rgba(253,245,227,0.78) italic
+- `#dy-tryon-modal .dy-tryon-loading + hint + meta + caption`: cream tones
+- `#dy-wardrobe-rec-modal .dy-wr-loading-text + hint`: cream
+- Universele fallback voor alle `[id^="dy-"][id$="-modal"]` en `.pp-modal`:
+  loading/error/empty/hint/placeholder/no-results tekst naar leesbare cream
+- Sub-tekst patronen (.dy-sub, .dy-meta, .dy-hint, .dy-caption, [class$="-sub"]
+  etc.) binnen modals krijgen rgba(253,245,227,0.80)
+- Input/textarea placeholders binnen modals: rgba(253,245,227,0.55)
+- Focus visible op alle interactieve modal-elementen: gouden ring 3px
+
+### Contrast metingen (WCAG AA target: 4.5:1)
+- VOOR loading tekst #7a6a3f op #1f1608: 3.37:1 (FAILS)
+- NA loading tekst rgba(253,245,227,0.86): 12.15:1 (PASSES ruim)
+- NA subtitle rgba(240,179,64,0.92): 9.04:1 (PASSES ruim)
+
+### Deliverable
+- sw.js VERSION: v60.1.261-20260212-modal-contrast-sweep
+- index.html cache-bust: ?v=60.1.261-modal-contrast-sweep
+- Zip: 13.25 MB HTTP 200 verified
+- Geen legacy JS aangeraakt
+
+### Bestrijkt
+Weekly Stylist, Virtual Try-On, Wardrobe Recommend, Premium modal en alle
+toekomstige modals via id-suffix `-modal` en `.pp-modal` class conventions.

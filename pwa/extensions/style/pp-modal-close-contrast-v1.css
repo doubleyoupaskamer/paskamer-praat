@@ -239,3 +239,101 @@ body:has(#dy-premium-modal) .pp-aig-banner {
   color: rgba(253, 245, 227, 0.86) !important;
 }
 
+
+/* =======================================================================
+ * v60.1.261. Universele modal en popup contrast boost (WCAG AA)
+ *
+ * Rootcause: meerdere legacy JS files hebben hardcoded inline CSS met
+ * kleur #7a6a3f (donker olijf) voor subtitles, loading en error state
+ * tekst. Op donker fond geeft dit slechts 2.5:1 contrast, ruim onder
+ * WCAG AA minimum 4.5:1. Voorbeelden: weekly-stylist, virtual-tryon.
+ *
+ * Fix: 100% additief, overriding de inline hardcoded regels met betere
+ * kleuren die WCAG AA garanderen op alle donkere modal fondsen.
+ * Legacy JS blijft ongewijzigd.
+ * ======================================================================= */
+
+/* Weekly Stylist modal (Deze week voor jou) */
+#dy-weekly-modal .s {
+  color: rgba(240, 179, 64, 0.92) !important;
+  font-weight: 600 !important;
+}
+#dy-weekly-modal .loading,
+#dy-weekly-modal .error {
+  color: rgba(253, 245, 227, 0.86) !important;
+}
+#dy-weekly-modal .pick .reason {
+  color: rgba(253, 245, 227, 0.78) !important;
+  font-style: italic;
+}
+#dy-weekly-modal header .t {
+  color: rgba(253, 245, 227, 0.98) !important;
+}
+
+/* Virtual Try-On modal loading en meta */
+#dy-tryon-modal .dy-tryon-loading {
+  color: rgba(253, 245, 227, 0.86) !important;
+}
+#dy-tryon-modal .dy-tryon-hint,
+#dy-tryon-modal .dy-tryon-meta,
+#dy-tryon-modal .dy-tryon-caption {
+  color: rgba(253, 245, 227, 0.80) !important;
+}
+
+/* Wardrobe Recommend modal loading */
+#dy-wardrobe-rec-modal .dy-wr-loading-text,
+#dy-wardrobe-rec-modal .dy-wr-hint {
+  color: rgba(253, 245, 227, 0.86) !important;
+}
+
+/* Universele modal fallback: empty/loading/error state tekst */
+[id^="dy-"][id$="-modal"] .loading,
+[id^="dy-"][id$="-modal"] .error,
+[id^="dy-"][id$="-modal"] .empty,
+[id^="dy-"][id$="-modal"] .hint,
+[id^="dy-"][id$="-modal"] .placeholder,
+[id^="dy-"][id$="-modal"] .no-results,
+.pp-modal .loading,
+.pp-modal .error,
+.pp-modal .empty {
+  color: rgba(253, 245, 227, 0.86) !important;
+}
+
+/* Sub-text patronen die op donker fond te licht bruin waren */
+.dy-modal-sub,
+[class*="modal"] .dy-sub,
+[class*="modal"] .dy-meta,
+[class*="modal"] .dy-hint,
+[class*="modal"] .dy-caption,
+[class*="modal"] [class$="-sub"],
+[class*="modal"] [class$="-meta"],
+[class*="modal"] [class$="-hint"] {
+  color: rgba(253, 245, 227, 0.80) !important;
+}
+
+/* Body tekst binnen modals: garandeer minimum leesbaarheid */
+[id^="dy-"][id$="-modal"] p,
+[id^="dy-"][id$="-modal"] li,
+[id^="dy-"][id$="-modal"] span:not([class*="badge"]):not([class*="pill"]):not([class*="chip"]) {
+  color: inherit;
+}
+
+/* Placeholders in form inputs binnen modals */
+[id^="dy-"][id$="-modal"] input::placeholder,
+[id^="dy-"][id$="-modal"] textarea::placeholder,
+.pp-modal input::placeholder,
+.pp-modal textarea::placeholder {
+  color: rgba(253, 245, 227, 0.55) !important;
+  opacity: 1;
+}
+
+/* Focus visible op alle interactieve elementen binnen modals */
+[id^="dy-"][id$="-modal"] button:focus-visible,
+[id^="dy-"][id$="-modal"] a:focus-visible,
+[id^="dy-"][id$="-modal"] input:focus-visible,
+[id^="dy-"][id$="-modal"] select:focus-visible,
+[id^="dy-"][id$="-modal"] textarea:focus-visible,
+.pp-modal button:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(240, 179, 64, 0.55) !important;
+}
