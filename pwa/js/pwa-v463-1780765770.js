@@ -9224,7 +9224,7 @@ DY.renderWinkel = function() {
         <div class="dy-vr-header-inner">
           <div>
             <div class="dy-feed-merk-label">Paskamerpraat</div>
-            <h1 class="dy-vr-titel">De <em>Winkel</em></h1>
+            <h1 class="dy-vr-titel">DoubleYou Tailored for Tall &amp; Plus Size: <em>Webshop</em></h1>
           </div>
           <button class="dy-pg-actie-btn" onclick="DY.openWebshop('https://doubleyoufashion.nl/collections/doubleyou-1')">
             Winkel openen
