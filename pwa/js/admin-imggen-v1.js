@@ -11,6 +11,65 @@
   if (!window.DY) window.DY = {};
 
   var _BACKEND_FALLBACK = 'https://paskamer-stability.preview.emergentagent.com';
+
+  // v60.1.243: Image compression helper (voorkomt "Failed to fetch" bij grote uploads)
+  //   Comprimeert naar max 1600×1600 en target JPEG quality 0.82.
+  //   Voert een 2e pass uit met lagere quality als resultaat > 1.5 MB.
+  async function compressImage(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        var img = new Image();
+        img.onload = function () {
+          var MAX_DIM = 1600;
+          var w = img.width, h = img.height;
+          var scale = Math.min(1, MAX_DIM / Math.max(w, h));
+          var canvas = document.createElement('canvas');
+          canvas.width = Math.round(w * scale);
+          canvas.height = Math.round(h * scale);
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          function encode(q) {
+            return canvas.toDataURL('image/jpeg', q);
+          }
+          var dataUrl = encode(0.82);
+          if (dataUrl.length > 1.5 * 1024 * 1024 * 1.35) { // > 1.5 MB in base64
+            dataUrl = encode(0.68);
+          }
+          if (dataUrl.length > 3 * 1024 * 1024 * 1.35) { // > 3 MB nog steeds
+            dataUrl = encode(0.55);
+          }
+          resolve({
+            dataUrl: dataUrl,
+            base64: dataUrl.split(',')[1] || '',
+            mime: 'image/jpeg',
+            origSize: file.size,
+            compressedSize: dataUrl.length
+          });
+        };
+        img.onerror = function () { reject(new Error('Kon afbeelding niet laden')); };
+        img.src = ev.target.result;
+      };
+      reader.onerror = function () { reject(new Error('FileReader fout')); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // v60.1.243: friendly error voor "Failed to fetch" (adblock / netwerk / mixed-content)
+  function _describeFetchErr(e, backendUrl) {
+    var msg = String(e && (e.message || e));
+    if (/Failed to fetch|NetworkError|Load failed/i.test(msg)) {
+      return 'Netwerkfout: <strong>Failed to fetch</strong>.<br>' +
+        '<small style="color:#f0b340">Mogelijke oorzaken:</small>' +
+        '<ul style="margin:6px 0 0 20px;padding:0;color:rgba(252,248,239,0.75);font-size:0.83rem;line-height:1.6">' +
+          '<li><strong>Adblock/Privacy-extensie</strong>: schakel uit voor deze pagina (Adblock Plus, uBlock, Ghostery, Brave shield) — het backend-domein ' + esc(backendUrl.replace(/^https?:\/\//, '')) + ' matcht ad-tracking-filters.</li>' +
+          '<li><strong>VPN / Firewall</strong>: probeer VPN uit te schakelen.</li>' +
+          '<li><strong>Slechte verbinding</strong>: check of ' + esc(backendUrl) + '/api/ bereikbaar is (open in een nieuw tabblad).</li>' +
+        '</ul>';
+    }
+    return 'Netwerkfout: ' + esc(msg);
+  }
+
   function _backendUrl() {
     var v = localStorage.getItem('dy.imggen.url');
     // v60.1.240: guard tegen stale/invalid localStorage waardes.
@@ -259,31 +318,30 @@
       var removeBtn = document.getElementById(prefix + '-ref-remove');
       var hint = document.getElementById(prefix + '-ref-hint');
       if (!fileInput) return;
-      fileInput.addEventListener('change', function () {
+      fileInput.addEventListener('change', async function () {
         var f = fileInput.files && fileInput.files[0];
         if (!f) return;
-        if (f.size > 4 * 1024 * 1024) {
-          if (hint) hint.textContent = 'Bestand > 4 MB. Comprimeer eerst en probeer opnieuw.';
-          if (hint) hint.style.color = '#ff6b6b';
+        if (f.size > 20 * 1024 * 1024) {
+          if (hint) { hint.textContent = 'Bestand > 20 MB. Comprimeer of gebruik kleiner formaat.'; hint.style.color = '#ff6b6b'; }
           fileInput.value = '';
           return;
         }
-        var reader = new FileReader();
-        reader.onload = function (ev) {
-          var dataUrl = ev.target.result || '';
-          var parts = dataUrl.split(',');
-          var b64 = parts[1] || '';
-          var mimeMatch = parts[0].match(/data:(.+);base64/);
-          var mime = mimeMatch ? mimeMatch[1] : (f.type || 'image/png');
-          window.__ppImgGenRefs[storeKey] = { base64: b64, mime: mime, name: f.name };
-          if (previewImg) previewImg.src = dataUrl;
+        if (hint) { hint.textContent = 'Bezig met comprimeren…'; hint.style.color = '#d4910a'; }
+        try {
+          var compressed = await compressImage(f);
+          window.__ppImgGenRefs[storeKey] = { base64: compressed.base64, mime: compressed.mime, name: f.name };
+          if (previewImg) previewImg.src = compressed.dataUrl;
           if (preview) preview.style.display = 'block';
           if (hint) {
-            hint.textContent = f.name + ' geladen (' + Math.round(f.size/1024) + ' KB)';
+            var savedKB = Math.round((f.size - compressed.compressedSize) / 1024);
+            var newKB = Math.round(compressed.compressedSize / 1024);
+            hint.textContent = f.name + ' (' + newKB + ' KB' + (savedKB > 0 ? ', −' + savedKB + ' KB gecomprimeerd' : '') + ')';
             hint.style.color = '#82c08a';
           }
-        };
-        reader.readAsDataURL(f);
+        } catch (err) {
+          if (hint) { hint.textContent = 'Compressie mislukt: ' + String(err.message || err); hint.style.color = '#ff6b6b'; }
+          fileInput.value = '';
+        }
       });
       if (removeBtn) {
         removeBtn.addEventListener('click', function () {
@@ -351,7 +409,7 @@
           '<img src="' + url + '" style="max-width:100%;border-radius:12px;display:block;margin-bottom:12px" data-testid="imggen-result-img">' +
           '<a href="' + url + '" download="' + filename + '" class="bp-btn bp-btn-primair" style="display:inline-block;text-decoration:none" data-testid="imggen-download-btn">Download ' + filename + '</a>';
       } catch(e) {
-        statusEl.innerHTML = '<span style="color:#ff6b6b">Netwerkfout: ' + esc(String(e.message || e)) + '</span>';
+        statusEl.innerHTML = '<span style="color:#ff6b6b;line-height:1.5">' + _describeFetchErr(e, _backendUrl()) + '</span>';
       } finally {
         btn.disabled = false; btn.textContent = 'Genereer afbeelding';
       }
@@ -480,7 +538,7 @@
           '<a href="' + url + '" download="' + filename + '" class="bp-btn bp-btn-primair" style="display:inline-block;text-decoration:none" data-testid="vidgen-download-btn">Download ' + filename + '</a>';
       } catch(e) {
         clearInterval(tickIv);
-        statusEl.innerHTML = '<span style="color:#ff6b6b">Netwerkfout: ' + esc(String(e.message || e)) + '</span>';
+        statusEl.innerHTML = '<span style="color:#ff6b6b;line-height:1.5">' + _describeFetchErr(e, _backendUrl()) + '</span>';
       } finally {
         clearInterval(tickIv);
         btn.disabled = false; btn.textContent = 'Genereer video';
