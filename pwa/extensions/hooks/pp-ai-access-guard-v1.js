@@ -117,7 +117,7 @@
     var s = document.createElement('style');
     s.id = 'pp-ai-guard-css';
     s.textContent =
-      '.pp-aig-ov{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}' +
+      '.pp-aig-ov{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}' +
       '.pp-aig-box{background:linear-gradient(155deg,#1a140c,#0f0c08);border:1px solid rgba(212,145,10,.34);border-radius:16px;padding:24px;max-width:440px;width:100%;color:#fcf8ef;font-family:"DM Sans",system-ui,sans-serif}' +
       '.pp-aig-box h3{margin:0 0 8px;font:400 1.35rem/1.2 "DM Serif Display","Cormorant Garamond",serif;color:#f0b340}' +
       '.pp-aig-box p{margin:0 0 14px;color:rgba(252,248,239,.82);line-height:1.55;font-size:.93rem}' +
@@ -151,29 +151,38 @@
   }
 
   function showLoginPrompt() {
-    // Hergebruik bestaande login-flow indien beschikbaar
-    if (window.DY && typeof DY.toonLoginPrompt === 'function') {
-      try { DY.toonLoginPrompt('Log in om AI-functionaliteiten te gebruiken.'); return; } catch (_) {}
-    }
-    if (window.DY && typeof DY.toonLogin === 'function') {
-      try { DY.toonLogin(); return; } catch (_) {}
-    }
-    // Fallback eigen modal
-    showModal(
+    // v60.1.246: Gebruik altijd eigen modal (DY.toonLoginPrompt kan silently
+    // falen bij sommige app-states). Consistent UX gegarandeerd.
+    var ov = showModal(
       '<span class="pp-aig-badge">Login vereist</span>' +
       '<h3>Log in om AI te gebruiken</h3>' +
-      '<p>Alle AI-functionaliteiten (Outfit Score, Style Assistant, Probeer Aan, Media Generator) zijn alleen beschikbaar voor ingelogde gebruikers.</p>' +
+      '<p>Alle AI-functionaliteiten (Outfit Score, Style Assistant, Probeer Aan, Media Generator, Wardrobe Advies) zijn alleen beschikbaar voor ingelogde gebruikers.</p>' +
       '<div class="pp-aig-acts">' +
         '<button class="pp-aig-btn pp-aig-btn-ghost" data-role="close" data-testid="pp-aig-login-close">Sluiten</button>' +
         '<button class="pp-aig-btn pp-aig-btn-primair" data-role="login" data-testid="pp-aig-login-open">Inloggen</button>' +
       '</div>'
     );
-    document.querySelector('.pp-aig-ov').addEventListener('click', function (e) {
+    ov.addEventListener('click', function (e) {
       var r = e.target.getAttribute && e.target.getAttribute('data-role');
       if (r === 'close') closeModal();
       if (r === 'login') {
         closeModal();
-        try { location.hash = '#login'; } catch (_) {}
+        // Probeer bestaande login-flow, anders hash-navigate
+        try {
+          if (window.DY && typeof DY.toonLoginPrompt === 'function') {
+            DY.toonLoginPrompt('Log in om AI te gebruiken.');
+            return;
+          }
+          if (window.DY && typeof DY.toonLogin === 'function') {
+            DY.toonLogin();
+            return;
+          }
+          if (window.DY && typeof DY.navigeer === 'function') {
+            DY.navigeer('login');
+            return;
+          }
+        } catch (_) {}
+        location.hash = '#login';
       }
     });
   }
@@ -266,16 +275,11 @@
     if (isAiEndpoint(url)) {
       var allowed = await guardCheck();
       if (!allowed) {
-        // Return een fake Response met 403 zodat calling code niet crasht
-        return new Response(JSON.stringify({
-          ok: false,
-          blocked: true,
-          reason: isGuest() ? 'not-authenticated' : 'quota-exhausted',
-          error: 'AI-analyse geblokkeerd door toegangsbeheer.'
-        }), {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' }
-        });
+        // v60.1.246: Return een never-resolving Promise. Zo blijft de
+        // guard-modal het enige zichtbare element en toont de calling
+        // code géén error dialog met rauwe response. Als de gebruiker
+        // klikt op Login/Upgrade wordt de pagina/state vernieuwd.
+        return new Promise(function () { /* nooit resolven */ });
       }
     }
     return _origFetch(input, init);
