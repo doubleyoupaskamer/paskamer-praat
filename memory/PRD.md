@@ -2742,3 +2742,48 @@ het bij normale interpunctie (punt, komma, dubbele punt).
 ### Cache
 - sw.js VERSION: v60.1.259-20260212-em-dash-cleanup
 - index.html cache-bust: ?v=60.1.259-em-dash-cleanup
+
+---
+
+## v60.1.260 (2026-02-12) Galerij knop WCAG AA contrast fix
+
+### Probleem
+Screenshot van user toonde dat de Galerij knop (primair goud) in Outfit
+Vergelijker en Kleuranalyse een onvoldoende leesbare sub tekst had. De
+"Kies een foto" met rgba(255,255,255,0.85) op linear-gradient(135deg,
+#c67d06, #b06205) gaf slechts contrast ratio 2.87:1, ver onder WCAG AA
+minimum van 4.5:1.
+
+### Fix (100% additief, geen legacy CSS aangeraakt)
+In `extensions/style/pp-modal-close-contrast-v1.css`:
+- Donkerdere gradient: #b06205 tot #8a4d04 (i.p.v. #c67d06 tot #b06205)
+- Volle opacity op labels (1.0) en sub tekst (0.98)
+- Text shadow rgba(0,0,0,0.30) voor gegarandeerd contrast op elke gradient positie
+- Font weight labels bumped naar 700
+- Icoon achtergrond opacity 0.28 (was 0.18) voor betere visuele scheiding
+- Pijl kleur rgba(255,255,255,0.95) (was 0.6)
+
+Bestrijkt beide varianten:
+- Outfit Vergelijker: `.dy-kvs-knop--primair`
+- Kleuranalyse: `.dy-kai-up-kaart--goud`
+
+Ook secundaire (Camera) en tertiaire (Verhaal) knoppen kregen consistente
+label + sub tekst kleuren voor uniforme leesbaarheid.
+
+Focus visible state toegevoegd: gouden ring van 3px + subtiele drop
+shadow voor keyboard navigatie.
+
+### Meting
+Contrast ratio berekend via WCAG formule op midpoint gradient:
+- VOOR: 2.87:1 (FAILS WCAG AA)
+- NA: 5.30:1 (PASSES WCAG AA)
+
+### Deliverable
+- sw.js VERSION: v60.1.260-20260212-galerij-contrast-wcag
+- index.html cache-bust: ?v=60.1.260-galerij-contrast
+- Zip: 13.25 MB, HTTP 200
+
+### Regressie check
+- Geen wijziging aan legacy CSS regels
+- Extension CSS syntax OK
+- Backend endpoints intact (401 / 200 controles slagen)

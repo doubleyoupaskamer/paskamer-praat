@@ -155,10 +155,87 @@
 .dy-prem-return-toast {
   z-index: 2147483645 !important;
 }
-/* Wanneer premium modal open is → dim & disable interactie op alle andere
+/* Wanneer premium modal open is: dim en disable interactie op alle andere
  * open modals (defensief, zodat er nooit twee actieve modals ontstaan). */
 body:has(#dy-premium-modal) .pp-aig-ov,
 body:has(#dy-premium-modal) .pp-aig-banner {
   display: none !important;
+}
+
+/* =======================================================================
+ * v60.1.260. WCAG AA contrast fix voor Galerij foto source knoppen
+ *
+ * Outfit Vergelijker en Kleuranalyse tonen drie keuzeknoppen: Galerij
+ * (goud, primair), Camera (donker) en Verhaal (donker). Op de goud
+ * primair knop had de sub tekst rgba(255,255,255,0.85) opacity wat op de
+ * lichte oranje gradient onvoldoende leesbaar was (contrast ratio < 3:1).
+ *
+ * Fix: donkerdere gradient, volle opacity, subtiele text shadow voor
+ * gegarandeerd contrast, ongeacht welk deel van de gradient onder de
+ * tekst zit. Alleen additief, legacy CSS blijft intact.
+ * ======================================================================= */
+
+/* Outfit Vergelijker: primair goud knop (Galerij) */
+.dy-kvs-knop--primair {
+  background: linear-gradient(135deg, #b06205 0%, #8a4d04 100%) !important;
+  color: #fff !important;
+}
+.dy-kvs-knop--primair .dy-kvs-knop-label {
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  font-weight: 700 !important;
+}
+.dy-kvs-knop--primair .dy-kvs-knop-sub {
+  color: rgba(255, 255, 255, 0.98) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
+}
+.dy-kvs-knop--primair .dy-kvs-knop-icoon {
+  background: rgba(255, 255, 255, 0.28) !important;
+  color: #fff !important;
+}
+.dy-kvs-knop--primair .dy-kvs-pijl {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Kleuranalyse: goud upload kaart (Galerij) */
+.dy-kai-up-kaart--goud {
+  background: linear-gradient(135deg, #b06205 0%, #8a4d04 100%) !important;
+}
+.dy-kai-up-kaart--goud .dy-kai-up-kaart-label {
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  font-weight: 700 !important;
+}
+.dy-kai-up-kaart--goud .dy-kai-up-kaart-desc {
+  color: rgba(255, 255, 255, 0.96) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
+}
+.dy-kai-up-kaart--goud .dy-kai-up-kaart-icoon {
+  background: rgba(255, 255, 255, 0.28) !important;
+  color: #fff !important;
+}
+.dy-kai-up-kaart--goud .dy-kai-up-kaart-pijl {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Focus visible state voor keyboard navigatie: gouden ring rond de knop */
+.dy-kvs-knop--primair:focus-visible,
+.dy-kai-up-kaart--goud:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(240, 179, 64, 0.55),
+              0 6px 18px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Camera + Verhaal knoppen: label en sub tekst iets sterker voor consistentie */
+.dy-kvs-knop--sec .dy-kvs-knop-label,
+.dy-kvs-knop--ter .dy-kvs-knop-label,
+.dy-kai-up-kaart--donker .dy-kai-up-kaart-label {
+  color: #fdf5e3 !important;
+  font-weight: 600 !important;
+}
+.dy-kvs-knop--sec .dy-kvs-knop-sub,
+.dy-kvs-knop--ter .dy-kvs-knop-sub,
+.dy-kai-up-kaart--donker .dy-kai-up-kaart-desc {
+  color: rgba(253, 245, 227, 0.86) !important;
 }
 
