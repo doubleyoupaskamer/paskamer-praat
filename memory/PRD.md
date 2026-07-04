@@ -2879,3 +2879,47 @@ incrementeel bijgewerkt worden met extra `html[data-pp-theme="light"]` regels.
 ### Cache
 - sw.js VERSION: v60.1.263-20260212-theme-toggle
 - Cache-bust: ?v=60.1.263-theme-toggle
+
+---
+
+## v60.1.264 (2026-02-12) DoubleYou Webshop Reviews (titel + scheiding)
+
+### Wijzigingen
+1. Paginakop "Eerlijke Reviews" hernoemd naar "DoubleYou: Webshop Reviews"
+   in beide JS versies (pwa-v463 en hero-v4)
+2. SEO metadata voor de reviews-pagina bijgewerkt:
+   - title: "DoubleYou: Webshop Reviews | Bestelervaring & Levering"
+   - desc: Ervaringen met de DoubleYou webshop (bestellen, verzending,
+     klantenservice, levering, retour). Onafhankelijk van merkenportaal reviews.
+3. Nieuw veld `reviewType` toegevoegd aan review data model:
+   - 'webshop' = bestelervaring/verzending/klantenservice/retour
+   - 'brand' = product/merk/pasvorm (default voor bestaande records zonder tag)
+4. Reviews-pagina filter: toont UITSLUITEND `reviewType === 'webshop'`
+   (client-side filter zodat geen Firestore index update nodig is)
+
+### Architectuur scheiding (opzet)
+- DoubleYou Webshop Reviews pagina: query `reviews` collection, filter
+  `reviewType === 'webshop'`, toont ALLEEN webshop-ervaringen
+- Merkenportaal (`brand-portal-v1.js`): kan straks queries doen met
+  `reviewType === 'brand'` OR ontbrekend (backwards compat) om product-reviews te tonen
+- Bestaande reviews zonder tag blijven behouden en tellen als brand-reviews
+- Geen breaking changes voor bestaande data
+
+### Volgende stap voor volledige scheiding
+Merkenportaal moet OOK een eigen review-submit flow krijgen die `reviewType='brand'`
+zet. Voor nu bestaat die flow nog niet in de codebase. Wanneer die wordt gebouwd
+(via brand-portal-v1.js), simpelweg `reviewType: 'brand'` toevoegen bij de add()
+en dezelfde filter gebruiken.
+
+### Testing
+- node --check op beide JS files: OK
+- Zero occurrences 'Eerlijke Reviews' in de codebase
+- 1x `reviewType: 'webshop'` bij submit per file
+- 1x `reviewType === 'webshop'` filter bij display per file
+
+### Cache
+- sw.js VERSION: v60.1.264-20260212-webshop-reviews-scheiding
+- Cache-bust: ?v=60.1.264-webshop-reviews-scheiding
+
+### Deliverable
+Zip 13.25 MB, HTTP 200 verified

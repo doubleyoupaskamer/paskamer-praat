@@ -148,7 +148,7 @@ DY._VERSION = 'v1779170400-seo-v358';
 DY._seoMetaConfig = {
   feed:             { title: 'Community Feed | Pasvorm Ervaringen & Fitchecks - Paskamerpraat', desc: 'Bekijk de nieuwste pasvorm ervaringen, fitchecks en outfit verhalen van tall (1.85m+) en plus size (XL-5XL) fashion fans in Nederland. Gratis community.' },
   lookbook:         { title: 'Outfit Inspiratie Tall & Plus Size | Lookbook - Paskamerpraat', desc: 'Outfit inspiratie van echte mensen, gefilterd op jouw lengte (1.85m-2.00m+) en maat (XL-5XL). Zie hoe kleding écht staat op een lichaam als het jouwe.' },
-  reviews:          { title: 'Pasvorm Reviews | Kleding voor Lange & Plus Size Mensen - Paskamerpraat', desc: 'Eerlijke pasvorm reviews van kledingmerken voor tall (1.85m+) en plus size (XL-5XL). Ontdek welke merken goed passen bij jouw lengte en bouw.' },
+  reviews:          { title: 'DoubleYou: Webshop Reviews | Bestelervaring & Levering - Paskamerpraat', desc: 'Eerlijke ervaringen met de DoubleYou webshop: bestellen, verzending, klantenservice, levering en retourproces. Onafhankelijk van de merkenportaal reviews.' },
   winkel:           { title: 'Paskamerpraat Winkel | Kleding voor Tall & Plus Size - Paskamerpraat', desc: 'Kleding gemaakt voor tall mensen (1.85m+) en plus size mensen (XL-5XL). Nederlandse ateliers, eerlijke pasvorm. Ontdek de DoubleYou collectie.' },
   challenges:       { title: 'Fashion Challenges voor Tall & Plus Size | Win DSP Punten - Paskamerpraat', desc: 'Doe mee aan wekelijkse fashion challenges voor tall en plus size mensen. Verdien DSP punten, stijg in rang en win community erkenning.' },
   ovdw:             { title: 'Post van de Week | Beste Pasvorm Bijdrage - Paskamerpraat', desc: 'De best beoordeelde community bijdrage van afgelopen week. Elke week kiezen Paskamerpraat leden de mooiste fitcheck of pasvorm review.' },
@@ -11038,7 +11038,7 @@ DY.renderReviewsOverzicht = async function() {
       '<div class="dy-vr-header-inner">' +
         '<div>' +
           '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
-          '<h1 class="dy-vr-titel">Eerlijke <em>Reviews</em></h1>' +
+          '<h1 class="dy-vr-titel">DoubleYou: <em>Webshop Reviews</em></h1>' +
         '</div>' +
         '<button class="dy-pg-actie-btn" id="dy-rev-nieuw-btn">\u2605 Plaatsen</button>' +
       '</div>' +
@@ -11066,6 +11066,16 @@ DY.renderReviewsOverzicht = async function() {
 
   try {
     var snap = await DY.db.collection('reviews').orderBy('ts', 'desc').limit(100).get();
+    // v60.1.264: DoubleYou: Webshop Reviews pagina toont UITSLUITEND reviews
+    // met reviewType='webshop'. Bestaande reviews zonder reviewType worden
+    // beschouwd als merken/product-reviews en verschijnen op deze pagina NIET.
+    // Firestore query filter zou beter zijn maar vereist een index; we filteren
+    // client-side om backwards compat te garanderen (geen index-update nodig).
+    var _filteredDocs = (snap.docs || []).filter(function (d) {
+      try { return (d.data() || {}).reviewType === 'webshop'; } catch (_) { return false; }
+    });
+    // Bouw een snapshot-achtige proxy met alleen webshop reviews
+    snap = { empty: _filteredDocs.length === 0, docs: _filteredDocs, size: _filteredDocs.length };
     var lijst = document.getElementById('dy-reviews-lijst');
     if (!lijst) return;
     if (snap.empty) {
@@ -11626,6 +11636,14 @@ DY.plaatsReview = async function() {
     var data = {
       userId:          DY.user.uid,
       authorName:      displayName,
+      // v60.1.264: expliciet review-domein scheiding.
+      // 'webshop' = ervaringen met de DoubleYou webshop (bestellen, levering,
+      // klantenservice, retour, gebruikservaring van de webshop).
+      // 'brand'   = product/merk/pasvorm reviews binnen het merkenportaal.
+      // De DoubleYou Webshop Reviews pagina toont ALLEEN reviewType='webshop'.
+      // Bestaande reviews zonder reviewType worden default als 'brand' behandeld
+      // (backwards compat, want ze bevatten product/pasvorm-velden).
+      reviewType:      'webshop',
       product:         product.trim(),
       ster:            ster,
       tekst:           tekst.trim(),
