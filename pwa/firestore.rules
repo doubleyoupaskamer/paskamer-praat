@@ -372,6 +372,20 @@ service cloud.firestore {
         resource.data.userId == request.auth.uid) || isAdmin();
     }
 
+    // v60.1.245: AI Access Guard usage counter (5 gratis analyses per maand)
+    // Doc ID = {uid}_{YYYY-MM}. Alleen eigen doc lezen/schrijven.
+    match /ai_usage/{docId} {
+      allow read:   if isEchtIngelogd() &&
+        docId.matches(request.auth.uid + '_[0-9]{4}-[0-9]{2}');
+      allow create: if isEchtIngelogd() &&
+        docId.matches(request.auth.uid + '_[0-9]{4}-[0-9]{2}') &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if isEchtIngelogd() &&
+        docId.matches(request.auth.uid + '_[0-9]{4}-[0-9]{2}') &&
+        resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
     match /reacties/{reactieId} {
       allow read:   if true;
       allow create: if isEchtIngelogd() &&

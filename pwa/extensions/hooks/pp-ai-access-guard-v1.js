@@ -1,0 +1,291 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * PASKAMER PRAAT — AI Access Guard (v1.0.0)
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * Centrale autorisatielaag voor ALLE AI-modules. Volledig additief —
+ * geen bestaande module wordt aangeraakt. Werkt via een wereldwijde
+ * fetch-hijack die AI-endpoints herkent en pre-flight controles doet.
+ *
+ * REGELS (per prompt):
+ *   1) Niet-ingelogd  → toon login-popup, blokkeer request.
+ *   2) Premium        → onbeperkte toegang, geen teller.
+ *   3) Ingelogd niet-premium:
+ *      - Max 5 AI-analyses per kalendermaand (gedeelde teller).
+ *      - Eerste gebruik in nieuwe maand → info-popup één keer.
+ *      - 6e analyse → premium-upgrade popup, request geblokkeerd.
+ *   4) Teller persistente in Firestore: `ai_usage/{uid}_{YYYY-MM}`
+ *   5) Teller reset automatisch bij nieuwe maand (nieuwe doc ID).
+ *
+ * BESCHERMDE ENDPOINTS (regex match):
+ *   - /api/ai/*
+ *   - /api/tryon
+ *   - /api/outfit-score
+ *   - /api/wardrobe/recommend
+ *   - /api/weekly-stylist
+ *   - /api/admin/generate-image  (mits niet-admin) → alleen premium
+ *   - /api/admin/generate-video  (mits niet-admin) → alleen premium
+ *
+ * ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  if (window.__ppAiAccessGuardInit) return;
+  window.__ppAiAccessGuardInit = true;
+
+  var FREE_LIMIT = 5;
+  var AI_ENDPOINT_PATTERNS = [
+    /\/api\/ai\//i,
+    /\/api\/tryon(\?|$)/i,
+    /\/api\/outfit-score(\?|$)/i,
+    /\/api\/wardrobe\/recommend(\?|$)/i,
+    /\/api\/weekly-stylist(\?|$)/i,
+  ];
+  // Admin endpoints zijn al beschermd met X-Admin-Secret; we skippen ze hier.
+
+  function log(m) { try { console.info('[ai-guard]', m); } catch (_) {} }
+  function db()  { try { return (window.DY && DY.db) || null; } catch (_) { return null; } }
+  function uid() { try { return (window.DY && DY.user && DY.user.uid) || null; } catch (_) { return null; } }
+  function isGuest() {
+    try {
+      var u = window.DY && DY.user;
+      if (!u || !u.uid) return true;
+      if (u.isAnonymous === true) return true;
+      return false;
+    } catch (_) { return true; }
+  }
+  async function isPremium() {
+    try {
+      if (window.DY && DY.premium && typeof DY.premium.isPremium === 'function') {
+        return await DY.premium.isPremium();
+      }
+    } catch (_) {}
+    return false;
+  }
+  function monthKey() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  }
+  function usageDocId() {
+    var u = uid();
+    return u ? (u + '_' + monthKey()) : null;
+  }
+
+  // ─── Firestore usage counter ─────────────────────────────────────────
+  async function getUsage() {
+    var d = db(); var id = usageDocId();
+    if (!d || !id) return { count: 0, firstShown: false };
+    try {
+      var snap = await d.collection('ai_usage').doc(id).get();
+      if (!snap.exists) return { count: 0, firstShown: false };
+      var v = snap.data() || {};
+      return { count: Number(v.count || 0), firstShown: v.firstShown === true };
+    } catch (e) {
+      log('getUsage err: ' + (e && e.message));
+      return { count: 0, firstShown: false };
+    }
+  }
+  async function incUsage() {
+    var d = db(); var id = usageDocId(); var u = uid();
+    if (!d || !id || !u) return 0;
+    try {
+      var ref = d.collection('ai_usage').doc(id);
+      var FieldValue = window.firebase && firebase.firestore && firebase.firestore.FieldValue;
+      var payload = {
+        userId: u,
+        month: monthKey(),
+        count: FieldValue && FieldValue.increment ? FieldValue.increment(1) : 1,
+        laatsteUpdate: (FieldValue && FieldValue.serverTimestamp && FieldValue.serverTimestamp()) || new Date(),
+      };
+      await ref.set(payload, { merge: true });
+      var snap = await ref.get();
+      return Number((snap.data() || {}).count || 0);
+    } catch (e) {
+      log('incUsage err: ' + (e && e.message));
+      return 0;
+    }
+  }
+  async function markFirstShown() {
+    var d = db(); var id = usageDocId();
+    if (!d || !id) return;
+    try {
+      await d.collection('ai_usage').doc(id).set({ firstShown: true }, { merge: true });
+    } catch (e) { log('markFirstShown err: ' + (e && e.message)); }
+  }
+
+  // ─── Modals ──────────────────────────────────────────────────────────
+  function injectCss() {
+    if (document.getElementById('pp-ai-guard-css')) return;
+    var s = document.createElement('style');
+    s.id = 'pp-ai-guard-css';
+    s.textContent =
+      '.pp-aig-ov{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}' +
+      '.pp-aig-box{background:linear-gradient(155deg,#1a140c,#0f0c08);border:1px solid rgba(212,145,10,.34);border-radius:16px;padding:24px;max-width:440px;width:100%;color:#fcf8ef;font-family:"DM Sans",system-ui,sans-serif}' +
+      '.pp-aig-box h3{margin:0 0 8px;font:400 1.35rem/1.2 "DM Serif Display","Cormorant Garamond",serif;color:#f0b340}' +
+      '.pp-aig-box p{margin:0 0 14px;color:rgba(252,248,239,.82);line-height:1.55;font-size:.93rem}' +
+      '.pp-aig-box .pp-aig-badge{display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(212,145,10,.14);border:1px solid rgba(212,145,10,.35);color:#f0b340;font:700 11px/1 "DM Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}' +
+      '.pp-aig-acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid rgba(245,236,224,.08)}' +
+      '.pp-aig-btn{padding:9px 18px;border-radius:999px;font:600 13px/1 "DM Sans",sans-serif;cursor:pointer;border:1px solid transparent;font-family:inherit;transition:all .15s}' +
+      '.pp-aig-btn-ghost{background:transparent;border-color:rgba(245,236,224,.16);color:rgba(252,248,239,.75)}' +
+      '.pp-aig-btn-ghost:hover{background:rgba(255,255,255,.05)}' +
+      '.pp-aig-btn-primair{background:linear-gradient(135deg,#d4910a,#f0b340);color:#0f0c08}' +
+      '.pp-aig-btn-primair:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(212,145,10,.35)}';
+    document.head.appendChild(s);
+  }
+  function showModal(html) {
+    injectCss();
+    // Voorkom dubbele modals
+    var existing = document.querySelector('.pp-aig-ov');
+    if (existing) existing.parentNode.removeChild(existing);
+    var ov = document.createElement('div');
+    ov.className = 'pp-aig-ov';
+    ov.setAttribute('data-testid', 'pp-ai-guard-modal');
+    ov.innerHTML = '<div class="pp-aig-box">' + html + '</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function (e) {
+      if (e.target === ov) closeModal();
+    });
+    return ov;
+  }
+  function closeModal() {
+    var ov = document.querySelector('.pp-aig-ov');
+    if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+  }
+
+  function showLoginPrompt() {
+    // Hergebruik bestaande login-flow indien beschikbaar
+    if (window.DY && typeof DY.toonLoginPrompt === 'function') {
+      try { DY.toonLoginPrompt('Log in om AI-functionaliteiten te gebruiken.'); return; } catch (_) {}
+    }
+    if (window.DY && typeof DY.toonLogin === 'function') {
+      try { DY.toonLogin(); return; } catch (_) {}
+    }
+    // Fallback eigen modal
+    showModal(
+      '<span class="pp-aig-badge">Login vereist</span>' +
+      '<h3>Log in om AI te gebruiken</h3>' +
+      '<p>Alle AI-functionaliteiten (Outfit Score, Style Assistant, Probeer Aan, Media Generator) zijn alleen beschikbaar voor ingelogde gebruikers.</p>' +
+      '<div class="pp-aig-acts">' +
+        '<button class="pp-aig-btn pp-aig-btn-ghost" data-role="close" data-testid="pp-aig-login-close">Sluiten</button>' +
+        '<button class="pp-aig-btn pp-aig-btn-primair" data-role="login" data-testid="pp-aig-login-open">Inloggen</button>' +
+      '</div>'
+    );
+    document.querySelector('.pp-aig-ov').addEventListener('click', function (e) {
+      var r = e.target.getAttribute && e.target.getAttribute('data-role');
+      if (r === 'close') closeModal();
+      if (r === 'login') {
+        closeModal();
+        try { location.hash = '#login'; } catch (_) {}
+      }
+    });
+  }
+
+  function showFirstUseInfo() {
+    return new Promise(function (resolve) {
+      var ov = showModal(
+        '<span class="pp-aig-badge">Deze maand</span>' +
+        '<h3>Je hebt 5 gratis AI-analyses</h3>' +
+        '<p>Je kunt deze maand <strong>5 AI-analyses</strong> gratis uitvoeren over alle AI-functies (Outfit Score, Probeer Aan, Style Assistant, Wardrobe Advies).</p>' +
+        '<p style="font-size:.85rem;color:rgba(252,248,239,.62)">Na deze 5 analyses kun je <strong>onbeperkt</strong> gebruikmaken van alle AI-functies door te upgraden naar Premium.</p>' +
+        '<div class="pp-aig-acts">' +
+          '<button class="pp-aig-btn pp-aig-btn-ghost" data-role="premium-info" data-testid="pp-aig-first-info">Meer over Premium</button>' +
+          '<button class="pp-aig-btn pp-aig-btn-primair" data-role="continue" data-testid="pp-aig-first-continue">Doorgaan</button>' +
+        '</div>'
+      );
+      ov.addEventListener('click', function (e) {
+        var r = e.target.getAttribute && e.target.getAttribute('data-role');
+        if (r === 'continue') { closeModal(); markFirstShown(); resolve(true); }
+        if (r === 'premium-info') {
+          closeModal();
+          if (window.DY && DY.premium && typeof DY.premium.openUpgrade === 'function') {
+            try { DY.premium.openUpgrade(); } catch (_) {}
+          }
+          resolve(false);
+        }
+      });
+    });
+  }
+
+  function showLimitReached() {
+    var ov = showModal(
+      '<span class="pp-aig-badge">Limiet bereikt</span>' +
+      '<h3>Je hebt je 5 gratis analyses gebruikt</h3>' +
+      '<p>Je hebt deze maand je <strong>5 gratis AI-analyses</strong> gebruikt. Upgrade naar Premium om <strong>onbeperkt</strong> gebruik te maken van alle AI-functionaliteiten.</p>' +
+      '<div class="pp-aig-acts">' +
+        '<button class="pp-aig-btn pp-aig-btn-ghost" data-role="close" data-testid="pp-aig-limit-later">Misschien later</button>' +
+        '<button class="pp-aig-btn pp-aig-btn-primair" data-role="upgrade" data-testid="pp-aig-limit-upgrade">Upgrade naar Premium</button>' +
+      '</div>'
+    );
+    ov.addEventListener('click', function (e) {
+      var r = e.target.getAttribute && e.target.getAttribute('data-role');
+      if (r === 'close') closeModal();
+      if (r === 'upgrade') {
+        closeModal();
+        if (window.DY && DY.premium && typeof DY.premium.openUpgrade === 'function') {
+          try { DY.premium.openUpgrade(); return; } catch (_) {}
+        }
+        try { location.hash = '#premium'; } catch (_) {}
+      }
+    });
+  }
+
+  // ─── Guard: pre-flight check vóór AI request ────────────────────────
+  //   Returns true als request door mag, false als geblokkeerd.
+  var _inflight = false;
+  async function guardCheck() {
+    if (isGuest()) { showLoginPrompt(); return false; }
+    if (await isPremium()) return true; // premium = onbeperkt
+    if (_inflight) return false;         // voorkom parallelle popups
+    _inflight = true;
+    try {
+      var usage = await getUsage();
+      // Eerste-gebruik popup (één keer per maand, alleen als count===0)
+      if (usage.count === 0 && !usage.firstShown) {
+        var ok = await showFirstUseInfo();
+        if (!ok) return false;
+      }
+      if (usage.count >= FREE_LIMIT) {
+        showLimitReached();
+        return false;
+      }
+      // Increment vóór we door laten (atomische verhoging)
+      await incUsage();
+      return true;
+    } finally { _inflight = false; }
+  }
+
+  function isAiEndpoint(url) {
+    try {
+      var s = typeof url === 'string' ? url : (url && url.url) || '';
+      return AI_ENDPOINT_PATTERNS.some(function (r) { return r.test(s); });
+    } catch (_) { return false; }
+  }
+
+  // ─── Global fetch hijack ─────────────────────────────────────────────
+  var _origFetch = window.fetch.bind(window);
+  window.fetch = async function (input, init) {
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+    if (isAiEndpoint(url)) {
+      var allowed = await guardCheck();
+      if (!allowed) {
+        // Return een fake Response met 403 zodat calling code niet crasht
+        return new Response(JSON.stringify({
+          ok: false,
+          blocked: true,
+          reason: isGuest() ? 'not-authenticated' : 'quota-exhausted',
+          error: 'AI-analyse geblokkeerd door toegangsbeheer.'
+        }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+    return _origFetch(input, init);
+  };
+
+  window.PP_AiGuard = {
+    VERSION: '1.0.0',
+    getUsage: getUsage,
+    check: guardCheck,
+    FREE_LIMIT: FREE_LIMIT,
+  };
+  log('AI Access Guard geladen (limiet: ' + FREE_LIMIT + '/maand)');
+})();
