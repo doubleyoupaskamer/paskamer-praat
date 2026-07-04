@@ -217,8 +217,11 @@ async def wardrobe_recommend(req: WardrobeRecommendRequest):
             for i in saved[:10]
         ])
         prompt = (
-            f"Je bent een persoonlijke stylist. Stel 3 outfit-combinaties voor uit deze opgeslagen looks "
-            f"van een gebruiker:\n{items_text}\n\nGelegenheid: {req.occasion}. Weer: {req.weather or 'normaal'}.\n"
+            f"Je bent een persoonlijke stylist voor Tall & Plus Size mode. "
+            f"FOCUS UITSLUITEND op de kledingstukken en hun combinaties. "
+            f"Negeer irrelevante context.\n\n"
+            f"Stel 3 outfit-combinaties voor uit deze opgeslagen looks:\n{items_text}\n\n"
+            f"Gelegenheid: {req.occasion}. Weer: {req.weather or 'normaal'}.\n"
             f"Geef EXACT 3 ideeën, elk met titel (max 30 tekens) en korte omschrijving (max 120 tekens). "
             f"Antwoord in JSON: [{{\"titel\":\"...\",\"omschrijving\":\"...\"}}]"
         )
@@ -357,7 +360,7 @@ async def generate_image(
                         except Exception:
                             pass
             except Exception as ref_err:
-                logger.exception("Reference image handling failed, falling back to text-only")
+                logger.exception("Reference image handling failed, falling back to text-only: %s", ref_err)
                 msg = UserMessage(text=full_prompt)
                 text, images = await chat.send_message_multimodal_response(msg)
         else:
@@ -508,7 +511,7 @@ async def _run_video_job(job_id: str, prompt: str, model: str, size: str, durati
             # anders text_to_video (huidige flow).
             if reference_image_base64:
                 # Probeer verschillende signatures op basis van SDK-versie
-                mime = reference_mime_type or "image/png"
+                _ = reference_mime_type or "image/png"
                 img_bytes = base64.b64decode(reference_image_base64)
                 for attempt in [
                     lambda: video_gen.image_to_video(
@@ -794,7 +797,16 @@ async def outfit_score(req: OutfitScoreRequest):
     system_prompt = (
         "Je bent een professionele Tall & Plus Size fashion stylist voor Doubleyou. "
         "Je krijgt EEN foto van een outfit. Volg STRIKT deze stappen:\n"
-        "STAP 1 - KIJK ZORGVULDIG naar de foto. Identificeer per kledingstuk:\n"
+        "\n"
+        "FOCUS-DIRECTIVE (v60.1.244): Analyseer UITSLUITEND de meest prominente persoon "
+        "in de foto en HUN kleding, silhouet, houding en pasvorm. NEGEER volledig: "
+        "achtergrondkleuren, meubilair, muren, decor, gordijnen, verlichting van de "
+        "omgeving, andere personen op de achtergrond, en willekeurige objecten. "
+        "Als er meerdere personen zijn, richt je op de centrale/grootste persoon. "
+        "Baseer stijl-classificatie en tips UITSLUITEND op de zichtbare kledingstukken "
+        "en het silhouet van de persoon.\n"
+        "\n"
+        "STAP 1 - KIJK ZORGVULDIG naar de persoon en HUN kleding. Identificeer per kledingstuk:\n"
         "  - Type (bv. hoodie, sweater, T-shirt, blouse, overhemd, jurk, broek, "
         "joggingbroek, jeans, rok, blazer, jas, schoenen, sneakers, etc.)\n"
         "  - Kleur (specifieke benoeming)\n"
@@ -1175,9 +1187,34 @@ class AiScoreBody(BaseModel):
 
 @api_router.post("/ai/score-outfit")
 async def ai_score_outfit(body: AiScoreBody):
+    """v60.1.244: forward naar /outfit-score endpoint als er een image_url is,
+    anders fallback naar heuristische score."""
+    if body.image_url:
+        # Reuse de bestaande outfit-score implementatie
+        try:
+            forward_req = OutfitScoreRequest(
+                photo_url=body.image_url,
+                request_id=body.outfit_id,
+                image_hash=None,
+                uid=body.user_id,
+            )
+            result = await outfit_score(forward_req)
+            # Normaliseer naar het legacy /ai/score-outfit response schema
+            return {
+                "score": result.get("score", 75),
+                "breakdown": result.get("breakdown", {}),
+                "outfit_id": body.outfit_id,
+                "label": result.get("label"),
+                "summary": result.get("summary"),
+                "tips": result.get("tips", []),
+                "source": result.get("source", "gemini"),
+            }
+        except Exception as e:
+            logger.warning(f"ai/score-outfit forward failed: {e}")
+    # Fallback: deterministic pseudo-score voor backwards compat
     h = body.outfit_id or body.image_url or ""
     score = 70 + (sum(ord(c) for c in h[:64]) % 26)
-    return {"score": score, "breakdown": {"silhouette": score - 4, "color": score, "fit": score + 2}, "outfit_id": body.outfit_id}
+    return {"score": score, "breakdown": {"silhouette": score - 4, "color": score, "fit": score + 2}, "outfit_id": body.outfit_id, "source": "fallback"}
 
 
 class AiAssistBody(BaseModel):
@@ -1188,7 +1225,51 @@ class AiAssistBody(BaseModel):
 
 @api_router.post("/ai/style-assistant")
 async def ai_style_assistant(body: AiAssistBody):
-    return {"reply": "Style Assistant wordt binnenkort geactiveerd.", "messages": [], "session_id": body.session_id}
+    """v60.1.244: echte conversational stylist via Claude Sonnet 4.5 (Emergent LLM)."""
+    if not body.message or not body.message.strip():
+        return {"reply": "Stel een vraag over stijl, kleur, pasvorm of outfit-combinaties.", "messages": [], "session_id": body.session_id}
+
+    api_key = os.environ.get('EMERGENT_LLM_KEY')
+    if not api_key:
+        return {"reply": "Style Assistant tijdelijk niet beschikbaar (config missing).", "messages": [], "session_id": body.session_id}
+
+    system_prompt = (
+        "Je bent de Paskamer Praat Style Assistant — een warme, deskundige Nederlandstalige "
+        "personal stylist gespecialiseerd in Tall (1.85m+) en Plus Size mode. "
+        "\n"
+        "FOCUS-DIRECTIVE: Richt je advies UITSLUITEND op:\n"
+        "- kleding, silhouet, pasvorm, kleurcombinaties, styling-tips;\n"
+        "- de lichaamsvorm en proporties die de gebruiker beschrijft;\n"
+        "- gelegenheid, seizoen en budget als die worden genoemd.\n"
+        "\n"
+        "NEGEER volledig irrelevante topics (politiek, dieet, weight-loss). "
+        "Geef ALTIJD een concreet, actionable antwoord in max 3 korte alinea's. "
+        "Gebruik body-positive taal. Antwoord in het Nederlands."
+    )
+
+    try:
+        session_id = body.session_id or f"stylist-{uuid.uuid4()}"
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=session_id,
+            system_message=system_prompt,
+        ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+        reply = await chat.send_message(UserMessage(text=str(body.message)[:1000]))
+        text = reply if isinstance(reply, str) else getattr(reply, "content", str(reply))
+        return {
+            "reply": (text or "").strip()[:1500],
+            "messages": [{"role": "assistant", "content": (text or "").strip()[:1500]}],
+            "session_id": session_id,
+            "source": "claude-sonnet-4-5",
+        }
+    except Exception as e:
+        logger.warning(f"Style Assistant Claude call failed: {e}")
+        return {
+            "reply": "Ik kan even geen advies geven — probeer het straks opnieuw.",
+            "messages": [],
+            "session_id": body.session_id,
+            "error_hint": str(e)[:120],
+        }
 
 
 class AiSimilarBody(BaseModel):
@@ -1204,14 +1285,146 @@ async def ai_similar_items(body: AiSimilarBody):
 
 # ── Overige legacy stubs - voorkomen 404 spam ──────────────────────────
 class TryonBody(BaseModel):
+    # v60.1.244: uitgebreid schema — accepteert nu ook base64 payloads
+    # zoals virtual-tryon-v1.js verstuurt.
     base_image_url: Optional[str] = None
     garment_image_url: Optional[str] = None
     user_id: Optional[str] = None
+    # Nieuwe velden matching frontend virtual-tryon-v1.js contract:
+    user_photo_b64: Optional[str] = None
+    user_photo_mime: Optional[str] = None
+    outfit_photo_b64: Optional[str] = None
+    outfit_photo_mime: Optional[str] = None
+    extra_prompt: Optional[str] = None
+    uid: Optional[str] = None
+    session_id: Optional[str] = None
 
 
 @api_router.post("/tryon")
-async def virtual_tryon_stub(body: TryonBody):
-    return {"ok": False, "error": "Virtual try-on tijdelijk niet beschikbaar. Wordt later opnieuw geactiveerd.", "result_url": None}
+async def virtual_tryon(body: TryonBody):
+    """Virtual try-on v60.1.244 (real implementation via Gemini Nano Banana).
+
+    Compose user photo + outfit reference into a realistic try-on image.
+    Focus EXCLUSIVELY on the person and their clothing/silhouette.
+
+    Returns: { ok, image_b64, mime_type, caption } — matching frontend contract.
+    """
+    api_key = os.environ.get('EMERGENT_LLM_KEY')
+    if not api_key:
+        return {"ok": False, "error": "EMERGENT_LLM_KEY niet geconfigureerd", "image_b64": None}
+
+    # v60.1.244: accepteer zowel base64 als URL. Fetch server-side als alleen URL.
+    async def _resolve_image(b64: Optional[str], url: Optional[str], mime_hint: Optional[str]):
+        if b64:
+            if b64.startswith("data:"):
+                try:
+                    b64 = b64.split(",", 1)[1]
+                except Exception:
+                    pass
+            return b64, (mime_hint or "image/jpeg")
+        if url:
+            try:
+                import httpx
+                async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as cx:
+                    r = await cx.get(url, headers={"User-Agent": "PaskamerPraat/1.0"})
+                    r.raise_for_status()
+                    ct = (r.headers.get("content-type") or "image/jpeg").lower()
+                    if not ct.startswith("image/"):
+                        ct = "image/jpeg"
+                    return base64.b64encode(r.content).decode("ascii"), ct
+            except Exception as e:
+                logger.warning(f"Tryon: kon URL niet fetchen: {e}")
+                return None, None
+        return None, None
+
+    user_b64, user_mime = await _resolve_image(body.user_photo_b64, body.base_image_url, body.user_photo_mime)
+    outfit_b64, outfit_mime = await _resolve_image(body.outfit_photo_b64, body.garment_image_url, body.outfit_photo_mime)
+
+    if not user_b64 or not outfit_b64:
+        return {
+            "ok": False,
+            "error": "Beide foto's (gebruiker + outfit) zijn verplicht.",
+            "image_b64": None,
+        }
+
+    tryon_prompt = (
+        "TASK: Create a photorealistic virtual try-on composite image.\n"
+        "\n"
+        "INSTRUCTIONS:\n"
+        "1. Take the person from the FIRST reference image (user photo).\n"
+        "2. Replace their current outfit with the clothing shown in the SECOND reference image (outfit photo).\n"
+        "3. Preserve the person's face, skin tone, body proportions, pose, and background EXACTLY.\n"
+        "4. Match the outfit's fit realistically to the person's silhouette (Tall or Plus Size body positive).\n"
+        "5. Preserve realistic fabric drape, folds, shadows, and lighting continuity.\n"
+        "\n"
+        "FOCUS-DIRECTIVE: Concentrate exclusively on the person and the clothing. "
+        "Do NOT alter facial features, background, or add new elements. "
+        "Keep the composition centered on the person's body and outfit fit.\n"
+    )
+    if body.extra_prompt:
+        tryon_prompt += f"\nEXTRA USER NOTE: {str(body.extra_prompt)[:400]}\n"
+
+    try:
+        import tempfile
+        from emergentintegrations.llm.chat import LlmChat, UserMessage  # type: ignore
+
+        # Schrijf beide afbeeldingen naar temp files
+        tmp_paths = []
+        file_contents = []
+        for b64, mime in [(user_b64, user_mime), (outfit_b64, outfit_mime)]:
+            ext = ".png" if "png" in (mime or "") else (".webp" if "webp" in (mime or "") else ".jpg")
+            with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+                tmp.write(base64.b64decode(b64))
+                tmp_paths.append(tmp.name)
+        try:
+            # Probeer FileContentWithMimeType als beschikbaar
+            try:
+                from emergentintegrations.llm.chat import FileContentWithMimeType  # type: ignore
+                for p, mime in zip(tmp_paths, [user_mime, outfit_mime]):
+                    file_contents.append(FileContentWithMimeType(file_path=p, mime_type=mime or "image/jpeg"))
+            except ImportError:
+                try:
+                    from emergentintegrations.llm.chat import ImageContent  # type: ignore
+                    for b64 in [user_b64, outfit_b64]:
+                        file_contents.append(ImageContent(image_base64=b64))
+                except ImportError:
+                    return {"ok": False, "error": "SDK ondersteunt geen image inputs", "image_b64": None}
+
+            chat = LlmChat(
+                api_key=api_key,
+                session_id=body.session_id or f"tryon-{uuid.uuid4()}",
+                system_message="You are a professional virtual try-on AI. Generate photorealistic, body-positive composite images.",
+            )
+            chat.with_model("gemini", "gemini-3.1-flash-image-preview").with_params(modalities=["image", "text"])
+
+            msg = UserMessage(text=tryon_prompt, file_contents=file_contents)
+            text, images = await chat.send_message_multimodal_response(msg)
+
+            if not images:
+                return {
+                    "ok": False,
+                    "error": "AI kon geen composite genereren. Probeer duidelijkere foto's.",
+                    "image_b64": None,
+                    "caption": text[:200] if text else None,
+                }
+
+            img = images[0]
+            return {
+                "ok": True,
+                "image_b64": img["data"],
+                "mime_type": img.get("mime_type", "image/png"),
+                "caption": (text or "")[:280] if text else None,
+                "session_id": body.session_id,
+            }
+        finally:
+            for p in tmp_paths:
+                try:
+                    os.unlink(p)
+                except Exception:
+                    pass
+    except Exception as e:
+        logger.exception("Virtual tryon failed")
+        return {"ok": False, "error": f"Try-on mislukt: {str(e)[:200]}", "image_b64": None}
 
 
 @api_router.get("/proxy-image")
