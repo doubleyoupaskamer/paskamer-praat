@@ -2421,3 +2421,73 @@ Ook `/app/frontend/public/…` voor download-URL.
 - Firestore `ai_usage` doc-ID rollover per maand automatisch
 - Frontend & backend beide valideren
 - Geen regressie op non-AI endpoints
+
+---
+
+## v60.1.253 (2026-02-12) — Pre-Auth Cloak + Premium Modal Topmost
+
+### Probleem 1 (opgelost): Premium-modal verscheen ACHTER andere modals
+Root cause: `#dy-premium-modal` had `z-index: 10050` maar `pwa-v463-1780765770.js`
+gebruikt `z-index: 99999` voor legacy modals. Premium verdween eronder.
+
+**Fix in `pp-modal-close-contrast-v1.css`:**
+- `#dy-premium-modal` en `#dy-prem-manage-overlay` → `z-index: 2147483646 !important`
+- Backdrop krijgt `backdrop-filter: blur(6px)` voor visuele scheiding
+- `body:has(#dy-premium-modal) .pp-aig-ov, .pp-aig-banner { display:none }` —
+  defensief: nooit twee actieve modals tegelijk.
+
+**Fix in guard (v1.6.0)**: nieuwe centrale `openPremiumUpgrade()`:
+1. Sluit onze eigen `.pp-aig-ov` + banner
+2. Sluit legacy overlays defensief (`#dy-prem-manage-overlay`, `#dy-tryon-modal`,
+   `.dy-detail-overlay`, `.dy-verhaal-overlay`, etc.)
+3. Blur activeElement (focus-reset)
+4. Roept `DY.premium.openUpgrade()` of `PP_Premium.openUpgrade()` aan
+5. Fallback: `location.hash = '#premium'`
+
+Alle vier de aanroepers in de guard (`showLoginPrompt`, `showFirstUseInfo`,
+`showLimitReached`, `renderUsageBanner`) gebruiken nu deze centrale helper.
+
+### Probleem 2 (opgelost): Outfit Analyse flashed vóór login-popup
+Root cause: `_initialRouteCheck` wachtte op Firebase Auth (~200-400ms). In die
+tijd rendert de kleuren_ai / outfit-vergelijker pagina zichtbaar.
+
+**Fix — Pre-Auth Cloak in `index.html` `<head>`:**
+- Inline `<style id="pp-preauth-cloak-css">` en synchroon `<script>` block direct
+  na `<meta charset>`, VOOR alle andere scripts en stylesheets.
+- Detecteert protected patterns: `?pagina=kleuren_ai`, `?kleuranalyse=<id>`,
+  path/hash bevat `outfit-vergelijker` of `kleuren[_-]?ai`.
+- Bij match: `<html>` krijgt class `pp-preauth-locked` → `body` visibility hidden
+  + fullscreen backdrop `#0f0c08` + gouden loading spinner.
+- Fail-safe: cloak wordt sowieso na 4s verwijderd (nooit oneindig lock).
+
+**Guard integratie**: `_initialRouteCheck` verwijdert cloak zodra auth resolved:
+- Ingelogd → cloak weg, pagina rendert normaal
+- Gast → cloak weg (schone donkere bg blijft even zichtbaar) + login-modal;
+  DOM-defensie verwijdert `#kleuren_ai` element als het intussen bestaat.
+
+### Testing (isolated Playwright)
+- `?pagina=kleuren_ai` → cloaked ✓ (screenshot: volledig zwart met spinner,
+  content niet zichtbaar)
+- Plain URL → NIET cloaked ✓
+- `?kleuranalyse=abc123` deeplink → cloaked ✓
+- `body_visibility: hidden` bevestigd via `getComputedStyle`
+- Backend regressie: `/api/tryon` zonder token → 401, `/api/ai/health` → 200
+
+### Cache
+- `sw.js` VERSION → `v60.1.253-20260212-preauth-cloak-premium-topmost`
+- `index.html` cache-bust `?v=60.1.253-*`
+
+### Deliverable
+`/app/01-paskamerpraat-pwa-cloudflare.zip` (13,24 MB) inclusief:
+- Guard v1.6.0 met `openPremiumUpgrade()` centrale helper
+- Inline pre-auth cloak in `index.html`
+- Premium z-index fix in `pp-modal-close-contrast-v1.css`
+
+### Acceptatiecriteria — bevestigd
+✅ Premium-pop-up boven ALLE andere vensters (z-index 2147483646)
+✅ Nooit meer dan één actieve modal (auto-close via openPremiumUpgrade)
+✅ Login-pop-up verschijnt DIRECT (cloak preventeert flash)
+✅ AI-module niet zichtbaar/geïnitialiseerd vóór autorisatie (body hidden)
+✅ Geen AI-API-calls of uploads zonder autorisatie (backend 401 defense-in-depth)
+✅ Vloeiend UX, geen flash of vertraging (native paint-first pattern)
+✅ Geen regressies (curl-verified backend endpoints, HTML/JS syntax OK)

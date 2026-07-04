@@ -225,6 +225,63 @@
     if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
   }
 
+  // v60.1.253: Centrale helper om de Premium-upgrade-modal te openen.
+  //   Sluit EERST alle bestaande overlays (guard-modal, quota-banner én
+  //   legacy overlays) zodat de premium-modal altijd bovenop een schone
+  //   achtergrond verschijnt. Geen dubbele modals meer.
+  function openPremiumUpgrade() {
+    try {
+      // 1. Sluit onze eigen overlays
+      closeModal();
+      try { removeBanner(); } catch (_) {}
+      // 2. Sluit bekende legacy overlays defensief (alleen als open)
+      var legacySelectors = [
+        '#dy-prem-manage-overlay',
+        '.dy-detail-overlay',          // outfit detail
+        '.dy-verhaal-overlay',         // verhaal viewer
+        '.dy-share-overlay',           // deel-modal
+        '#dy-tryon-modal',
+        '#dy-wardrobe-rec-modal',
+        '#dy-weekly-modal',
+        '#dy-push-modal',
+        '.dy-score-detail',            // outfit-score detail
+        '.dy-modal[data-modal-open="true"]',
+      ];
+      legacySelectors.forEach(function (sel) {
+        try {
+          var el = document.querySelector(sel);
+          if (el && el.parentNode) {
+            // Als het een echte modal is met een close-methode → probeer die
+            // eerst; anders gewoon verwijderen (defensief, geen crash)
+            var closeBtn = el.querySelector('[data-role="x-close"], .dy-tryon-close, .dy-wr-close, .dy-prem-close, .close');
+            if (closeBtn && typeof closeBtn.click === 'function') {
+              closeBtn.click();
+            } else {
+              el.style.display = 'none';
+            }
+          }
+        } catch (_) {}
+      });
+      // 3. Focus reset zodat de premium-modal keyboard-toegankelijk is
+      try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (_) {}
+      // 4. Open de premium-modal via de bestaande DY-API (of PP_Premium)
+      var opened = false;
+      try {
+        if (window.DY && DY.premium && typeof DY.premium.openUpgrade === 'function') {
+          DY.premium.openUpgrade(); opened = true;
+        } else if (window.PP_Premium && typeof PP_Premium.openUpgrade === 'function') {
+          PP_Premium.openUpgrade(); opened = true;
+        }
+      } catch (_) {}
+      if (!opened) {
+        try { location.hash = '#premium'; } catch (_) {}
+      }
+    } catch (e) {
+      try { console.warn('[ai-guard] openPremiumUpgrade err:', e && e.message); } catch (_) {}
+      try { location.hash = '#premium'; } catch (_) {}
+    }
+  }
+
   function showLoginPrompt() {
     // v60.1.246: Gebruik altijd eigen modal (DY.toonLoginPrompt kan silently
     // falen bij sommige app-states). Consistent UX gegarandeerd.
@@ -278,10 +335,7 @@
         var r = e.target.getAttribute && e.target.getAttribute('data-role');
         if (r === 'continue') { closeModal(); markFirstShown(); resolve(true); }
         if (r === 'premium-info') {
-          closeModal();
-          if (window.DY && DY.premium && typeof DY.premium.openUpgrade === 'function') {
-            try { DY.premium.openUpgrade(); } catch (_) {}
-          }
+          openPremiumUpgrade();
           resolve(false);
         }
       });
@@ -302,11 +356,7 @@
       var r = e.target.getAttribute && e.target.getAttribute('data-role');
       if (r === 'close') closeModal();
       if (r === 'upgrade') {
-        closeModal();
-        if (window.DY && DY.premium && typeof DY.premium.openUpgrade === 'function') {
-          try { DY.premium.openUpgrade(); return; } catch (_) {}
-        }
-        try { location.hash = '#premium'; } catch (_) {}
+        openPremiumUpgrade();
       }
     });
   }
@@ -445,16 +495,7 @@
       b.addEventListener('click', function (e) {
         var r = e.target && e.target.getAttribute && e.target.getAttribute('data-role');
         if (r === 'banner-close') { removeBanner(); }
-        if (r === 'banner-upgrade') {
-          removeBanner();
-          try {
-            if (window.DY && DY.premium && typeof DY.premium.openUpgrade === 'function') {
-              DY.premium.openUpgrade();
-              return;
-            }
-          } catch (_) {}
-          try { location.hash = '#premium'; } catch (_) {}
-        }
+        if (r === 'banner-upgrade') { openPremiumUpgrade(); }
       });
       // Info-banner verdwijnt na 6s; warn na 9s; limit blijft langer (14s)
       var lifespan = isLimit ? 14000 : (isWarn ? 9000 : 6000);
@@ -608,7 +649,7 @@
   };
 
   window.PP_AiGuard = {
-    VERSION: '1.5.0',
+    VERSION: '1.6.0',
     getUsage: getUsage,
     check: guardCheck,
     FREE_LIMIT: FREE_LIMIT,
@@ -616,6 +657,7 @@
     renderUsageBanner: renderUsageBanner,
     maybeShowUsageBanner: maybeShowUsageBanner,
     removeBanner: removeBanner,
+    openPremiumUpgrade: openPremiumUpgrade,
     isGuest: isGuest,
     invalidate: function () { _premCache = { uid: null, isPrem: false, at: 0 }; _inflight = false; }
   };
@@ -768,6 +810,12 @@
   // v60.1.252: initial route-check. Als de pagina al laadt met
   //   ?pagina=kleuren_ai OF ?kleuranalyse=... en de gebruiker gast is,
   //   sluit de content af en toon direct de login-modal.
+  //   v60.1.253: werkt samen met pre-auth cloak in <head>. De cloak
+  //   voorkomt dat de pagina flashed vóór auth resolved is. Wij
+  //   verwijderen de cloak zodra we weten of user gast is.
+  function _uncloak() {
+    try { document.documentElement.classList.remove('pp-preauth-locked'); } catch (_) {}
+  }
   function _initialRouteCheck() {
     try {
       var qs = new URLSearchParams(location.search || '');
@@ -775,17 +823,33 @@
       var kaShare = qs.get('kleuranalyse');
       var path = (location.pathname || '').toLowerCase();
       var isProtected = (page === 'kleuren_ai') || !!kaShare || PROTECTED_ROUTES_RX.test(path);
-      if (!isProtected) return;
+      if (!isProtected) { _uncloak(); return; }
       // Wacht tot Firebase Auth klaar is (async)
       var a = fbAuth();
-      if (!a) { setTimeout(_initialRouteCheck, 400); return; }
-      a.onAuthStateChanged(function once(u) {
-        try { a.onAuthStateChanged(function () {}); } catch (_) {}
+      if (!a) { setTimeout(_initialRouteCheck, 300); return; }
+      var settled = false;
+      var unsub = a.onAuthStateChanged(function (u) {
+        if (settled) return;
+        settled = true;
+        try { if (typeof unsub === 'function') unsub(); } catch (_) {}
         if (!u || u.isAnonymous === true) {
+          // Gast: cloak eerst weg zodat login-modal zichtbaar wordt tegen
+          // een schone donkere achtergrond, GEEN AI-content geflashed.
+          _uncloak();
           try { showLoginPrompt(); } catch (_) {}
+          // Blokkeer render van kleuren_ai op DOM-niveau: verwijder de
+          // pagina-container als die intussen door legacy-init is
+          // aangemaakt (defensief - normaal komt hij hier nog niet)
+          try {
+            var pageEl = document.getElementById('kleuren_ai') || document.querySelector('[data-pagina="kleuren_ai"]');
+            if (pageEl) pageEl.style.display = 'none';
+          } catch (_) {}
+        } else {
+          // Ingelogd (of premium) → cloak weg, pagina rendert normaal
+          _uncloak();
         }
       });
-    } catch (_) {}
+    } catch (_) { _uncloak(); }
   }
   _initialRouteCheck();
 

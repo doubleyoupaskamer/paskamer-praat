@@ -133,3 +133,32 @@
     font-size: 24px !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * v60.1.253 — Premium modal boven ALLES
+ *
+ * Legacy modals in pwa-v463 gebruiken z-index 99999 waardoor de premium
+ * modal (10050) eronder verdween. We bumpen naar één stap onder onze
+ * guard-modal (2147483647) zodat premium ALTIJD op de top ligt, ongeacht
+ * welke modal open staat wanneer de gebruiker op "Meer over Premium" klikt.
+ * ═══════════════════════════════════════════════════════════════════════ */
+#dy-premium-modal,
+#dy-prem-manage-overlay {
+  z-index: 2147483646 !important;
+}
+#dy-premium-modal .dy-prem-backdrop {
+  /* Volledige backdrop-blur zodat achtergelaten modals visueel niet doorwerken */
+  background: radial-gradient(circle at 30% 20%, rgba(198,125,6,.28), rgba(11,9,5,.92)) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.dy-prem-return-toast {
+  z-index: 2147483645 !important;
+}
+/* Wanneer premium modal open is → dim & disable interactie op alle andere
+ * open modals (defensief, zodat er nooit twee actieve modals ontstaan). */
+body:has(#dy-premium-modal) .pp-aig-ov,
+body:has(#dy-premium-modal) .pp-aig-banner {
+  display: none !important;
+}
+
