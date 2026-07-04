@@ -2625,3 +2625,80 @@ Firestore-console gepiel.
 
 ### Deliverable
 **Backend-only** (geen PWA-zip wijziging). Zip blijft op v60.1.256.
+
+---
+
+## v60.1.258 (2026-02-12) — Realtime Profile Sync (avatar/naam/bio overal)
+
+### Doel
+Alle profielwijzigingen (avatar, naam, bio, socials, ...) direct zichtbaar
+in ALLE geopende weergaves — topbar, feed-header, reactie-input, DM header,
+profielpagina — zonder page-refresh en over meerdere tabs synchroon.
+Voorheen: `DY.profile` werd één keer geladen bij inlog (`.get()`), 168+
+plaatsen lazen stale data tot page reload.
+
+### Nieuwe module `extensions/hooks/pp-profile-realtime-v1.js` (v1.0.0)
+Volledig additief. 100% werkt naast bestaande legacy code zonder wijziging.
+
+**Architectuur:**
+1. `firebase.firestore().collection('users').doc(uid).onSnapshot()` listener
+   attached zodra Firebase Auth een user rapporteert
+2. Elke snapshot merge't naar `window.DY.profile` (behoudt refs)
+3. Custom event `pp-profile-updated` gedispatched op `document`
+4. Bekende legacy renderers aangeroepen: `DY.updateTopbarAvatar()`,
+   `DY.updateNav()`, en `DY.renderProfiel()` alleen als user op profielpagina is
+5. Auto-render van elementen met `data-pp-live-avatar`, `data-pp-live-name`,
+   `data-pp-live-bio` attributen (future-proof, zonder legacy code te raken)
+6. Cross-tab sync via `BroadcastChannel('pp-profile-sync')` met
+   `localStorage` event fallback (Safari ≤15)
+7. Throttling: max 1 render per 250ms (voorkomt DOM-thrashing)
+
+### Fallback-hiërarchie (nooit een lege state)
+- **Naam**: `profile.naam` → `.displayName` → `.name` → `.gebruikersnaam`
+  → `user.displayName` → email-prefix → `'Gebruiker'`
+- **Avatar**: `profile.avatar` → `.avatarUrl` → `.profielFoto` → `.photoURL`
+  → `user.photoURL` → initialen-cirkel met deterministische kleur o.b.v. uid
+- **Bio**: `profile.bio` → `.beschrijving` → leeg (geen crash)
+- Firestore fail → behoud laatst-bekende DY.profile
+- Broken image URL → `img.onerror` valt terug op initialen-cirkel
+
+### Public API
+`window.PP_ProfileRT.{ VERSION, forceRefresh, getProfile, bestNaam,
+bestAvatarUrl, initials, initialsColor, renderAvatarInto, detach }`
+
+### Testing (isolated Playwright, mocked Firestore) — ALL PASS
+- Initial state: initialen "AN" van Anne (fallback naar user.displayName) ✓
+- Set avatar URL: `<img class="pp-live-avatar-img">` verschijnt overal ✓
+- Set naam+bio: 3 avatar-slots + name + bio synchroon geüpdatet ✓
+- Other-user slot (uid mismatch): NIET geüpdatet ✓
+- Fallback naar leeg: initialen-cirkel met deterministische kleur ✓
+- Legacy hooks aangeroepen: updateTopbarAvatar, updateNav, renderProfiel ✓
+- Public API bestNaam/bestAvatarUrl werken los ✓
+- Throttling geverifieerd (250ms tussen renders)
+
+### Migratie-hint voor nieuwe componenten
+```html
+<!-- Auto-syncing avatar (uses fallback chain automatisch) -->
+<div data-pp-live-avatar data-pp-uid="{{userId}}"></div>
+<!-- Auto-syncing naam -->
+<span data-pp-live-name data-pp-uid="{{userId}}"></span>
+<!-- Auto-syncing bio -->
+<p data-pp-live-bio data-pp-uid="{{userId}}"></p>
+```
+Legacy componenten (`.dy-reactie-avatar-eigen`, of `[data-pp-user-avatar="self"]`)
+worden ook automatisch geüpdatet.
+
+### Cache & Deliverable
+- `sw.js` VERSION → `v60.1.258-20260212-realtime-profile-sync`
+- `index.html` cache-bust `?v=60.1.258-*`
+- `/app/01-paskamerpraat-pwa-cloudflare.zip` (13,25 MB, HTTP 200 verified)
+
+### Acceptatiecriteria — bevestigd
+✅ Firestore `onSnapshot()` op eigen `users/{uid}` doc
+✅ DY.profile blijft altijd up-to-date (real-time via listener)
+✅ Alle bekende legacy render-hooks aangeroepen bij wijziging
+✅ Nieuwe `data-pp-live-*` opt-in attributen voor toekomstige componenten
+✅ Robuuste fallback-hiërarchie: naam / avatar / bio / logout
+✅ Cross-tab sync (BroadcastChannel + storage fallback)
+✅ Firestore-fail / broken image → geen crash, veilige fallback
+✅ Geen wijziging aan legacy code, alleen additive extension
