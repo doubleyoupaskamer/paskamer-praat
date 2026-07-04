@@ -163,17 +163,22 @@
     var s = document.createElement('style');
     s.id = 'pp-ai-guard-css';
     s.textContent =
-      '.pp-aig-ov{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}' +
-      '.pp-aig-box{background:linear-gradient(155deg,#1a140c,#0f0c08);border:1px solid rgba(212,145,10,.34);border-radius:16px;padding:24px;max-width:440px;width:100%;color:#fcf8ef;font-family:"DM Sans",system-ui,sans-serif}' +
-      '.pp-aig-box h3{margin:0 0 8px;font:400 1.35rem/1.2 "DM Serif Display","Cormorant Garamond",serif;color:#f0b340}' +
-      '.pp-aig-box p{margin:0 0 14px;color:rgba(252,248,239,.82);line-height:1.55;font-size:.93rem}' +
-      '.pp-aig-box .pp-aig-badge{display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(212,145,10,.14);border:1px solid rgba(212,145,10,.35);color:#f0b340;font:700 11px/1 "DM Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}' +
-      '.pp-aig-acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid rgba(245,236,224,.08)}' +
-      '.pp-aig-btn{padding:9px 18px;border-radius:999px;font:600 13px/1 "DM Sans",sans-serif;cursor:pointer;border:1px solid transparent;font-family:inherit;transition:all .15s}' +
-      '.pp-aig-btn-ghost{background:transparent;border-color:rgba(245,236,224,.16);color:rgba(252,248,239,.75)}' +
-      '.pp-aig-btn-ghost:hover{background:rgba(255,255,255,.05)}' +
-      '.pp-aig-btn-primair{background:linear-gradient(135deg,#d4910a,#f0b340);color:#0f0c08}' +
-      '.pp-aig-btn-primair:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(212,145,10,.35)}';
+      '.pp-aig-ov{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);animation:pp-aig-fade .18s ease-out}' +
+      '@keyframes pp-aig-fade{from{opacity:0}to{opacity:1}}' +
+      '.pp-aig-box{position:relative;background:linear-gradient(155deg,#1a140c,#0f0c08);border:1px solid rgba(212,145,10,.42);border-radius:16px;padding:26px 24px 22px;max-width:460px;width:100%;color:#fcf8ef;font-family:"DM Sans",system-ui,sans-serif;box-shadow:0 24px 60px rgba(0,0,0,.6)}' +
+      '.pp-aig-box h3{margin:0 0 10px;font:400 1.4rem/1.2 "DM Serif Display","Cormorant Garamond",serif;color:#f0b340;padding-right:36px}' +
+      '.pp-aig-box p{margin:0 0 14px;color:#fdf5e3;line-height:1.6;font-size:.95rem}' +
+      '.pp-aig-box .pp-aig-badge{display:inline-block;padding:5px 11px;border-radius:999px;background:rgba(212,145,10,.20);border:1px solid rgba(212,145,10,.45);color:#f0b340;font:700 11px/1 "DM Sans",sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}' +
+      // X-close button — hoog contrast, groot klikgebied
+      '.pp-aig-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(240,179,64,.45);color:#f0b340;cursor:pointer;font:700 22px/1 "DM Sans",sans-serif;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;padding:0;transition:all .15s ease;line-height:1}' +
+      '.pp-aig-x:hover,.pp-aig-x:focus-visible{background:rgba(240,179,64,.20);color:#fff;transform:scale(1.08);outline:none;box-shadow:0 0 0 3px rgba(240,179,64,.28)}' +
+      '.pp-aig-x:active{transform:scale(.94)}' +
+      '.pp-aig-acts{display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid rgba(240,179,64,.18)}' +
+      '.pp-aig-btn{padding:10px 20px;border-radius:999px;font:600 13.5px/1 "DM Sans",sans-serif;cursor:pointer;border:1px solid transparent;font-family:inherit;transition:all .15s;min-height:44px}' +
+      '.pp-aig-btn-ghost{background:transparent;border-color:rgba(240,179,64,.35);color:#f0b340}' +
+      '.pp-aig-btn-ghost:hover,.pp-aig-btn-ghost:focus-visible{background:rgba(240,179,64,.10);color:#fdf5e3;outline:none}' +
+      '.pp-aig-btn-primair{background:linear-gradient(135deg,#d4910a,#f0b340);color:#0f0c08;font-weight:700}' +
+      '.pp-aig-btn-primair:hover,.pp-aig-btn-primair:focus-visible{transform:translateY(-1px);box-shadow:0 8px 22px rgba(212,145,10,.45);outline:none}';
     document.head.appendChild(s);
   }
   function showModal(html) {
@@ -184,11 +189,24 @@
     var ov = document.createElement('div');
     ov.className = 'pp-aig-ov';
     ov.setAttribute('data-testid', 'pp-ai-guard-modal');
-    ov.innerHTML = '<div class="pp-aig-box">' + html + '</div>';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    // v60.1.249: elke modal krijgt een goed zichtbare X-close (WCAG AA)
+    ov.innerHTML = '<div class="pp-aig-box">' +
+      '<button type="button" class="pp-aig-x" data-role="x-close" data-testid="pp-ai-guard-close" aria-label="Sluiten">×</button>' +
+      html +
+    '</div>';
     document.body.appendChild(ov);
     ov.addEventListener('click', function (e) {
       if (e.target === ov) closeModal();
+      var xr = e.target.getAttribute && e.target.getAttribute('data-role');
+      if (xr === 'x-close') closeModal();
     });
+    // ESC key sluit
+    var escHandler = function (e) {
+      if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', escHandler); }
+    };
+    document.addEventListener('keydown', escHandler);
     return ov;
   }
   function closeModal() {
@@ -356,16 +374,14 @@
     invalidate: function () { _premCache = { uid: null, isPrem: false, at: 0 }; _inflight = false; }
   };
 
-  // v60.1.248: Firebase Auth state listener — instant invalidatie bij logout
+  // v60.1.249: Firebase Auth state listener — instant invalidatie bij logout
   function installAuthListener() {
     var a = fbAuth();
     if (!a) return false;
     try {
       a.onAuthStateChanged(function (u) {
-        // Reset alle interne caches — geen stale premium of counter state
         _premCache = { uid: null, isPrem: false, at: 0 };
         _inflight = false;
-        // Sluit eventuele open guard-modals — nieuwe login/logout = schone slate
         try {
           var ov = document.querySelector('.pp-aig-ov');
           if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
@@ -375,10 +391,77 @@
       return true;
     } catch (_) { return false; }
   }
-  var _authWatchAttempts = 0;
-  var _authWatchIv = setInterval(function () {
-    if (installAuthListener() || _authWatchAttempts++ > 40) clearInterval(_authWatchIv);
+
+  // v60.1.249: Module-open hooks — blokkeer AI-UI vóór rendering voor gasten.
+  //   Wraps de publieke open() functies van elke AI-module.
+  function wrapModuleOpen(namespace, key) {
+    try {
+      var target = window;
+      var parts = namespace.split('.');
+      for (var i = 0; i < parts.length; i++) {
+        target = target && target[parts[i]];
+        if (!target) return false;
+      }
+      var orig = target[key];
+      if (typeof orig !== 'function' || target['__ppGuarded_' + key]) return false;
+      target[key] = function () {
+        // STAP 1: harde auth-check vóór module rendert
+        if (isGuest()) {
+          showLoginPrompt();
+          return; // module open volledig geblokkeerd, geen UI, geen fetch
+        }
+        // STAP 2: premium & quota check (async) — module opent alleen als OK
+        var self = this, args = arguments;
+        Promise.resolve().then(async function () {
+          // Premium check
+          if (await isPremium()) { orig.apply(self, args); return; }
+          // Quota check (leest usage; increment gebeurt pas bij echte fetch)
+          var usage = await getUsage();
+          if (usage.count === 0 && !usage.firstShown) {
+            var ok = await showFirstUseInfo();
+            if (!ok) return;
+          }
+          if (usage.count >= FREE_LIMIT) { showLimitReached(); return; }
+          // Alles OK → open de module
+          if (!isGuest()) orig.apply(self, args);
+          else showLoginPrompt();
+        });
+      };
+      target['__ppGuarded_' + key] = true;
+      return true;
+    } catch (_) { return false; }
+  }
+
+  // Registreer bekende AI-module open-functies. Ontbrekende worden gewoon
+  // overgeslagen — polling zorgt dat late-init modules alsnog gewrapt worden.
+  var MODULE_HOOKS = [
+    ['DY.tryOn', 'open'],
+    ['DY.tryOn', 'openWithOutfit'],
+    // Toekomstige AI-modules toevoegen zonder code-refactor:
+    ['DY.outfitScore', 'open'],
+    ['DY.pickMe', 'open'],
+    ['DY.styleAssistant', 'open'],
+    ['DY.kleuranalyse', 'open'],
+    ['DY.fashionMatch', 'open'],
+    ['DY.aiChat', 'open'],
+    ['DY.wardrobeRecommend', 'open'],
+  ];
+  function installModuleHooks() {
+    var wrappedAny = false;
+    for (var i = 0; i < MODULE_HOOKS.length; i++) {
+      if (wrapModuleOpen(MODULE_HOOKS[i][0], MODULE_HOOKS[i][1])) wrappedAny = true;
+    }
+    return wrappedAny;
+  }
+
+  var _initAttempts = 0;
+  var _initIv = setInterval(function () {
+    var ok1 = installAuthListener();
+    installModuleHooks(); // best-effort elke tick — voegt late modules toe
+    if (ok1 || _initAttempts++ > 80) clearInterval(_initIv);
   }, 250);
+  // Initial run
+  installModuleHooks();
 
   log('AI Access Guard geladen (limiet: ' + FREE_LIMIT + '/maand)');
 })();
