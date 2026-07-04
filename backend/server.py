@@ -309,6 +309,51 @@ def _ai_get_usage_and_inc(firestore_client, uid: str) -> int:
         return 0
 
 
+def _ai_check_and_inc_atomic(firestore_client, uid: str, limit: int) -> tuple:
+    """v60.1.256 — Transactional check-and-increment.
+
+    Voorkomt race condition bij gelijktijdige requests: leest count en
+    verhoogt hem alleen als count < limit, allemaal in één Firestore
+    transactie. Returns (new_count, allowed).
+
+    - allowed=False → user is over quota, count is niet verhoogd
+    - allowed=True  → nieuwe count na increment
+    """
+    if not firestore_client or not uid:
+        return (0, True)  # soft-fail: sta door bij Firestore-outage
+    try:
+        from firebase_admin import firestore as _fs
+        doc_id = f"{uid}_{_ai_month_key()}"
+        ref = firestore_client.collection("ai_usage").document(doc_id)
+        transaction = firestore_client.transaction()
+
+        @_fs.transactional
+        def _run(tx):
+            snap = ref.get(transaction=tx)
+            current = 0
+            first_shown = False
+            if snap.exists:
+                data = snap.to_dict() or {}
+                current = int(data.get("count") or 0)
+                first_shown = bool(data.get("firstShown"))
+            if current >= limit:
+                return (current, False)
+            tx.set(ref, {
+                "userId": uid,
+                "month": _ai_month_key(),
+                "count": current + 1,
+                "firstShown": first_shown or (current == 0),  # markeer bij eerste
+                "laatsteUpdate": _fs.SERVER_TIMESTAMP,
+                "source": "backend",
+            }, merge=True)
+            return (current + 1, True)
+
+        return _run(transaction)
+    except Exception as e:
+        logger.warning("[ai-guard] transactional inc faalde voor %s: %s", uid, e)
+        return (0, True)  # soft-fail door, backend logt de fout
+
+
 def _ai_get_usage_only(firestore_client, uid: str) -> int:
     """Leest de huidige count zonder increment (voor pre-check)."""
     if not firestore_client or not uid:
@@ -363,20 +408,20 @@ async def _verify_ai_access(authorization: Optional[str], *, endpoint: str = "ai
     if premium:
         return {"uid": uid, "email": email, "premium": True, "count": 0, "strict": True}
 
-    # Non-premium → check + increment quota
-    current = _ai_get_usage_only(fs, uid)
-    if current >= AI_FREE_LIMIT:
+    # v60.1.256: Non-premium → ATOMISCH check + increment quota
+    # (voorkomt race condition bij gelijktijdige requests)
+    new_count, allowed = _ai_check_and_inc_atomic(fs, uid, AI_FREE_LIMIT)
+    if not allowed:
         raise HTTPException(
             402,
             {
                 "error": "quota_exceeded",
                 "message": f"Je hebt je {AI_FREE_LIMIT} gratis AI-analyses voor deze maand gebruikt. Upgrade naar Premium voor onbeperkt gebruik.",
                 "limit": AI_FREE_LIMIT,
-                "count": current,
+                "count": new_count,
                 "upgrade": True,
             },
         )
-    new_count = _ai_get_usage_and_inc(fs, uid)
     return {"uid": uid, "email": email, "premium": False, "count": new_count, "strict": True}
 
 

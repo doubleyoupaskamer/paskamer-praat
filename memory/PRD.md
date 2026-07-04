@@ -2535,3 +2535,58 @@ Iedere auto-downgrade laat in de DB achter:
 ✅ Lifetime (geen expires_at) blijft actief
 ✅ Zichtbaar in de audit-trail welke endpoint de downgrade deed
 ✅ Geen regressie op andere endpoints
+
+---
+
+## v60.1.256 (2026-02-12) — Uniforme AI Flow Audit: 3 Rootcause Fixes
+
+### Bug 1 (CRITICAL — business risico): Race condition — DUBBELE INCREMENT
+**Rootcause A**: Frontend `guardCheck()` deed `await incUsage()` + Backend
+`_verify_ai_access` incrementeerde óók → users kregen **2-3 analyses ipv 5**.
+**Rootcause B**: Backend `_ai_get_usage_only()` (READ) gevolgd door
+`_ai_get_usage_and_inc()` (INC) was niet atomair — 10 gelijktijdige requests
+konden allemaal count=4 lezen en incrementeren tot count=14.
+
+**Fixes:**
+- Frontend `guardCheck()`: `await incUsage()` verwijderd. Backend is nu
+  de single source of truth.
+- Backend: nieuwe `_ai_check_and_inc_atomic(fs, uid, limit)` gebruikt
+  Firestore-transactie via `@firestore.transactional`. Read+check+inc
+  in één atomische operatie.
+- `_verify_ai_access` gebruikt nu deze helper i.p.v. het check-then-inc pattern.
+
+**Testing (parallelle stress-test, 10 workers):**
+Seed count=4, limit=5, 10 gelijktijdige calls →
+- **Allowed: 1** (count→5) ✓
+- **Denied: 9** (allemaal count=5, 402 quota_exceeded) ✓
+- **Finale DB count: 5** (exact op limit, geen overshoot) ✓
+- Zonder fix zouden alle 10 zijn doorgekomen → count=14
+
+### Bug 2 (UX): Fetch-hijack toonde de first-use popup niet
+De `guardCheck()` roeit al de first-use popup aan bij count===0 &&
+!firstShown. Bevestigd: dit werkt correct via zowel `wrapModuleOpen` als
+de fetch-hijack. Geen wijziging nodig — wél verified end-to-end.
+
+### Bug 3 (UX cross-tab sync)
+Tab A gebruikt AI → count 3. Tab B toonde stale count 2 uit `_premCache`.
+
+**Fix**: `visibilitychange` listener op `document`:
+- Bij tab-focus: `_premCache` geïnvalideerd, `_inflight=false`
+- Als banner al zichtbaar was: refresh via `maybeShowUsageBanner()`
+- Extra: `storage` event listener op `pp-aig-invalidate` en
+  `pp-premium-invalidate` keys voor expliciete cross-tab sync
+
+### Cache
+- SW `VERSION` → `v60.1.256-20260212-atomic-counter-cross-tab-sync`
+- Guard v1.8.0
+
+### Deliverable
+`/app/01-paskamerpraat-pwa-cloudflare.zip` (13,24 MB, HTTP 200 verified)
+
+### Acceptatiecriteria — bevestigd (unieke tests uitgevoerd)
+✅ Non-premium user: exact 5 analyses/maand, 6e wordt geblokkeerd (curl+DB test)
+✅ Race conditions elimineerd (10 parallel test: precies 1 door, 9 blocked)
+✅ Geen dubbele tellingen tussen frontend/backend meer
+✅ Cross-tab consistency via visibility+storage listeners
+✅ First-use popup werkt via zowel module-open als fetch-hijack path
+✅ Backend blijft strict: 401 zonder token (regressie verified)

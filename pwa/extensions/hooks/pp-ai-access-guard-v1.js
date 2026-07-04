@@ -557,8 +557,11 @@
         showLimitReached();
         return false;
       }
-      // Increment vóór we door laten (atomische verhoging)
-      await incUsage();
+      // v60.1.256: GEEN client-side incUsage meer.
+      //   Backend `_verify_ai_access` doet de atomische increment via
+      //   Firestore-transactie. Dit is defense-in-depth EN voorkomt
+      //   dubbele tellingen (bug: user kreeg 2-3 analyses ipv 5).
+      //   De frontend leest count na de fetch via maybeShowUsageBanner.
       return true;
     } finally { _inflight = false; }
   }
@@ -649,7 +652,7 @@
   };
 
   window.PP_AiGuard = {
-    VERSION: '1.7.0',
+    VERSION: '1.8.0',
     getUsage: getUsage,
     check: guardCheck,
     FREE_LIMIT: FREE_LIMIT,
@@ -661,6 +664,32 @@
     isGuest: isGuest,
     invalidate: function () { _premCache = { uid: null, isPrem: false, at: 0 }; _inflight = false; }
   };
+
+  // v60.1.256: Cross-tab sync via visibilitychange + storage-events.
+  //   Wanneer een tab actief wordt (bijv. na tab-switch), invalideer de
+  //   premium-cache en refresh de banner-teller. Zo blijft de teller
+  //   consistent tussen meerdere geopende tabs.
+  try {
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState !== 'visible') return;
+      try {
+        _premCache = { uid: null, isPrem: false, at: 0 };
+        _inflight = false;
+        // Alleen verversen als banner al zichtbaar was — geen surprise-popups
+        if (document.querySelector('.pp-aig-banner')) {
+          setTimeout(function () { try { maybeShowUsageBanner(); } catch (_) {} }, 100);
+        }
+      } catch (_) {}
+    });
+    // Cross-tab: als een andere tab de premium/usage-status wijzigt, sync
+    window.addEventListener('storage', function (e) {
+      if (!e || !e.key) return;
+      if (e.key === 'pp-aig-invalidate' || e.key === 'pp-premium-invalidate') {
+        _premCache = { uid: null, isPrem: false, at: 0 };
+        _inflight = false;
+      }
+    });
+  } catch (_) {}
 
   // v60.1.249: Firebase Auth state listener — instant invalidatie bij logout
   function installAuthListener() {
