@@ -300,62 +300,177 @@
     });
   }
 
-  // v60.1.250: NIET-blokkerende quota-op banner die BOVENOP een reeds
-  // geopende AI-module wordt getoond. Gebruiker kan tool UI zien maar
-  // wordt geïnformeerd dat een AI-request niet meer werkt zonder Premium.
+  // v60.1.250 / v60.1.251: NIET-blokkerende banner boven een geopende AI-
+  //   module. Twee varianten:
+  //     - "info"    : voor niet-premium bij count < FREE_LIMIT → toont
+  //                   progress-teller "X van 5 gebruikt" + progressbar.
+  //     - "limit"   : bij count >= FREE_LIMIT → toont "Limiet bereikt".
+  //   Uitkomst: zichtbaarheid VOOR de gebruiker op de limiet stuit,
+  //   waardoor premium-conversie omhoog gaat zonder gratis-flow te
+  //   frustreren.
   function injectBannerCss() {
     if (document.getElementById('pp-aig-banner-css')) return;
     var s = document.createElement('style');
     s.id = 'pp-aig-banner-css';
     s.textContent =
+      // Basis-container
       '.pp-aig-banner{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483646;' +
-      'display:flex;align-items:center;gap:14px;padding:14px 20px 14px 18px;max-width:min(560px,94vw);' +
+      'display:flex;align-items:center;gap:12px;padding:12px 16px 12px 14px;max-width:min(560px,94vw);' +
       'background:linear-gradient(135deg,#1a140c,#241a0e);border:1px solid rgba(240,179,64,.55);' +
       'border-radius:14px;color:#fdf5e3;font-family:"DM Sans",system-ui,sans-serif;font-size:13.5px;' +
-      'line-height:1.5;box-shadow:0 18px 42px rgba(0,0,0,.55);animation:pp-aig-banner-in .22s ease-out}' +
+      'line-height:1.45;box-shadow:0 18px 42px rgba(0,0,0,.55);' +
+      'animation:pp-aig-banner-in .24s ease-out}' +
       '@keyframes pp-aig-banner-in{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}' +
-      '.pp-aig-banner-icon{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:rgba(240,179,64,.20);' +
-      'display:inline-flex;align-items:center;justify-content:center;color:#f0b340;font-size:18px;font-weight:700}' +
+      // Icon-cirkel (variant per state)
+      '.pp-aig-banner-icon{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:rgba(240,179,64,.20);' +
+      'display:inline-flex;align-items:center;justify-content:center;color:#f0b340;font:700 15px/1 "DM Sans",sans-serif}' +
+      '.pp-aig-banner.state-warn .pp-aig-banner-icon{background:rgba(240,179,64,.30);color:#ffdb8a}' +
+      '.pp-aig-banner.state-limit .pp-aig-banner-icon{background:rgba(217,74,52,.28);color:#ff9a82;border:1px solid rgba(217,74,52,.6)}' +
+      // Tekstblok + progressbar
       '.pp-aig-banner-txt{flex:1 1 auto;min-width:0}' +
       '.pp-aig-banner-txt strong{color:#f0b340;font-weight:700}' +
+      '.pp-aig-banner-title{display:block;font-weight:600;color:#fdf5e3;margin-bottom:4px;font-size:13.5px;letter-spacing:.005em}' +
+      '.pp-aig-banner-sub{display:block;color:rgba(253,245,227,.72);font-size:11.5px;line-height:1.35}' +
+      '.pp-aig-banner.state-limit .pp-aig-banner-title{color:#ffb59a}' +
+      // Progress-strip
+      '.pp-aig-progress{display:block;position:relative;height:5px;border-radius:999px;background:rgba(253,245,227,.14);' +
+      'margin:6px 0 3px;overflow:hidden}' +
+      '.pp-aig-progress-fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#d4910a,#f0b340);' +
+      'transition:width .45s cubic-bezier(.4,0,.2,1);min-width:4px}' +
+      '.pp-aig-banner.state-warn .pp-aig-progress-fill{background:linear-gradient(90deg,#e6a63a,#ffd577)}' +
+      '.pp-aig-banner.state-limit .pp-aig-progress-fill{background:linear-gradient(90deg,#c94a34,#ff8a70)}' +
+      // CTA + close
       '.pp-aig-banner-cta{flex:0 0 auto;padding:8px 14px;border-radius:999px;background:linear-gradient(135deg,#d4910a,#f0b340);' +
-      'color:#0f0c08;border:0;font:700 12.5px/1 "DM Sans",sans-serif;cursor:pointer;min-height:36px;white-space:nowrap}' +
+      'color:#0f0c08;border:0;font:700 12.5px/1 "DM Sans",sans-serif;cursor:pointer;min-height:36px;white-space:nowrap;' +
+      'transition:transform .15s ease,box-shadow .15s ease}' +
       '.pp-aig-banner-cta:hover,.pp-aig-banner-cta:focus-visible{transform:translateY(-1px);outline:none;box-shadow:0 6px 16px rgba(240,179,64,.35)}' +
-      '.pp-aig-banner-x{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:transparent;border:1px solid rgba(240,179,64,.35);' +
-      'color:#f0b340;cursor:pointer;font:700 16px/1 "DM Sans";display:inline-flex;align-items:center;justify-content:center;padding:0}' +
-      '.pp-aig-banner-x:hover,.pp-aig-banner-x:focus-visible{background:rgba(240,179,64,.18);color:#fff;outline:none}' +
-      '@media (max-width:520px){.pp-aig-banner{left:10px;right:10px;transform:none;bottom:14px;max-width:none;flex-wrap:wrap}' +
-      '@keyframes pp-aig-banner-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}}';
+      '.pp-aig-banner-cta.ghost{background:transparent;border:1px solid rgba(240,179,64,.45);color:#f0b340}' +
+      '.pp-aig-banner-cta.ghost:hover,.pp-aig-banner-cta.ghost:focus-visible{background:rgba(240,179,64,.15);color:#fff}' +
+      '.pp-aig-banner-x{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:rgba(240,179,64,.10);' +
+      'border:1px solid rgba(240,179,64,.35);color:#f0b340;cursor:pointer;font:700 18px/1 "DM Sans",sans-serif;' +
+      'display:inline-flex;align-items:center;justify-content:center;padding:0;transition:all .15s ease}' +
+      '.pp-aig-banner-x:hover,.pp-aig-banner-x:focus-visible{background:rgba(240,179,64,.25);color:#fff;outline:none;transform:scale(1.06)}' +
+      // Mobile: stack items zodat progressbar volledige breedte krijgt
+      '@media (max-width:520px){.pp-aig-banner{left:10px;right:10px;transform:none;bottom:14px;max-width:none;flex-wrap:wrap;padding:12px 14px}' +
+      '.pp-aig-banner-txt{flex:1 1 100%;order:2;width:100%}' +
+      '.pp-aig-banner-icon{order:1}' +
+      '.pp-aig-banner-cta{order:3;flex:1 1 auto}' +
+      '.pp-aig-banner-x{order:4}' +
+      '@keyframes pp-aig-banner-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}}' +
+      // Reduced motion
+      '@media (prefers-reduced-motion:reduce){.pp-aig-banner{animation:none}.pp-aig-progress-fill{transition:none}}';
     document.head.appendChild(s);
   }
-  function showQuotaBanner() {
-    injectBannerCss();
-    // Voorkom dubbele banners
-    var existing = document.querySelector('.pp-aig-banner');
-    if (existing) return;
-    var b = document.createElement('div');
-    b.className = 'pp-aig-banner';
-    b.setAttribute('role', 'status');
-    b.setAttribute('data-testid', 'pp-aig-quota-banner');
-    b.innerHTML =
-      '<span class="pp-aig-banner-icon" aria-hidden="true">!</span>' +
-      '<div class="pp-aig-banner-txt"><strong>Limiet bereikt.</strong> Je 5 gratis analyses zijn op. Upgrade voor onbeperkte AI.</div>' +
-      '<button type="button" class="pp-aig-banner-cta" data-role="banner-upgrade" data-testid="pp-aig-banner-upgrade">Upgrade</button>' +
-      '<button type="button" class="pp-aig-banner-x" data-role="banner-close" data-testid="pp-aig-banner-close" aria-label="Sluiten">×</button>';
-    document.body.appendChild(b);
-    b.addEventListener('click', function (e) {
-      var r = e.target.getAttribute && e.target.getAttribute('data-role');
-      if (r === 'banner-close') { b.parentNode && b.parentNode.removeChild(b); }
-      if (r === 'banner-upgrade') {
-        if (b.parentNode) b.parentNode.removeChild(b);
-        if (window.DY && DY.premium && typeof DY.premium.openUpgrade === 'function') {
-          try { DY.premium.openUpgrade(); return; } catch (_) {}
-        }
-        try { location.hash = '#premium'; } catch (_) {}
-      }
+
+  // Auto-dismiss timer handle om leaks te voorkomen
+  var _bannerTimer = null;
+  function removeBanner() {
+    try {
+      if (_bannerTimer) { clearTimeout(_bannerTimer); _bannerTimer = null; }
+      var el = document.querySelector('.pp-aig-banner');
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    } catch (_) {}
+  }
+  function _escBanner(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
     });
-    // Auto-dismiss na 12s
-    setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 12000);
+  }
+
+  // Toont een banner met de huidige stand. Aanroep is 100% defensief:
+  //   - kraakt niet bij ontbrekende auth / db
+  //   - stapelt geen dubbele banners
+  //   - onafhankelijk van modal-lifecycle
+  //   count  : integer >= 0
+  //   limit  : integer (FREE_LIMIT)
+  function renderUsageBanner(count, limit) {
+    try {
+      injectBannerCss();
+      removeBanner();
+      var safeCount = Math.max(0, Math.min(Number(count) || 0, limit));
+      var pct = Math.round((safeCount / limit) * 100);
+      var isLimit = safeCount >= limit;
+      var isWarn  = !isLimit && safeCount >= (limit - 1); // laatste analyse
+      var stateCls = isLimit ? 'state-limit' : (isWarn ? 'state-warn' : 'state-info');
+      var iconChar = isLimit ? '!' : (isWarn ? '!' : (String(limit - safeCount)));
+      var titleTxt, subTxt, ctaLabel;
+      if (isLimit) {
+        titleTxt = 'Limiet bereikt';
+        subTxt   = 'Je ' + limit + ' gratis analyses zijn op. Upgrade voor onbeperkte AI.';
+        ctaLabel = 'Upgrade';
+      } else if (isWarn) {
+        titleTxt = 'Nog 1 gratis analyse over';
+        subTxt   = safeCount + ' van ' + limit + ' gebruikt deze maand. Upgrade nu voor onbeperkt.';
+        ctaLabel = 'Upgrade';
+      } else {
+        titleTxt = safeCount + ' van ' + limit + ' AI-analyses gebruikt';
+        subTxt   = 'Deze maand nog ' + (limit - safeCount) + ' gratis over. Upgrade voor onbeperkt.';
+        ctaLabel = 'Upgrade';
+      }
+      var b = document.createElement('div');
+      b.className = 'pp-aig-banner ' + stateCls;
+      b.setAttribute('role', 'status');
+      b.setAttribute('aria-live', 'polite');
+      b.setAttribute('data-testid', 'pp-aig-usage-banner');
+      b.setAttribute('data-state', isLimit ? 'limit' : (isWarn ? 'warn' : 'info'));
+      b.setAttribute('data-count', String(safeCount));
+      b.innerHTML =
+        '<span class="pp-aig-banner-icon" aria-hidden="true">' + _escBanner(iconChar) + '</span>' +
+        '<div class="pp-aig-banner-txt">' +
+          '<span class="pp-aig-banner-title">' + _escBanner(titleTxt) + '</span>' +
+          '<span class="pp-aig-progress" aria-hidden="true"><span class="pp-aig-progress-fill" style="width:0%"></span></span>' +
+          '<span class="pp-aig-banner-sub">' + _escBanner(subTxt) + '</span>' +
+        '</div>' +
+        '<button type="button" class="pp-aig-banner-cta" data-role="banner-upgrade" data-testid="pp-aig-banner-upgrade">' + _escBanner(ctaLabel) + '</button>' +
+        '<button type="button" class="pp-aig-banner-x" data-role="banner-close" data-testid="pp-aig-banner-close" aria-label="Sluiten">×</button>';
+      document.body.appendChild(b);
+      // Trigger progress-animatie na append (na de eerstvolgende frame)
+      requestAnimationFrame(function () {
+        try {
+          var f = b.querySelector('.pp-aig-progress-fill');
+          if (f) f.style.width = pct + '%';
+        } catch (_) {}
+      });
+      b.addEventListener('click', function (e) {
+        var r = e.target && e.target.getAttribute && e.target.getAttribute('data-role');
+        if (r === 'banner-close') { removeBanner(); }
+        if (r === 'banner-upgrade') {
+          removeBanner();
+          try {
+            if (window.DY && DY.premium && typeof DY.premium.openUpgrade === 'function') {
+              DY.premium.openUpgrade();
+              return;
+            }
+          } catch (_) {}
+          try { location.hash = '#premium'; } catch (_) {}
+        }
+      });
+      // Info-banner verdwijnt na 6s; warn na 9s; limit blijft langer (14s)
+      var lifespan = isLimit ? 14000 : (isWarn ? 9000 : 6000);
+      _bannerTimer = setTimeout(removeBanner, lifespan);
+      return b;
+    } catch (e) {
+      try { console.warn('[ai-guard] banner render failed:', e && e.message); } catch (_) {}
+      return null;
+    }
+  }
+
+  // Legacy alias: bij quota-op-only (backwards compat met externe callers)
+  function showQuotaBanner() {
+    renderUsageBanner(FREE_LIMIT, FREE_LIMIT);
+  }
+  // Nieuwe publieke helper — wordt aangeroepen na module-open voor
+  // non-premium users. Skipt bij premium (die krijgen NOOIT een banner).
+  async function maybeShowUsageBanner() {
+    try {
+      if (isGuest()) return; // guests krijgen alleen login-modal, geen banner
+      if (await isPremium()) return; // premium ziet nooit progress
+      var usage = await getUsage();
+      var count = (usage && Number(usage.count)) || 0;
+      renderUsageBanner(count, FREE_LIMIT);
+    } catch (e) {
+      try { console.warn('[ai-guard] maybeShowUsageBanner err:', e && e.message); } catch (_) {}
+    }
   }
 
   // ─── Guard: pre-flight check vóór AI request ────────────────────────
@@ -420,16 +535,31 @@
         // klikt op Login/Upgrade wordt de pagina/state vernieuwd.
         return new Promise(function () { /* nooit resolven */ });
       }
+      // v60.1.251: na succesvolle AI-call de banner verversen zodat de
+      // teller live meestapelt. Skip bij premium (isPremium is al gecheckt
+      // in guardCheck, dus als we hier zijn is user non-premium).
+      var _resp = await _origFetch(input, init);
+      try {
+        // Alleen bij OK response updaten; failed requests worden niet geteld
+        if (_resp && (_resp.ok || (_resp.status >= 200 && _resp.status < 300))) {
+          // getUsage is inmiddels geincrementeerd; toon vernieuwde stand
+          setTimeout(function () { maybeShowUsageBanner(); }, 200);
+        }
+      } catch (_) {}
+      return _resp;
     }
     return _origFetch(input, init);
   };
 
   window.PP_AiGuard = {
-    VERSION: '1.3.0',
+    VERSION: '1.4.0',
     getUsage: getUsage,
     check: guardCheck,
     FREE_LIMIT: FREE_LIMIT,
     showQuotaBanner: showQuotaBanner,
+    renderUsageBanner: renderUsageBanner,
+    maybeShowUsageBanner: maybeShowUsageBanner,
+    removeBanner: removeBanner,
     isGuest: isGuest,
     invalidate: function () { _premCache = { uid: null, isPrem: false, at: 0 }; _inflight = false; }
   };
@@ -446,6 +576,8 @@
           var ov = document.querySelector('.pp-aig-ov');
           if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
         } catch (_) {}
+        // v60.1.251: verwijder ook eventuele usage-banner bij logout/switch
+        try { removeBanner(); } catch (_) {}
         log(u ? ('Auth: uid=' + u.uid + (u.isAnonymous ? ' (anon)' : '')) : 'Auth: logged out — caches gewist');
       });
       return true;
@@ -489,10 +621,11 @@
           }
           // UI altijd openen (ook bij quota-op → user-keuze non-blocking overlay)
           orig.apply(self, args);
-          // Bij quota-op: toon niet-blokkerende banner
-          if (usage.count >= FREE_LIMIT) {
-            setTimeout(showQuotaBanner, 380);
-          }
+          // v60.1.251: toon ALTIJD progress-teller (X van 5 gebruikt) voor
+          // non-premium na module-open. Verhoogt bewustzijn + premium-
+          // conversie zonder gratis flow te frustreren. Bij limit-op wordt
+          // automatisch de 'limit'-variant getoond.
+          setTimeout(function () { maybeShowUsageBanner(); }, 420);
         });
       };
       target['__ppGuarded_' + key] = true;

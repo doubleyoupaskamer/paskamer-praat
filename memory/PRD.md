@@ -2306,3 +2306,42 @@ en `sw.js`. Kopie ook naar `/app/frontend/public/` voor download.
 ### Backlog
 - P1: Verifiëren dat 6e AI-actie fetch-guard doet blokkeren via user test.
 - P2: Live Module Phase 2 — True Video Broadcasting.
+
+---
+
+## v60.1.251 (2026-02-12) — AI Quota Progress-Counter Banner
+
+### Doel
+De niet-blokkerende quota-banner uitgebreid tot een echte progress-teller
+die bij ELKE opening van een AI-module getoond wordt aan non-premium
+gebruikers ("2 van 5 gebruikt · nog 3 gratis over"). Verhoogt premium-
+conversie zonder de gratis flow te frustreren.
+
+### Wijzigingen
+- **`extensions/hooks/pp-ai-access-guard-v1.js` → v1.4.0**
+  - `renderUsageBanner(count, limit)` — nieuwe generieke banner met 3 states:
+    - `info` (count < limit-1) : gouden progressbar + "X van 5 gebruikt"
+    - `warn` (count === limit-1) : oranje bar + "Nog 1 gratis analyse over"
+    - `limit` (count >= limit)  : rode bar + "Limiet bereikt"
+  - CSS-animated progressbar (0→X% via requestAnimationFrame + transition).
+  - Icon-cirkel toont "aantal nog over" (info) of "!" (warn/limit).
+  - Lifespan: info 6s, warn 9s, limit 14s (auto-dismiss). Handmatig close & upgrade werken.
+  - Aanroep na module-open via `maybeShowUsageBanner()` (skips guests/premium).
+  - Fetch-guard triggert banner-refresh NA succesvolle AI-response, zodat
+    de teller live meestapelt binnen dezelfde sessie.
+  - Auth-listener verwijdert nu ook de banner bij logout (geen leak).
+- Public API uitgebreid: `PP_AiGuard.renderUsageBanner`, `.maybeShowUsageBanner`, `.removeBanner`.
+- `index.html`: cache-bust `?v=60.1.251-ai-guard-progress-counter`.
+- `sw.js`: `VERSION` → `v60.1.251-20260212-ai-guard-progress-counter-banner`.
+
+### Testing
+- 3 banner-varianten (info/warn/limit) visueel geverifieerd via geïsoleerde
+  Playwright test. Progress-fill widths: 40%, 80%, 100% respectievelijk. Close-
+  knop, correcte tekst per state, correcte state-attributen. **ALL PASSED.**
+- `node --check` op alle gewijzigde JS: PASS.
+- Bestaande legacy code (`virtual-tryon-v1.js`, `outfit-score-v1.js`,
+  `wardrobe-recommend-v1.js`, `ai-fit-chat-v3.js`) volledig **onaangeraakt**.
+
+### Deliverable
+`/app/01-paskamerpraat-pwa-cloudflare.zip` (13 MB) inclusief guard v1.4.0.
+Kopie in `/app/frontend/public/`. SW `v60.1.251`.
