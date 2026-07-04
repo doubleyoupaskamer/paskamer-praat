@@ -2258,3 +2258,51 @@ opnieuw gebouwd met de nieuwe extensie + bijgewerkte `index.html`/`sw.js`.
 ### Fase 4-7 volledig afgerond. Backlog nu:
 - Optional: Fase 4 review-verificatie badge automatisch via `orders` lookup.
 - Live Module Phase 2 — True Video Broadcasting integratie.
+
+---
+
+## v60.1.250 (2026-02-12) — AI Guest-Block UI + WCAG Contrast Close-buttons
+
+### Doel
+Twee gerelateerde kritieke UX-fixes:
+1. **AI-modules blokkeren vóór render voor niet-ingelogde gebruikers** — zij
+   mochten de UI van Probeer Aan, Style Assistant, Outfit Score etc. niet
+   meer zien; alleen een kleine login-prompt.
+2. **WCAG AA contrast op alle modal-sluitknoppen (×)** — voorheen te bleek,
+   gebruikers klikten mis.
+
+### Wijzigingen
+- **`extensions/hooks/pp-ai-access-guard-v1.js` → v1.3.0**
+  - `wrapModuleOpen()` doet nu:
+    - Guest → `showLoginPrompt()` (klein modal met Login-knop, per user-keuze)
+    - Premium → open direct, geen check
+    - Non-premium quota-op → **UI opent WEL** (per user-keuze), gevolgd door
+      niet-blokkerende `showQuotaBanner()` (auto-hide na 12s)
+    - Non-premium eerste gebruik → `showFirstUseInfo()` popup één keer
+  - Nieuwe `showQuotaBanner()`: floating banner met upgrade-CTA, ×-close, ESC.
+  - Nieuwe MODULE_HOOKS: `DY.outfitScore.scoreCard` (hub-menu force-rescore),
+    `DY.wardrobeRecommend.open`, `DY.AIChat.open` (casing gefixt).
+- **`extensions/style/pp-modal-close-contrast-v1.css` (nieuw)**
+  - WCAG AA (4.5:1+) contrast op alle bekende close-knoppen:
+    donker modal → licht ivoor × + focus-ring; licht modal → zeer donker ×.
+  - Bestrijkt `.dy-tryon-close`, `.dy-prem-close`, `.dy-wr-close`,
+    `.dy-wr-banner-close`, `.dy-push-close`, `.dy-score-close`, `.close`,
+    `.dy-modal-sluiten`, `.pp-modal-close`, `.pp-aig-x`.
+  - 44×44 touch-target op mobiel.
+- `index.html`: nieuw stylesheet, script cache-bust naar `v60.1.250-*`.
+- `sw.js`: `VERSION` → `v60.1.250-20260212-ai-guard-nonblock-banner-modal-contrast`.
+
+### Deliverable
+`/app/01-paskamerpraat-pwa-cloudflare.zip` (13 MB) rebuilt met
+`extensions/hooks/pp-ai-access-guard-v1.js` (v1.3.0), nieuwe
+`extensions/style/pp-modal-close-contrast-v1.css`, geüpdatete `index.html`
+en `sw.js`. Kopie ook naar `/app/frontend/public/` voor download.
+
+### Testing status
+- Syntax-check via `node --check` op alle gewijzigde JS: PASS.
+- Geen E2E in preview-env mogelijk (PWA draait op Cloudflare Pages via zip).
+- User zelf-test na deploy verwacht.
+
+### Backlog
+- P1: Verifiëren dat 6e AI-actie fetch-guard doet blokkeren via user test.
+- P2: Live Module Phase 2 — True Video Broadcasting.

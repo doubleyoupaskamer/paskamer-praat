@@ -1,0 +1,135 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * PASKAMER PRAAT — Modal Close Button Contrast Fix (v1.0)
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * WCAG AA/AAA compliant contrast voor alle sluitknoppen (×) in modals.
+ * Volledig additief — geen legacy CSS wordt aangeraakt.
+ *
+ * Doel: minimum 4.5:1 contrast ratio (WCAG AA) op X-glyph, met visible
+ * focus-ring én hover-state die duidelijk zichtbaar is voor alle
+ * gebruikers, ook bij scherm-reflecties en lage-visuele-scherpte.
+ *
+ * Selectors bestrijken:
+ *   - .dy-tryon-close       (Virtual Try-On)
+ *   - .dy-prem-close        (Premium modal)
+ *   - .dy-wr-close          (Wardrobe Recommend)
+ *   - .dy-wr-banner-close   (Wardrobe Banner)
+ *   - .dy-push-close        (Push Notifications)
+ *   - .dy-score-close       (Outfit Score detail)
+ *   - .dy-modal-sluiten     (Legacy Doubleyou modals)
+ *   - .close (in modals)    (Weekly stylist, generic)
+ *   - .pp-modal-close       (New PP modals)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── DONKERE MODALS (donker fond, licht × nodig) ─────────────────────── */
+#dy-premium-modal .dy-prem-close,
+.pp-aig-ov .pp-aig-x,
+#dy-push-modal .dy-push-close {
+  /* Minimum 4.5:1: licht ivoor op donker fond */
+  color: #fdf5e3 !important;
+  opacity: 1 !important;
+  background: rgba(240, 179, 64, 0.16) !important;
+  border: 1px solid rgba(240, 179, 64, 0.45) !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+#dy-premium-modal .dy-prem-close:hover,
+#dy-premium-modal .dy-prem-close:focus-visible,
+.pp-aig-ov .pp-aig-x:hover,
+.pp-aig-ov .pp-aig-x:focus-visible,
+#dy-push-modal .dy-push-close:hover,
+#dy-push-modal .dy-push-close:focus-visible {
+  background: rgba(240, 179, 64, 0.32) !important;
+  color: #ffffff !important;
+  transform: scale(1.06) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(240, 179, 64, 0.35) !important;
+}
+
+/* ─── LICHTE MODALS (licht fond, donker × nodig) ──────────────────────── */
+#dy-tryon-modal .dy-tryon-close,
+#dy-wardrobe-rec-modal .dy-wr-close,
+#dy-weekly-modal .close,
+#dy-wr-banner .dy-wr-banner-close,
+.dy-score-detail .dy-score-close,
+.dy-modal-sluiten,
+.pp-modal-close {
+  color: #1e1a0f !important;                       /* zeer donker ivory-zwart */
+  opacity: 1 !important;
+  background: rgba(30, 26, 15, 0.06) !important;   /* subtiele halo */
+  border: 1px solid rgba(30, 26, 15, 0.14) !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+#dy-tryon-modal .dy-tryon-close:hover,
+#dy-tryon-modal .dy-tryon-close:focus-visible,
+#dy-wardrobe-rec-modal .dy-wr-close:hover,
+#dy-wardrobe-rec-modal .dy-wr-close:focus-visible,
+#dy-weekly-modal .close:hover,
+#dy-weekly-modal .close:focus-visible,
+#dy-wr-banner .dy-wr-banner-close:hover,
+#dy-wr-banner .dy-wr-banner-close:focus-visible,
+.dy-score-detail .dy-score-close:hover,
+.dy-score-detail .dy-score-close:focus-visible,
+.dy-modal-sluiten:hover,
+.dy-modal-sluiten:focus-visible,
+.pp-modal-close:hover,
+.pp-modal-close:focus-visible {
+  background: rgba(30, 26, 15, 0.14) !important;
+  color: #000000 !important;
+  transform: scale(1.06) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(198, 125, 6, 0.32) !important;
+}
+
+/* ─── Dark-mode override: als het OS/thema donker is, herstel we terug ─ */
+@media (prefers-color-scheme: dark) {
+  /* Alleen X-buttons in modals die zich als dark-mode voorbereiden */
+  #dy-premium-modal.dy-dark .dy-prem-close,
+  #dy-wardrobe-rec-modal.dy-dark .dy-wr-close {
+    color: #fdf5e3 !important;
+    background: rgba(240, 179, 64, 0.16) !important;
+    border-color: rgba(240, 179, 64, 0.45) !important;
+  }
+}
+
+/* Touch-friendly bij mobiel */
+@media (max-width: 480px) {
+  #dy-tryon-modal .dy-tryon-close,
+  #dy-premium-modal .dy-prem-close,
+  #dy-wardrobe-rec-modal .dy-wr-close,
+  #dy-weekly-modal .close,
+  #dy-push-modal .dy-push-close,
+  .pp-aig-ov .pp-aig-x,
+  .pp-modal-close {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 24px !important;
+  }
+}
