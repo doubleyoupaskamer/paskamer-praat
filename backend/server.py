@@ -176,13 +176,172 @@ async def ai_health():
     }
 
 
+# ════════════════════════════════════════════════════════════════════════
+# v60.1.252 — CENTRALE AI AUTORISATIE (server-side defense-in-depth)
+#
+# Verifieert de Bearer ID-token, checkt Premium status, en beheert de
+# maandelijkse quota-teller in Firestore `ai_usage/{uid}_{YYYY-MM}`.
+# Wordt aangeroepen door alle beschermde AI-endpoints (tryon, outfit-
+# score, style-assistant, wardrobe-recommend, weekly-stylist).
+#
+# STRICT MODE:
+#   - `AI_STRICT_AUTH=true` in .env → hard 401/403 bij ontbrekend/verlopen
+#     token of quota-op. Aanbevolen voor productie.
+#   - Uitgeschakeld (default) → soft check: log warning maar sta door.
+# ════════════════════════════════════════════════════════════════════════
+AI_FREE_LIMIT = int(os.environ.get("AI_FREE_LIMIT", "5") or 5)
+AI_STRICT_AUTH = str(os.environ.get("AI_STRICT_AUTH", "true")).lower() in ("1", "true", "yes", "on")
+
+
+def _ai_month_key(now: Optional[datetime] = None) -> str:
+    d = now or datetime.now(timezone.utc)
+    return f"{d.year:04d}-{d.month:02d}"
+
+
+def _ai_get_firestore():
+    """Haal de Firestore-client op via de gedeelde shopify_wallet app.
+    Returns None als Firebase niet geconfigureerd is (soft-fail voor dev)."""
+    try:
+        import shopify_wallet
+        client = shopify_wallet._init_firebase()
+        return client
+    except Exception:
+        return None
+
+
+def _ai_check_admin_email(email: str) -> bool:
+    """Admin emails krijgen altijd premium-toegang (bypass quota)."""
+    email = (email or "").lower().strip()
+    if not email:
+        return False
+    admin_env = (os.environ.get("ADMIN_USER_EMAIL", "") + "," +
+                 os.environ.get("ADMIN_PREMIUM_EMAILS", "")).lower()
+    admin_set = {e.strip() for e in admin_env.split(",") if e.strip()}
+    return email in admin_set
+
+
+async def _ai_is_premium(uid: str, email: Optional[str]) -> bool:
+    """Check Premium via Mongo `premium_users` (bestaande collection)."""
+    if _ai_check_admin_email(email or ""):
+        return True
+    if not uid and not email:
+        return False
+    try:
+        rec = None
+        if uid:
+            rec = await db.premium_users.find_one({"user_key": uid})
+        if not rec and email:
+            rec = await db.premium_users.find_one({"email": email.lower().strip()})
+        return bool(rec and rec.get("is_premium"))
+    except Exception:
+        return False
+
+
+def _ai_get_usage_and_inc(firestore_client, uid: str) -> int:
+    """Leest de huidige maand-teller EN incrementeert deze atomair.
+    Returns het NIEUWE count-getal. Wanneer Firestore niet beschikbaar
+    is, geeft 0 terug (soft-fail)."""
+    if not firestore_client or not uid:
+        return 0
+    try:
+        from firebase_admin import firestore as _fs
+        doc_id = f"{uid}_{_ai_month_key()}"
+        ref = firestore_client.collection("ai_usage").document(doc_id)
+        # Increment atomically
+        ref.set({
+            "userId": uid,
+            "month": _ai_month_key(),
+            "count": _fs.Increment(1),
+            "laatsteUpdate": _fs.SERVER_TIMESTAMP,
+            "source": "backend",
+        }, merge=True)
+        snap = ref.get()
+        data = snap.to_dict() if snap and snap.exists else {}
+        return int(data.get("count") or 0)
+    except Exception as e:
+        logger.warning("ai_usage increment faalde voor %s: %s", uid, e)
+        return 0
+
+
+def _ai_get_usage_only(firestore_client, uid: str) -> int:
+    """Leest de huidige count zonder increment (voor pre-check)."""
+    if not firestore_client or not uid:
+        return 0
+    try:
+        doc_id = f"{uid}_{_ai_month_key()}"
+        snap = firestore_client.collection("ai_usage").document(doc_id).get()
+        data = snap.to_dict() if snap and snap.exists else {}
+        return int(data.get("count") or 0)
+    except Exception:
+        return 0
+
+
+async def _verify_ai_access(authorization: Optional[str], *, endpoint: str = "ai") -> dict:
+    """Hard AI-authorisatie:
+        - Bearer token vereist (in STRICT mode → 401 zonder)
+        - Verifieert token via Firebase Admin
+        - Premium bypasst quota; anders check + increment maandteller
+        - 403 bij quota-op (non-premium)
+    Returns dict met {uid, email, premium, count}.
+    """
+    fs = _ai_get_firestore()
+
+    # Geen Firebase configuratie → soft mode (log en laat door)
+    if fs is None:
+        if AI_STRICT_AUTH:
+            raise HTTPException(503, "Firebase Admin niet geconfigureerd; AI-toegang tijdelijk niet beschikbaar")
+        logger.warning("[ai-guard] geen Firebase — %s call zonder auth toegestaan", endpoint)
+        return {"uid": None, "email": None, "premium": False, "count": 0, "strict": False}
+
+    if not authorization or not authorization.startswith("Bearer "):
+        if AI_STRICT_AUTH:
+            raise HTTPException(401, "Login vereist voor AI-functionaliteit")
+        logger.warning("[ai-guard] %s call zonder Bearer token (soft mode)", endpoint)
+        return {"uid": None, "email": None, "premium": False, "count": 0, "strict": False}
+
+    try:
+        from firebase_admin import auth as fb_auth
+        import shopify_wallet
+        token = authorization[7:]
+        decoded = fb_auth.verify_id_token(token, app=shopify_wallet._fb_app)
+    except Exception as e:
+        logger.warning("[ai-guard] token verify faalde: %s", e)
+        raise HTTPException(401, "Ongeldig of verlopen sessie-token")
+
+    uid = decoded.get("uid")
+    email = decoded.get("email")
+    if not uid:
+        raise HTTPException(401, "Token bevat geen uid")
+
+    premium = await _ai_is_premium(uid, email)
+    if premium:
+        return {"uid": uid, "email": email, "premium": True, "count": 0, "strict": True}
+
+    # Non-premium → check + increment quota
+    current = _ai_get_usage_only(fs, uid)
+    if current >= AI_FREE_LIMIT:
+        raise HTTPException(
+            402,
+            {
+                "error": "quota_exceeded",
+                "message": f"Je hebt je {AI_FREE_LIMIT} gratis AI-analyses voor deze maand gebruikt. Upgrade naar Premium voor onbeperkt gebruik.",
+                "limit": AI_FREE_LIMIT,
+                "count": current,
+                "upgrade": True,
+            },
+        )
+    new_count = _ai_get_usage_and_inc(fs, uid)
+    return {"uid": uid, "email": email, "premium": False, "count": new_count, "strict": True}
+
+
 @api_router.post("/wardrobe/recommend")
-async def wardrobe_recommend(req: WardrobeRecommendRequest):
+async def wardrobe_recommend(req: WardrobeRecommendRequest, authorization: Optional[str] = Header(None)):
     """Genereert 3 outfit-ideeën uit opgeslagen looks via Emergent LLM Key.
 
     Fallback bij geen items of geen key: heldere, niet-crashende response zodat
     de popup nooit een lege/Netwerkfout staat ziet.
     """
+    await _verify_ai_access(authorization, endpoint="wardrobe_recommend")
     saved = req.saved_items or []
     if not saved:
         return {
@@ -747,7 +906,8 @@ def _outfit_score_fallback(req: OutfitScoreRequest) -> dict:
 
 
 @api_router.post("/outfit-score")
-async def outfit_score(req: OutfitScoreRequest):
+async def outfit_score(req: OutfitScoreRequest, authorization: Optional[str] = Header(None)):
+    await _verify_ai_access(authorization, endpoint="outfit_score")
     api_key = os.environ.get("EMERGENT_LLM_KEY")
     # v60.1.89: als photo_b64 ontbreekt maar photo_url is gegeven,
     # fetch de afbeelding server-side. Dit omzeilt browser-CORS issues
@@ -1186,9 +1346,10 @@ class AiScoreBody(BaseModel):
 
 
 @api_router.post("/ai/score-outfit")
-async def ai_score_outfit(body: AiScoreBody):
+async def ai_score_outfit(body: AiScoreBody, authorization: Optional[str] = Header(None)):
     """v60.1.244: forward naar /outfit-score endpoint als er een image_url is,
     anders fallback naar heuristische score."""
+    await _verify_ai_access(authorization, endpoint="ai_score_outfit")
     if body.image_url:
         # Reuse de bestaande outfit-score implementatie
         try:
@@ -1224,8 +1385,9 @@ class AiAssistBody(BaseModel):
 
 
 @api_router.post("/ai/style-assistant")
-async def ai_style_assistant(body: AiAssistBody):
+async def ai_style_assistant(body: AiAssistBody, authorization: Optional[str] = Header(None)):
     """v60.1.244: echte conversational stylist via Claude Sonnet 4.5 (Emergent LLM)."""
+    await _verify_ai_access(authorization, endpoint="ai_style_assistant")
     if not body.message or not body.message.strip():
         return {"reply": "Stel een vraag over stijl, kleur, pasvorm of outfit-combinaties.", "messages": [], "session_id": body.session_id}
 
@@ -1301,7 +1463,7 @@ class TryonBody(BaseModel):
 
 
 @api_router.post("/tryon")
-async def virtual_tryon(body: TryonBody):
+async def virtual_tryon(body: TryonBody, authorization: Optional[str] = Header(None)):
     """Virtual try-on v60.1.244 (real implementation via Gemini Nano Banana).
 
     Compose user photo + outfit reference into a realistic try-on image.
@@ -1309,6 +1471,7 @@ async def virtual_tryon(body: TryonBody):
 
     Returns: { ok, image_b64, mime_type, caption } — matching frontend contract.
     """
+    await _verify_ai_access(authorization, endpoint="tryon")
     api_key = os.environ.get('EMERGENT_LLM_KEY')
     if not api_key:
         return {"ok": False, "error": "EMERGENT_LLM_KEY niet geconfigureerd", "image_b64": None}
@@ -1450,7 +1613,8 @@ class WeeklyStylistBody(BaseModel):
 
 
 @api_router.post("/weekly-stylist")
-async def weekly_stylist_stub(body: WeeklyStylistBody):
+async def weekly_stylist_stub(body: WeeklyStylistBody, authorization: Optional[str] = Header(None)):
+    await _verify_ai_access(authorization, endpoint="weekly_stylist")
     return {"ok": False, "error": "Weekly stylist nog niet geactiveerd."}
 
 

@@ -2345,3 +2345,79 @@ conversie zonder de gratis flow te frustreren.
 ### Deliverable
 `/app/01-paskamerpraat-pwa-cloudflare.zip` (13 MB) inclusief guard v1.4.0.
 Kopie in `/app/frontend/public/`. SW `v60.1.251`.
+
+---
+
+## v60.1.252 (2026-02-12) — VOLLEDIGE AI AUTORISATIE AUDIT & CENTRALE GUARD
+
+### Doel (productieblokker fix)
+Kritieke rootcause: **Outfit Analyse / Kleuranalyse / Outfit Vergelijker**
+riepen direct `api.anthropic.com/v1/messages` aan vanuit `pwa-v463…js`
+— compleet buiten de guard om. Dit betekende dat gasten en gebruikers
+zonder quota onbeperkt AI konden gebruiken. Gefixt via defense-in-depth:
+
+### Frontend (`pp-ai-access-guard-v1.js` → v1.5.0)
+1. **Fetch-hijack uitgebreid** met externe AI-providers:
+   - `api.anthropic.com/v1/messages`
+   - `api.openai.com/v1/*`
+   - `generativelanguage.googleapis.com/*`
+   - `doubleyou-patroon-server.onrender.com/patroon`
+2. **Legacy DY-functies gewrapt** (bypaste vroeger):
+   - `DY.cfgStuurAI` (patroon-configurator)
+   - `DY._kleurenAnalyseerMet` (kleuranalyse → Anthropic)
+   - `DY._kaiImprovementEngine` (improvement suggesties)
+3. **Route-guard** voor beschermde paginas:
+   - `DY.toonPagina` en `DY.navigeer` worden nu gewrapt
+   - Kleuren_ai / /outfit-vergelijker route blokkeert gasten
+   - Deep-link `?pagina=kleuren_ai` en `?kleuranalyse=<id>` → login-modal
+4. **Automatische Bearer token injectie** in alle AI-fetches naar onze
+   backend (`/api/*` endpoints). Externe providers krijgen géén token.
+5. **401/402 response handling**: 401 → login-modal (token verlopen), 402
+   → limit-modal (quota-op) — geen rauwe error meer in UI.
+
+### Backend (`server.py`)
+Nieuwe centrale helper `_verify_ai_access(authorization)`:
+- Verifieert Firebase ID token via `firebase_admin.auth.verify_id_token`
+- Premium-check via Mongo `premium_users` (incl. `ADMIN_PREMIUM_EMAILS`)
+- Non-premium: leest + verhoogt `ai_usage/{uid}_{YYYY-MM}` in Firestore
+- 401 zonder/verlopen token, 402 bij quota-op
+- STRICT-mode default AAN (env: `AI_STRICT_AUTH=true`)
+
+Toegepast op ALLE AI-endpoints:
+- `POST /api/tryon`
+- `POST /api/outfit-score`
+- `POST /api/ai/score-outfit`
+- `POST /api/ai/style-assistant`
+- `POST /api/wardrobe/recommend`
+- `POST /api/weekly-stylist`
+
+`GET /api/ai/health` blijft publiek (health probe, geen AI generatie).
+
+### Testing (curl-verified)
+- `POST /api/wardrobe/recommend` zonder token → **401** "Login vereist"
+- `POST /api/outfit-score` zonder token → **401**
+- `POST /api/tryon` zonder token → **401**
+- `POST /api/ai/style-assistant` zonder token → **401**
+- `POST /api/tryon` met FAKE token → **401** "Ongeldig of verlopen sessie-token"
+- `GET /api/ai/health` → **200** OK (whitelisted)
+- `GET /api/premium/status`, `/api/wallet/health` → **200** (regressie clean)
+
+### Cache
+- `sw.js` VERSION → `v60.1.252-20260212-ai-guard-full-audit-server-side-enforce`
+- `index.html` cache-bust `?v=60.1.252-*`
+
+### Deliverable
+`/app/01-paskamerpraat-pwa-cloudflare.zip` (13 MB, 13.24M bytes verified).
+Ook `/app/frontend/public/…` voor download-URL.
+
+### Acceptatiecriteria — bevestigd
+- Outfit Analyse afgeschermd (fetch + route + module hook)
+- Outfit Vergelijker afgeschermd (kleuren_ai route + Anthropic patterns)
+- Alle AI-modules via één guard (frontend) én één `_verify_ai_access`
+  (backend defense-in-depth)
+- Gasten → geen AI (UI + fetch + route allemaal geblokkeerd)
+- Free-users → max 5/maand (frontend teller + backend teller redundant)
+- Premium → onbeperkt (Mongo premium_users + admin emails)
+- Firestore `ai_usage` doc-ID rollover per maand automatisch
+- Frontend & backend beide valideren
+- Geen regressie op non-AI endpoints

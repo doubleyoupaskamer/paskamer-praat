@@ -32,17 +32,28 @@
   window.__ppAiAccessGuardInit = true;
 
   var FREE_LIMIT = 5;
-  // v60.1.247: EXPLICIETE lijst van user-initiated AI-generation endpoints
+  // v60.1.247/252: EXPLICIETE lijst van user-initiated AI-generation endpoints
   // die tegen de limiet tellen. Passive endpoints (health, embedding
   // matching, prefetch) mogen ALTIJD door - anders blokkeert de guard
   // menu-open flows voor gasten.
+  //
+  // v60.1.252 KRITIEKE UITBREIDING: legacy modules (Outfit Vergelijker /
+  // Kleuranalyse / AI Chat improvement engine) roepen `api.anthropic.com`
+  // DIRECT aan, buiten onze backend om. Deze moeten OOK gecontroleerd
+  // worden — anders bypassen ze de gehele autorisatielaag.
   var AI_ENDPOINT_PATTERNS = [
+    // ─── Backend AI endpoints ──────────────────────────────────────────
     /\/api\/tryon(\?|$)/i,
     /\/api\/outfit-score(\?|$)/i,
     /\/api\/wardrobe\/recommend(\?|$)/i,
     /\/api\/weekly-stylist(\?|$)/i,
     /\/api\/ai\/style-assistant(\?|$)/i,
     /\/api\/ai\/score-outfit(\?|$)/i,
+    // ─── Externe AI provider endpoints (legacy direct-calls) ──────────
+    /^https?:\/\/api\.anthropic\.com\/v1\/messages/i,
+    /^https?:\/\/api\.openai\.com\/v1\/(chat|completions|images|responses|embeddings|audio)/i,
+    /^https?:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/[^/]+:(generateContent|streamGenerateContent|embedContent)/i,
+    /^https?:\/\/doubleyou-patroon-server\.onrender\.com\/patroon/i,
   ];
   // Expliciete whitelist (passieve/health/prefetch endpoints - nooit guarden)
   var AI_ENDPOINT_WHITELIST = [
@@ -522,6 +533,23 @@
     } catch (_) { return false; }
   }
 
+  // v60.1.252: Herken alleen ONZE eigen /api/ endpoints (voor token-injectie).
+  //   Externe providers zoals api.anthropic.com krijgen GEEN Bearer token
+  //   (die hebben hun eigen auth) — maar worden nog steeds guard-gecheckt.
+  function isOurBackendApi(url) {
+    try {
+      var s = String(url || '');
+      if (!s) return false;
+      if (/^https?:\/\/api\.anthropic\.com/i.test(s)) return false;
+      if (/^https?:\/\/api\.openai\.com/i.test(s)) return false;
+      if (/^https?:\/\/generativelanguage\.googleapis\.com/i.test(s)) return false;
+      if (/^https?:\/\/doubleyou-patroon-server\.onrender\.com/i.test(s)) return false;
+      // Relatieve /api of onze backend-hosts
+      if (s.indexOf('/api/') >= 0) return true;
+      return false;
+    } catch (_) { return false; }
+  }
+
   // ─── Global fetch hijack ─────────────────────────────────────────────
   var _origFetch = window.fetch.bind(window);
   window.fetch = async function (input, init) {
@@ -535,11 +563,39 @@
         // klikt op Login/Upgrade wordt de pagina/state vernieuwd.
         return new Promise(function () { /* nooit resolven */ });
       }
+      // v60.1.252: injecteer Firebase ID token in Authorization header voor
+      //   ONZE backend endpoints. Externe providers krijgen geen token.
+      if (isOurBackendApi(url)) {
+        try {
+          var a = fbAuth();
+          var currentUser = a && a.currentUser;
+          if (currentUser && typeof currentUser.getIdToken === 'function') {
+            var idToken = await currentUser.getIdToken(/* forceRefresh */ false);
+            if (idToken) {
+              init = init || {};
+              // Kopieer headers zonder de originele init te muteren
+              var mergedHeaders = new Headers(init.headers || (typeof input !== 'string' && input && input.headers) || {});
+              if (!mergedHeaders.has('Authorization')) {
+                mergedHeaders.set('Authorization', 'Bearer ' + idToken);
+              }
+              init.headers = mergedHeaders;
+            }
+          }
+        } catch (e) {
+          try { console.warn('[ai-guard] token injection failed:', e && e.message); } catch (_) {}
+        }
+      }
       // v60.1.251: na succesvolle AI-call de banner verversen zodat de
       // teller live meestapelt. Skip bij premium (isPremium is al gecheckt
       // in guardCheck, dus als we hier zijn is user non-premium).
       var _resp = await _origFetch(input, init);
       try {
+        // v60.1.252: 401 → login-modal (token verlopen); 402 → limit-modal
+        if (_resp && _resp.status === 401) {
+          try { showLoginPrompt(); } catch (_) {}
+        } else if (_resp && _resp.status === 402) {
+          try { showLimitReached(); } catch (_) {}
+        }
         // Alleen bij OK response updaten; failed requests worden niet geteld
         if (_resp && (_resp.ok || (_resp.status >= 200 && _resp.status < 300))) {
           // getUsage is inmiddels geincrementeerd; toon vernieuwde stand
@@ -552,7 +608,7 @@
   };
 
   window.PP_AiGuard = {
-    VERSION: '1.4.0',
+    VERSION: '1.5.0',
     getUsage: getUsage,
     check: guardCheck,
     FREE_LIMIT: FREE_LIMIT,
@@ -642,12 +698,54 @@
     ['DY.wardrobeRecommend', 'open'],
     ['DY.AIChat', 'open'],             // v60.1.250: fix casing (was DY.aiChat)
     ['DY.weeklyStylist', 'open'],
+    // v60.1.252: legacy Outfit Vergelijker / Kleuranalyse (bypaste guard)
+    ['DY', 'cfgStuurAI'],              // AI configurator (patroon-server)
+    ['DY', '_kleurenAnalyseerMet'],    // Kleuranalyse ↔ Anthropic
+    ['DY', '_kaiImprovementEngine'],   // Kleuranalyse improvement suggesties
     // Toekomstige AI-modules toevoegen zonder code-refactor:
     ['DY.pickMe', 'open'],
     ['DY.styleAssistant', 'open'],
     ['DY.kleuranalyse', 'open'],
     ['DY.fashionMatch', 'open'],
   ];
+
+  // v60.1.252: ROUTE-GUARD voor beschermde AI-paginas. Wraps DY.toonPagina
+  //   en DY.navigeer zodat kleuren_ai / outfit-vergelijker deep-links
+  //   voor gasten direct de login-modal tonen ipv de pagina te renderen.
+  //   Non-premium met quota mag WEL naar de pagina (banner toont teller).
+  var PROTECTED_PAGES = ['kleuren_ai']; // interne pagina-id
+  var PROTECTED_ROUTES_RX = /^\/?outfit-vergelijker(\/|$|\?)/i;
+
+  function _isProtectedPageArg(arg) {
+    try {
+      var s = String(arg == null ? '' : arg).toLowerCase().trim();
+      if (!s) return false;
+      if (PROTECTED_PAGES.indexOf(s) >= 0) return true;
+      if (PROTECTED_ROUTES_RX.test(s)) return true;
+      return false;
+    } catch (_) { return false; }
+  }
+  function wrapPageRouter() {
+    try {
+      if (!window.DY) return false;
+      var wrapped = 0;
+      ['toonPagina', 'navigeer'].forEach(function (fn) {
+        if (typeof DY[fn] !== 'function' || DY['__ppGuarded_' + fn]) return;
+        var orig = DY[fn];
+        DY[fn] = function (arg) {
+          if (_isProtectedPageArg(arg) && isGuest()) {
+            try { showLoginPrompt(); } catch (_) {}
+            return; // pagina niet renderen
+          }
+          // Non-premium mag door — de banner + fetch-guard handelen quota af
+          return orig.apply(this, arguments);
+        };
+        DY['__ppGuarded_' + fn] = true;
+        wrapped++;
+      });
+      return wrapped > 0;
+    } catch (_) { return false; }
+  }
   function installModuleHooks() {
     var wrappedAny = false;
     for (var i = 0; i < MODULE_HOOKS.length; i++) {
@@ -660,10 +758,36 @@
   var _initIv = setInterval(function () {
     var ok1 = installAuthListener();
     installModuleHooks(); // best-effort elke tick — voegt late modules toe
+    wrapPageRouter();      // v60.1.252: wrap router zodra DY.toonPagina bestaat
     if (ok1 || _initAttempts++ > 80) clearInterval(_initIv);
   }, 250);
   // Initial run
   installModuleHooks();
+  wrapPageRouter();
+
+  // v60.1.252: initial route-check. Als de pagina al laadt met
+  //   ?pagina=kleuren_ai OF ?kleuranalyse=... en de gebruiker gast is,
+  //   sluit de content af en toon direct de login-modal.
+  function _initialRouteCheck() {
+    try {
+      var qs = new URLSearchParams(location.search || '');
+      var page = (qs.get('pagina') || '').toLowerCase();
+      var kaShare = qs.get('kleuranalyse');
+      var path = (location.pathname || '').toLowerCase();
+      var isProtected = (page === 'kleuren_ai') || !!kaShare || PROTECTED_ROUTES_RX.test(path);
+      if (!isProtected) return;
+      // Wacht tot Firebase Auth klaar is (async)
+      var a = fbAuth();
+      if (!a) { setTimeout(_initialRouteCheck, 400); return; }
+      a.onAuthStateChanged(function once(u) {
+        try { a.onAuthStateChanged(function () {}); } catch (_) {}
+        if (!u || u.isAnonymous === true) {
+          try { showLoginPrompt(); } catch (_) {}
+        }
+      });
+    } catch (_) {}
+  }
+  _initialRouteCheck();
 
   log('AI Access Guard geladen (limiet: ' + FREE_LIMIT + '/maand)');
 })();
