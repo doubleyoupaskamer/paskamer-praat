@@ -1,0 +1,184 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * PASKAMER PRAAT. Theme toggle CSS (v1.0)
+ *
+ * DOEL
+ * 1. Styling voor de toggle knop (icoon + label pill in topbar).
+ * 2. Light theme overrides voor de meest zichtbare elementen. Alle regels
+ *    zijn scoped op html[data-pp-theme="light"] zodat het donkere thema
+ *    100% intact blijft voor gebruikers die dat kiezen.
+ *
+ * NIET DOEL
+ * Volledige re-theming van elk legacy element. Legacy CSS is enorm en
+ * heeft veel hardcoded donkere kleuren. Dit MVP dekt de meest zichtbare
+ * elementen. Overige elementen kunnen incrementeel bijgewerkt worden.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── Toggle knop styling (werkt in beide themes) ───────────────────── */
+.pp-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: 600 12px/1 "DM Sans", system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  min-height: 32px;
+  opacity: 0.85;
+}
+.pp-theme-toggle:hover,
+.pp-theme-toggle:focus-visible {
+  opacity: 1;
+  transform: translateY(-1px);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(240, 179, 64, 0.35);
+}
+.pp-theme-toggle .pp-theme-toggle-icon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+}
+.pp-theme-toggle .pp-theme-toggle-icon svg {
+  display: block;
+}
+.pp-theme-toggle .pp-theme-toggle-label {
+  display: inline-block;
+}
+@media (max-width: 520px) {
+  .pp-theme-toggle .pp-theme-toggle-label {
+    display: none; /* op mobiel alleen icoon */
+  }
+  .pp-theme-toggle {
+    padding: 6px;
+    min-width: 32px;
+    justify-content: center;
+  }
+}
+
+/* ─── LICHT THEMA OVERRIDES ─────────────────────────────────────────── */
+html[data-pp-theme="light"] {
+  color-scheme: light;
+  --pp-bg: #fdf5e3;
+  --pp-bg-elev: #ffffff;
+  --pp-bg-elev-2: #f5ecd7;
+  --pp-text: #1e1a0f;
+  --pp-text-muted: #5a4c2f;
+  --pp-border: rgba(30, 26, 15, 0.14);
+  --pp-accent: #b06205;
+  --pp-accent-hover: #8a4d04;
+}
+
+/* Basis achtergrond en tekst */
+html[data-pp-theme="light"] body {
+  background: #fdf5e3 !important;
+  color: #1e1a0f !important;
+}
+
+/* Topbar en navigatie */
+html[data-pp-theme="light"] .dy-topbar,
+html[data-pp-theme="light"] #dy-topbar,
+html[data-pp-theme="light"] .dy-topnav,
+html[data-pp-theme="light"] header.dy-topbar {
+  background: rgba(253, 245, 227, 0.92) !important;
+  backdrop-filter: blur(12px);
+  color: #1e1a0f !important;
+  border-bottom: 1px solid rgba(30, 26, 15, 0.10) !important;
+}
+html[data-pp-theme="light"] .dy-topbar a,
+html[data-pp-theme="light"] .dy-topbar button,
+html[data-pp-theme="light"] .dy-topnav a,
+html[data-pp-theme="light"] .dy-topnav button {
+  color: #1e1a0f !important;
+}
+
+/* Bottom nav (mobiel) */
+html[data-pp-theme="light"] .dy-botnav,
+html[data-pp-theme="light"] .dy-bottom-nav,
+html[data-pp-theme="light"] #dy-botnav {
+  background: rgba(253, 245, 227, 0.96) !important;
+  color: #1e1a0f !important;
+  border-top: 1px solid rgba(30, 26, 15, 0.10) !important;
+}
+html[data-pp-theme="light"] .dy-botnav a,
+html[data-pp-theme="light"] .dy-botnav button {
+  color: #4a3208 !important;
+}
+
+/* Cards / feed items / posts */
+html[data-pp-theme="light"] .dy-card,
+html[data-pp-theme="light"] .dy-feed-card,
+html[data-pp-theme="light"] .dy-post,
+html[data-pp-theme="light"] .dy-outfit-card,
+html[data-pp-theme="light"] .dy-review-card,
+html[data-pp-theme="light"] .dy-brand-card {
+  background: #ffffff !important;
+  color: #1e1a0f !important;
+  border: 1px solid rgba(30, 26, 15, 0.08) !important;
+  box-shadow: 0 4px 14px rgba(30, 26, 15, 0.05) !important;
+}
+
+/* Hoofdtekst binnen cards */
+html[data-pp-theme="light"] .dy-card p,
+html[data-pp-theme="light"] .dy-card h1,
+html[data-pp-theme="light"] .dy-card h2,
+html[data-pp-theme="light"] .dy-card h3,
+html[data-pp-theme="light"] .dy-card span,
+html[data-pp-theme="light"] .dy-feed-card p,
+html[data-pp-theme="light"] .dy-feed-card span {
+  color: #1e1a0f;
+}
+
+/* Meta tekst en subtitles: donkere olijf op ivoor */
+html[data-pp-theme="light"] .dy-meta,
+html[data-pp-theme="light"] .dy-sub,
+html[data-pp-theme="light"] .dy-hint,
+html[data-pp-theme="light"] .dy-caption,
+html[data-pp-theme="light"] .dy-feed-merk-label,
+html[data-pp-theme="light"] [class*="-sub"] {
+  color: #5a4c2f !important;
+}
+
+/* Titel emphasis (b.v. <em> in H1) */
+html[data-pp-theme="light"] .dy-vr-titel em,
+html[data-pp-theme="light"] h1 em,
+html[data-pp-theme="light"] h2 em {
+  color: #b06205 !important;
+  font-style: italic;
+}
+
+/* Inputs en textarea */
+html[data-pp-theme="light"] input,
+html[data-pp-theme="light"] textarea,
+html[data-pp-theme="light"] select {
+  background: #ffffff !important;
+  color: #1e1a0f !important;
+  border-color: rgba(30, 26, 15, 0.16) !important;
+}
+html[data-pp-theme="light"] input::placeholder,
+html[data-pp-theme="light"] textarea::placeholder {
+  color: rgba(30, 26, 15, 0.42) !important;
+}
+
+/* Modals blijven donker want dat is een expliciet design keuze in de
+ * modals (met goud accenten). Light thema wijzigt bewust NIET de modals
+ * om regressie en contrast issues te voorkomen. */
+
+/* Preauth cloak: als user light thema koos maar preauth cloak actief is,
+ * gebruik ivoor achtergrond ipv zwart voor visuele consistentie */
+html[data-pp-theme="light"].pp-preauth-locked::before {
+  background: #fdf5e3 !important;
+}
+
+/* Scrollbar */
+html[data-pp-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(30, 26, 15, 0.20);
+}
+html[data-pp-theme="light"] ::-webkit-scrollbar-track {
+  background: rgba(30, 26, 15, 0.04);
+}

@@ -2828,3 +2828,54 @@ olijf) voor subtitles, loading en error states. Op donker fond zwak contrast.
 ### Bestrijkt
 Weekly Stylist, Virtual Try-On, Wardrobe Recommend, Premium modal en alle
 toekomstige modals via id-suffix `-modal` en `.pp-modal` class conventions.
+
+---
+
+## v60.1.263 (2026-02-12) Licht/Donker/Auto thema toggle
+
+### Doel
+Gebruiker kan wisselen tussen 3 thema's via een knop rechtsboven in de topbar:
+- Donker (huidige default, behoud bestaande UX)
+- Licht (ivoor achtergrond, donkere tekst)
+- Systeem/Auto (respecteert prefers-color-scheme)
+
+### Nieuwe files (100% additief)
+- `extensions/hooks/pp-theme-toggle-v1.js` (v1.0.0)
+- `extensions/style/pp-theme-toggle-v1.css`
+
+### Architectuur
+- State in localStorage key 'pp-theme'
+- `<html>` krijgt `data-pp-theme="light|dark"` (resolved) en `data-pp-theme-pref="light|dark|auto"` (user keuze)
+- CSS overrides scoped op `html[data-pp-theme="light"]` zodat donker thema 100% intact blijft
+- Knop wordt geinjecteerd in topbar via MutationObserver (topbar wordt dynamisch gerender)
+- Cross-tab sync via storage event
+- Auto reageert op system theme change (matchMedia listener)
+
+### Light theme dekking (MVP)
+- Body achtergrond ivoor #fdf5e3, tekst donker #1e1a0f
+- Topbar en bottom nav ivoor met blur
+- Cards wit met donkere tekst en subtiele shadow
+- Meta/hint/caption sub tekst donker olijf #5a4c2f
+- Title <em> emphasis gouden accent
+- Inputs wit met donkere tekst
+- Modals blijven donker (bewuste keuze, expliciet design met goud accenten)
+
+### Public API
+`window.PP_Theme.{VERSION, get, getResolved, set, cycle}`
+`document` event: `pp-theme-changed` met detail `{pref, resolved}`
+
+### Testing (Playwright isolated) ALL PASS
+- Initial: dark (default), knop "Donker" met maan icoon
+- Click 1: auto (system preference gehanteerd, in test = light)
+- Click 2: light (bg=rgb(253,245,227), color=rgb(30,26,15))
+- Click 3: back to dark
+- localStorage persistent
+
+### Beperkingen (MVP scope)
+Legacy CSS heeft veel hardcoded donkere kleuren. Dit MVP dekt de meest
+zichtbare elementen. Modals blijven bewust donker. Detailschermen kunnen
+incrementeel bijgewerkt worden met extra `html[data-pp-theme="light"]` regels.
+
+### Cache
+- sw.js VERSION: v60.1.263-20260212-theme-toggle
+- Cache-bust: ?v=60.1.263-theme-toggle
