@@ -649,7 +649,7 @@
   };
 
   window.PP_AiGuard = {
-    VERSION: '1.6.0',
+    VERSION: '1.7.0',
     getUsage: getUsage,
     check: guardCheck,
     FREE_LIMIT: FREE_LIMIT,
@@ -751,12 +751,31 @@
     ['DY.fashionMatch', 'open'],
   ];
 
-  // v60.1.252: ROUTE-GUARD voor beschermde AI-paginas. Wraps DY.toonPagina
-  //   en DY.navigeer zodat kleuren_ai / outfit-vergelijker deep-links
-  //   voor gasten direct de login-modal tonen ipv de pagina te renderen.
-  //   Non-premium met quota mag WEL naar de pagina (banner toont teller).
-  var PROTECTED_PAGES = ['kleuren_ai']; // interne pagina-id
-  var PROTECTED_ROUTES_RX = /^\/?outfit-vergelijker(\/|$|\?)/i;
+  // v60.1.252/254: ROUTE-GUARD voor beschermde AI-paginas. Wraps DY.toonPagina
+  //   en DY.navigeer zodat kleuren_ai / outfit-vergelijker en toekomstige
+  //   AI-routes (media-generator, ai-chat, try-on) voor gasten direct de
+  //   login-modal tonen ipv de pagina te renderen.
+  //   Synchroon met de pre-auth cloak-detector in <head>.
+  var PROTECTED_PAGES = ['kleuren_ai']; // interne pagina-id's
+  var PROTECTED_ROUTES_RX = new RegExp([
+    'outfit-vergelijker',
+    'kleuren[_-]?ai',
+    'media[_-]?generator',
+    'image[_-]?generator',
+    'img[_-]?gen',
+    'video[_-]?gen',
+    'ai[_-]?chat',
+    'chat[_-]?ai',
+    'try[_-]?on',
+    'probeer[_-]?aan',
+    'outfit[_-]?score',
+    'wardrobe[_-]?recommend',
+    'style[_-]?assistant',
+    'styling[_-]?advies',
+    'weekly[_-]?stylist',
+    'pick[_-]?me',
+    'fashion[_-]?match'
+  ].join('|'), 'i');
 
   function _isProtectedPageArg(arg) {
     try {
@@ -820,9 +839,14 @@
     try {
       var qs = new URLSearchParams(location.search || '');
       var page = (qs.get('pagina') || '').toLowerCase();
-      var kaShare = qs.get('kleuranalyse');
       var path = (location.pathname || '').toLowerCase();
-      var isProtected = (page === 'kleuren_ai') || !!kaShare || PROTECTED_ROUTES_RX.test(path);
+      var hash = (location.hash || '').toLowerCase();
+      var SHARE_PARAMS = ['kleuranalyse','tryon','outfit_score','style_advies','mediagen','imggen'];
+      var hasShareParam = SHARE_PARAMS.some(function (k) { return qs.get(k); });
+      var isProtected = (PROTECTED_PAGES.indexOf(page) >= 0)
+        || hasShareParam
+        || PROTECTED_ROUTES_RX.test(path)
+        || PROTECTED_ROUTES_RX.test(hash);
       if (!isProtected) { _uncloak(); return; }
       // Wacht tot Firebase Auth klaar is (async)
       var a = fbAuth();
