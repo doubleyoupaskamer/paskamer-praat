@@ -54,21 +54,56 @@
 
   function log(m) { try { console.info('[ai-guard]', m); } catch (_) {} }
   function db()  { try { return (window.DY && DY.db) || null; } catch (_) { return null; } }
-  function uid() { try { return (window.DY && DY.user && DY.user.uid) || null; } catch (_) { return null; } }
-  function isGuest() {
-    try {
-      var u = window.DY && DY.user;
-      if (!u || !u.uid) return true;
-      if (u.isAnonymous === true) return true;
-      return false;
-    } catch (_) { return true; }
+
+  // v60.1.248: Auth uit Firebase Auth (source of truth), NIET uit DY.user.
+  //   DY.user kan stale zijn na logout. Firebase Auth is direct accuraat.
+  function fbAuth() {
+    try { return window.firebase && firebase.auth ? firebase.auth() : null; } catch (_) { return null; }
   }
+  function firebaseUid() {
+    var a = fbAuth();
+    if (!a) return null;
+    var u = a.currentUser;
+    return (u && !u.isAnonymous && u.uid) ? u.uid : null;
+  }
+  function uid() {
+    // Combineer beide bronnen: gebruiker MOET beide passeren (defense in depth)
+    var fb = firebaseUid();
+    if (!fb) return null;
+    try {
+      var dyU = window.DY && DY.user;
+      if (dyU && dyU.uid && dyU.uid !== fb) return null; // mismatch → treat as gast
+    } catch (_) {}
+    return fb;
+  }
+  function isGuest() {
+    // v60.1.248: strict check — Firebase Auth is bron van waarheid
+    var a = fbAuth();
+    if (!a) return true;
+    var u = a.currentUser;
+    if (!u) return true;
+    if (u.isAnonymous === true) return true;
+    if (!u.uid) return true;
+    return false;
+  }
+
+  // v60.1.248: Premium status cache met invalidatie bij auth-change
+  var _premCache = { uid: null, isPrem: false, at: 0 };
+  var PREM_CACHE_MS = 60 * 1000; // 60 sec — kort genoeg om vervalcheck relevant te houden
   async function isPremium() {
+    var currentUid = uid();
+    if (!currentUid) { _premCache = { uid: null, isPrem: false, at: 0 }; return false; }
+    // Cache invalideren als uid veranderd is (nieuwe login na logout)
+    if (_premCache.uid !== currentUid) _premCache = { uid: currentUid, isPrem: false, at: 0 };
+    if (_premCache.at && (Date.now() - _premCache.at) < PREM_CACHE_MS) return _premCache.isPrem;
     try {
       if (window.DY && DY.premium && typeof DY.premium.isPremium === 'function') {
-        return await DY.premium.isPremium();
+        var r = await DY.premium.isPremium();
+        _premCache = { uid: currentUid, isPrem: !!r, at: Date.now() };
+        return _premCache.isPrem;
       }
     } catch (_) {}
+    _premCache = { uid: currentUid, isPrem: false, at: Date.now() };
     return false;
   }
   function monthKey() {
@@ -249,18 +284,31 @@
 
   // ─── Guard: pre-flight check vóór AI request ────────────────────────
   //   Returns true als request door mag, false als geblokkeerd.
+  //   v60.1.248: Auth is ALTIJD live gecontroleerd (geen cache),
+  //   zodat logout onmiddellijk effect heeft op alle in-flight aanvragen.
   var _inflight = false;
   async function guardCheck() {
-    if (isGuest()) { showLoginPrompt(); return false; }
-    if (await isPremium()) return true; // premium = onbeperkt
-    if (_inflight) return false;         // voorkom parallelle popups
+    // STAP 1: harde auth-check via Firebase Auth (source of truth)
+    if (isGuest()) {
+      showLoginPrompt();
+      return false;
+    }
+    // STAP 2: Premium bypass — onbeperkte toegang
+    if (await isPremium()) return true;
+    // STAP 3: Voorkom parallelle popups tijdens gelijktijdige requests
+    if (_inflight) return false;
     _inflight = true;
     try {
+      // Herevalueer auth NA async premium check (kan intussen zijn uitgelogd)
+      if (isGuest()) { showLoginPrompt(); return false; }
+
       var usage = await getUsage();
       // Eerste-gebruik popup (één keer per maand, alleen als count===0)
       if (usage.count === 0 && !usage.firstShown) {
         var ok = await showFirstUseInfo();
         if (!ok) return false;
+        // Herevalueer auth NA modal-interactie
+        if (isGuest()) { showLoginPrompt(); return false; }
       }
       if (usage.count >= FREE_LIMIT) {
         showLimitReached();
@@ -301,10 +349,36 @@
   };
 
   window.PP_AiGuard = {
-    VERSION: '1.0.0',
+    VERSION: '1.2.0',
     getUsage: getUsage,
     check: guardCheck,
     FREE_LIMIT: FREE_LIMIT,
+    invalidate: function () { _premCache = { uid: null, isPrem: false, at: 0 }; _inflight = false; }
   };
+
+  // v60.1.248: Firebase Auth state listener — instant invalidatie bij logout
+  function installAuthListener() {
+    var a = fbAuth();
+    if (!a) return false;
+    try {
+      a.onAuthStateChanged(function (u) {
+        // Reset alle interne caches — geen stale premium of counter state
+        _premCache = { uid: null, isPrem: false, at: 0 };
+        _inflight = false;
+        // Sluit eventuele open guard-modals — nieuwe login/logout = schone slate
+        try {
+          var ov = document.querySelector('.pp-aig-ov');
+          if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+        } catch (_) {}
+        log(u ? ('Auth: uid=' + u.uid + (u.isAnonymous ? ' (anon)' : '')) : 'Auth: logged out — caches gewist');
+      });
+      return true;
+    } catch (_) { return false; }
+  }
+  var _authWatchAttempts = 0;
+  var _authWatchIv = setInterval(function () {
+    if (installAuthListener() || _authWatchAttempts++ > 40) clearInterval(_authWatchIv);
+  }, 250);
+
   log('AI Access Guard geladen (limiet: ' + FREE_LIMIT + '/maand)');
 })();
