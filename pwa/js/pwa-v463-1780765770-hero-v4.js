@@ -11537,7 +11537,7 @@ DY.rvChipToggle = function(btn, fieldId) {
 
 DY.rvChipMulti = function(btn, fieldId) {
   // Meervoudige keuze
-// SYNTAX_ERROR_SKIPPED:   btn.classList.toggle(\'actief\');
+  btn.classList.toggle('actief');
   var el = document.getElementById(fieldId);
   if (!el) return;
   var wrap = btn.parentNode;
