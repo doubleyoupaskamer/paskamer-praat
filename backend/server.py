@@ -192,6 +192,70 @@ async def ai_health():
 AI_FREE_LIMIT = int(os.environ.get("AI_FREE_LIMIT", "5") or 5)
 AI_STRICT_AUTH = str(os.environ.get("AI_STRICT_AUTH", "true")).lower() in ("1", "true", "yes", "on")
 
+# v60.1.267 . AI RATE LIMITING (sliding window per user_key)
+# Voorkomt spam/abuse van de Emergent LLM key. Gebruikt MongoDB om de
+# laatste N timestamps per uid bij te houden. Retourneert HTTP 429
+# wanneer de drempel is overschreden.
+AI_RATE_LIMIT_MAX = int(os.environ.get("AI_RATE_LIMIT_MAX", "10") or 10)
+AI_RATE_LIMIT_WINDOW_SEC = int(os.environ.get("AI_RATE_LIMIT_WINDOW_SEC", "60") or 60)
+
+
+async def _ai_rate_limit_check(uid: str, endpoint: str) -> None:
+    """Sliding-window rate limiter: max AI_RATE_LIMIT_MAX requests per
+    AI_RATE_LIMIT_WINDOW_SEC seconds per uid. Gooit HTTPException(429).
+
+    - Soft-fail bij Mongo-outage: laat door zodat de app blijft werken.
+    - Aparte collectie `ai_rate_limits` (buiten Firestore): {user_key, ts[]}
+    """
+    if not uid:
+        return  # anon calls hebben al andere guards; sla over
+    try:
+        now = datetime.now(timezone.utc)
+        cutoff = now - timedelta(seconds=AI_RATE_LIMIT_WINDOW_SEC)
+        cutoff_ts = cutoff.timestamp()
+        now_ts = now.timestamp()
+        # Push nieuwe timestamp + set metadata (upsert). Haal de oude lijst
+        # daarna op en filter zelf zodat cross-driver compat gewaarborgd is.
+        result = await db.ai_rate_limits.find_one_and_update(
+            {"user_key": uid},
+            {
+                "$push": {"ts": now_ts},
+                "$set": {"last_endpoint": endpoint, "last_ts": now.isoformat()},
+            },
+            upsert=True,
+            return_document=True,
+        )
+        current_list = (result or {}).get("ts", []) if result else []
+        recent = [t for t in current_list if isinstance(t, (int, float)) and t >= cutoff_ts]
+        # Verwijder verlopen timestamps periodiek uit Mongo
+        if len(recent) != len(current_list):
+            try:
+                await db.ai_rate_limits.update_one({"user_key": uid}, {"$set": {"ts": recent}})
+            except Exception:
+                pass
+        if len(recent) > AI_RATE_LIMIT_MAX:
+            retry_after = AI_RATE_LIMIT_WINDOW_SEC
+            try:
+                oldest = min(recent)
+                retry_after = max(1, int(AI_RATE_LIMIT_WINDOW_SEC - (now_ts - oldest)))
+            except Exception:
+                pass
+            raise HTTPException(
+                429,
+                {
+                    "error": "rate_limited",
+                    "message": f"Te veel AI-verzoeken. Wacht {retry_after} seconden en probeer opnieuw.",
+                    "limit": AI_RATE_LIMIT_MAX,
+                    "window_sec": AI_RATE_LIMIT_WINDOW_SEC,
+                    "retry_after_sec": retry_after,
+                },
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning("[ai-ratelimit] soft-fail voor uid=%s endpoint=%s: %s", uid, endpoint, e)
+        return  # soft fail
+
 
 def _ai_month_key(now: Optional[datetime] = None) -> str:
     d = now or datetime.now(timezone.utc)
@@ -403,6 +467,10 @@ async def _verify_ai_access(authorization: Optional[str], *, endpoint: str = "ai
     email = decoded.get("email")
     if not uid:
         raise HTTPException(401, "Token bevat geen uid")
+
+    # v60.1.267: Rate limiting (sliding window) VOOR premium/quota check.
+    # Voorkomt dat premium users de API kunnen spammen.
+    await _ai_rate_limit_check(uid, endpoint)
 
     premium = await _ai_is_premium(uid, email)
     if premium:

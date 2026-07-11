@@ -6,6 +6,40 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
+
+## v60.1.267 - Winkel CTA + Merkenportaal Reviews + Backend Rate Limiting (12 feb 2026)
+
+### Gebruikerskeuzes
+- CTA: "Alleen een knop bovenaan op de De Winkel pagina"
+- Merken review-flow: "Iedereen" mag reviews plaatsen (login vereist via Firestore rules)
+- Rate limit drempel: 10 requests / minuut per user_key
+- Uitvoering: "Alles in 1 sessie afwerken en dan pas testen"
+
+### Geleverd (P0-P2)
+- **P0 CTA De Winkel** - `extensions/hooks/pp-webshop-reviews-cta-v1.js` + CSS. Additieve MutationObserver injecteert een CTA-strip in `.dy-wk-wrap` (na `.dy-vr-header`) die linkt naar `#webshop-reviews`. Legacy render-flow ongewijzigd.
+- **P1 Merkenportaal reviews** - `extensions/hooks/pp-brand-reviews-v1.js` + CSS. Reviews sectie geinjecteerd op elke `.bp-merk-hero` (brand detail pagina). Firestore collection `reviews` met `reviewType: 'brand'` + `brandId`. Guests worden via AI-Guard naar login-modal geleid; ingelogde users kunnen submitten (1-5 sterren + tekst min 10 tekens). Client-side sortering (ts desc) zodat geen composite index vereist is. Gemiddelde sterren-badge boven de lijst.
+- **P2 Backend rate limiter** - `server.py` `_ai_rate_limit_check(uid, endpoint)` sliding-window (max 10 requests / 60s per uid) in nieuwe MongoDB collection `ai_rate_limits`. Ge-integreerd in `_verify_ai_access` VOOR de premium/quota check. Retourneert HTTP 429 met `retry_after_sec`. Soft-fail bij Mongo-outage.
+
+### Nieuwe/bijgewerkte bestanden
+- `pwa/extensions/hooks/pp-webshop-reviews-cta-v1.js` (nieuw)
+- `pwa/extensions/style/pp-webshop-reviews-cta-v1.css` (nieuw)
+- `pwa/extensions/hooks/pp-brand-reviews-v1.js` (nieuw)
+- `pwa/extensions/style/pp-brand-reviews-v1.css` (nieuw)
+- `pwa/index.html` (script/CSS refs + cache-bump `?v=60.1.267-brand-reviews-cta`)
+- `pwa/sw.js` (VERSION bump)
+- `backend/server.py` (`_ai_rate_limit_check` + integratie in `_verify_ai_access`)
+- `01-paskamerpraat-pwa-cloudflare.zip` (herbouwd, 7.9 MB)
+
+### Testing
+- Rate limiter unit-getest via direct call: exact 10 OK, 11e request geeft 429 met `retry_after_sec=59`.
+- Statische validatie: alle nieuwe files leveren HTTP 200 via local server; cache-bump strings correct in index.html; zip bevat de 4 nieuwe files.
+- Backend service running clean, geen import errors.
+- Frontend UI-tests: **NIET uitvoerbaar** via Emergent preview URL (PWA hoort thuis op paskamerpraat.nl na Cloudflare deploy). Handmatige QA nodig door user na deploy.
+
+### Nog te doen (backlog)
+- P3: Live Module Phase 2 - True Video Broadcasting integration
+- Optioneel: gemiddelde rating tonen op merken-listing kaarten
+
 ## v60.1.186 — Combined Cloudflare Worker (1 jul 2026)
 
 ### Gebruikerskeuze

@@ -1,0 +1,79 @@
+/* PASKAMER PRAAT. Webshop Reviews CTA strip (v1.0) */
+.pp-wsr-cta-strip {
+  margin: 0 auto 20px;
+  max-width: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+.pp-wsr-cta-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(240,179,64,0.16) 0%, rgba(198,125,6,0.10) 100%);
+  border: 1px solid rgba(240,179,64,0.35);
+  color: #fdf5e3;
+  box-shadow: 0 4px 16px rgba(198,125,6,0.15);
+}
+.pp-wsr-cta-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pp-wsr-cta-eyebrow {
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #f0b340;
+}
+.pp-wsr-cta-titel {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #fdf5e3;
+}
+.pp-wsr-cta-sub {
+  font-size: 12.5px;
+  opacity: 0.80;
+  line-height: 1.4;
+  color: #fdf5e3;
+}
+.pp-wsr-cta-btn {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 0;
+  background: linear-gradient(135deg, #d4910a 0%, #b06205 100%);
+  color: #fff;
+  font: 700 13px/1 "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+.pp-wsr-cta-btn:hover,
+.pp-wsr-cta-btn:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+  box-shadow: 0 6px 18px rgba(198,125,6,0.4);
+}
+html[data-pp-theme="light"] .pp-wsr-cta-inner {
+  background: linear-gradient(135deg, rgba(240,179,64,0.20) 0%, rgba(198,125,6,0.10) 100%);
+  border-color: rgba(198,125,6,0.35);
+  color: #1e1a0f;
+}
+html[data-pp-theme="light"] .pp-wsr-cta-titel,
+html[data-pp-theme="light"] .pp-wsr-cta-sub { color: #1e1a0f; }
+@media (max-width: 560px) {
+  .pp-wsr-cta-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 16px;
+  }
+  .pp-wsr-cta-btn { align-self: stretch; text-align: center; padding: 12px 18px; }
+  .pp-wsr-cta-titel { font-size: 20px; }
+}
