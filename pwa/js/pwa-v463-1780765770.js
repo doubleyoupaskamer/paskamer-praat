@@ -11038,7 +11038,7 @@ DY.renderReviewsOverzicht = async function() {
       '<div class="dy-vr-header-inner">' +
         '<div>' +
           '<div class="dy-feed-merk-label">Paskamerpraat</div>' +
-          '<h1 class="dy-vr-titel">Eerlijke <em>Reviews</em></h1>' +
+          '<h1 class="dy-vr-titel">DoubleYou Tailored for Tall &amp; Plus Size: <em>Webshop Reviews</em></h1>' +
         '</div>' +
         '<button class="dy-pg-actie-btn" id="dy-rev-nieuw-btn">\u2605 Plaatsen</button>' +
       '</div>' +
