@@ -179,10 +179,15 @@
       var errEl = ov.querySelector('[data-error]');
       var picksEl = ov.querySelector('[data-picks]');
       var metaEl = ov.querySelector('[data-meta]');
+      // v60.1.272 FIX: .dy-wr-loading gebruikt display:flex via een ID-selector,
+      // die overschrijft de default [hidden]{display:none}. Zet dus expliciet
+      // de inline display-style om de spinner écht weg te halen.
       loading.hidden = true;
+      loading.style.display = 'none';
 
       if (res.error) {
         errEl.hidden = false;
+        errEl.style.display = '';
         errEl.innerHTML = '<strong>Helaas.</strong> ' + (res.message || 'Iets ging mis.') +
           (res.limit ? '<br><button class="dy-wr-upgrade" data-testid="wardrobe-upgrade-btn">Upgrade naar Premium →</button>' : '');
         var up = errEl.querySelector('[data-testid="wardrobe-upgrade-btn"]');
@@ -210,9 +215,11 @@
       // Toon fallback-boodschap als er ideeen zijn maar met een message
       if (d.fallback && d.message) {
         errEl.hidden = false;
+        errEl.style.display = '';
         errEl.innerHTML = '<strong>Info.</strong> ' + escapeHtml(d.message);
       }
       picksEl.hidden = false;
+      picksEl.style.display = '';
       picksEl.innerHTML = picksArr.map(function (p, i) {
         return '<article class="dy-wr-pick" data-testid="wardrobe-pick-' + i + '">' +
           '<div class="dy-wr-pick-num">' + (i + 1) + '</div>' +

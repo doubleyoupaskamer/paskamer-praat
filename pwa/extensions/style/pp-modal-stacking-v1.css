@@ -1,0 +1,52 @@
+/* PASKAMER PRAAT - Modal Z-Index Stacking + Hidden-attr fix (v1.0.0)
+ *
+ * Twee stukken:
+ * 1. HIDDEN-ATTRIBUTE fix. Sommige modals gebruiken ID-selectors met
+ *    display:flex/block die de default [hidden]{display:none} overrulen.
+ *    Deze regel forceert [hidden] te winnen zonder layout te wijzigen.
+ * 2. Z-INDEX STACKING. Nieuwe popups moeten altijd bovenop bestaande
+ *    popups verschijnen (nooit erachter). Alle bekende modal-wrappers
+ *    krijgen een gelijke hoge basis-z-index; latere DOM-elementen
+ *    stapelen automatisch bovenop dankzij paint order.
+ *    De z-index-stacker helper (script) verhoogt de z-index van een
+ *    zojuist geopende modal nog eens boven de reeds actieve popup.
+ */
+
+/* ─── 1. HIDDEN attribute universeel afdwingen ──────────────────────── */
+[hidden] {
+  display: none !important;
+}
+
+/* ─── 2. Basis-z-index voor alle bekende modal/popup containers ─────── */
+/* Alle popups delen dezelfde hoge basis, zodat ze boven de rest van de
+ * app zitten. De .pp-modal-top class (via JS helper) bumpt actieve popup
+ * nog eens hoger. Bestaande z-index waarden worden alleen aangepast als
+ * ze LAGER waren dan 9990. */
+#dy-wardrobe-rec-modal,
+#dy-tryon-modal,
+#dy-premium-modal,
+#dy-weekly-modal,
+#dy-card-hub-pop,
+#dy-card-hub-backdrop,
+#pp-webshop-review-modal,
+#pp-br-modal,
+.dy-score-detail,
+.dy-modal,
+.dy-drawer,
+.dy-dialog,
+.dy-popup,
+.pp-modal,
+.dy-toast,
+.dy-notification,
+.dy-tooltip {
+  z-index: 9990;
+}
+
+/* Actieve/net-geopende modal wordt door de JS helper opgehoogd */
+.pp-modal-top {
+  z-index: 10050 !important;
+}
+
+/* ─── 3. Losse tweaks: sommige backdrops moeten onder hun eigen card
+ *      blijven maar boven andere popups uit. Dit blijft ongewijzigd
+ *      omdat backdrop meestal een child is van de modal-container. ── */
