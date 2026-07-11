@@ -2923,3 +2923,46 @@ en dezelfde filter gebruiken.
 
 ### Deliverable
 Zip 13.25 MB, HTTP 200 verified
+
+---
+
+## v60.1.266 (2026-02-12) DoubleYou Webshop Reviews (aparte pagina)
+
+### Doel
+Aparte pagina bouwen voor webshop bestelervaringen. Volledige data-scheiding
+van tall/plus pasvorm reviews (Eerlijke Reviews) en toekomstige merkenportaal
+reviews.
+
+### Nieuwe files (100% additief)
+- extensions/hooks/pp-webshop-reviews-v1.js (v1.0.0, ~180 regels)
+- extensions/style/pp-webshop-reviews-v1.css
+
+### Kern
+- EIGEN Firestore collection 'webshop_reviews' (geen shared data met 'reviews')
+- Route: ?pagina=webshop_reviews of #webshop-reviews of /webshop-reviews path
+- Auto mount/unmount via popstate + hashchange listeners
+- Submit form: 1-5 sterren picker, categorie dropdown (6 opties), tekst (min 10 chars)
+- Categorieen: bestelling, verzending, klantenservice, levering, retourproces, gebruikservaring
+- Guest wordt naar bestaande PP_AiGuard login-modal geroute
+- Data schrijft altijd reviewType='webshop' voor toekomstige queries
+- Empty state, loading state, error state
+- Cross-tab live avatar naam via data-pp-live-name + data-pp-uid attributen
+- Theme-aware (light/dark) via html[data-pp-theme] scoping
+
+### Testing (testing agent iteration_20.json) - ALLE 13 PASS
+- Extension load, mount, unmount
+- Route detection (query + hash + path)
+- Guest -> login modal
+- Submit form validatie (rating vereist, tekst min 10 chars)
+- Firestore add: collection='webshop_reviews', reviewType='webshop'
+- GEEN lees op 'reviews' collection (volledige scheiding bevestigd)
+- Empty state weergave
+- Eerlijke Reviews pagina code intact (regel 11069+ en 11643 ongewijzigd)
+- SW versie v60.1.266
+
+### Cache
+- sw.js VERSION: v60.1.266-20260212-webshop-reviews-aparte-pagina
+- Cache-bust: ?v=60.1.266-webshop-reviews
+
+### Deliverable
+Zip 13.26 MB, HTTP 200 verified.
