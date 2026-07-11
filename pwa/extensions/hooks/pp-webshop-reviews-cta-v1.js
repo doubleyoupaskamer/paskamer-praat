@@ -1,18 +1,27 @@
-/* PASKAMER PRAAT. Webshop Reviews CTA (v1.1.0)
- * Injecteert additief een CTA-knop bovenaan de "De Winkel" (renderWinkel)
- * pagina met een link naar de Webshop Reviews pagina.
+/* PASKAMER PRAAT. Webshop Reviews CTA (v1.2.0)
+ * Injecteert additief een CTA-knop bovenaan de "De Winkel" pagina
+ * (renderWinkel) met een link naar de Reviews-tab (bottom nav).
  *
- * v1.1.0 ROUTING RCA FIX:
- * - Gebruikt query-param routing (?pagina=webshop_reviews) i.p.v. hash,
- *   want de legacy router draait op ?pagina=. Voorkomt stale hash + dubbele
- *   pagina's + silent no-ops als de hash al gelijk was.
- * - Preventive stopPropagation + preventDefault op click.
- * - Idempotente CTA-injectie via MutationObserver blijft ongewijzigd.
+ * v1.2.0 CTA TARGET FIX:
+ * - Target gewijzigd naar ?pagina=reviews (de Reviews-tab uit de bottom
+ *   navigation, hernoemd tot "DoubleYou Tailored for Tall & Plus Size:
+ *   Webshop Reviews"). Voorheen ging de CTA naar de aparte
+ *   ?pagina=webshop_reviews pagina die niet gekoppeld was aan de tab.
+ * - Gebruikt de bestaande legacy router DY.navigeer(...) als 1e keus,
+ *   waardoor de CTA exact hetzelfde gedrag geeft als een tab-klik.
+ * - Fallback via History API + PopStateEvent, en 3e keus location.href.
+ *
+ * v1.1.0 fixes blijven actief:
+ * - Query-param routing (geen hash-conflicten)
+ * - preventDefault + stopPropagation op click
+ * - Idempotente MutationObserver-injectie
+ * - Opruimen van stale pp-wsr-root bij navigatie
  */
 (function () {
   'use strict';
+
   var CTA_ID = 'pp-wsr-cta-strip';
-  var TARGET_PAGE = 'webshop_reviews';
+  var TARGET_PAGE = 'reviews';
 
   function alreadyInjected() {
     return !!document.getElementById(CTA_ID);
@@ -43,17 +52,32 @@
   }
 
   /**
-   * Deterministische navigatie naar de Webshop Reviews pagina.
-   * Elke klik bouwt een schone URL vanuit `location.origin + location.pathname`
-   * met alleen ?pagina=webshop_reviews. Geen hergebruik van oude query-params,
-   * slugs, hash-fragmenten of state-objects.
+   * Deterministische navigatie naar de Reviews-tab. Elke klik bouwt een
+   * verse URL zonder state carry-over. Prefereert DY.navigeer() zodat
+   * de CTA exact hetzelfde gedrag geeft als de bottom-nav Reviews-knop.
    */
   function navigateToReviews() {
+    // Ruim eventuele stale render-artefacten van de aparte webshop_reviews
+    // pagina op, zodat de reviews-tab schoon gerenderd wordt.
+    try {
+      var stale = document.getElementById('pp-wsr-root');
+      if (stale && stale.parentNode) stale.parentNode.removeChild(stale);
+    } catch (_) { /* no-op */ }
+
+    // 1e keus: legacy router. Exact hetzelfde gedrag als een tab-klik.
+    try {
+      if (window.DY && typeof window.DY.navigeer === 'function') {
+        window.DY.navigeer(TARGET_PAGE);
+        return;
+      }
+    } catch (_) { /* fallthrough */ }
+
+    // 2e keus: History API + popstate-dispatch. De legacy popstate-listener
+    // leest ?pagina=reviews uit de URL en rendert die pagina.
     var origin = location.origin || '';
     var path = location.pathname || '/';
     var cleanUrl;
     try {
-      // URL-object garandeert consistente encoding, GEEN hash carry-over.
       var u = new URL(origin + path);
       u.searchParams.set('pagina', TARGET_PAGE);
       u.hash = '';
@@ -61,39 +85,19 @@
     } catch (_) {
       cleanUrl = path + '?pagina=' + TARGET_PAGE;
     }
-
-    // Wis eerst eventueel achtergebleven Webshop-Reviews root DOM node
-    // zodat mount() straks een verse render bouwt (geen stale state).
-    try {
-      var stale = document.getElementById('pp-wsr-root');
-      if (stale && stale.parentNode) stale.parentNode.removeChild(stale);
-    } catch (_) {}
-
-    // Update URL via History API (verse state, geen state-object hergebruik).
-    var pushed = false;
     try {
       if (history && typeof history.pushState === 'function') {
         history.pushState({ pp: TARGET_PAGE, ts: Date.now() }, '', cleanUrl);
-        pushed = true;
-      }
-    } catch (_) {}
-
-    if (!pushed) {
-      // Geen History API. Val terug op een schone volledige navigatie.
-      location.href = cleanUrl;
-      return;
-    }
-
-    // Directe mount zonder popstate-dispatch. popstate-dispatch zou de
-    // legacy router óók triggeren en race-conditions veroorzaken doordat
-    // hij `webshop_reviews` als onbekende route zou proberen te renderen.
-    try {
-      if (window.PP_WebshopReviews && typeof window.PP_WebshopReviews.mount === 'function') {
-        window.PP_WebshopReviews.mount();
+        try {
+          window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }));
+        } catch (_) {
+          try { window.dispatchEvent(new Event('popstate')); } catch (__) { /* no-op */ }
+        }
         return;
       }
-    } catch (_) {}
-    // Extensie nog niet geladen? Val terug op harde navigatie.
+    } catch (_) { /* fallthrough */ }
+
+    // 3e keus: harde navigatie naar schone URL (geen state hergebruik).
     location.href = cleanUrl;
   }
 
@@ -125,7 +129,7 @@
   }
 
   window.PP_WebshopReviewsCTA = {
-    VERSION: '1.1.0',
+    VERSION: '1.2.0',
     inject: tryInject,
     navigate: navigateToReviews
   };
