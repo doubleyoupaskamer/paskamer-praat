@@ -148,9 +148,18 @@
     }catch(_){return false;}
   }
   function mount(){
-    if(!isOnRoute()||document.getElementById('pp-wsr-root'))return;
-    var main=document.getElementById('main')||document.querySelector('main')||document.getElementById('dy-main')||document.querySelector('#app')||document.body;
+    if(!isOnRoute())return;
+    // v1.1: idempotent mount. Elke aanroep verwijdert oude root en bouwt vers.
+    // Voorkomt stale state van eerdere selectie / dubbele pagina's.
+    var main=document.getElementById('dy-main')||document.getElementById('main')||document.querySelector('main')||document.querySelector('#app')||document.body;
     if(!main)return;
+    var existing=document.getElementById('pp-wsr-root');
+    if(existing&&existing.parentNode)existing.parentNode.removeChild(existing);
+    // Wis legacy pagina-content in de dy-main container zodat de vorige pagina
+    // (bijv. winkel) niet doorschijnt onder de reviews-pagina.
+    if(main.id==='dy-main'){
+      try{main.innerHTML='';}catch(_){}
+    }
     var root=document.createElement('div');root.id='pp-wsr-root';root.setAttribute('data-testid','pp-webshop-reviews-root');
     main.appendChild(root);render(root);
   }
@@ -162,9 +171,37 @@
   window.addEventListener('load',onRoute);
   if(document.readyState==='complete'||document.readyState==='interactive'){setTimeout(onRoute,100);}
 
+  // v1.1 RACE-RESISTANT MOUNT: als de legacy router na onze mount de
+  // dy-main container leegmaakt/overschrijft (bijv. bij initial page-load
+  // op directe URL) en wij nog steeds op de webshop-reviews-route zitten,
+  // moeten we onszelf automatisch herstellen. MutationObserver kijkt naar
+  // dy-main childList-mutaties.
+  (function watchDyMain(){
+    function attach(){
+      var main=document.getElementById('dy-main');
+      if(!main){setTimeout(attach,200);return;}
+      var mo=new MutationObserver(function(){
+        if(!isOnRoute())return;
+        if(!document.getElementById('pp-wsr-root'))mount();
+      });
+      mo.observe(main,{childList:true});
+    }
+    if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',attach);}
+    else{attach();}
+  })();
+
   window.PP_WebshopReviews={
-    VERSION:'1.0.0',COLLECTION:COLL,
-    open:function(){location.hash='#webshop-reviews';onRoute();},
+    VERSION:'1.1.0',COLLECTION:COLL,
+    open:function(){
+      // Gebruik query-param routing voor consistentie met legacy router.
+      try{
+        var u=new URL(location.origin+(location.pathname||'/'));
+        u.searchParams.set('pagina','webshop_reviews');u.hash='';
+        history.pushState({pp:'webshop_reviews',ts:Date.now()},'',u.toString());
+      }catch(_){location.href='/?pagina=webshop_reviews';return;}
+      // Directe mount, geen popstate-dispatch (voorkomt legacy router race).
+      mount();
+    },
     mount:mount,unmount:unmount
   };
 })();
