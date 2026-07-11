@@ -110,12 +110,44 @@
 
 /* ─── Dark-mode override: als het OS/thema donker is, herstel we terug ─ */
 @media (prefers-color-scheme: dark) {
-  /* Alleen X-buttons in modals die zich als dark-mode voorbereiden */
+  /* v60.1.271: FIX. De .dy-dark class wordt nooit gezet op de wardrobe/
+   * premium modals, waardoor bij dark-mode het bijna-zwarte × op donkere
+   * modal-achtergrond onzichtbaar bleef. Deze regels vereisen geen extra
+   * class meer, ze pakken elk modal-X in prefers-color-scheme: dark. */
+  #dy-premium-modal .dy-prem-close,
   #dy-premium-modal.dy-dark .dy-prem-close,
-  #dy-wardrobe-rec-modal.dy-dark .dy-wr-close {
+  #dy-wardrobe-rec-modal .dy-wr-close,
+  #dy-wardrobe-rec-modal.dy-dark .dy-wr-close,
+  #dy-tryon-modal .dy-tryon-close,
+  #dy-weekly-modal .close,
+  #dy-wr-banner .dy-wr-banner-close,
+  .dy-score-detail .dy-score-close,
+  .dy-modal-sluiten,
+  .pp-modal-close {
     color: #fdf5e3 !important;
     background: rgba(240, 179, 64, 0.16) !important;
     border-color: rgba(240, 179, 64, 0.45) !important;
+  }
+  #dy-premium-modal .dy-prem-close:hover,
+  #dy-premium-modal .dy-prem-close:focus-visible,
+  #dy-wardrobe-rec-modal .dy-wr-close:hover,
+  #dy-wardrobe-rec-modal .dy-wr-close:focus-visible,
+  #dy-tryon-modal .dy-tryon-close:hover,
+  #dy-tryon-modal .dy-tryon-close:focus-visible,
+  #dy-weekly-modal .close:hover,
+  #dy-weekly-modal .close:focus-visible,
+  #dy-wr-banner .dy-wr-banner-close:hover,
+  #dy-wr-banner .dy-wr-banner-close:focus-visible,
+  .dy-score-detail .dy-score-close:hover,
+  .dy-score-detail .dy-score-close:focus-visible,
+  .dy-modal-sluiten:hover,
+  .dy-modal-sluiten:focus-visible,
+  .pp-modal-close:hover,
+  .pp-modal-close:focus-visible {
+    color: #ffffff !important;
+    background: rgba(240, 179, 64, 0.32) !important;
+    border-color: rgba(240, 179, 64, 0.65) !important;
+    box-shadow: 0 0 0 3px rgba(240, 179, 64, 0.35) !important;
   }
 }
 

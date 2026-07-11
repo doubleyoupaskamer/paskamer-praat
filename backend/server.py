@@ -529,6 +529,7 @@ async def wardrobe_recommend(req: WardrobeRecommendRequest, authorization: Optio
     # Met Emergent LLM Key: real recommendation via Claude/Gemini
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage  # type: ignore
+        import asyncio
 
         items_text = "\n".join([
             f"- {i.get('title','onbekend')} ({i.get('category','')})"
@@ -545,12 +546,25 @@ async def wardrobe_recommend(req: WardrobeRecommendRequest, authorization: Optio
         )
         chat = LlmChat(api_key=key, session_id=f"wardrobe-{req.user_key or 'anon'}",
                        system_message="Je bent een Nederlandse stylist voor de Paskamer Praat community.").with_model("openai", "gpt-4o-mini")
-        reply = await chat.send_message(UserMessage(text=prompt))
+        # v60.1.271: harde timeout om oneindige hangs te voorkomen (bug: modal
+        # bleef 10+ min bij "Onze stylist is je looks aan het combineren...").
+        reply = await asyncio.wait_for(chat.send_message(UserMessage(text=prompt)), timeout=30.0)
         import json as _json
         import re as _re
         m = _re.search(r"\[.*\]", reply, _re.DOTALL)
         ideas = _json.loads(m.group(0)) if m else []
         return {"ok": True, "ideas": ideas[:3]}
+    except asyncio.TimeoutError:
+        return {
+            "ok": True,
+            "fallback": True,
+            "ideas": [
+                {"titel": "Klassieke combi", "omschrijving": "Combineer een top-favoriet met een neutrale broek voor tijdloos comfort."},
+                {"titel": "Layered look", "omschrijving": "Draag je jas over een fijngebreide trui, ideaal voor deze tijd van het jaar."},
+                {"titel": "Statement accent", "omschrijving": "Voeg een opvallend item (kleur of textuur) toe aan een rustige basis."},
+            ],
+            "message": "AI service reageerde te traag, algemene tips getoond.",
+        }
     except Exception as e:
         return {
             "ok": True,

@@ -96,6 +96,8 @@
     if (!base) return { error: 'no_api', message: 'Geen verbinding met AI service.' };
 
     try {
+      var _ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var _to = _ctrl ? setTimeout(function () { try { _ctrl.abort(); } catch (_) {} }, 45000) : null;
       var r = await fetch(base + '/api/wardrobe/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -106,13 +108,18 @@
           weather: weatherHint(),
           occasion: 'dagelijks',
         }),
+        signal: _ctrl ? _ctrl.signal : undefined,
       });
+      if (_to) clearTimeout(_to);
       var d = await r.json();
       if (!r.ok) return { error: 'http_' + r.status, message: d.detail || 'AI service fout', limit: r.status === 429 };
       try { localStorage.setItem(LS_LAST_SUGGEST, JSON.stringify({ ts: Date.now(), data: d })); } catch (e) {}
       return { ok: true, data: d };
     } catch (e) {
-      return { error: 'network', message: 'Tijdelijke netwerkfout, probeer over enkele seconden opnieuw.' };
+      var _isAbort = e && (e.name === 'AbortError' || String(e && e.message || '').toLowerCase().indexOf('abort') >= 0);
+      return { error: _isAbort ? 'timeout' : 'network',
+        message: _isAbort ? 'AI service reageerde te traag. Probeer over enkele seconden opnieuw.'
+                          : 'Tijdelijke netwerkfout, probeer over enkele seconden opnieuw.' };
     }
   }
 
@@ -188,8 +195,25 @@
 
       var d = res.data;
       ov.querySelector('[data-testid="wardrobe-rec-intro"]').textContent = d.intro || '';
+      // v1.2 FIX: backend levert {ideas:[{titel, omschrijving}]} maar oude
+      // frontend las {picks:[{title, why}]}. Accepteer beide vormen (map
+      // ideas -> picks-vorm) zodat er niets stil-faalt.
+      var picksArr = Array.isArray(d.picks) ? d.picks
+                   : Array.isArray(d.ideas) ? d.ideas.map(function (x) {
+                       return {
+                         title: x.title || x.titel || '',
+                         why: x.why || x.omschrijving || x.description || '',
+                         items_to_combine: x.items_to_combine || x.items || [],
+                         weather_note: x.weather_note || x.weer || ''
+                       };
+                     }) : [];
+      // Toon fallback-boodschap als er ideeen zijn maar met een message
+      if (d.fallback && d.message) {
+        errEl.hidden = false;
+        errEl.innerHTML = '<strong>Info.</strong> ' + escapeHtml(d.message);
+      }
       picksEl.hidden = false;
-      picksEl.innerHTML = (d.picks || []).map(function (p, i) {
+      picksEl.innerHTML = picksArr.map(function (p, i) {
         return '<article class="dy-wr-pick" data-testid="wardrobe-pick-' + i + '">' +
           '<div class="dy-wr-pick-num">' + (i + 1) + '</div>' +
           '<div class="dy-wr-pick-body">' +
