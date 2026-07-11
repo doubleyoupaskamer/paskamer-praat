@@ -11066,13 +11066,20 @@ DY.renderReviewsOverzicht = async function() {
 
   try {
     var snap = await DY.db.collection('reviews').orderBy('ts', 'desc').limit(100).get();
-    // v60.1.265: "Eerlijke Reviews" pagina toont pasvorm-reviews (tall/plus).
-    // Filter uit alle reviews met een expliciet ander domein (webshop of brand).
-    // Reviews zonder reviewType (bestaande records) worden als tall_fit behandeld.
+    // v60.1.268: STRIKTE isolatie. "Eerlijke Reviews" pagina toont ALLEEN
+    // tall/plus-size pasvorm-reviews van de DoubleYou webshop-items. Merk-
+    // reviews (reviewType='brand') en reviews zonder expliciet type worden
+    // uitgesloten, zodat ze niet dubbel opduiken in de merken-portaal.
     var _filteredDocs = (snap.docs || []).filter(function (d) {
       try {
-        var t = (d.data() || {}).reviewType;
-        return !t || t === 'tall_fit';
+        var data = d.data() || {};
+        // Merk-reviews (brand): expliciet uitsluiten.
+        if (data.reviewType === 'brand') return false;
+        if (data.brandId) return false;
+        // Alleen expliciete tall_fit reviews. Reviews zonder type worden ook
+        // toegelaten omdat oude records nog geen field hebben (behalve als ze
+        // een brandId hebben - dan zijn ze uit de merken-flow).
+        return data.reviewType === 'tall_fit' || !data.reviewType;
       } catch (_) { return true; }
     });
     snap = { empty: _filteredDocs.length === 0, docs: _filteredDocs, size: _filteredDocs.length };

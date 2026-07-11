@@ -592,6 +592,7 @@
       var payload = {
         userId: u,
         brandId: brandId,
+        reviewType: 'brand',
         rating: rating,
         tekst: tekst,
         userNaam: (naamEl.value || '').trim() || 'Anoniem',
@@ -647,5 +648,5 @@
     init();
   }
 
-  window.PP_BrandFase4 = { VERSION: '1.1.0', enhance: enhanceFase4, openReview: openReviewModal };
+  window.PP_BrandFase4 = { VERSION: '1.2.0', enhance: enhanceFase4, openReview: openReviewModal };
 })();
