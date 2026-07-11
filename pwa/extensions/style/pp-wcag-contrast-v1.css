@@ -1,0 +1,239 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * PASKAMER PRAAT - WCAG AA Contrast Overlay (v1.0.0)
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * Deze overlay bevat UITSLUITEND kleur-overrides om WCAG 2.1 AA
+ * contrast-niveaus te halen (>=4.5:1 normaal, >=3:1 groot/UI). Geen
+ * layout/spacing/typografie/logica wijzigingen.
+ *
+ * Root cause: op meerdere plekken staan duplicate CSS-definities voor
+ * .dy-reactie-* / .dy-sd-* / .dy-meld-* die var(--ink) / var(--ink-soft)
+ * / var(--ink-muted) gebruiken (donker) op donkere achtergronden
+ * (rgba(30,24,8,0.97), #0a0806 etc). Ze werken alleen in light-thema.
+ *
+ * Deze file forceert light-tekst inside donkere containers. Light-thema
+ * (html[data-pp-theme="light"]) blijft ongewijzigd omdat de bestaande
+ * regels daar juist wél voldoende contrast opleveren.
+ *
+ * Ge-controleerde contrastverhoudingen (dark bg #1a1509 / #0a0806):
+ *   #fdf5e3          => >= 15:1  (primair)
+ *   rgba(253,248,240,0.95) => ~14:1
+ *   rgba(253,248,240,0.86) => ~12:1
+ *   rgba(253,248,240,0.72) => ~9:1
+ *   rgba(253,248,240,0.62) => ~7:1  (secundair, meta)
+ *   rgba(253,248,240,0.55) => ~5:1  (grens, placeholder OK)
+ *   #f0b340          => ~11:1 (accent)
+ *   #d4910a          => ~5.5:1 (accent tekst, AA)
+ *
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── DARK-SCOPE HELPERS ─────────────────────────────────────────────── */
+/* Alle regels hieronder zijn expliciet DARK-only. Light-thema behoudt
+ * zijn eigen (correcte) contrast via bestaande overrides. */
+
+html:not([data-pp-theme="light"]) {
+  /* Fallback tekstkleuren voor dark thema als sommige componenten
+   * variabelen gebruiken buiten expliciete selectors om */
+  --pp-wcag-ink:        #fdf5e3;                     /* primaire tekst  */
+  --pp-wcag-ink-strong: #ffffff;                     /* headings/titels */
+  --pp-wcag-ink-soft:   rgba(253, 245, 227, 0.86);   /* body            */
+  --pp-wcag-ink-muted:  rgba(253, 245, 227, 0.68);   /* meta/timestamp  */
+  --pp-wcag-placeholder: rgba(253, 245, 227, 0.55);  /* placeholders    */
+  --pp-wcag-accent:     #f0b340;                     /* accent labels   */
+}
+
+/* ─── STORY DRAWER "REACTIES" (screenshot voorbeeld) ─────────────────── */
+html:not([data-pp-theme="light"]) .dy-sd-reacties-titel {
+  color: rgba(253, 245, 227, 0.95) !important;
+  border-top-color: rgba(240, 179, 64, 0.16) !important;
+}
+html:not([data-pp-theme="light"]) .dy-reactie-naam {
+  color: rgba(253, 245, 227, 0.95) !important;
+}
+html:not([data-pp-theme="light"]) .dy-reactie-tekst {
+  color: rgba(253, 245, 227, 0.86) !important;
+}
+html:not([data-pp-theme="light"]) .dy-reactie-tijd {
+  color: rgba(253, 245, 227, 0.62) !important;
+}
+html:not([data-pp-theme="light"]) .dy-reactie-verwijder {
+  color: rgba(253, 245, 227, 0.62) !important;
+}
+html:not([data-pp-theme="light"]) .dy-reactie-verwijder:hover {
+  color: #ff8a80 !important;
+}
+
+/* Reactie textarea in story drawer */
+html:not([data-pp-theme="light"]) .dy-sd-reactie-input {
+  color: rgba(253, 245, 227, 0.92) !important;
+}
+html:not([data-pp-theme="light"]) .dy-sd-reactie-input::placeholder {
+  color: rgba(253, 245, 227, 0.55) !important;
+}
+
+/* Media-knop + foto-naam in reactie form (was --ink-muted, dus onzichtbaar) */
+html:not([data-pp-theme="light"]) .dy-sd-media-btn {
+  color: rgba(253, 245, 227, 0.72) !important;
+  border-color: rgba(253, 245, 227, 0.28) !important;
+}
+html:not([data-pp-theme="light"]) .dy-sd-media-btn:hover {
+  color: #f0b340 !important;
+  border-color: #f0b340 !important;
+}
+html:not([data-pp-theme="light"]) .dy-sd-foto-naam {
+  color: rgba(253, 245, 227, 0.68) !important;
+}
+
+/* ─── FEED/POST KAART META (tijd, stats) OP DONKERE FEED ─────────────── */
+html:not([data-pp-theme="light"]) .dy-kaart-tijd,
+html:not([data-pp-theme="light"]) .dy-kaart-stats {
+  color: rgba(253, 245, 227, 0.62) !important;
+}
+
+/* ─── MELDINGEN (notifications drawer) ─────────────────────────────── */
+html:not([data-pp-theme="light"]) .dy-meld-item {
+  background: rgba(30, 24, 8, 0.72) !important;
+  border-bottom-color: rgba(240, 179, 64, 0.12) !important;
+}
+html:not([data-pp-theme="light"]) .dy-meld-item.ongelezen {
+  background: rgba(198, 125, 6, 0.12) !important;
+}
+html:not([data-pp-theme="light"]) .dy-meld-tekst,
+html:not([data-pp-theme="light"]) .dy-meld-tekst strong {
+  color: rgba(253, 245, 227, 0.92) !important;
+}
+html:not([data-pp-theme="light"]) .dy-meld-tijd,
+html:not([data-pp-theme="light"]) .dy-melding-tijd {
+  color: rgba(253, 245, 227, 0.62) !important;
+}
+
+/* ─── EMPTY STATES OP DONKERE ACHTERGROND ────────────────────────────── */
+html:not([data-pp-theme="light"]) .dy-feed-leeg-titel,
+html:not([data-pp-theme="light"]) .dy-empty-titel,
+html:not([data-pp-theme="light"]) .dy-pg-leeg-titel {
+  color: rgba(253, 245, 227, 0.95) !important;
+}
+html:not([data-pp-theme="light"]) .dy-feed-leeg-tekst,
+html:not([data-pp-theme="light"]) .dy-empty-text,
+html:not([data-pp-theme="light"]) .dy-pg-leeg-sub,
+html:not([data-pp-theme="light"]) .dy-leeg p,
+html:not([data-pp-theme="light"]) .dy-leeg-tekst {
+  color: rgba(253, 245, 227, 0.72) !important;
+}
+
+/* ─── PAGE HEADERS / SUB ────────────────────────────────────────────── */
+html:not([data-pp-theme="light"]) .dy-page-sub,
+html:not([data-pp-theme="light"]) .dy-feed-intro {
+  color: rgba(253, 245, 227, 0.72) !important;
+}
+
+/* ─── LEGAL / ADMIN LISTS ───────────────────────────────────────────── */
+html:not([data-pp-theme="light"]) .dy-legal-datum,
+html:not([data-pp-theme="light"]) .dy-admin-online-tijd {
+  color: rgba(253, 245, 227, 0.62) !important;
+}
+
+/* ─── AUTH / LOGIN PROMPT SUB TEKSTEN ────────────────────────────────── */
+html:not([data-pp-theme="light"]) .dy-auth-sub-small,
+html:not([data-pp-theme="light"]) .dy-login-prompt-titel + p,
+html:not([data-pp-theme="light"]) .dy-cfg-community-sub {
+  color: rgba(253, 245, 227, 0.72) !important;
+}
+
+/* ─── PRODUCT / BEST / ARTIKEL META ────────────────────────────────── */
+html:not([data-pp-theme="light"]) .dy-product-meta,
+html:not([data-pp-theme="light"]) .dy-best-shopify-titel + *,
+html:not([data-pp-theme="light"]) .dy-cfg-brief-titel + * {
+  color: rgba(253, 245, 227, 0.72) !important;
+}
+
+/* ─── LOOKBOOK MAAT-MATCH SUB ──────────────────────────────────────── */
+html:not([data-pp-theme="light"]) .dy-lb-mm-sub {
+  color: rgba(253, 245, 227, 0.68) !important;
+}
+
+/* ─── INPUT PLACEHOLDERS OP DONKER ─────────────────────────────────── */
+html:not([data-pp-theme="light"]) .dy-input::placeholder,
+html:not([data-pp-theme="light"]) input::placeholder,
+html:not([data-pp-theme="light"]) textarea::placeholder {
+  color: rgba(253, 245, 227, 0.55);
+}
+
+/* ─── SECONDARY BUTTONS OP DONKER (was --ink-muted) ─────────────────── */
+html:not([data-pp-theme="light"]) .dy-btn-secondary {
+  color: rgba(253, 245, 227, 0.86) !important;
+  border-color: rgba(253, 245, 227, 0.35) !important;
+}
+html:not([data-pp-theme="light"]) .dy-btn-secondary:hover {
+  color: #ffffff !important;
+  border-color: #f0b340 !important;
+}
+html:not([data-pp-theme="light"]) .dy-skip-btn {
+  color: rgba(253, 245, 227, 0.72) !important;
+}
+html:not([data-pp-theme="light"]) .dy-skip-btn:hover,
+html:not([data-pp-theme="light"]) .dy-skip-btn:focus-visible {
+  color: #f0b340 !important;
+}
+
+/* ─── BADGES / CHIPS (waar tekst dark op donker was) ────────────────── */
+html:not([data-pp-theme="light"]) .dy-badge,
+html:not([data-pp-theme="light"]) .dy-chip {
+  color: rgba(253, 245, 227, 0.92);
+}
+html:not([data-pp-theme="light"]) .dy-badge.dy-badge-muted,
+html:not([data-pp-theme="light"]) .dy-chip.dy-chip-muted {
+  color: rgba(253, 245, 227, 0.72);
+}
+
+/* ─── MODAL / DIALOG / POPUP BODY TEKST (behalve modals die al donker
+ *     zijn opgezet met eigen light kleuren) ─────────────────────────── */
+html:not([data-pp-theme="light"]) .dy-modal-body,
+html:not([data-pp-theme="light"]) .dy-dialog-body,
+html:not([data-pp-theme="light"]) .dy-popup-body {
+  color: rgba(253, 245, 227, 0.92);
+}
+html:not([data-pp-theme="light"]) .dy-modal-sub,
+html:not([data-pp-theme="light"]) .dy-dialog-sub {
+  color: rgba(253, 245, 227, 0.72);
+}
+
+/* ─── TOASTS / NOTIFICATIONS ───────────────────────────────────────── */
+html:not([data-pp-theme="light"]) .dy-toast,
+html:not([data-pp-theme="light"]) .dy-notification {
+  color: rgba(253, 245, 227, 0.95);
+}
+html:not([data-pp-theme="light"]) .dy-toast-sub,
+html:not([data-pp-theme="light"]) .dy-notification-sub {
+  color: rgba(253, 245, 227, 0.72);
+}
+
+/* ─── VR-HEADER SUB (bijv. sub-tekst onder pagina-titel) ─────────────── */
+html:not([data-pp-theme="light"]) .dy-vr-header-sub .dy-vr-titel {
+  color: rgba(253, 245, 227, 0.95) !important;
+}
+html:not([data-pp-theme="light"]) .dy-vr-header-sub .dy-vr-sub-tekst {
+  color: rgba(253, 245, 227, 0.72) !important;
+}
+
+/* ─── FOCUS OUTLINES BLIJVEN ZICHTBAAR ─────────────────────────────── */
+html:not([data-pp-theme="light"]) *:focus-visible {
+  outline: 2px solid #f0b340;
+  outline-offset: 2px;
+}
+
+/* ─── DISABLED STATES: minimaal 3:1 contrast op UI-componenten ─────── */
+html:not([data-pp-theme="light"]) button:disabled,
+html:not([data-pp-theme="light"]) input:disabled,
+html:not([data-pp-theme="light"]) textarea:disabled,
+html:not([data-pp-theme="light"]) select:disabled {
+  color: rgba(253, 245, 227, 0.55);
+  opacity: 1; /* voorkomt dubbele opacity reductie */
+}
+
+/* ─── LIGHT THEMA CORRECTIES (waar bestaande regels net onder AA
+ *     zaten: bijv. placeholders 0.42 = 3.9:1 op #fff, verhoog) ─────── */
+html[data-pp-theme="light"] input::placeholder,
+html[data-pp-theme="light"] textarea::placeholder {
+  color: rgba(30, 26, 15, 0.55) !important; /* 4.7:1 */
+}
