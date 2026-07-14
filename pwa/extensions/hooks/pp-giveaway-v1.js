@@ -67,7 +67,8 @@
           'De webshop <a href="' + WEBSHOP_URL + '" target="_blank" rel="noopener">doubleyoufashion.nl</a> ' +
           'is op dit moment <strong>nog niet geopend</strong>. Je kunt alvast een ' +
           '<strong>gratis ebook</strong> downloaden om je voor te bereiden. ' +
-          'Ondanks dat de webshop nog gesloten is, worden de <strong>eerste 50 aanmeldingen</strong> ' +
+          'Ondanks dat de webshop nog gesloten is, worden de <strong>eerste 50 aanmeldingen op ' +
+          '<a href="https://www.paskamerpraat.nl" target="_blank" rel="noopener">www.paskamerpraat.nl</a></strong> ' +
           'alvast verloot. De winnaar mag zodra de webshop opent iets uitzoeken t.w.v. <strong>EUR 119</strong>.' +
         '</p>' +
         '<div class="pp-giveaway-acties">' +
