@@ -1,0 +1,172 @@
+/* PASKAMER PRAAT - Giveaway Popup (v1.0) styling */
+.pp-giveaway-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 8, 6, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 10050;
+}
+.pp-giveaway-backdrop.pp-giveaway-in { opacity: 1; }
+.pp-giveaway-backdrop.pp-giveaway-uit { opacity: 0; }
+
+.pp-giveaway-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: linear-gradient(160deg, #1a1509 0%, #2a1e0a 100%);
+  border: 1px solid rgba(240, 179, 64, 0.35);
+  border-radius: 22px;
+  padding: 32px 26px 24px;
+  color: #fdf5e3;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  transform: translateY(16px) scale(0.98);
+  transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+.pp-giveaway-in .pp-giveaway-card { transform: translateY(0) scale(1); }
+
+html[data-pp-theme="light"] .pp-giveaway-card {
+  background: linear-gradient(160deg, #fffcf5 0%, #f5edda 100%);
+  color: #1e1a0f;
+  border-color: rgba(198, 125, 6, 0.35);
+}
+
+.pp-giveaway-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: rgba(240, 179, 64, 0.16);
+  border: 1px solid rgba(240, 179, 64, 0.45);
+  color: #fdf5e3;
+  font-size: 26px;
+  line-height: 1;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.pp-giveaway-close:hover,
+.pp-giveaway-close:focus-visible {
+  background: rgba(240, 179, 64, 0.32);
+  color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(240, 179, 64, 0.35);
+}
+html[data-pp-theme="light"] .pp-giveaway-close {
+  color: #1e1a0f;
+  background: rgba(198, 125, 6, 0.14);
+  border-color: rgba(198, 125, 6, 0.35);
+}
+
+.pp-giveaway-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #d4910a 0%, #b06205 100%);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.pp-giveaway-titel {
+  margin: 0 0 12px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #fdf5e3;
+}
+html[data-pp-theme="light"] .pp-giveaway-titel { color: #1e1a0f; }
+
+.pp-giveaway-tekst {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(253, 245, 227, 0.92);
+}
+html[data-pp-theme="light"] .pp-giveaway-tekst { color: rgba(30, 26, 15, 0.85); }
+.pp-giveaway-tekst a {
+  color: #f0b340;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.pp-giveaway-tekst strong {
+  color: #f0b340;
+  font-weight: 700;
+}
+
+.pp-giveaway-acties {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.pp-giveaway-btn {
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 0;
+  font: 700 14px/1 "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  text-align: center;
+}
+.pp-giveaway-btn-primair {
+  background: linear-gradient(135deg, #d4910a 0%, #b06205 100%);
+  color: #ffffff;
+}
+.pp-giveaway-btn-primair:hover,
+.pp-giveaway-btn-primair:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+  box-shadow: 0 8px 20px rgba(198, 125, 6, 0.45);
+}
+.pp-giveaway-btn-ghost {
+  background: transparent;
+  color: rgba(253, 245, 227, 0.85);
+  border: 1px solid rgba(240, 179, 64, 0.40);
+}
+html[data-pp-theme="light"] .pp-giveaway-btn-ghost {
+  color: #1e1a0f;
+  border-color: rgba(198, 125, 6, 0.35);
+}
+.pp-giveaway-btn-ghost:hover,
+.pp-giveaway-btn-ghost:focus-visible {
+  background: rgba(240, 179, 64, 0.12);
+  color: #ffffff;
+  outline: none;
+}
+html[data-pp-theme="light"] .pp-giveaway-btn-ghost:hover,
+html[data-pp-theme="light"] .pp-giveaway-btn-ghost:focus-visible {
+  color: #1e1a0f;
+  background: rgba(198, 125, 6, 0.10);
+}
+
+.pp-giveaway-kv {
+  margin: 0;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  color: rgba(253, 245, 227, 0.55);
+  text-align: center;
+}
+html[data-pp-theme="light"] .pp-giveaway-kv { color: rgba(30, 26, 15, 0.55); }
+
+@media (max-width: 480px) {
+  .pp-giveaway-card { padding: 26px 20px 20px; }
+  .pp-giveaway-titel { font-size: 26px; }
+  .pp-giveaway-acties { flex-direction: column; }
+}
