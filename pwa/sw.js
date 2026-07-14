@@ -10,7 +10,7 @@
 // Strategie is bewust simpel + bestand-naam-gebaseerd zodat een nieuwe deploy
 // (nieuwe versioned filename) automatisch niet uit cache komt.
 
-const VERSION       = 'v60.1.278-20260212-giveaway-ebook-text';
+const VERSION       = 'v60.1.279-20260212-cache-freshness-autoreload';
 const STATIC_CACHE  = 'pp-static-' + VERSION;
 const RUNTIME_CACHE = 'pp-runtime-' + VERSION;
 const IMG_CACHE     = 'pp-images-' + VERSION;
@@ -44,6 +44,16 @@ self.addEventListener('activate', event => {
         keys.filter(k => !ALLOWED_CACHES.includes(k)).map(k => caches.delete(k))
       ))
       .then(() => self.clients.claim())
+      .then(() => {
+        // v60.1.279: notify alle open clients dat er een nieuwe SW-versie
+        // actief is, zodat ze automatisch kunnen reloaden en direct verse
+        // content zien in plaats van gecachte oude assets.
+        return self.clients.matchAll({ type: 'window' }).then(clients => {
+          for (const client of clients) {
+            try { client.postMessage({ type: 'SW_UPDATED', version: VERSION }); } catch (_) {}
+          }
+        });
+      })
   );
 });
 
@@ -232,9 +242,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 5. CSS
+  // 5. CSS - NETWORK-FIRST (2s timeout) zodat nieuwe styling na deploy
+  //    direct zichtbaar is (v60.1.279: was stale-while-revalidate, gaf
+  //    oude styles bij eerste bezoek na deploy).
   if (url.origin === self.location.origin && /\.css(\?|$)/.test(url.pathname + url.search)) {
-    event.respondWith(staleWhileRevalidate(req, RUNTIME_CACHE));
+    event.respondWith(networkFirst(req, RUNTIME_CACHE, 2000, false));
     return;
   }
 
@@ -256,9 +268,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 9. Manifest
+  // 9. Manifest - NETWORK-FIRST (v60.1.279: was stale-while-revalidate)
   if (url.pathname.endsWith('/manifest.json')) {
-    event.respondWith(staleWhileRevalidate(req, RUNTIME_CACHE));
+    event.respondWith(networkFirst(req, RUNTIME_CACHE, 2000, false));
     return;
   }
 
