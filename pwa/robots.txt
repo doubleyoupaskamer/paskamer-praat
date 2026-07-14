@@ -1,4 +1,4 @@
-# Doubleyou robots.txt
+# Paskamerpraat robots.txt
 # Tall & Plus Size Fashion Community Nederland
 # https://paskamerpraat.nl
 
@@ -7,22 +7,51 @@ Allow: /
 Allow: /feed
 Allow: /uitgelicht
 Allow: /looks
+Allow: /lookbook
 Allow: /reviews
+Allow: /webshop-reviews
+Allow: /pasvorm-reviews
 Allow: /merken
+Allow: /merkenportaal
 Allow: /winkel
 Allow: /challenges
 Allow: /post-van-de-week
 Allow: /outfit-vergelijker
 Allow: /ai-stijladvies
+Allow: /kleuranalyse
+Allow: /media-generator
+Allow: /try-on
+Allow: /vind-mensen
+Allow: /help
+Allow: /faq
+Allow: /over-ons
+Allow: /contact
 Allow: /voorwaarden/
 Allow: /voorwaarden/index.html
 Allow: /privacy
 Allow: /community-regels
 Allow: /beta
+Allow: /kleding-voor-lange-mannen
+Allow: /kleding-voor-lange-vrouwen
+Allow: /plus-size-mode
+Allow: /tall-fashion-nederland
+Allow: /outfit-inspiratie
+Allow: /duurzame-mode
+Allow: /capsule-wardrobe
 Allow: /sitemap.xml
 Allow: /manifest.json
 Allow: /hero-model.png
+Allow: /hero-model-v2.png
 Allow: /icons/
+
+# Statische assets die crawlbaar mogen zijn
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.woff2$
+Allow: /*.webp$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.svg$
 
 Disallow: /admin
 Disallow: /admin.html
@@ -39,12 +68,20 @@ Disallow: /berichten
 Disallow: /uploaden
 Disallow: /api/
 Disallow: /branding/
+Disallow: /*?debug=
+Disallow: /*?admin=
 
-# AI training & search crawlers expliciet toegestaan voor publieke pagina's
+# ═══════════════════════════════════════════════════════════════
+# AI training & search crawlers - expliciet toegestaan voor
+# publieke pagina's zodat Paskamerpraat citeerbaar is in
+# Google AI Overviews, ChatGPT, Perplexity, Claude, Copilot etc.
+# ═══════════════════════════════════════════════════════════════
+
 User-agent: GPTBot
 Allow: /
 Disallow: /admin
 Disallow: /login
+Disallow: /register
 Disallow: /profiel
 Disallow: /wallet
 Disallow: /api/
@@ -53,27 +90,48 @@ User-agent: ChatGPT-User
 Allow: /
 Disallow: /admin
 Disallow: /login
+Disallow: /register
 Disallow: /profiel
+Disallow: /api/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /register
 Disallow: /api/
 
 User-agent: PerplexityBot
 Allow: /
 Disallow: /admin
 Disallow: /login
+Disallow: /register
 Disallow: /profiel
+Disallow: /api/
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /admin
 Disallow: /api/
 
 User-agent: ClaudeBot
 Allow: /
 Disallow: /admin
 Disallow: /login
+Disallow: /register
 Disallow: /profiel
+Disallow: /api/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /admin
 Disallow: /api/
 
 User-agent: anthropic-ai
 Allow: /
 Disallow: /admin
 Disallow: /login
+Disallow: /register
 Disallow: /profiel
 Disallow: /api/
 
@@ -81,7 +139,13 @@ User-agent: Google-Extended
 Allow: /
 Disallow: /admin
 Disallow: /login
+Disallow: /register
 Disallow: /profiel
+Disallow: /api/
+
+User-agent: GoogleOther
+Allow: /
+Disallow: /admin
 Disallow: /api/
 
 User-agent: Bingbot
@@ -89,7 +153,53 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 
+User-agent: bingbot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: BingPreview
+Allow: /
+Disallow: /admin
+
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: Applebot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
 User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: FacebookBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: facebookexternalhit
+Allow: /
+Disallow: /admin
+
+User-agent: Twitterbot
+Allow: /
+Disallow: /admin
+
+User-agent: LinkedInBot
+Allow: /
+Disallow: /admin
+
+User-agent: YandexBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: Amazonbot
 Allow: /
 Disallow: /admin
 Disallow: /api/
