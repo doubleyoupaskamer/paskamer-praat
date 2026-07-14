@@ -72,7 +72,7 @@
           'alvast verloot. De winnaar mag zodra de webshop opent iets uitzoeken t.w.v. <strong>EUR 119</strong>.' +
         '</p>' +
         '<div class="pp-giveaway-acties">' +
-          '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-primair" data-role="cta" data-testid="pp-giveaway-cta">Download ebook</button>' +
+          '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-primair" data-role="cta" data-testid="pp-giveaway-cta">Ga naar doubleyoufashion.nl en download je E-book</button>' +
           '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-ghost" data-role="close" data-testid="pp-giveaway-later">Later</button>' +
         '</div>' +
         '<p class="pp-giveaway-kv">Actievoorwaarden: aanmelden en profiel voltooien. Winnaar wordt persoonlijk benaderd zodra de webshop opent.</p>' +
