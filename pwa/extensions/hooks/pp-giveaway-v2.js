@@ -61,7 +61,7 @@
     wrap.innerHTML =
       '<div class="pp-giveaway-card" role="document">' +
         '<button type="button" class="pp-giveaway-close" data-role="close" aria-label="Sluiten" data-testid="pp-giveaway-close">&times;</button>' +
-        '<div class="pp-giveaway-badge">Winactie</div>' +
+        '<div class="pp-giveaway-badge">Ledenactie</div>' +
         '<h2 class="pp-giveaway-titel" id="pp-giveaway-titel">EUR 119 shoptegoed te winnen</h2>' +
         '<p class="pp-giveaway-tekst">' +
           'De webshop <a href="' + WEBSHOP_URL + '" target="_blank" rel="noopener">doubleyoufashion.nl</a> ' +
