@@ -18,6 +18,9 @@
 
   var OVERLAY_ID = 'pp-giveaway-overlay';
   var WEBSHOP_URL = 'https://www.doubleyoufashion.nl';
+  // TIP: pas EBOOK_URL aan naar de directe download-link van je ebook.
+  // Voor nu wijst hij naar de webshop (waar het ebook straks te downloaden is).
+  var EBOOK_URL = 'https://www.doubleyoufashion.nl';
   var SHOWN_THIS_LOAD = false;
 
   var BLOCKING_SELECTORS = [
@@ -61,15 +64,17 @@
         '<div class="pp-giveaway-badge">Winactie</div>' +
         '<h2 class="pp-giveaway-titel" id="pp-giveaway-titel">EUR 119 shoptegoed te winnen</h2>' +
         '<p class="pp-giveaway-tekst">' +
-          'De eerste <strong>50 aanmeldingen</strong> worden verloot. ' +
-          'De winnaar mag t.w.v. <strong>EUR 119</strong> iets uitzoeken in ' +
-          'de webshop <a href="' + WEBSHOP_URL + '" target="_blank" rel="noopener">doubleyoufashion.nl</a>.' +
+          'De webshop <a href="' + WEBSHOP_URL + '" target="_blank" rel="noopener">doubleyoufashion.nl</a> ' +
+          'is op dit moment <strong>nog niet geopend</strong>. Je kunt alvast een ' +
+          '<strong>gratis ebook</strong> downloaden om je voor te bereiden. ' +
+          'Ondanks dat de webshop nog gesloten is, worden de <strong>eerste 50 aanmeldingen</strong> ' +
+          'alvast verloot. De winnaar mag zodra de webshop opent iets uitzoeken t.w.v. <strong>EUR 119</strong>.' +
         '</p>' +
         '<div class="pp-giveaway-acties">' +
-          '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-primair" data-role="cta" data-testid="pp-giveaway-cta">Naar de webshop</button>' +
+          '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-primair" data-role="cta" data-testid="pp-giveaway-cta">Download ebook</button>' +
           '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-ghost" data-role="close" data-testid="pp-giveaway-later">Later</button>' +
         '</div>' +
-        '<p class="pp-giveaway-kv">Actievoorwaarden: aanmelden en profiel voltooien. Winnaar wordt persoonlijk benaderd.</p>' +
+        '<p class="pp-giveaway-kv">Actievoorwaarden: aanmelden en profiel voltooien. Winnaar wordt persoonlijk benaderd zodra de webshop opent.</p>' +
       '</div>';
 
     wrap.addEventListener('click', function (e) {
@@ -77,8 +82,8 @@
       var role = t && t.getAttribute && t.getAttribute('data-role');
       if (!role && t === wrap) role = 'close';
       if (role === 'cta') {
-        try { window.open(WEBSHOP_URL, '_blank', 'noopener'); }
-        catch (_) { location.href = WEBSHOP_URL; }
+        try { window.open(EBOOK_URL, '_blank', 'noopener'); }
+        catch (_) { location.href = EBOOK_URL; }
         remove();
       } else if (role === 'close') {
         remove();
