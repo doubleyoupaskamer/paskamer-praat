@@ -18,7 +18,7 @@
 
   var OVERLAY_ID = 'pp-giveaway-overlay';
   var WEBSHOP_URL = 'https://www.doubleyoufashion.nl';
-  var SIGNUP_URL = 'https://www.paskamerpraat.nl';
+  var SIGNUP_URL = 'https://www.paskamerpraat.nl/?pagina=register';
   // TIP: pas EBOOK_URL aan naar de directe download-link van je ebook.
   // Voor nu wijst hij naar de webshop (waar het ebook straks te downloaden is).
   var EBOOK_URL = 'https://www.doubleyoufashion.nl';
