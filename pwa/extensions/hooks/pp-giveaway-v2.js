@@ -63,14 +63,14 @@
       '<div class="pp-giveaway-card" role="document">' +
         '<button type="button" class="pp-giveaway-close" data-role="close" aria-label="Sluiten" data-testid="pp-giveaway-close">&times;</button>' +
         '<div class="pp-giveaway-badge">Ledenactie</div>' +
-        '<h2 class="pp-giveaway-titel" id="pp-giveaway-titel">EUR 119 shoptegoed te winnen</h2>' +
+        '<h2 class="pp-giveaway-titel" id="pp-giveaway-titel">EUR 200 shoptegoed te winnen</h2>' +
         '<p class="pp-giveaway-tekst">' +
           'De webshop <a href="' + WEBSHOP_URL + '" target="_blank" rel="noopener">doubleyoufashion.nl</a> ' +
           'is op dit moment <strong>nog niet geopend</strong>. Je kunt alvast een ' +
           '<strong>gratis ebook</strong> downloaden om je voor te bereiden. ' +
           'Ondanks dat de webshop nog gesloten is, worden de <strong>eerste 150 aanmeldingen op ' +
           '<a href="https://www.paskamerpraat.nl" target="_blank" rel="noopener">www.paskamerpraat.nl</a></strong> ' +
-          'alvast verloot. De winnaar mag zodra de webshop opent iets uitzoeken t.w.v. <strong>EUR 119</strong>.' +
+          'alvast verloot. De winnaar mag zodra de webshop opent iets uitzoeken t.w.v. <strong>EUR 200</strong>.' +
         '</p>' +
         '<div class="pp-giveaway-acties">' +
           '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-primair" data-role="cta" data-testid="pp-giveaway-cta">Ga naar doubleyoufashion.nl en download je E-book</button>' +
