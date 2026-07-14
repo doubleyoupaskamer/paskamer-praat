@@ -18,6 +18,7 @@
 
   var OVERLAY_ID = 'pp-giveaway-overlay';
   var WEBSHOP_URL = 'https://www.doubleyoufashion.nl';
+  var SIGNUP_URL = 'https://www.paskamerpraat.nl';
   // TIP: pas EBOOK_URL aan naar de directe download-link van je ebook.
   // Voor nu wijst hij naar de webshop (waar het ebook straks te downloaden is).
   var EBOOK_URL = 'https://www.doubleyoufashion.nl';
@@ -73,7 +74,7 @@
         '</p>' +
         '<div class="pp-giveaway-acties">' +
           '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-primair" data-role="cta" data-testid="pp-giveaway-cta">Ga naar doubleyoufashion.nl en download je E-book</button>' +
-          '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-ghost" data-role="close" data-testid="pp-giveaway-later">Later</button>' +
+          '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-ghost" data-role="signup" data-testid="pp-giveaway-signup">Meld je direct aan op paskamerpraat.nl</button>' +
         '</div>' +
         '<p class="pp-giveaway-kv">Actievoorwaarden: aanmelden en profiel voltooien. Winnaar wordt persoonlijk benaderd zodra de webshop opent.</p>' +
       '</div>';
@@ -85,6 +86,10 @@
       if (role === 'cta') {
         try { window.open(EBOOK_URL, '_blank', 'noopener'); }
         catch (_) { location.href = EBOOK_URL; }
+        remove();
+      } else if (role === 'signup') {
+        try { window.open(SIGNUP_URL, '_blank', 'noopener'); }
+        catch (_) { location.href = SIGNUP_URL; }
         remove();
       } else if (role === 'close') {
         remove();
