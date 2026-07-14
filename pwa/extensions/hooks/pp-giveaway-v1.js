@@ -1,13 +1,14 @@
-/* PASKAMER PRAAT. Giveaway Popup (v1.0.0)
+/* PASKAMER PRAAT - Giveaway Popup (v2.0.0)
  *
- * Toont eenmalig een popup met de winactie: "De eerste 50 aanmeldingen
- * worden verloot. Winnaar mag t.w.v. EUR 119 kiezen op doubleyoufashion.nl".
+ * Toont bij ELKE pageload een popup met de winactie: "De eerste 50
+ * aanmeldingen worden verloot. Winnaar mag t.w.v. EUR 119 kiezen op
+ * doubleyoufashion.nl".
  *
  * Flow:
- * - Toont NA de aanmeld/onboarding-overlay (wacht tot die weg is)
- * - Ook los van aanmeld-flow: valt terug op timer als geen aanmeld-popup
- *   verschijnt (voor bestaande users of guests die niets doen)
- * - Wordt maximaal 1x getoond per browser (localStorage vlag)
+ * - Verschijnt na de aanmeld/onboarding-overlay (wacht max 3s tot die weg is)
+ * - Bij geen aanmeld-overlay: verschijnt binnen 1.5s na page-load
+ * - Wordt getoond bij ELKE pageload (geen localStorage persistence)
+ * - Sluiten via kruisje, backdrop-klik of "Later"-knop
  * - CTA opent doubleyoufashion.nl in nieuw tabblad
  *
  * 100% additief. Raakt geen bestaande code aan.
@@ -15,11 +16,10 @@
 (function () {
   'use strict';
 
-  var STORAGE_KEY = 'pp_giveaway_shown_v1';
   var OVERLAY_ID = 'pp-giveaway-overlay';
   var WEBSHOP_URL = 'https://www.doubleyoufashion.nl';
+  var SHOWN_THIS_LOAD = false;
 
-  // Selectors van bekende aanmeld/onboarding overlays die eerst weg moeten.
   var BLOCKING_SELECTORS = [
     '#dy-onboarding-overlay',
     '#dy-bpos-overlay',
@@ -29,20 +29,6 @@
     '.dy-signup-modal'
   ];
 
-  function alreadyShown() {
-    try { return localStorage.getItem(STORAGE_KEY) === '1'; }
-    catch (_) { return false; }
-  }
-  function markShown() {
-    try { localStorage.setItem(STORAGE_KEY, '1'); } catch (_) {}
-  }
-  function isBlocked() {
-    for (var i = 0; i < BLOCKING_SELECTORS.length; i++) {
-      var el = document.querySelector(BLOCKING_SELECTORS[i]);
-      if (el && isVisible(el)) return true;
-    }
-    return false;
-  }
   function isVisible(el) {
     if (!el || !el.getBoundingClientRect) return false;
     try {
@@ -51,6 +37,14 @@
       var cs = getComputedStyle(el);
       return cs.display !== 'none' && cs.visibility !== 'hidden' && parseFloat(cs.opacity || '1') > 0;
     } catch (_) { return true; }
+  }
+
+  function isBlocked() {
+    for (var i = 0; i < BLOCKING_SELECTORS.length; i++) {
+      var el = document.querySelector(BLOCKING_SELECTORS[i]);
+      if (el && isVisible(el)) return true;
+    }
+    return false;
   }
 
   function build() {
@@ -62,7 +56,7 @@
     wrap.setAttribute('aria-labelledby', 'pp-giveaway-titel');
     wrap.setAttribute('data-testid', 'pp-giveaway-overlay');
     wrap.innerHTML =
-      '<div class="pp-giveaway-card">' +
+      '<div class="pp-giveaway-card" role="document">' +
         '<button type="button" class="pp-giveaway-close" data-role="close" aria-label="Sluiten" data-testid="pp-giveaway-close">&times;</button>' +
         '<div class="pp-giveaway-badge">Winactie</div>' +
         '<h2 class="pp-giveaway-titel" id="pp-giveaway-titel">EUR 119 shoptegoed te winnen</h2>' +
@@ -81,13 +75,12 @@
     wrap.addEventListener('click', function (e) {
       var t = e.target;
       var role = t && t.getAttribute && t.getAttribute('data-role');
-      if (!role && t === wrap) role = 'close'; // klik op backdrop
+      if (!role && t === wrap) role = 'close';
       if (role === 'cta') {
-        markShown();
-        try { window.open(WEBSHOP_URL, '_blank', 'noopener'); } catch (_) { location.href = WEBSHOP_URL; }
+        try { window.open(WEBSHOP_URL, '_blank', 'noopener'); }
+        catch (_) { location.href = WEBSHOP_URL; }
         remove();
       } else if (role === 'close') {
-        markShown();
         remove();
       }
     });
@@ -104,47 +97,48 @@
   }
 
   function show() {
-    if (alreadyShown() || document.getElementById(OVERLAY_ID)) return;
+    if (SHOWN_THIS_LOAD) return;
+    if (document.getElementById(OVERLAY_ID)) return;
+    SHOWN_THIS_LOAD = true;
     var overlay = build();
     document.body.appendChild(overlay);
     requestAnimationFrame(function () {
       requestAnimationFrame(function () { overlay.classList.add('pp-giveaway-in'); });
     });
+    try { console.log('[pp-giveaway] popup shown'); } catch (_) {}
   }
 
-  function trySchedule() {
-    if (alreadyShown()) return;
+  function scheduleShow() {
+    if (SHOWN_THIS_LOAD) return;
     if (!isBlocked()) {
-      // Geen blokkerende popup zichtbaar: kleine delay + toon.
-      setTimeout(function () {
-        if (!isBlocked() && !alreadyShown()) show();
-      }, 1500);
+      // Geen blokkerende overlay: kort delay + toon.
+      setTimeout(show, 1200);
       return;
     }
-    // Blokkerende popup zichtbaar: wacht tot die weg is via MutationObserver.
+    // Blokkerende overlay: wacht met MutationObserver, max 15s.
     var mo = new MutationObserver(function () {
-      if (alreadyShown()) { mo.disconnect(); return; }
+      if (SHOWN_THIS_LOAD) { mo.disconnect(); return; }
       if (!isBlocked()) {
         mo.disconnect();
-        setTimeout(function () { if (!alreadyShown()) show(); }, 700);
+        setTimeout(show, 500);
       }
     });
-    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
-
-    // Fallback: als er om welke reden dan ook nooit een unblock volgt,
-    // dwing na 60 seconden een toon af (mensen zonder aanmeld-actie).
+    mo.observe(document.body, {
+      childList: true, subtree: true,
+      attributes: true, attributeFilter: ['class', 'style', 'hidden']
+    });
+    // Absolute fallback: dwing na 15s af, ook al is er iets zichtbaar.
     setTimeout(function () {
-      if (alreadyShown()) return;
-      mo.disconnect();
+      if (SHOWN_THIS_LOAD) return;
+      try { mo.disconnect(); } catch (_) {}
       show();
-    }, 60000);
+    }, 15000);
   }
 
   function start() {
-    // Wacht op eventuele boot-splash en initialize-flow.
-    if (alreadyShown()) return;
-    // Initial poging pas na 4s zodat aanmeld-overlay zich kan tonen als hij komt.
-    setTimeout(trySchedule, 4000);
+    // Klein window zodat de aanmeld-overlay zich kan tonen als hij komt,
+    // maar niet zo lang dat de gebruiker moet wachten.
+    setTimeout(scheduleShow, 1500);
   }
 
   if (document.readyState === 'loading') {
@@ -154,8 +148,8 @@
   }
 
   window.PP_Giveaway = {
-    VERSION: '1.0.0',
+    VERSION: '2.0.0',
     show: show,
-    reset: function () { try { localStorage.removeItem(STORAGE_KEY); } catch (_) {} }
+    forceShow: function () { SHOWN_THIS_LOAD = false; remove(); show(); }
   };
 })();
