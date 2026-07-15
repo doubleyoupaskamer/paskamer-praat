@@ -65,9 +65,9 @@
         '<div class="pp-giveaway-badge">Ledenactie</div>' +
         '<h2 class="pp-giveaway-titel" id="pp-giveaway-titel">200 Euro shoptegoed te winnen</h2>' +
         '<p class="pp-giveaway-tekst">' +
-          'De webshop <a href="' + WEBSHOP_URL + '" target="_blank" rel="noopener">doubleyoufashion.nl</a> ' +
-          'is op dit moment <strong>nog niet geopend</strong>. Je kunt alvast een ' +
-          '<strong>gratis ebook</strong> downloaden om je voor te bereiden. ' +
+          'Paskamerpraat is onderdeel van <strong>Doubleyou Tailored for Tall &amp; Plus size</strong>. ' +
+          'Binnenkort opent de webshop van <a href="' + WEBSHOP_URL + '" target="_blank" rel="noopener">Double You Fashion</a>. ' +
+          'Tot die tijd kun je gratis onze <strong>handige pasvormgidsen</strong> downloaden en ontdekken welke pasvorm het beste bij je past. ' +
           'Ondanks dat de webshop nog gesloten is, worden de <strong>eerste 150 aanmeldingen op ' +
           '<a href="https://www.paskamerpraat.nl" target="_blank" rel="noopener">www.paskamerpraat.nl</a></strong> ' +
           'alvast verloot. De winnaar mag zodra de webshop opent iets uitzoeken t.w.v. <strong>200 Euro</strong>.' +
