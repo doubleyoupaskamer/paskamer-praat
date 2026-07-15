@@ -55,15 +55,25 @@
     });
   }
 
-  // v60.1.243: friendly error voor "Failed to fetch" (adblock / netwerk / mixed-content)
+  // v60.1.295: friendly error voor "Failed to fetch". De proxy via _redirects
+  // op paskamerpraat.nl elimineert de meeste adblock/CORS issues. Als een
+  // request nu nog faalt, is het waarschijnlijk offline/VPN/firewall.
   function _describeFetchErr(e, backendUrl) {
     var msg = String(e && (e.message || e));
     if (/Failed to fetch|NetworkError|Load failed/i.test(msg)) {
+      var isSameOrigin = false;
+      try {
+        isSameOrigin = (backendUrl || '').indexOf(location.origin) === 0;
+      } catch (_) {}
       return 'Netwerkfout: <strong>Failed to fetch</strong>.<br>' +
         '<small style="color:#f0b340">Mogelijke oorzaken:</small>' +
         '<ul style="margin:6px 0 0 20px;padding:0;color:rgba(252,248,239,0.75);font-size:0.83rem;line-height:1.6">' +
-          '<li><strong>Adblock/Privacy-extensie</strong>: schakel uit voor deze pagina (Adblock Plus, uBlock, Ghostery, Brave shield) — het backend-domein ' + esc(backendUrl.replace(/^https?:\/\//, '')) + ' matcht ad-tracking-filters.</li>' +
-          '<li><strong>VPN / Firewall</strong>: probeer VPN uit te schakelen.</li>' +
+          (isSameOrigin ?
+            '<li><strong>Cloudflare Pages proxy niet actief</strong>: controleer of <code>_redirects</code> een <code>/api/*</code> proxy-regel bevat. Deploy opnieuw met de nieuwste zip als dit ontbreekt.</li>'
+            :
+            '<li><strong>Adblock/Privacy-extensie</strong>: schakel uit voor deze pagina (Adblock Plus, uBlock, Ghostery, Brave shield) - het backend-domein ' + esc(backendUrl.replace(/^https?:\/\//, '')) + ' matcht ad-tracking-filters.</li>'
+          ) +
+          '<li><strong>VPN / Firewall</strong>: schakel deze tijdelijk uit.</li>' +
           '<li><strong>Slechte verbinding</strong>: check of ' + esc(backendUrl) + '/api/ bereikbaar is (open in een nieuw tabblad).</li>' +
         '</ul>';
     }
@@ -71,6 +81,23 @@
   }
 
   function _backendUrl() {
+    // v60.1.295: SAME-ORIGIN PROXY. Als we op paskamerpraat.nl (of subdomain)
+    // draaien, gebruik dan de same-origin '/api/*' proxy die via _redirects
+    // door-proxied wordt naar de emergentagent backend. Dit voorkomt:
+    //  - "Failed to fetch" door adblock filters op preview.emergentagent.com
+    //  - CORS-preflight roundtrips
+    //  - CSP violations bij cross-origin requests
+    // Alleen bij localhost/preview fallback we naar de directe URL.
+    try {
+      var host = (location.hostname || '').toLowerCase();
+      if (host === 'paskamerpraat.nl' || host === 'www.paskamerpraat.nl' ||
+          /\.paskamerpraat\.nl$/i.test(host) || /\.pages\.dev$/i.test(host)) {
+        // Alleen origin teruggeven; alle /api/* calls gaan dan naar
+        // https://paskamerpraat.nl/api/* wat Cloudflare Pages door-proxied.
+        return location.origin;
+      }
+    } catch (_) {}
+
     var v = localStorage.getItem('dy.imggen.url');
     // v60.1.240: guard tegen stale/invalid localStorage waardes.
     // - Alleen accepteren als het een geldige HTTPS URL is
@@ -447,11 +474,33 @@
           vReqBody.reference_image_base64 = vRefImg.base64;
           vReqBody.reference_mime_type = vRefImg.mime;
         }
-        var r = await fetch(_backendUrl() + '/api/admin/generate-video', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': _secret(), 'X-User-Email': _userEmail() },
-          body: JSON.stringify(vReqBody),
-        });
+        // v60.1.295: retry-loop met exponential backoff bij Failed-to-fetch,
+        // ONLY voor transient network errors. Server-fouten (4xx/5xx) worden
+        // NIET geretryd zodat we geen duplicate jobs starten.
+        var r = null, lastNetErr = null;
+        var backendUrl = _backendUrl();
+        for (var attempt = 0; attempt < 3; attempt++) {
+          try {
+            r = await fetch(backendUrl + '/api/admin/generate-video', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': _secret(), 'X-User-Email': _userEmail() },
+              body: JSON.stringify(vReqBody),
+            });
+            lastNetErr = null;
+            break;
+          } catch (netErr) {
+            lastNetErr = netErr;
+            if (attempt < 2) {
+              statusEl.innerHTML = '<span style="color:#f0b340">Netwerkhikje, opnieuw proberen (poging ' + (attempt + 2) + '/3)...</span>';
+              await new Promise(function (res) { setTimeout(res, 800 * (attempt + 1)); });
+            }
+          }
+        }
+        if (lastNetErr) {
+          clearInterval(tickIv);
+          statusEl.innerHTML = '<span style="color:#ff6b6b">' + _describeFetchErr(lastNetErr, backendUrl) + '</span>';
+          return;
+        }
         if (!r.ok) {
           clearInterval(tickIv);
           var errTxt = await r.text();

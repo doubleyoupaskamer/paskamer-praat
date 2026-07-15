@@ -1,3 +1,11 @@
+# ═══════════════════════════════════════════════════════════════
+# API PROXY: same-origin proxying naar de emergentagent backend.
+# Voorkomt "Failed to fetch" door adblock false-positives op de
+# preview.emergentagent.com hostname en elimineert cross-origin
+# CORS/CSP-complicaties. Werkt voor GET, POST, PUT, DELETE.
+# ═══════════════════════════════════════════════════════════════
+/api/*  https://paskamer-stability.preview.emergentagent.com/api/:splat  200
+
 # SPA fallback: alle bekende paden → index.html
 /feed                  /index.html    200
 /looks                 /index.html    200
