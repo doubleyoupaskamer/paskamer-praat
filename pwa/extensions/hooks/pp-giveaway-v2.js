@@ -66,7 +66,7 @@
         '<h2 class="pp-giveaway-titel" id="pp-giveaway-titel">200 Euro shoptegoed te winnen</h2>' +
         '<p class="pp-giveaway-tekst">' +
           'Paskamerpraat is onderdeel van <strong>Doubleyou Tailored for Tall &amp; Plus size</strong>. ' +
-          'Binnenkort opent de webshop van <a href="' + WEBSHOP_URL + '" target="_blank" rel="noopener">Double You Fashion</a>. ' +
+          'Binnenkort opent de webshop <a href="' + WEBSHOP_URL + '" target="_blank" rel="noopener">doubleyoufashion.nl</a>. ' +
           'Tot die tijd kun je gratis onze <strong>handige pasvormgidsen</strong> downloaden en ontdekken welke pasvorm het beste bij je past. ' +
           'Ondanks dat de webshop nog gesloten is, worden de <strong>eerste 150 aanmeldingen op ' +
           '<a href="https://www.paskamerpraat.nl" target="_blank" rel="noopener">www.paskamerpraat.nl</a></strong> ' +
