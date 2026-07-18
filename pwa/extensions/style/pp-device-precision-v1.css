@@ -1,0 +1,210 @@
+/* ═════════════════════════════════════════════════════════════════════
+ * PASKAMER PRAAT - Per-Device Precisie Overlay (v1.0.0)
+ * ═════════════════════════════════════════════════════════════════════
+ *
+ * Vult pp-mobile-responsive-v1.css aan met device-specifieke tuning
+ * zodat de app op elk apparaat perfect gerenderd wordt. Gebruikt
+ * fluid typography (clamp) i.p.v. harde breekpunten waar mogelijk,
+ * en gedetailleerde media queries voor iconische devices.
+ *
+ * Getarget: iPhone SE t/m Pro Max, Pixel 3-8, Galaxy S/Fold, iPad 
+ * Mini/Air/Pro, foldables in open + gesloten, desktop 1280-4K.
+ * ═════════════════════════════════════════════════════════════════════ */
+
+/* ─── FLUID TYPOGRAPHY: schaalt tussen 320px en 1920px viewport ───── */
+:root {
+  --pp-fs-xs:  clamp(0.72rem, 0.68rem + 0.20vw, 0.82rem);   /* 11.5 -> 13 */
+  --pp-fs-sm:  clamp(0.82rem, 0.76rem + 0.28vw, 0.94rem);   /* 13   -> 15 */
+  --pp-fs-md:  clamp(0.94rem, 0.86rem + 0.36vw, 1.06rem);   /* 15   -> 17 */
+  --pp-fs-lg:  clamp(1.08rem, 0.96rem + 0.56vw, 1.30rem);   /* 17.3 -> 21 */
+  --pp-fs-xl:  clamp(1.28rem, 1.08rem + 0.90vw, 1.65rem);   /* 20.5 -> 26.4 */
+  --pp-fs-2xl: clamp(1.55rem, 1.24rem + 1.40vw, 2.20rem);   /* 25   -> 35 */
+  --pp-fs-3xl: clamp(1.85rem, 1.42rem + 1.95vw, 2.85rem);   /* 30   -> 45 */
+  --pp-fs-hero:clamp(2.20rem, 1.68rem + 2.30vw, 3.60rem);   /* 35   -> 57 */
+
+  --pp-space-xs: clamp(0.25rem, 0.20rem + 0.20vw, 0.35rem);
+  --pp-space-sm: clamp(0.50rem, 0.40rem + 0.40vw, 0.75rem);
+  --pp-space-md: clamp(0.85rem, 0.65rem + 0.90vw, 1.35rem);
+  --pp-space-lg: clamp(1.40rem, 1.00rem + 1.80vw, 2.40rem);
+
+  --pp-max-content: min(100vw - 32px, 1240px);
+}
+
+/* ─── iPHONE SE (1st/2nd/3rd gen, 320-375px) - extreem smal ────────── */
+@media (max-width: 375px) {
+  .pp-giveaway-card, .pp-br-modal-inner, .dy-modal-inner {
+    padding: 20px 14px 16px;
+    border-radius: 16px;
+  }
+  .pp-giveaway-titel { font-size: 21px; line-height: 1.15; }
+  .pp-giveaway-badge { font-size: 10px; letter-spacing: 0.10em; }
+  .pp-giveaway-tekst { font-size: 13.5px; line-height: 1.5; }
+  .pp-giveaway-kv { font-size: 10.5px; }
+  .pp-giveaway-btn { padding: 11px 12px; font-size: 12.5px; }
+  .pp-giveaway-acties { flex-direction: column; gap: 8px; }
+  .pp-br-titel { font-size: 20px; }
+  .pp-wsr-cta-titel { font-size: 18px; }
+  .pp-wsr-cta-sub { font-size: 11.5px; }
+  .dy-vr-titel { font-size: 22px !important; line-height: 1.1; }
+  .dy-vr-header { padding-left: 8px; padding-right: 8px; }
+  .dy-card, .dy-post, .dy-review, .bp-kaart { border-radius: 12px; }
+}
+
+/* ─── iPHONE 12/13/14 mini + normale phones (376-430px) ────────────── */
+@media (min-width: 376px) and (max-width: 430px) {
+  .pp-giveaway-card { padding: 24px 18px 18px; }
+  .pp-giveaway-titel { font-size: 24px; }
+  .pp-giveaway-acties { flex-direction: column; gap: 9px; }
+  .pp-giveaway-btn { width: 100%; padding: 12px 16px; }
+}
+
+/* ─── iPHONE PRO MAX / grote Androids (431-540px) ──────────────────── */
+@media (min-width: 431px) and (max-width: 540px) {
+  .pp-giveaway-card { padding: 26px 22px 20px; max-width: 400px; }
+  .pp-giveaway-titel { font-size: 26px; }
+}
+
+/* ─── PHABLETS / kleine tablets portrait (541-767px) ───────────────── */
+@media (min-width: 541px) and (max-width: 767px) {
+  .pp-giveaway-card { max-width: 460px; padding: 28px 24px 22px; }
+  .pp-giveaway-titel { font-size: 28px; }
+  .dy-grid-2 { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* ─── iPAD MINI / kleine tablets (768-834px) ───────────────────────── */
+@media (min-width: 768px) and (max-width: 834px) {
+  .pp-giveaway-card { max-width: 500px; }
+  .dy-container, .dy-wrap { max-width: 720px; margin: 0 auto; }
+}
+
+/* ─── iPAD AIR / medium tablets (835-1024px) ───────────────────────── */
+@media (min-width: 835px) and (max-width: 1024px) {
+  .pp-giveaway-card { max-width: 520px; }
+  .dy-container, .dy-wrap { max-width: 900px; margin: 0 auto; }
+  /* Sidebar zichtbaar op iPad landscape? Legacy code beheert dit. */
+}
+
+/* ─── iPAD PRO 11" / grote tablets (1025-1194px) ───────────────────── */
+@media (min-width: 1025px) and (max-width: 1194px) {
+  .dy-container, .dy-wrap { max-width: 1080px; margin: 0 auto; }
+  .pp-giveaway-card { max-width: 520px; }
+}
+
+/* ─── iPAD PRO 12.9" / desktop klein (1195-1440px) ─────────────────── */
+@media (min-width: 1195px) and (max-width: 1440px) {
+  .dy-container, .dy-wrap { max-width: 1200px; margin: 0 auto; }
+}
+
+/* ─── DESKTOP / laptop (1441-1919px) ───────────────────────────────── */
+@media (min-width: 1441px) and (max-width: 1919px) {
+  .dy-container, .dy-wrap { max-width: 1360px; margin: 0 auto; }
+}
+
+/* ─── 4K / ultrawide (>= 1920px) ───────────────────────────────────── */
+@media (min-width: 1920px) {
+  .dy-container, .dy-wrap { max-width: 1560px; margin: 0 auto; }
+  .pp-giveaway-card { max-width: 560px; }
+}
+
+/* ─── FOLDABLE gesloten (Galaxy Z Fold gesloten ~280px) ────────────── */
+@media (max-width: 320px) {
+  .pp-giveaway-card { padding: 18px 12px 14px; border-radius: 14px; }
+  .pp-giveaway-titel { font-size: 19px; }
+  .pp-giveaway-tekst { font-size: 13px; }
+  .pp-giveaway-btn { padding: 10px 10px; font-size: 12px; }
+  /* Kritieke content moet leesbaar blijven ook op 280px */
+  html { font-size: 14.5px; }
+}
+
+/* ─── FOLDABLE open (Galaxy Z Fold open ~717x653, tablet-achtig) ──── */
+@media (min-width: 700px) and (max-width: 900px) and (orientation: landscape) {
+  .pp-giveaway-card { max-width: 480px; }
+  .pp-giveaway-backdrop { align-items: center; }
+}
+
+/* ─── LANDSCAPE PHONE (kort, breed) ────────────────────────────────── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .pp-giveaway-backdrop, .dy-modal, .dy-dialog, [role="dialog"] {
+    align-items: flex-start;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .pp-giveaway-card, .pp-br-modal-inner {
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+  .pp-giveaway-titel { font-size: 22px; margin-bottom: 8px; }
+  .pp-giveaway-tekst { font-size: 13.5px; margin-bottom: 12px; }
+  .pp-giveaway-badge { margin-bottom: 8px; }
+  .pp-giveaway-acties { margin-bottom: 8px; }
+  .pp-giveaway-kv { display: none; } /* schaars ruimte, verberg fine-print */
+}
+
+/* ─── HOOG-DPI schermen (Retina 2x/3x) ─────────────────────────────── */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sub-pixel rendering optimalisatie voor scherpe text op retina */
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  /* SVG-borders scherper */
+  .pp-giveaway-card, .pp-br-modal-inner { border-width: 0.75px; }
+}
+
+/* ─── HOVER capable (echte muis-devices) ───────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  /* Subtiele hover-lift op cards, alleen op echte desktops/laptops */
+  .dy-card:hover, .dy-post:hover, .bp-kaart:hover, .pp-br-kaart:hover {
+    transform: translateY(-2px);
+    transition: transform 0.15s ease;
+  }
+}
+
+/* ─── TOUCH-only (mobile/tablet zonder externe muis) ───────────────── */
+@media (hover: none) and (pointer: coarse) {
+  /* Hover-effecten disable om nogal wat sticky-states op tap te voorkomen */
+  *:hover { transform: none !important; }
+  /* Extra padding op inline links om tap-nauwkeurigheid te verhogen */
+  p a, li a, span a { padding: 2px 0; }
+}
+
+/* ─── HOOG CONTRAST modus (Windows High Contrast, macOS Increase C.) ─ */
+@media (prefers-contrast: more) {
+  .pp-giveaway-card, .pp-br-modal-inner, .dy-modal-inner {
+    border-width: 2px;
+    border-color: currentColor;
+  }
+  .pp-giveaway-btn-primair {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+/* ─── DYNAMIC VIEWPORT HEIGHT (moderne Safari/Chrome) ──────────────── */
+@supports (height: 100dvh) {
+  .pp-giveaway-backdrop, .dy-modal-fullscreen, [data-fullscreen] {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+}
+
+/* ─── PRINT: verberg interactieve overlays ─────────────────────────── */
+@media print {
+  .pp-giveaway-backdrop, .dy-modal, .dy-topbar, .dy-bottomnav,
+  .dy-fab, .dy-tooltip, .pp-modal-top, [role="dialog"] {
+    display: none !important;
+  }
+  body { color: #000 !important; background: #fff !important; }
+  a { text-decoration: underline; }
+}
+
+/* ─── LOW-END device fallback (geen container queries) ─────────────── */
+@supports not (container-type: inline-size) {
+  /* Alle standaard media queries hierboven dekken deze devices. */
+}
+
+/* ─── ULTRA-SMALL SMARTWATCH / rare vieuws (< 280px) ───────────────── */
+@media (max-width: 279px) {
+  html { font-size: 13px; }
+  .pp-giveaway-titel { font-size: 17px; }
+  .pp-giveaway-tekst { font-size: 12px; }
+  .pp-giveaway-btn { padding: 8px 8px; font-size: 11.5px; }
+}
