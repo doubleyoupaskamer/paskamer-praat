@@ -1,0 +1,242 @@
+/* ═════════════════════════════════════════════════════════════════════
+ * PASKAMER PRAAT - Universele Mobile Responsiveness Overlay (v1.0.0)
+ * ═════════════════════════════════════════════════════════════════════
+ *
+ * Additieve laag die de app op alle mobiele devices en breekpunten
+ * betrouwbaar maakt zonder legacy code te wijzigen. Focus op:
+ *
+ *  1. Voorkomen van horizontal overflow op smalle schermen
+ *  2. Modals/popups/overlays altijd binnen de viewport
+ *  3. Touch targets >= 44px (Apple Human Interface Guideline)
+ *  4. Input font >= 16px op iOS (voorkomt auto-zoom bij focus)
+ *  5. Safe-area-insets voor iPhone notch en Android gesture-navs
+ *  6. Word-break op lange strings (URL's, e-mails, hashtags)
+ *  7. Images/videos schalen mee, nooit vaste pixel-breedtes
+ *  8. Vaste positionering die niet breekt op iOS scroll
+ *  9. Tabellen scrollen horizontaal binnen hun container
+ * 10. Sticky footers/topbars respecteren safe-area
+ * ═════════════════════════════════════════════════════════════════════ */
+
+/* ─── Universele box-sizing + overflow-x block ─────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%; /* voorkomt iOS Safari zoom bij landscape */
+  text-size-adjust: 100%;
+}
+body {
+  /* Safe-area padding voor iPhone notch (alleen als niet al gedefinieerd) */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ─── Media (afbeeldingen, video, iframes) schalen mee ─────────────── */
+img, video, iframe, embed, object, canvas, picture, svg {
+  max-width: 100%;
+  height: auto;
+}
+video, iframe {
+  aspect-ratio: 16 / 9; /* fallback als aspect-ratio niet is gezet */
+}
+video[height], iframe[height], img[height] {
+  aspect-ratio: auto;
+}
+
+/* ─── Lange strings breken (URL's, e-mails, base64) ────────────────── */
+p, span, div, li, td, th, dd, dt, blockquote,
+.dy-msg-tekst, .dy-comment-tekst, .dy-reactie-tekst,
+.pp-giveaway-tekst, .pp-br-k-tekst, .dy-vr-sub-tekst {
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+}
+pre, code {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* ─── Tabellen scrollen horizontaal binnen hun container ───────────── */
+.dy-table-wrap, .pp-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+table {
+  max-width: 100%;
+}
+
+/* ─── Touch targets: minimaal 44x44 CSS px ─────────────────────────── */
+@media (hover: none) and (pointer: coarse) {
+  button, .dy-btn, .dy-icon-btn, .dy-nav-item, .dy-tab,
+  .pp-giveaway-btn, .pp-giveaway-close, .pp-br-btn, .pp-br-nieuw,
+  a.dy-btn, a.dy-link, .dy-fab, input[type="checkbox"], input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* Kruisjes/icoon-knoppen mogen visueel klein zijn maar hebben
+     een groter tap-vlak via padding. */
+  .pp-giveaway-close, .dy-modal-sluiten, .pp-modal-close,
+  .dy-wr-close, .dy-tryon-close, .dy-prem-close, .dy-score-close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* ─── Inputs: font-size >= 16px op mobiel om iOS-zoom te voorkomen ── */
+@media (max-width: 767px) {
+  input[type="text"], input[type="email"], input[type="password"],
+  input[type="search"], input[type="tel"], input[type="url"],
+  input[type="number"], input[type="date"], input[type="time"],
+  input[type="datetime-local"], textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* ─── Modals / popups / dialogs: max-width binnen viewport ─────────── */
+.dy-modal, .dy-dialog, .dy-popup, .pp-modal,
+#dy-wardrobe-rec-modal, #dy-tryon-modal, #dy-premium-modal,
+#dy-weekly-modal, #pp-webshop-review-modal, #pp-br-modal,
+.pp-giveaway-backdrop, .dy-score-detail,
+[role="dialog"], [role="alertdialog"] {
+  max-width: 100vw;
+  max-height: 100vh;
+  max-height: 100dvh; /* dynamic viewport height, respecteert address bar */
+}
+.dy-modal > *, .dy-dialog > *, .dy-popup > *, .pp-modal > *,
+.pp-giveaway-card, .pp-br-modal-inner, .dy-modal-body, .dy-dialog-body {
+  max-width: min(100%, 100vw - 24px);
+  max-height: min(100%, 100dvh - 24px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Fixed positioning: respecteer safe-area voor iOS ────────────── */
+.dy-topbar, .dy-topnav, header.dy-header {
+  padding-top: env(safe-area-inset-top);
+}
+.dy-bottomnav, .dy-bottom-nav, footer.dy-footer, .dy-tabbar {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.dy-fab, .dy-fab-container {
+  bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+/* ─── Kleine schermen (< 380px): compactere spacing en fonts ──────── */
+@media (max-width: 379px) {
+  .pp-giveaway-card {
+    padding: 22px 16px 18px;
+  }
+  .pp-giveaway-titel {
+    font-size: 22px;
+  }
+  .pp-giveaway-tekst {
+    font-size: 14px;
+  }
+  .pp-giveaway-acties {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pp-giveaway-btn {
+    width: 100%;
+    padding: 12px 14px;
+  }
+  .pp-br-modal-inner {
+    padding: 20px 16px;
+  }
+  .pp-br-titel {
+    font-size: 22px;
+  }
+}
+
+/* ─── Landscape op korte devices: verticaal scrollbare modals ─────── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .pp-giveaway-backdrop, .dy-modal, .dy-dialog {
+    align-items: flex-start;
+    padding: 12px;
+  }
+  .pp-giveaway-card, .pp-br-modal-inner, .dy-modal-inner {
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+}
+
+/* ─── Sidebar op mobiel: bereidt onder de topbar in plaats van vast ─ */
+@media (max-width: 1023px) {
+  .dy-sidebar {
+    /* Als sidebar niet is opengezet via de mobile hamburger, geen absolute
+       positionering forceren. Legacy code beheert de open/dicht state. */
+  }
+  /* Voorkom dat elementen met vaste breedte de viewport laten scrollen */
+  .dy-card, .dy-item, .dy-post, .dy-review, .dy-look-card,
+  .bp-kaart, .bp-merk-hero, .dy-vr-card {
+    max-width: 100%;
+  }
+}
+
+/* ─── Very-wide desktop content niet uitrekken op mobiel ─────────── */
+@media (max-width: 640px) {
+  .dy-container, .dy-wrap, .dy-vr-wrap, .dy-wk-wrap, .bp-page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  /* Grid-layouts: laat de browser besluiten of items op 1 kolom moeten */
+  .dy-grid-2, .dy-grid-3, .dy-grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── Toasts en notifications: mobile-friendly plaatsing ─────────── */
+.dy-toast, .dy-notification, .sonner-toaster {
+  max-width: calc(100vw - 24px);
+  left: 12px !important;
+  right: 12px !important;
+}
+@media (min-width: 641px) {
+  .dy-toast, .dy-notification, .sonner-toaster {
+    left: auto !important;
+    right: 16px !important;
+    max-width: 400px;
+  }
+}
+
+/* ─── Tooltips: nooit buiten de viewport ─────────────────────────── */
+.dy-tooltip, [role="tooltip"] {
+  max-width: calc(100vw - 24px);
+  word-wrap: break-word;
+}
+
+/* ─── Formulieren: velden vullen de beschikbare breedte ──────────── */
+.dy-form input, .dy-form textarea, .dy-form select,
+.pp-form input, .pp-form textarea, .pp-form select {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* ─── Sticky headers: fallback voor iOS Safari 15+ dynamic viewport ─ */
+.dy-sticky-header, .dy-sticky-topbar {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* ─── Hoge DPI displays (Retina, Samsung): geen extra actie nodig,
+ *     alle SVG/vector assets schalen automatisch mee ─────────────── */
+
+/* ─── Motion-reduced preferentie respecteren ─────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Anti-tap-highlight op iOS (subtiel accent, geen zwart blok) ── */
+button, a, [role="button"], .dy-btn {
+  -webkit-tap-highlight-color: rgba(240, 179, 64, 0.20);
+}
