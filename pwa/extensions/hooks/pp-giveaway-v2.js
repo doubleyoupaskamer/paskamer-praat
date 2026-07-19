@@ -173,21 +173,3 @@
     forceShow: function () { SHOWN_THIS_LOAD = false; remove(); show(); }
   };
 })();
-start() {
-    // Klein window zodat de aanmeld-overlay zich kan tonen als hij komt,
-    // maar niet zo lang dat de gebruiker moet wachten.
-    setTimeout(scheduleShow, 1500);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start);
-  } else {
-    start();
-  }
-
-  window.PP_Giveaway = {
-    VERSION: '2.0.0',
-    show: show,
-    forceShow: function () { SHOWN_THIS_LOAD = false; remove(); show(); }
-  };
-})();
