@@ -14,7 +14,6 @@
   border-radius: 999px;
   border: 1px solid rgba(240, 179, 64, 0.32);
   background: rgba(240, 179, 64, 0.08);
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
   z-index: 2;
   white-space: nowrap;
   line-height: 1;
@@ -22,25 +21,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  -webkit-tap-highlight-color: rgba(240, 179, 64, 0.20);
-}
-.pp-giveaway-beta-link:hover,
-.pp-giveaway-beta-link:focus-visible {
-  color: #ffffff;
-  border-color: rgba(240, 179, 64, 0.65);
-  background: rgba(240, 179, 64, 0.20);
-  outline: none;
-}
-html[data-pp-theme="light"] .pp-giveaway-beta-link {
-  color: rgba(176, 98, 5, 0.90);
-  border-color: rgba(176, 98, 5, 0.35);
-  background: rgba(240, 179, 64, 0.10);
-}
-html[data-pp-theme="light"] .pp-giveaway-beta-link:hover,
-html[data-pp-theme="light"] .pp-giveaway-beta-link:focus-visible {
-  color: #6b3a02;
-  border-color: rgba(176, 98, 5, 0.65);
-  background: rgba(240, 179, 64, 0.24);
+  pointer-events: none;
+  user-select: none;
 }
 
 /* Op smalle schermen: onderaan gecentreerd zodat het niet over de kv-tekst valt */
