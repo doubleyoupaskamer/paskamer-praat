@@ -23,6 +23,23 @@
   // Voor nu wijst hij naar de webshop (waar het ebook straks te downloaden is).
   var EBOOK_URL = 'https://www.doubleyoufashion.nl';
   var SHOWN_THIS_LOAD = false;
+  var SESSION_DISMISSED_KEY = 'pp_giveaway_dismissed';
+
+  // v60.1.304: als user al op de register/login pagina is, popup niet tonen.
+  function isOnAuthPage() {
+    try {
+      var qs = new URLSearchParams(location.search || '');
+      var p = (qs.get('pagina') || '').toLowerCase();
+      return p === 'register' || p === 'login' || p === 'aanmelden' || p === 'inloggen';
+    } catch (_) { return false; }
+  }
+  function isSessionDismissed() {
+    try { return sessionStorage.getItem(SESSION_DISMISSED_KEY) === '1'; }
+    catch (_) { return false; }
+  }
+  function markSessionDismissed() {
+    try { sessionStorage.setItem(SESSION_DISMISSED_KEY, '1'); } catch (_) {}
+  }
 
   var BLOCKING_SELECTORS = [
     '#dy-onboarding-overlay',
@@ -89,9 +106,31 @@
         catch (_) { location.href = EBOOK_URL; }
         remove();
       } else if (role === 'signup') {
-        try { window.open(SIGNUP_URL, '_blank', 'noopener'); }
-        catch (_) { location.href = SIGNUP_URL; }
+        // v60.1.304: navigeer in DEZELFDE tab via de legacy router naar de
+        // aanmeld-pagina. Voorheen opende dit een nieuw tabblad naar
+        // paskamerpraat.nl/?pagina=register waardoor de popup daar opnieuw
+        // verscheen. Nu: sluit popup + navigeer direct.
+        markSessionDismissed();
         remove();
+        try {
+          if (window.DY && typeof window.DY.navigeer === 'function') {
+            window.DY.navigeer('register');
+            return;
+          }
+        } catch (_) {}
+        // Fallback: History API + popstate zodat de legacy popstate-listener
+        // register rendert.
+        try {
+          var u = new URL(location.origin + (location.pathname || '/'));
+          u.searchParams.set('pagina', 'register');
+          u.hash = '';
+          history.pushState({ pp: 'register', ts: Date.now() }, '', u.toString());
+          try { window.dispatchEvent(new PopStateEvent('popstate', { state: history.state })); }
+          catch (_) { try { window.dispatchEvent(new Event('popstate')); } catch (__) {} }
+          return;
+        } catch (_) {}
+        // Laatste redmiddel: harde navigatie in dezelfde tab.
+        location.href = SIGNUP_URL;
       } else if (role === 'close') {
         remove();
       }
@@ -148,6 +187,10 @@
   }
 
   function start() {
+    // v60.1.304: skip popup als user al op de aanmeld/inlogpagina is
+    // (voorkomt dat popup terugkomt na signup-navigatie).
+    if (isOnAuthPage()) return;
+    if (isSessionDismissed()) return;
     // Klein window zodat de aanmeld-overlay zich kan tonen als hij komt,
     // maar niet zo lang dat de gebruiker moet wachten.
     setTimeout(scheduleShow, 1500);
