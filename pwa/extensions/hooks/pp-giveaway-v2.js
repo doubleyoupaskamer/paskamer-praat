@@ -77,6 +77,7 @@
           '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-ghost" data-role="signup" data-testid="pp-giveaway-signup">Meld je direct aan op paskamerpraat.nl</button>' +
         '</div>' +
         '<p class="pp-giveaway-kv">Actievoorwaarden: aanmelden en profiel voltooien. Winnaar wordt persoonlijk benaderd zodra de webshop opent.</p>' +
+        '<a href="https://paskamerpraat.nl/beta" target="_blank" rel="noopener" class="pp-giveaway-beta-link" data-testid="pp-giveaway-beta-link">Beta programma</a>' +
       '</div>';
 
     wrap.addEventListener('click', function (e) {
