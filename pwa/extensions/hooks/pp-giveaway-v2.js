@@ -77,7 +77,7 @@
           '<button type="button" class="pp-giveaway-btn pp-giveaway-btn-ghost" data-role="signup" data-testid="pp-giveaway-signup">Meld je direct aan op paskamerpraat.nl</button>' +
         '</div>' +
         '<p class="pp-giveaway-kv">Actievoorwaarden: aanmelden en profiel voltooien. Winnaar wordt persoonlijk benaderd zodra de webshop opent.</p>' +
-        '<a href="https://paskamerpraat.nl/beta" target="_blank" rel="noopener" class="pp-giveaway-beta-link" data-testid="pp-giveaway-beta-link">Beta programma</a>' +
+        '<a href="https://paskamerpraat.nl/beta" target="_blank" rel="noopener" class="pp-giveaway-beta-link" data-role="beta" data-testid="pp-giveaway-beta-link">Beta programma</a>' +
       '</div>';
 
     wrap.addEventListener('click', function (e) {
@@ -92,6 +92,14 @@
         try { window.open(SIGNUP_URL, '_blank', 'noopener'); }
         catch (_) { location.href = SIGNUP_URL; }
         remove();
+      } else if (role === 'beta') {
+        // v60.1.300: expliciete handler zodat legacy document-level click
+        // handlers (affiliate-tagger, button-watchdog) niet interferen met
+        // de native anchor-flow en users hier NIET naar /feed doorschieten.
+        e.preventDefault();
+        e.stopPropagation();
+        try { window.open('https://paskamerpraat.nl/beta', '_blank', 'noopener'); }
+        catch (_) { location.href = 'https://paskamerpraat.nl/beta'; }
       } else if (role === 'close') {
         remove();
       }
@@ -148,6 +156,24 @@
   }
 
   function start() {
+    // Klein window zodat de aanmeld-overlay zich kan tonen als hij komt,
+    // maar niet zo lang dat de gebruiker moet wachten.
+    setTimeout(scheduleShow, 1500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+
+  window.PP_Giveaway = {
+    VERSION: '2.0.0',
+    show: show,
+    forceShow: function () { SHOWN_THIS_LOAD = false; remove(); show(); }
+  };
+})();
+start() {
     // Klein window zodat de aanmeld-overlay zich kan tonen als hij komt,
     // maar niet zo lang dat de gebruiker moet wachten.
     setTimeout(scheduleShow, 1500);
