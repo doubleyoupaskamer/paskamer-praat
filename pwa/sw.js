@@ -10,7 +10,7 @@
 // Strategie is bewust simpel + bestand-naam-gebaseerd zodat een nieuwe deploy
 // (nieuwe versioned filename) automatisch niet uit cache komt.
 
-const VERSION       = 'v60.1.302-20260214-beta-label-only';
+const VERSION       = 'v60.1.303-20260214-sw-defensive-error-handlers';
 const STATIC_CACHE  = 'pp-static-' + VERSION;
 const RUNTIME_CACHE = 'pp-runtime-' + VERSION;
 const IMG_CACHE     = 'pp-images-' + VERSION;
@@ -34,7 +34,25 @@ self.addEventListener('install', event => {
     caches.open(STATIC_CACHE)
       .then(c => c.addAll(PRECACHE_URLS).catch(() => {}))
       .then(() => self.skipWaiting())
+      .catch(err => {
+        // v60.1.303: defensieve error handler zodat een precache-failure
+        // niet de hele SW-update blokkeert (voorkomt AbortError bij
+        // ServiceWorker.update() calls).
+        try { console.warn('[sw] install soft-fail:', err && err.message); } catch (_) {}
+        return self.skipWaiting();
+      })
   );
+});
+
+// v60.1.303: globale error handler in de SW om AbortError tijdens updates
+// te voorkomen. Als de SW een unhandled fout heeft, wordt hij door de
+// browser als "faalend" gemarkeerd en kan hij niet meer geactiveerd worden.
+self.addEventListener('error', event => {
+  try { console.warn('[sw] error event:', event.message); } catch (_) {}
+});
+self.addEventListener('unhandledrejection', event => {
+  try { console.warn('[sw] unhandled rejection:', event.reason && event.reason.message); } catch (_) {}
+  event.preventDefault && event.preventDefault();
 });
 
 self.addEventListener('activate', event => {
