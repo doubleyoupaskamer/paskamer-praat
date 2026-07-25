@@ -10,7 +10,7 @@
 // Strategie is bewust simpel + bestand-naam-gebaseerd zodat een nieuwe deploy
 // (nieuwe versioned filename) automatisch niet uit cache komt.
 
-const VERSION       = 'v60.1.306-20260214-universal-adaptive-layout';
+const VERSION       = 'v60.1.307-20260214-favicon-logo';
 const STATIC_CACHE  = 'pp-static-' + VERSION;
 const RUNTIME_CACHE = 'pp-runtime-' + VERSION;
 const IMG_CACHE     = 'pp-images-' + VERSION;
@@ -23,8 +23,12 @@ const PRECACHE_URLS = [
   '/',
   '/offline.html',
   '/manifest.json',
+  '/favicon.ico',
   '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/icons/icon-512.png',
+  '/icons/favicon-32.png',
+  '/icons/apple-touch-icon-180.png',
+  '/icons/paskamerpraat-splash.png'
 ];
 
 const OFFLINE_URL = '/offline.html';
