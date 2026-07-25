@@ -1,0 +1,418 @@
+/* ═════════════════════════════════════════════════════════════════════
+ * PASKAMER PRAAT - Universal Adaptive Layout System (v1.0.0)
+ * ═════════════════════════════════════════════════════════════════════
+ *
+ * ADDITIEVE laag bovenop pp-mobile-responsive-v1.css en
+ * pp-device-precision-v1.css. Doel: elk scherm, popup, tab, image,
+ * navigatie en herbruikbaar component past zich automatisch aan alle
+ * moderne iOS + Android schermmaten aan, zonder legacy code te
+ * wijzigen en zonder regressies te veroorzaken.
+ *
+ * Deze laag focust op de gaten die de bestaande overlays nog niet
+ * dichten:
+ *   1. Fluid custom-properties (--pp-vh/-vw/safe insets) voor alle
+ *      componenten en JS-code
+ *   2. Universele image-behavior (contain, aspect-ratio, geen crop)
+ *   3. Volledige modal/popup adaptivity via dvh/svh/lvh + safe areas
+ *   4. Tabs: wrap of horizontale scroll (nooit clipping)
+ *   5. Navigation (top/bottom/floating) respecteert alle safe areas
+ *   6. Typography: fluid clamp + accessibility scaling
+ *   7. Container queries voor grid-based feed/product cards
+ *   8. Focus-visible ring voor WCAG
+ *   9. Foldable / iPhone SE / Pro Max / iPad breekpunten aanvullend
+ *  10. Landscape korte hoogte: modals scrollen intern, headers zichtbaar
+ * ═════════════════════════════════════════════════════════════════════ */
+
+/* ─── ROOT CUSTOM PROPS (worden door pp-viewport-observer-v1.js gezet) ─ */
+:root {
+  --pp-vh: 1vh;
+  --pp-vh-s: 1svh;
+  --pp-vh-l: 1lvh;
+  --pp-vw: 1vw;
+  --pp-safe-top:    env(safe-area-inset-top, 0px);
+  --pp-safe-right:  env(safe-area-inset-right, 0px);
+  --pp-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --pp-safe-left:   env(safe-area-inset-left, 0px);
+  --pp-touch-min:   44px;
+  --pp-radius-sm:   clamp(6px, 0.6vw, 10px);
+  --pp-radius-md:   clamp(10px, 1vw, 14px);
+  --pp-radius-lg:   clamp(14px, 1.6vw, 22px);
+  --pp-focus-ring:  0 0 0 3px rgba(240, 179, 64, 0.55);
+}
+
+/* Body/html: voorkom horizontale overflow uniforme */
+html {
+  /* Fluid root font-size, respecteert user accessibility scaling */
+  font-size: clamp(15px, 0.9rem + 0.15vw, 17px);
+}
+html, body {
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+}
+
+/* ─── UNIVERSELE IMAGE BEHAVIOR ───────────────────────────────────── */
+img {
+  max-width: 100%;
+  height: auto;
+  /* Nooit stretch: als container groter is, blijft image op ware ratio */
+  object-fit: contain;
+  object-position: center;
+}
+/* Foto-content (feed, avatars, hero, product) mag COVER doen zodat het
+   container vult; wij triggeren dit met bestaande legacy class-names.  */
+img.dy-avatar, img.dy-user-avatar, img.dy-post-image,
+img.bp-merk-logo, img.bp-hero-img, img.dy-hero-img,
+img.dy-product-image, img.dy-look-img, img.dy-vr-hero,
+img.pp-cover, .pp-cover img,
+[data-img-mode="cover"] img, [data-img-mode="cover"] {
+  object-fit: cover;
+}
+/* Icoontjes altijd contain */
+img.dy-icon, img.pp-icon, .dy-icon-btn img, .pp-icon-btn img {
+  object-fit: contain;
+}
+/* Retina-scherp op mobiel */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img { image-rendering: -webkit-optimize-contrast; }
+}
+
+/* Picture/figure wrap: vult altijd container zonder overflow */
+picture, figure {
+  display: block;
+  max-width: 100%;
+  margin: 0;
+}
+figure > img, picture > img { display: block; margin: 0 auto; }
+
+/* Video: cover met behoud van ratio */
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ─── UNIVERSELE MODAL / POPUP / DIALOG ──────────────────────────── */
+/* Alles wat door legacy of extensions als dialog rendert, past in de
+   viewport. Content scrollt intern, headers/knoppen blijven zichtbaar. */
+.dy-modal, .dy-dialog, .dy-popup, .dy-sheet,
+.pp-modal, .pp-dialog, .pp-sheet,
+[role="dialog"], [role="alertdialog"],
+.pp-giveaway-backdrop, .pp-iim-backdrop,
+#dy-wardrobe-rec-modal, #dy-tryon-modal, #dy-premium-modal,
+#dy-weekly-modal, #pp-webshop-review-modal, #pp-br-modal {
+  /* Dynamic viewport height: iOS Safari address bar-vriendelijk */
+  max-width: 100vw;
+  max-height: 100dvh;
+  padding-left:  max(12px, var(--pp-safe-left));
+  padding-right: max(12px, var(--pp-safe-right));
+  padding-top:   max(12px, var(--pp-safe-top));
+  padding-bottom:max(12px, var(--pp-safe-bottom));
+  box-sizing: border-box;
+}
+
+/* Inner card (het echte visuele blok binnen backdrop) - fluid width */
+.pp-giveaway-card,
+.pp-iim-card,
+.pp-br-modal-inner,
+.dy-modal-inner,
+.dy-dialog-inner,
+.pp-modal-inner,
+.pp-sheet-inner {
+  width: 100%;
+  max-width: min(560px, 100% - 8px);
+  max-height: calc(100dvh - var(--pp-safe-top) - var(--pp-safe-bottom) - 24px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  border-radius: var(--pp-radius-lg);
+}
+
+/* Sticky footer met primaire actie binnen lange modals blijft zichtbaar */
+.pp-modal-sticky-footer,
+.pp-iim-acties,
+.pp-giveaway-acties {
+  position: sticky;
+  bottom: 0;
+  padding-top: 8px;
+  background: inherit;
+  /* Zorg dat de knop-rij niet onder Home-Indicator valt */
+  padding-bottom: max(0px, var(--pp-safe-bottom));
+}
+
+/* Fullscreen sheets (Bottom Sheets) */
+.dy-sheet, .pp-sheet, [data-sheet-fullscreen] {
+  max-height: 100dvh;
+  height: 100dvh;
+  height: 100svh;
+}
+
+/* Bij zeer korte hoogte (landscape phone) → scroll intern, geen overlap */
+@media (max-height: 500px) {
+  .pp-giveaway-card, .pp-iim-card, .dy-modal-inner,
+  .pp-br-modal-inner, .pp-modal-inner {
+    max-height: calc(100dvh - 16px);
+    border-radius: var(--pp-radius-md);
+  }
+}
+
+/* ─── UNIVERSELE TABS ────────────────────────────────────────────── */
+/* Tabs mogen nooit clippen. Als ze niet passen: horizontaal scrollen.
+   Fallback: laten wrappen. */
+.dy-tabs, .pp-tabs,
+[role="tablist"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+.dy-tabs::-webkit-scrollbar, .pp-tabs::-webkit-scrollbar,
+[role="tablist"]::-webkit-scrollbar { display: none; }
+.dy-tab, .pp-tab,
+[role="tab"] {
+  flex: 0 0 auto;
+  min-height: var(--pp-touch-min);
+  padding: 10px 14px;
+  scroll-snap-align: start;
+  white-space: nowrap;
+}
+/* Als tabs op smalle schermen willen wrappen ipv scrollen, override: */
+.pp-tabs[data-tabs-wrap="true"],
+.dy-tabs[data-tabs-wrap="true"] {
+  overflow-x: visible;
+  flex-wrap: wrap;
+}
+
+/* ─── UNIVERSELE NAVIGATIE ───────────────────────────────────────── */
+/* Bottom-nav: nooit onder gesture-bar/home-indicator */
+.dy-bottomnav, .dy-bottom-nav, .dy-tabbar,
+nav[data-nav="bottom"], footer[data-nav="bottom"] {
+  padding-bottom: max(8px, var(--pp-safe-bottom));
+  padding-left:   max(8px, var(--pp-safe-left));
+  padding-right:  max(8px, var(--pp-safe-right));
+  min-height: calc(var(--pp-touch-min) + var(--pp-safe-bottom));
+}
+/* Top-nav: nooit onder notch/Dynamic Island */
+.dy-topbar, .dy-topnav, .dy-header,
+nav[data-nav="top"], header[data-nav="top"] {
+  padding-top:   max(8px, var(--pp-safe-top));
+  padding-left:  max(8px, var(--pp-safe-left));
+  padding-right: max(8px, var(--pp-safe-right));
+}
+/* Floating action button - boven home-indicator */
+.dy-fab, .pp-fab,
+[data-fab] {
+  bottom: calc(16px + var(--pp-safe-bottom)) !important;
+  right:  calc(16px + var(--pp-safe-right));
+}
+/* Drawer-menu (side): max viewport height */
+.dy-drawer, .pp-drawer, [data-drawer] {
+  max-width: min(85vw, 380px);
+  height: 100dvh;
+  padding-top:    var(--pp-safe-top);
+  padding-bottom: var(--pp-safe-bottom);
+}
+
+/* ─── UNIVERSELE TOAST / TOOLTIP ─────────────────────────────────── */
+.dy-toast, .pp-toast, .sonner-toaster, [role="status"] {
+  max-width: min(400px, calc(100vw - 24px));
+  left:  max(12px, var(--pp-safe-left)) !important;
+  right: max(12px, var(--pp-safe-right)) !important;
+  bottom: max(12px, calc(12px + var(--pp-safe-bottom))) !important;
+}
+@media (min-width: 641px) {
+  .dy-toast, .pp-toast, .sonner-toaster, [role="status"] {
+    left: auto !important;
+  }
+}
+.dy-tooltip, [role="tooltip"] {
+  max-width: min(300px, calc(100vw - 24px));
+  overflow-wrap: anywhere;
+}
+
+/* ─── UNIVERSELE DROPDOWN / MENU ─────────────────────────────────── */
+.dy-menu, .pp-menu, .dy-dropdown, .pp-dropdown,
+[role="menu"], [role="listbox"] {
+  max-width: min(90vw, 360px);
+  max-height: min(60dvh, 480px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ─── UNIVERSELE CARDS / GRID (container queries) ────────────────── */
+/* Feed, product en review grids passen zich aan container-breedte aan */
+.dy-feed, .dy-grid, .pp-grid, .dy-vr-lijst, .bp-lijst {
+  display: grid;
+  gap: clamp(8px, 1.5vw, 16px);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+}
+/* Compacte grids (bv. avatars/kleine cards) */
+.dy-grid-compact, .pp-grid-compact {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
+}
+/* Large hero-cards */
+.dy-grid-hero, .pp-grid-hero {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+}
+
+/* Individuele card: geen vaste breedte, image binnen container */
+.dy-card, .pp-card, .dy-post, .dy-review, .dy-look-card,
+.bp-kaart, .pp-br-kaart, .dy-vr-card {
+  max-width: 100%;
+  min-width: 0; /* voorkom grid-blowup */
+  overflow: hidden; /* clip alleen op container, image is al contain */
+  border-radius: var(--pp-radius-md);
+}
+.dy-card > img, .pp-card > img, .dy-post > img, .dy-look-card > img,
+.bp-kaart > img, .pp-br-kaart > img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+/* ─── FLUID TYPOGRAPHY OVERRIDES (met bestaande vars) ────────────── */
+/* Als legacy H1/H2 nog vaste px hebben, laat ze naar clamp schalen */
+.dy-hero-titel, .dy-vr-titel, .bp-hero-titel {
+  font-size: clamp(24px, 4.5vw + 8px, 44px) !important;
+  line-height: 1.08;
+}
+.dy-section-titel, .pp-section-titel {
+  font-size: clamp(20px, 2.6vw + 8px, 30px) !important;
+  line-height: 1.15;
+}
+.dy-body, .pp-body, .dy-tekst {
+  font-size: clamp(14px, 0.9rem + 0.2vw, 16px);
+  line-height: 1.55;
+}
+
+/* ─── UNIVERSELE FORMULIEREN ─────────────────────────────────────── */
+input, select, textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* Voorkom breedte-clip bij lange e-mail/URL suggesties */
+input[type="email"], input[type="url"] { text-overflow: ellipsis; }
+
+/* ─── TOUCH TARGETS (aanvulling, alle interactieve elementen) ────── */
+@media (hover: none) and (pointer: coarse) {
+  button, a[role="button"], [role="button"], [role="link"],
+  input[type="button"], input[type="submit"], input[type="reset"],
+  .dy-clickable, .pp-clickable {
+    min-height: var(--pp-touch-min);
+  }
+}
+
+/* ─── FOCUS-VISIBLE (WCAG 2.4.7) ─────────────────────────────────── */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--pp-focus-ring);
+  border-radius: 6px;
+}
+/* Bepaalde legacy buttons hebben eigen shadow - respect existing */
+.pp-giveaway-btn:focus-visible,
+.pp-iim-btn:focus-visible,
+.pp-br-btn:focus-visible {
+  outline: 2px solid #f0b340;
+  outline-offset: 2px;
+}
+
+/* ─── AANVULLENDE BREEKPUNTEN (niet in pp-device-precision) ──────── */
+
+/* Foldable gesloten (Galaxy Z Fold 5/6 gesloten ~344px) */
+@media (min-width: 321px) and (max-width: 360px) {
+  html { font-size: 14.5px; }
+  .dy-card, .pp-card, .bp-kaart { border-radius: 12px; }
+  .dy-topbar, .dy-topnav { padding-left: 8px; padding-right: 8px; }
+}
+
+/* iPhone 15/16 Pro Max (430px) - grote phone benutten */
+@media (min-width: 428px) and (max-width: 460px) {
+  .dy-feed, .dy-grid { gap: 14px; }
+}
+
+/* Foldable open (Galaxy Z Fold open ~717px) - tablet-mode */
+@media (min-width: 700px) and (max-width: 900px) {
+  .dy-feed, .dy-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  }
+}
+
+/* iPad Pro 12.9" landscape (1366px) - benut ruimte, niet uitrekken */
+@media (min-width: 1366px) {
+  .dy-feed { grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+}
+
+/* Dynamic Island specifiek: iPhone 14/15/16 Pro (top inset ~59px) */
+@supports (padding-top: env(safe-area-inset-top)) {
+  @media (min-width: 390px) and (max-width: 440px) {
+    /* Extra ruimte onder Dynamic Island voor hero-titels */
+    .dy-vr-header, .bp-merk-hero-header, .dy-hero-header {
+      padding-top: max(12px, calc(var(--pp-safe-top) + 4px));
+    }
+  }
+}
+
+/* ─── DVH FALLBACK VOOR OUDE BROWSERS (iOS < 15.4) ───────────────── */
+@supports not (height: 100dvh) {
+  .dy-modal, .dy-dialog, [role="dialog"],
+  .pp-giveaway-backdrop, .pp-iim-backdrop {
+    max-height: calc(var(--pp-vh, 1vh) * 100);
+  }
+  .dy-sheet, .pp-sheet, [data-sheet-fullscreen] {
+    height: calc(var(--pp-vh, 1vh) * 100);
+  }
+}
+
+/* ─── ORIENTATIE-TRANSITIE: geen visuele artefacten ─────────────── */
+@media (orientation: portrait), (orientation: landscape) {
+  .dy-modal, .pp-modal, [role="dialog"] {
+    transition: max-height 0.15s ease;
+  }
+}
+
+/* ─── REDUCED MOTION AANVULLEND (specifiek voor cards/scroll) ───── */
+@media (prefers-reduced-motion: reduce) {
+  .dy-card, .pp-card, .bp-kaart {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ─── HIGH-DPI + P3 WIDE GAMUT (Retina + moderne Androids) ──────── */
+@media (color-gamut: p3) {
+  /* Accent-kleuren mogen iets warmer op wide-gamut displays */
+  :root { --pp-accent: color(display-p3 0.83 0.57 0.04); }
+}
+
+/* ─── PWA STANDALONE MODE: extra padding voor Dynamic Island ────── */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  body {
+    /* Sommige devices geven safe-area 0 in standalone; forceer minimum */
+    padding-top: max(var(--pp-safe-top), 12px);
+  }
+  .dy-topbar, .dy-topnav {
+    padding-top: max(var(--pp-safe-top), 16px);
+  }
+}
+
+/* ─── ACCESSIBILITY: verhoogde tekst-scaling ─────────────────────── */
+@media (min-resolution: 1dppx) {
+  /* Als user browser-zoom naar 200% zet, containers mogen wrappen */
+  .dy-btn-row, .pp-btn-row, .pp-giveaway-acties, .pp-iim-acties {
+    flex-wrap: wrap;
+  }
+}
+
+/* ─── ANTI-SCROLLLOCK op iOS: body kan scrollen als modal dicht is ─ */
+body:not(.pp-modal-open):not(.dy-modal-open) {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── VOORKOM DAT LEGACY ELEMENTEN BUITEN VIEWPORT BLIJVEN ───────── */
+[style*="width:1200px"], [style*="width: 1200px"],
+[style*="width:1440px"], [style*="width: 1440px"] {
+  max-width: 100% !important;
+}
