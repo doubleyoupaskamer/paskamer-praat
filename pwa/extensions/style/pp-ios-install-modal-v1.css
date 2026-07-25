@@ -1,0 +1,218 @@
+/* iOS Install Modal - Safe-area bewust, portrait+landscape (v1.0) */
+.pp-iim-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 8, 6, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 16px)
+    calc(env(safe-area-inset-right, 0px) + 16px)
+    calc(env(safe-area-inset-bottom, 0px) + 16px)
+    calc(env(safe-area-inset-left, 0px) + 16px);
+  z-index: 10060;
+  opacity: 0;
+  transition: opacity 0.24s ease;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.pp-iim-backdrop.pp-iim-in { opacity: 1; }
+.pp-iim-backdrop.pp-iim-uit { opacity: 0; }
+
+.pp-iim-card {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 32px);
+  background: linear-gradient(160deg, #1a1509 0%, #2a1e0a 100%);
+  border: 1px solid rgba(240, 179, 64, 0.35);
+  border-radius: 22px;
+  padding: 26px 22px 22px;
+  color: #fdf5e3;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  transform: translateY(20px) scale(0.98);
+  transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+.pp-iim-in .pp-iim-card { transform: translateY(0) scale(1); }
+
+.pp-iim-close {
+  position: absolute; top: 12px; right: 14px;
+  width: 40px; height: 40px;
+  background: rgba(240, 179, 64, 0.16);
+  border: 1px solid rgba(240, 179, 64, 0.45);
+  color: #fdf5e3;
+  font-size: 26px; line-height: 1;
+  border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(240, 179, 64, 0.20);
+}
+.pp-iim-close:hover, .pp-iim-close:focus-visible {
+  background: rgba(240, 179, 64, 0.32);
+  color: #fff;
+  outline: none;
+}
+
+.pp-iim-icon { display: flex; justify-content: center; margin-bottom: 12px; }
+.pp-iim-logo {
+  width: 68px; height: 68px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #d4910a 0%, #b06205 100%);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font: 700 34px/1 "Cormorant Garamond", Georgia, serif;
+  box-shadow: 0 8px 22px rgba(198,125,6,0.35);
+}
+
+.pp-iim-titel {
+  margin: 0 0 6px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 26px; line-height: 1.1; font-weight: 700;
+  text-align: center;
+}
+.pp-iim-sub {
+  margin: 0 0 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  opacity: 0.85;
+  text-align: center;
+}
+.pp-iim-sub strong { color: #f0b340; }
+
+.pp-iim-lijst {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pp-iim-lijst li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 14px; line-height: 1.5;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(240, 179, 64, 0.08);
+  border: 1px solid rgba(240, 179, 64, 0.20);
+}
+.pp-iim-lijst strong { color: #f0b340; }
+.pp-iim-nr {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #d4910a 0%, #b06205 100%);
+  color: #fff;
+  font-weight: 800; font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.pp-iim-share-ico {
+  vertical-align: -3px; margin: 0 2px;
+  color: #f0b340;
+}
+
+.pp-iim-remember {
+  display: flex; align-items: center; gap: 8px;
+  margin: 4px 0 14px;
+  font-size: 12.5px;
+  opacity: 0.75;
+  cursor: pointer;
+  user-select: none;
+}
+.pp-iim-remember input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: #d4910a;
+  cursor: pointer;
+  margin: 0;
+}
+
+.pp-iim-acties {
+  display: flex; gap: 10px;
+  margin-top: 6px;
+}
+.pp-iim-btn {
+  flex: 1;
+  min-height: 44px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: 0;
+  font: 700 14px/1 "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  -webkit-tap-highlight-color: rgba(240, 179, 64, 0.20);
+}
+.pp-iim-btn-primair {
+  background: linear-gradient(135deg, #d4910a 0%, #b06205 100%);
+  color: #fff;
+}
+.pp-iim-btn-primair:hover, .pp-iim-btn-primair:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(198,125,6,0.4);
+  outline: none;
+}
+.pp-iim-btn-ghost {
+  background: transparent;
+  color: rgba(253,245,227,0.85);
+  border: 1px solid rgba(240,179,64,0.40);
+}
+.pp-iim-btn-ghost:hover, .pp-iim-btn-ghost:focus-visible {
+  color: #fff;
+  background: rgba(240,179,64,0.12);
+  outline: none;
+}
+
+/* Step 2 - Deelmenu guidance */
+.pp-iim-hint {
+  display: flex; justify-content: center;
+  color: #f0b340;
+  margin-bottom: 10px;
+}
+.pp-iim-arrow {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: #f0b340;
+  margin: 14px 0 12px;
+  animation: pp-iim-bounce 1.6s ease-in-out infinite;
+}
+.pp-iim-arrow-label {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+@keyframes pp-iim-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(6px); }
+}
+
+/* Landscape phone: verklein illustratie/tekst zodat alles zichtbaar blijft */
+@media (max-height: 500px) and (orientation: landscape) {
+  .pp-iim-backdrop { align-items: flex-start; padding-top: calc(env(safe-area-inset-top, 0px) + 10px); }
+  .pp-iim-card { padding: 20px 20px 18px; max-height: calc(100dvh - 20px); }
+  .pp-iim-icon { margin-bottom: 6px; }
+  .pp-iim-logo { width: 48px; height: 48px; font-size: 24px; border-radius: 12px; }
+  .pp-iim-titel { font-size: 22px; }
+  .pp-iim-sub { font-size: 13px; margin-bottom: 10px; }
+  .pp-iim-lijst { gap: 6px; margin-bottom: 8px; }
+  .pp-iim-lijst li { padding: 7px 10px; font-size: 13px; }
+  .pp-iim-arrow { display: none; }
+}
+
+/* Ultra-small (iPhone SE 1st gen, 320px wide) */
+@media (max-width: 360px) {
+  .pp-iim-card { padding: 22px 16px 18px; border-radius: 18px; }
+  .pp-iim-titel { font-size: 22px; }
+  .pp-iim-sub { font-size: 13px; }
+  .pp-iim-lijst li { font-size: 13px; padding: 8px 10px; }
+  .pp-iim-logo { width: 60px; height: 60px; font-size: 30px; }
+  .pp-iim-acties { flex-direction: column; }
+  .pp-iim-btn { width: 100%; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .pp-iim-card { transition: none; transform: none; }
+  .pp-iim-arrow { animation: none; }
+}
