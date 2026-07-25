@@ -7,6 +7,34 @@ Verschillende foutmeldingen, merklogo wordt niet geladen, merkinformatie niet co
 Plus: full system audit + stabilisatie + ontbrekend merkprofiel.
 
 
+## v60.1.305 - iPhone "Voeg toe aan beginscherm" Modal (25 juli 2026)
+
+### Probleem
+Legacy iOS a2hs bottom-sheet werd afgekapt op iPhone-viewports (SE/12/13/14/Pro Max), leidde de gebruiker meteen naar de Safari share-sheet zonder eerst instructies te tonen. Slechte install-conversie.
+
+### Geleverd (P0)
+- **Nieuwe centered modal** `extensions/hooks/pp-ios-install-modal-v1.js` + `extensions/style/pp-ios-install-modal-v1.css`.
+- 2-staps flow: (1) instructies lezen -> (2) "Volgende" -> pulserende pijl-hint naar Safari deelknop met "Zet op beginscherm" guidance.
+- Safe-area-inset bewust (Dynamic Island, home-indicator, notch). Portrait + landscape. iPhone SE (320px) tot Pro Max (430px).
+- "Niet meer tonen" checkbox voor permanente dismiss.
+- `suppressLegacy()` verwijdert de oude `#dy-a2hs-prompt` als die alsnog rendert (MutationObserver 30s).
+- Wired in `index.html` (2 refs met `?v=60.1.305-ios-install-modal`) en `sw.js` VERSION gebumpt naar `v60.1.305-20260214-ios-install-modal`.
+- Zip herbouwd: `01-paskamerpraat-pwa-cloudflare.zip` (8.3 MB).
+
+### Testing
+- Syntax check via `node -c` op JS + SW: OK.
+- Smoke-test via lokale HTTP server draaide, maar UA-fake naar iOS werd bij page-load gereset (test-artefact, geen productie-bug).
+- Handmatige QA op echte iPhone door user vereist na Cloudflare deploy.
+
+### Files
+- `pwa/extensions/hooks/pp-ios-install-modal-v1.js` (nieuw, 162 regels)
+- `pwa/extensions/style/pp-ios-install-modal-v1.css` (nieuw, 219 regels)
+- `pwa/index.html` (2 nieuwe refs)
+- `pwa/sw.js` (VERSION bump)
+- `01-paskamerpraat-pwa-cloudflare.zip` (herbouwd)
+
+
+
 ## v60.1.267 - Winkel CTA + Merkenportaal Reviews + Backend Rate Limiting (12 feb 2026)
 
 ### Gebruikerskeuzes
