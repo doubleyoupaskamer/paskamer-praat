@@ -1,208 +1,43 @@
 /* ═════════════════════════════════════════════════════════════════════
- * Paskamer Praat - Hero v5 responsive overrides (v1.3.0)
+ * Paskamer Praat - Hero image visibility fix (v2.0.0)
  * ═════════════════════════════════════════════════════════════════════
  *
- * v1.3.0 (definitieve fix): op mobiel/tablet plaatst de foto en de
- * tekst-overlay in NORMALE flow (geen `position: absolute` op picture/img).
- * Zo staat de tekst automatisch ONDER de foto zonder cropping.
+ * MINIMALE additieve overlay. Doel: nieuwe landscape foto
+ * (paskamerpraat_header, 1672x941) VOLLEDIG in verhouding zichtbaar
+ * binnen de ORIGINELE hero-indeling van app.css. Geen andere wijzigingen.
  *
- * DOEL: alle 7 personen ALTIJD volledig zichtbaar. Tekst niet OVER de
- * foto, maar eronder. Desktop behoudt 2-koloms layout.
+ * Enige aanpassingen:
+ *   1. `.dy-hm-hero-img { object-fit: contain }` (was cover)
+ *      → landscape foto past volledig in het portrait/desktop-vak
+ *   2. Blurred ambient fill via `.dy-hm-hero-overlay` op ALLE viewports
+ *      (was alleen desktop) zodat de lege ruimte rond de foto niet leeg
+ *      oogt maar een cinematische donkere blur toont van dezelfde foto.
+ *
+ * Alle overige originele styling (parent flex, text-overlay absolute
+ * met gradient, content-panel, animaties, CTA styling, breakpoints)
+ * blijft ONAANGETAST.
  * ═════════════════════════════════════════════════════════════════════ */
 
-/* ─── Parent flexible ─── */
-.dy-hm-hero {
-  min-height: auto !important;
-  height: auto !important;
+/* Foto altijd volledig zichtbaar in verhouding, boven ambient overlay */
+.dy-hm-hero-img {
+  object-fit: contain !important;
+  object-position: center center !important;
+  z-index: 1 !important;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
- * MOBILE + TABLET (< 1024px)
- * Picture en img in normale block-flow, tekst er onder.
- * ═══════════════════════════════════════════════════════════════════ */
-@media (max-width: 1023px) {
-  .dy-hm-hero,
-  body .dy-hm-hero {
-    display: block !important;
-    min-height: auto !important;
-    height: auto !important;
-    background: #0f0d06 !important;
-  }
-
-  /* Container: laat kinderen hun eigen hoogte bepalen */
-  .dy-hm-hero-bg,
-  body .dy-hm-hero-bg {
-    display: block !important;
-    position: relative !important;
-    width: 100% !important;
-    aspect-ratio: auto !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    flex: none !important;
-    overflow: visible !important;
-    background: #0f0d06 !important;
-    animation: none !important;
-  }
-  .dy-hm-hero-bg::before,
-  .dy-hm-hero-bg::after {
-    display: none !important;
-    content: none !important;
-    animation: none !important;
-  }
-
-  /* Picture wrap: normale block, geen absolute */
-  .dy-hm-hero-bg > picture,
-  .dy-hm-hero-bg picture {
-    position: static !important;
-    inset: auto !important;
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 1672 / 941 !important;
-    overflow: hidden !important;
-    background: #1a1408 !important;
-  }
-
-  /* Image: normale block, contain als vangnet, geen crop */
-  .dy-hm-hero-img,
-  .dy-hm-hero-img.pp-hero-v5,
-  body .dy-hm-hero-img {
-    position: static !important;
-    inset: auto !important;
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    max-width: 100% !important;
-    object-fit: contain !important;
-    object-position: center center !important;
-    filter: none !important;
-    animation: none !important;
-  }
-
-  /* Text-overlay: onder de foto, geen absolute positie */
-  .dy-hm-hero-text-overlay {
-    position: static !important;
-    inset: auto !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
-    display: block !important;
-    width: 100% !important;
-    padding: 24px 20px 8px !important;
-    background: #0f0d06 !important;  /* solid, geen gradient over foto */
-    z-index: auto !important;
-    pointer-events: auto !important;
-  }
-
-  /* Blurred overlay uit op mobiel (die zit ook binnen bg) */
-  .dy-hm-hero-overlay {
-    display: none !important;
-    position: static !important;
-  }
-
-  /* Duplicate text-desktop verborgen op mobiel */
-  .dy-hm-hero-text-desktop {
-    display: none !important;
-  }
-
-  /* Content-panel met CTAs onder de tekst */
-  .dy-hm-hero-content {
-    padding: 0 !important;
-    background: #0f0d06 !important;
-    display: block !important;
-  }
-  .dy-hm-hero-actions {
-    padding: 8px 20px 24px !important;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════
- * DESKTOP (>= 1024px)
- * 2-koloms layout, foto in aspect-ratio met content-hoogte centraal
- * ═══════════════════════════════════════════════════════════════════ */
-@media (min-width: 1024px) {
-  .dy-hm-hero {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: center !important;
-    height: auto !important;
-    min-height: 480px !important;
-    max-height: 100dvh !important;
-    background: #0f0d06 !important;
-    padding: 24px 0 !important;
-  }
-  .dy-hm-hero-bg,
-  body .dy-hm-hero-bg {
-    position: relative !important;
-    flex: 0 1 58% !important;
-    width: 58% !important;
-    max-width: 60% !important;
-    height: auto !important;
-    aspect-ratio: 1672 / 941 !important;   /* eigen aspect, geen letterbox */
-    max-height: 88dvh !important;
-    align-self: center !important;
-    background: #0f0d06 !important;
-    overflow: hidden !important;
-    border-radius: 4px;
-  }
-  .dy-hm-hero-bg > picture,
-  .dy-hm-hero-bg picture {
-    position: absolute !important;
-    inset: 0 !important;
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    aspect-ratio: auto !important;
-  }
-  .dy-hm-hero-img,
-  body .dy-hm-hero-img {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;   /* aspect matcht dus geen crop */
-    object-position: center center !important;
-    filter: none !important;
-  }
-  .dy-hm-hero-text-overlay {
-    display: none !important;
-  }
-  .dy-hm-hero-text-desktop {
-    display: block !important;
-  }
-  .dy-hm-hero-overlay {
-    display: block !important;
-    position: absolute !important;
-    inset: -60px !important;
-    width: calc(100% + 120px) !important;
-    height: calc(100% + 120px) !important;
-    background-image: url('/paskamerpraat-header-1024.jpg') !important;
-    background-size: cover !important;
-    background-position: center !important;
-    filter: blur(72px) brightness(0.5) saturate(0.7);
-    z-index: 0;
-    pointer-events: none;
-  }
-  .dy-hm-hero-content {
-    position: relative !important;
-    flex: 1 1 42% !important;
-    max-width: 42% !important;
-    padding: 32px 40px !important;
-    background: transparent !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    z-index: 2;
-  }
-}
-
-/* Ultrawide */
-@media (min-width: 1800px) {
-  .dy-hm-hero {
-    max-width: 1920px !important;
-    margin: 0 auto !important;
-  }
+/* Blurred ambient fill onder de foto op alle viewports.
+   Op desktop bestond dit al met hero-v4-canal.jpg reference; nu ook op mobiel
+   zodat de contain-fit niet leeg oogt aan de zijkanten. */
+.dy-hm-hero-overlay {
+  display: block !important;
+  position: absolute !important;
+  inset: -60px !important;
+  width: calc(100% + 120px) !important;
+  height: calc(100% + 120px) !important;
+  background-image: url('/paskamerpraat-header-800.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  filter: blur(56px) brightness(0.55) saturate(0.75) !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
 }
