@@ -1,14 +1,34 @@
 /* ═════════════════════════════════════════════════════════════════════
- * Paskamer Praat - Hero image (no-op v5.0.0)
+ * Paskamer Praat - Hero container aspect enforcement (v5.1.0)
  * ═════════════════════════════════════════════════════════════════════
  *
- * De nieuwe hero image (paskamerpraat-header) is nu gegenereerd in
- * exact het originele portrait aspect (848:1264) met zachte kleur-
- * gradient extension boven en onder de foto.
- *
- * Daardoor werkt de ORIGINELE app.css hero-layout perfect zonder enige
- * CSS override nodig. Dit bestand blijft leeg als placeholder voor
- * eventuele toekomstige finetuning.
+ * De foto is padded naar aspect 848:1264 (portrait). Op mobiel maakt
+ * de flex parent (100dvh min-height) de container hoger dan dit aspect
+ * waardoor object-fit cover horizontaal cropt. Deze regel dwingt het
+ * juiste aspect af zodat ALLE 7 personen ALTIJD volledig zichtbaar
+ * blijven zonder crop.
  * ═════════════════════════════════════════════════════════════════════ */
 
-/* Geen overrides - originele app.css hero styling handelt alles af. */
+.dy-hm-hero-bg,
+body .dy-hm-hero-bg,
+.dy-hm-hero .dy-hm-hero-bg {
+  aspect-ratio: 848 / 1264 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  flex: 0 0 auto !important;
+}
+
+@supports not (aspect-ratio: 848 / 1264) {
+  .dy-hm-hero-bg {
+    height: 0 !important;
+    padding-top: 149.06% !important;
+  }
+}
+
+/* Foto vult container 100% - aspect matcht dus geen crop */
+.dy-hm-hero-img,
+body .dy-hm-hero-img {
+  object-fit: cover !important;
+  object-position: center center !important;
+}
