@@ -2247,8 +2247,8 @@ DY.renderHome = function() {
       '<section class="dy-hm-hero">' +
         '<div class="dy-hm-hero-bg">' +
           '<picture>' +
-            '<source type="image/webp" srcset="paskamerpraat-header-480.webp 480w, paskamerpraat-header-800.webp 800w, paskamerpraat-header-1024.webp 1024w, paskamerpraat-header-1440.webp 1440w, paskamerpraat-header-1920.webp 1920w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 100vw, 1440px">' +
-            '<img src="paskamerpraat-header-1024.jpg" srcset="paskamerpraat-header-480.jpg 480w, paskamerpraat-header-800.jpg 800w, paskamerpraat-header-1024.jpg 1024w, paskamerpraat-header-1440.jpg 1440w, paskamerpraat-header-1920.jpg 1920w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 100vw, 1440px" class="dy-hm-hero-img pp-hero-v5" width="1672" height="941" alt="Paskamerpraat community - diverse mensen met verschillende lichaamsvormen, lengtes en maten samen in de stad" loading="eager" fetchpriority="high" decoding="async">' +
+            '<source type="image/webp" srcset="paskamerpraat-header-480.webp 480w, paskamerpraat-header-800.webp 800w, paskamerpraat-header-1024.webp 1024w, paskamerpraat-header-1440.webp 1440w, paskamerpraat-header-1920.webp 1920w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 720px">' +
+            '<img src="paskamerpraat-header-1024.jpg" srcset="paskamerpraat-header-480.jpg 480w, paskamerpraat-header-800.jpg 800w, paskamerpraat-header-1024.jpg 1024w, paskamerpraat-header-1440.jpg 1440w, paskamerpraat-header-1920.jpg 1920w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 720px" class="dy-hm-hero-img pp-hero-v5" width="848" height="1264" alt="Paskamerpraat community - diverse mensen met verschillende lichaamsvormen, lengtes en maten samen in de stad" loading="eager" fetchpriority="high" decoding="async">' +
           '</picture>' +
           '<div class="dy-hm-hero-overlay"></div>' +
           // v60.1.32: tekst-overlay op de foto

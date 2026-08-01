@@ -10,7 +10,7 @@
 // Strategie is bewust simpel + bestand-naam-gebaseerd zodat een nieuwe deploy
 // (nieuwe versioned filename) automatisch niet uit cache komt.
 
-const VERSION       = 'v60.1.314-20260214-hero-exact-aspect';
+const VERSION       = 'v60.1.315-20260214-hero-padded-portrait';
 const STATIC_CACHE  = 'pp-static-' + VERSION;
 const RUNTIME_CACHE = 'pp-runtime-' + VERSION;
 const IMG_CACHE     = 'pp-images-' + VERSION;
