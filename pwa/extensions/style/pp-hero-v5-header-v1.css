@@ -1,33 +1,32 @@
 /* ═════════════════════════════════════════════════════════════════════
- * Paskamer Praat - Hero image visibility fix (v2.0.0)
+ * Paskamer Praat - Hero image final fix (v3.0.0)
  * ═════════════════════════════════════════════════════════════════════
  *
- * MINIMALE additieve overlay. Doel: nieuwe landscape foto
- * (paskamerpraat_header, 1672x941) VOLLEDIG in verhouding zichtbaar
- * binnen de ORIGINELE hero-indeling van app.css. Geen andere wijzigingen.
+ * FINALE minimale additieve overlay. Twee doelen:
  *
- * Enige aanpassingen:
- *   1. `.dy-hm-hero-img { object-fit: contain }` (was cover)
- *      → landscape foto past volledig in het portrait/desktop-vak
- *   2. Blurred ambient fill via `.dy-hm-hero-overlay` op ALLE viewports
- *      (was alleen desktop) zodat de lege ruimte rond de foto niet leeg
- *      oogt maar een cinematische donkere blur toont van dezelfde foto.
+ *   MOBIEL: hero-container heeft 9:16 aspect ratio en vult het
+ *   volledige zichtbare scherm (portrait). Compatibel met alle iOS
+ *   en Android schermen (SE tot Pro Max, Fold, Pixel, Galaxy).
  *
- * Alle overige originele styling (parent flex, text-overlay absolute
- * met gradient, content-panel, animaties, CTA styling, breakpoints)
- * blijft ONAANGETAST.
+ *   DESKTOP: hero-container vult de volledige hoogte van het venster
+ *   (van boven tot onder), foto altijd volledig zichtbaar zonder crop.
+ *
+ * De foto wordt ALTIJD volledig in verhouding weergegeven (`contain`).
+ * De lege ruimte rondom wordt gevuld met een cinematisch geblurde
+ * versie van dezelfde foto zodat het gevuld en intentioneel oogt.
+ *
+ * Geen andere wijzigingen aan de bestaande code of functionaliteiten.
  * ═════════════════════════════════════════════════════════════════════ */
 
-/* Foto altijd volledig zichtbaar in verhouding, boven ambient overlay */
+/* Foto: altijd volledig zichtbaar in verhouding, boven ambient */
 .dy-hm-hero-img {
   object-fit: contain !important;
   object-position: center center !important;
   z-index: 1 !important;
+  filter: none !important;
 }
 
-/* Blurred ambient fill onder de foto op alle viewports.
-   Op desktop bestond dit al met hero-v4-canal.jpg reference; nu ook op mobiel
-   zodat de contain-fit niet leeg oogt aan de zijkanten. */
+/* Blurred ambient fill met dezelfde foto - vult de lege ruimte cinematisch */
 .dy-hm-hero-overlay {
   display: block !important;
   position: absolute !important;
@@ -40,4 +39,40 @@
   filter: blur(56px) brightness(0.55) saturate(0.75) !important;
   z-index: 0 !important;
   pointer-events: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ * MOBIEL / TABLET (< 1024px): 9:16 full-screen hero
+ * ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 1023px) {
+  .dy-hm-hero-bg,
+  body .dy-hm-hero-bg {
+    aspect-ratio: 9 / 16 !important;
+    width: 100vw !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+  /* Padding-top fallback voor oude iOS < 15.4 */
+  @supports not (aspect-ratio: 9 / 16) {
+    .dy-hm-hero-bg { height: 0 !important; padding-top: 177.78% !important; }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ * DESKTOP (>= 1024px): container vult volledige viewport-hoogte
+ * ═══════════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+  .dy-hm-hero {
+    min-height: 100dvh !important;
+    height: 100dvh !important;
+  }
+  .dy-hm-hero-bg,
+  body .dy-hm-hero-bg {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    aspect-ratio: auto !important;
+  }
 }
