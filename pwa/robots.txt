@@ -54,12 +54,18 @@ Allow: /*.jpg$
 Allow: /*.svg$
 
 Disallow: /admin
+Disallow: /admin/
 Disallow: /admin.html
+Disallow: /account
+Disallow: /account/
+Disallow: /leden
+Disallow: /leden/
 Disallow: /debug.html
 Disallow: /vernieuw.html
 Disallow: /test-hub.html
 Disallow: /login
 Disallow: /register
+Disallow: /checkout
 Disallow: /profiel
 Disallow: /instellingen
 Disallow: /wallet
