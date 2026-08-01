@@ -1,0 +1,116 @@
+/* ═════════════════════════════════════════════════════════════════════
+ * Paskamer Praat - Hero v5 (paskamerpraat_header) responsive overrides
+ * ═════════════════════════════════════════════════════════════════════
+ *
+ * ADDITIEVE laag bovenop app.css. Zorgt dat de NIEUWE hero-afbeelding
+ * (paskamerpraat-header, aspect 1672:941 ≈ 16:9 landscape) NOOIT wordt
+ * gecropt, uitgerekt of vervormd op enig apparaat.
+ *
+ * Strategie:
+ *   1. Container krijgt aspect-ratio 1672 / 941 exact matching de foto.
+ *   2. Image krijgt object-fit: contain als dubbele veiligheid.
+ *   3. Container heeft neutrale achtergrond zodat evt. minieme rounding
+ *      afwijkingen niet zichtbaar zijn.
+ *   4. Overschrijft eerdere portrait-modus (848/1264) op ALLE viewports.
+ *
+ * Wordt geladen NA app.css zodat de nieuwe aspect-ratio wint.
+ * ═════════════════════════════════════════════════════════════════════ */
+
+/* Alle viewports: container matcht foto-aspect precies */
+.dy-hm-hero-bg {
+  aspect-ratio: 1672 / 941 !important;
+  background: #1a1408 !important;
+  overflow: hidden;
+}
+
+/* Image vult container zonder crop; contain valt terug op cover als
+   aspect exact matcht, en beschermt bij minieme rounding-verschillen. */
+.dy-hm-hero-img.pp-hero-v5,
+.dy-hm-hero-bg .dy-hm-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%   !important;
+  height: 100%  !important;
+  object-fit: cover !important;      /* aspect matcht dus geen crop */
+  object-position: center center;
+  filter: none !important;           /* geen brightness reductie */
+}
+
+/* Mobile: hero direct onder de header, geen extra padding die
+   onderkant of bovenkant zou afsnijden. */
+@media (max-width: 767px) {
+  .dy-hm-hero-bg {
+    width: 100vw;
+    max-width: 100%;
+    aspect-ratio: 1672 / 941 !important;
+  }
+  /* Tekst-overlay binnen hero (bp-hero-titel/dy-hero-titel) blijft
+     centraal maar niet buiten viewport. */
+  .dy-hm-hero-bg .dy-vr-titel,
+  .dy-hm-hero-bg .bp-hero-titel {
+    padding-left:  clamp(12px, 4vw, 32px);
+    padding-right: clamp(12px, 4vw, 32px);
+  }
+}
+
+/* Tablet / small-desktop */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .dy-hm-hero-bg {
+    aspect-ratio: 1672 / 941 !important;
+    max-height: 70dvh;
+  }
+}
+
+/* Large desktop / ultrawide: begrens hoogte zodat hero niet dominant
+   over volledige scroll ligt, maar aspect blijft correct. */
+@media (min-width: 1200px) {
+  .dy-hm-hero-bg {
+    aspect-ratio: 1672 / 941 !important;
+    max-height: 78dvh;
+  }
+}
+
+/* Landscape korte hoogte (mobiel liggend / iPad landscape) */
+@media (orientation: landscape) and (max-height: 500px) {
+  .dy-hm-hero-bg {
+    max-height: 100dvh;
+    aspect-ratio: 1672 / 941 !important;
+  }
+}
+
+/* Ultrawide (21:9 en breder) */
+@media (min-width: 1800px) {
+  .dy-hm-hero-bg {
+    max-width: 1920px;
+    margin-left: auto;
+    margin-right: auto;
+    aspect-ratio: 1672 / 941 !important;
+  }
+}
+
+/* Zorg dat een eventuele `picture` wrapper altijd de volledige
+   container-ruimte inneemt. */
+.dy-hm-hero-bg > picture,
+.dy-hm-hero-bg picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Voorkom dat oude shimmer-animatie de foto verduistert nu we geen
+   portrait-crop meer gebruiken. */
+@media (max-width: 767px) {
+  .dy-hm-hero-bg {
+    animation: none !important;
+  }
+}
+
+/* v60.1.309: ambient blurred fill overlay op desktop met NIEUWE hero image
+   (vervangt hero-v4-canal.jpg reference in app.css) */
+@media (min-width: 768px) {
+  .dy-hm-hero-overlay {
+    background-image: url('/paskamerpraat-header-800.jpg') !important;
+  }
+}

@@ -426,7 +426,7 @@ var _urlPaginaVeilig = (_urlStartPagina && _publiekeUrlPaginas.indexOf(_urlStart
 DY.pagina = _urlPaginaVeilig
   ? _urlPaginaVeilig
   : ((_hersteldPagina && _veiligePaginas.includes(_hersteldPagina))
-    ? (_hersteldPagina === 'lookbook' ? 'feed' : _hersteldPagina) : 'feed');
+    ? (_hersteldPagina === 'lookbook' ? 'feed' : _hersteldPagina) : 'home');
 DY.authKlaar = false;
 
 
@@ -536,6 +536,7 @@ DY.onAuthReady = function(user) {
                       'dsp','configurator','privacy_center','account_verwijder','community_regels','beta_pagina'];
     // SEO: directe URL (bijv. /feed) wordt gerespecteerd voor terugkerende bezoekers
     // Eerste bezoek zonder onboarding → altijd home, ook bij directe URL
+    // Root-URL (/) OF geen expliciete pagina → home met hero
     var _heeftDirecteUrl = !!window._dy_start_pagina;
     var _gast_pagina;
     if (_userPages.indexOf(DY.pagina) >= 0) {
@@ -544,7 +545,7 @@ DY.onAuthReady = function(user) {
       // Eerste bezoek via directe link → onboarding eerst
       _gast_pagina = 'home';
     } else {
-      _gast_pagina = DY.pagina || 'feed';
+      _gast_pagina = DY.pagina || 'home';
     }
     DY.toonPagina(_gast_pagina);
     DY.updateNav();
@@ -585,7 +586,9 @@ DY.onAuthReady = function(user) {
       DY.toonPagina('kleuren_ai');
       DY._kaiLaadGedeeldeAnalyse(_kaUrlParam);
     } else {
-      DY.toonPagina(DY.pagina === 'login' || DY.pagina === 'register' ? 'home' : DY.pagina);
+      // Root-URL of ongeldige pagina → home (met hero); login/register/leeg → home
+      var _startPag = (DY.pagina && DY.pagina !== 'login' && DY.pagina !== 'register') ? DY.pagina : 'home';
+      DY.toonPagina(_startPag);
     }
     requestAnimationFrame(function() { DY.updateNav(); DY.updateTopbarAvatar(); });
       var notifBtn = document.getElementById('dy-topbar-notif-btn');
@@ -2244,8 +2247,8 @@ DY.renderHome = function() {
       '<section class="dy-hm-hero">' +
         '<div class="dy-hm-hero-bg">' +
           '<picture>' +
-            '<source type="image/webp" srcset="hero-v4-canal-480.webp 480w, hero-v4-canal-800.webp 800w, hero-v4-canal-1024.webp 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 720px">' +
-            '<img src="hero-v4-canal.jpg" srcset="hero-v4-canal-480.jpg 480w, hero-v4-canal-800.jpg 800w, hero-v4-canal-1024.jpg 1024w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 720px" class="dy-hm-hero-img" width="848" height="1264" alt="Inclusieve modecommunity bij Amsterdamse gracht, mensen met diverse lichaamstypen, leeftijden en stijlen" loading="eager" fetchpriority="high" decoding="async">' +
+            '<source type="image/webp" srcset="paskamerpraat-header-480.webp 480w, paskamerpraat-header-800.webp 800w, paskamerpraat-header-1024.webp 1024w, paskamerpraat-header-1440.webp 1440w, paskamerpraat-header-1920.webp 1920w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 100vw, 1440px">' +
+            '<img src="paskamerpraat-header-1024.jpg" srcset="paskamerpraat-header-480.jpg 480w, paskamerpraat-header-800.jpg 800w, paskamerpraat-header-1024.jpg 1024w, paskamerpraat-header-1440.jpg 1440w, paskamerpraat-header-1920.jpg 1920w" sizes="(max-width: 600px) 100vw, (max-width: 1024px) 100vw, 1440px" class="dy-hm-hero-img pp-hero-v5" width="1672" height="941" alt="Paskamerpraat community - diverse mensen met verschillende lichaamsvormen, lengtes en maten samen in de stad" loading="eager" fetchpriority="high" decoding="async">' +
           '</picture>' +
           '<div class="dy-hm-hero-overlay"></div>' +
           // v60.1.32: tekst-overlay op de foto
@@ -10732,9 +10735,10 @@ DY.terug = function() {
   };
 
   // Zet initiële history state met correcte URL
+  // Root-URL (/) → home (met hero), niet feed. Legacy: /feed, /looks etc. blijven werken.
   try {
     var _initPad = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
-    var _initPagina = _SEO_PAD_MAP[_initPad.split('/')[0]] || 'feed';
+    var _initPagina = _SEO_PAD_MAP[_initPad.split('/')[0]] || 'home';
     var _initUrl = _SEO_URL_MAP[_initPagina] || '/';
     if (!window.history.state || !window.history.state._dy) {
       window.history.replaceState({ _dy: true, pagina: _initPagina }, '', _initUrl);
@@ -10743,7 +10747,7 @@ DY.terug = function() {
 
   window.addEventListener('popstate', function(e) {
     DY._popstateActive = true;
-    var veiligePagina = (e.state && e.state.pagina) || (DY && DY.pagina) || 'feed';
+    var veiligePagina = (e.state && e.state.pagina) || (DY && DY.pagina) || 'home';
     var veiligUrl = _SEO_URL_MAP[veiligePagina] || '/';
     try { window.history.replaceState({ _dy: true, pagina: veiligePagina }, '', veiligUrl); } catch(ex) {}
     try {

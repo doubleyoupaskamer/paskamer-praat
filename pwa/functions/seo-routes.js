@@ -15,7 +15,7 @@ export const SITE = {
   name:   'Paskamerpraat',
   brand:  'DoubleYou',
   locale: 'nl_NL',
-  image:  'https://paskamerpraat.nl/hero-model-v2.png',
+  image:  'https://paskamerpraat.nl/paskamerpraat-header.png',
   twitterHandle: '@paskamerpraat'
 };
 
