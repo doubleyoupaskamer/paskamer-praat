@@ -1,0 +1,86 @@
+name: Import PWA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-pwa:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Find ZIP
+        id: zip
+        shell: bash
+        run: |
+          ZIP_FILE="$(find . -maxdepth 1 -type f -name '*.zip' | head -n 1)"
+
+          if [ -z "$ZIP_FILE" ]; then
+            echo "Geen ZIP-bestand gevonden in de repository."
+            exit 1
+          fi
+
+          echo "ZIP gevonden: $ZIP_FILE"
+          echo "zip_file=$ZIP_FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Extract PWA
+        shell: bash
+        run: |
+          rm -rf /tmp/pwa-import
+          mkdir -p /tmp/pwa-import
+
+          unzip -q "${{ steps.zip.outputs.zip_file }}" -d /tmp/pwa-import
+
+          echo "Uitgepakte bestanden:"
+          find /tmp/pwa-import -maxdepth 2 -type f | head -100
+
+      - name: Detect extracted root
+        id: root
+        shell: bash
+        run: |
+          shopt -s nullglob dotglob
+
+          entries=(/tmp/pwa-import/*)
+
+          if [ "${#entries[@]}" -eq 1 ] && [ -d "${entries[0]}" ]; then
+            SOURCE_DIR="${entries[0]}"
+          else
+            SOURCE_DIR="/tmp/pwa-import"
+          fi
+
+          echo "Bronmap: $SOURCE_DIR"
+          echo "source_dir=$SOURCE_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Copy complete PWA to repository
+        shell: bash
+        run: |
+          SOURCE_DIR="${{ steps.root.outputs.source_dir }}"
+
+          cp -a "$SOURCE_DIR"/. .
+
+          echo "PWA-bestanden geplaatst in repository:"
+          find . -maxdepth 2 -type f \
+            ! -path './.git/*' \
+            ! -path './.github/*' \
+            | sort | head -200
+
+      - name: Commit imported PWA
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Geen nieuwe wijzigingen gevonden."
+            exit 0
+          fi
+
+          git commit -m "Import complete PWA from ZIP"
+          git push
