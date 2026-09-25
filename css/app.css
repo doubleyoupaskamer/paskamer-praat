@@ -1,0 +1,869 @@
+/* DoubleYou PWA — Stylesheet */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;700&display=swap');
+
+:root {
+  --ink:       #1e1a0f;
+  --ink-soft:  #3a3018;
+  --ink-muted: #7a6a3a;
+  --cream:     #fdf8f0;
+  --warm:      #f5edda;
+  --parchment: #e2cfa0;
+  --clay:      #c67d06;
+  --clay-dark: #a56605;
+  --white:     #fefcf5;
+  --border:    rgba(30,26,15,0.12);
+  --nav-h:     64px;
+  --radius:    8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  padding-bottom: var(--nav-h);
+  overflow-x: hidden;
+}
+
+/* ── TOPBAR ── */
+.dy-topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 100;
+  border-bottom: 1px solid rgba(198,125,6,0.2);
+}
+.dy-topbar-brand {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--clay);
+  letter-spacing: 1px;
+}
+.dy-topbar-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: rgba(254,252,245,0.5);
+}
+.dy-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dy-topbar-avatar {
+  width: 32px; height: 32px;
+  background: var(--clay);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* ── MAIN ── */
+.dy-main {
+  margin-top: 56px;
+  min-height: calc(100vh - 56px - var(--nav-h));
+  padding-bottom: 24px;
+}
+
+.dy-fade-in {
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── BOTTOM NAV ── */
+.dy-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: var(--ink);
+  display: flex;
+  border-top: 1px solid rgba(198,125,6,0.15);
+  z-index: 100;
+}
+.dy-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  color: rgba(254,252,245,0.35);
+  transition: color 0.2s;
+  border: none;
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+  padding: 0;
+}
+.dy-nav-item svg {
+  width: 22px; height: 22px;
+  fill: currentColor;
+}
+.dy-nav-item span {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dy-nav-item.active { color: var(--clay); }
+.dy-nav-item:hover { color: rgba(198,125,6,0.7); }
+
+/* ── AUTH ── */
+.dy-auth-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px;
+  max-width: 440px;
+  margin: 0 auto;
+}
+.dy-auth-logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.dy-auth-w {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 64px;
+  font-weight: 300;
+  color: var(--clay);
+  line-height: 1;
+}
+.dy-auth-brand {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+.dy-auth-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--clay);
+}
+.dy-auth-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.dy-auth-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--ink);
+}
+.dy-auth-err {
+  background: rgba(192,57,43,0.08);
+  border: 1px solid rgba(192,57,43,0.25);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #c0392b;
+}
+.dy-auth-note {
+  font-size: 12px;
+  color: var(--ink-muted);
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* ── FORM ELEMENTEN ── */
+.dy-field { display: flex; flex-direction: column; gap: 6px; }
+.dy-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.dy-input, .dy-textarea {
+  padding: 12px 14px;
+  background: var(--cream);
+  border: 1px solid var(--parchment);
+  border-radius: 4px;
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+.dy-input:focus, .dy-textarea:focus { border-color: var(--clay); }
+.dy-textarea { resize: vertical; min-height: 120px; }
+
+/* ── KNOPPEN ── */
+.dy-btn {
+  padding: 14px 20px;
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, color 0.2s;
+  width: 100%;
+}
+.dy-btn-primary {
+  background: var(--clay);
+  color: var(--ink);
+}
+.dy-btn-primary:hover { background: var(--clay-dark); }
+.dy-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.dy-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+}
+.dy-btn-ghost:hover { border-color: var(--clay); color: var(--clay); }
+.dy-btn-link {
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 12px;
+  padding: 8px;
+}
+.dy-btn-uitloggen { margin-top: 24px; }
+
+/* ── FEED ── */
+.dy-feed-header {
+  background: var(--ink);
+  padding: 24px 16px 20px;
+}
+.dy-feed-header-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.dy-page-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--white);
+  line-height: 1.1;
+}
+.dy-page-title em { font-style: italic; color: var(--clay); }
+.dy-page-sub {
+  font-size: 13px;
+  color: rgba(254,252,245,0.45);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.dy-fab {
+  width: 44px; height: 44px;
+  background: var(--clay);
+  border: none;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 16px;
+  margin-top: 4px;
+}
+.dy-fab svg { width: 20px; height: 20px; fill: var(--ink); }
+.dy-fab:hover { background: var(--clay-dark); }
+
+.dy-filters {
+  display: flex;
+  gap: 0;
+  padding: 12px 16px;
+  background: var(--warm);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.dy-filter {
+  padding: 7px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  margin-right: 8px;
+  transition: all 0.2s;
+}
+.dy-filter.active {
+  background: var(--clay);
+  color: var(--ink);
+  border-color: var(--clay);
+}
+
+.dy-verhalen-lijst { padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; }
+.dy-leeg { text-align: center; padding: 48px 16px; color: var(--ink-muted); font-style: italic; }
+
+/* ── KAART ── */
+.dy-kaart {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.dy-kaart-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px 0;
+}
+.dy-avatar {
+  width: 36px; height: 36px;
+  background: var(--ink);
+  color: var(--clay);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  flex-shrink: 0;
+}
+.dy-avatar-lg { width: 56px; height: 56px; font-size: 20px; }
+.dy-kaart-meta { flex: 1; }
+.dy-kaart-naam { display: block; font-size: 14px; font-weight: 700; color: var(--ink); }
+.dy-kaart-tijd { font-size: 11px; color: var(--ink-muted); }
+.dy-eigen-badge {
+  font-size: 10px;
+  background: rgba(198,125,6,0.12);
+  border: 1px solid rgba(198,125,6,0.3);
+  color: var(--clay);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.dy-kaart-foto {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  margin-top: 10px;
+}
+.dy-kaart-body { padding: 12px 16px; }
+.dy-kaart-tekst { font-size: 14px; line-height: 1.65; color: var(--ink-soft); }
+.dy-kaart-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 14px;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+.dy-like-btn, .dy-reactie-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; color: var(--ink-muted);
+  padding: 4px 8px;
+  border-radius: 20px;
+  transition: all 0.15s;
+}
+.dy-like-btn svg, .dy-reactie-btn svg { width: 16px; height: 16px; fill: currentColor; }
+.dy-like-btn:hover { color: #e74c3c; }
+.dy-like-btn.liked { color: #e74c3c; }
+.dy-reactie-btn:hover { color: var(--clay); }
+.dy-lees-btn {
+  margin-left: auto;
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  color: var(--clay);
+  letter-spacing: 0.04em;
+}
+
+/* ── NIEUW VERHAAL FORM ── */
+.dy-form-wrap {
+  padding: 20px 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.dy-form-header { display: flex; align-items: center; gap: 16px; }
+.dy-back-btn {
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  color: var(--clay);
+  padding: 0;
+}
+.dy-dsp-tip {
+  background: rgba(198,125,6,0.08);
+  border: 1px solid rgba(198,125,6,0.2);
+  border-radius: 4px;
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--ink-muted);
+}
+.dy-dsp-tip-icon { color: var(--clay); font-size: 16px; flex-shrink: 0; }
+.dy-dsp-tip strong { color: var(--clay); }
+.dy-woordteller { font-size: 11px; color: var(--ink-muted); text-align: right; margin-top: 4px; }
+.dy-foto-upload { border: 1px dashed var(--parchment); border-radius: 4px; overflow: hidden; }
+.dy-foto-placeholder {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; padding: 24px;
+  cursor: pointer; color: var(--ink-muted); font-size: 13px;
+}
+.dy-foto-placeholder svg { width: 28px; height: 28px; fill: var(--parchment); }
+.dy-foto-preview { width: 100%; max-height: 200px; object-fit: cover; display: block; }
+.dy-disclaimer { font-size: 12px; color: var(--ink-muted); font-style: italic; }
+
+/* ── DETAIL ── */
+.dy-detail-wrap { padding: 16px; max-width: 600px; margin: 0 auto; }
+.dy-artikel { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 12px 0; }
+.dy-artikel-foto { width: 100%; border-radius: 4px; margin: 12px 0; }
+.dy-artikel-tekst { font-size: 15px; line-height: 1.75; color: var(--ink-soft); }
+.dy-artikel-acties { padding-top: 12px; border-top: 1px solid var(--border); margin-top: 12px; }
+.dy-reacties-sectie { margin-top: 8px; }
+.dy-reacties-titel { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; color: var(--ink); margin-bottom: 12px; }
+.dy-reacties-lijst { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.dy-reactie { display: flex; gap: 10px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+.dy-reactie-avatar { width: 32px; height: 32px; background: var(--ink); color: var(--clay); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.dy-reactie-naam { font-size: 13px; font-weight: 700; display: block; }
+.dy-reactie-tekst { font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin: 2px 0; }
+.dy-reactie-tijd { font-size: 11px; color: var(--ink-muted); }
+.dy-reactie-form { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.dy-login-prompt { font-size: 13px; color: var(--ink-muted); font-style: italic; text-align: center; padding: 16px; }
+.dy-leeg-tekst { font-size: 13px; color: var(--ink-muted); font-style: italic; text-align: center; padding: 16px 0; }
+
+/* ── PROFIEL ── */
+.dy-profiel-wrap { padding: 0 0 32px; max-width: 500px; margin: 0 auto; }
+.dy-profiel-hero { background: var(--ink); padding: 28px 20px 24px; text-align: center; }
+.dy-profiel-avatar-lg { width: 64px; height: 64px; background: var(--clay); color: var(--ink); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; margin: 0 auto 12px; }
+.dy-profiel-naam { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: var(--white); }
+.dy-profiel-niveau { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 8px 0; }
+.dy-niveau-emoji { font-size: 18px; }
+.dy-niveau-naam { font-size: 14px; font-weight: 500; color: var(--clay); }
+.dy-profiel-email { font-size: 12px; color: rgba(254,252,245,0.35); margin-top: 4px; }
+
+.dy-stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+.dy-stat { background: var(--warm); padding: 16px 12px; text-align: center; }
+.dy-stat-waarde { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: var(--clay); }
+.dy-stat-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); margin-top: 2px; }
+
+.dy-niveau-kaart, .dy-seizoen-kaart { margin: 16px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.dy-niveau-kaart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px; font-weight: 500; }
+.dy-niveau-pct { color: var(--clay); }
+.dy-progress-bar { height: 4px; background: var(--parchment); border-radius: 2px; overflow: hidden; }
+.dy-progress-fill { height: 100%; background: var(--clay); border-radius: 2px; transition: width 1s ease; }
+.dy-niveau-voordelen { font-size: 12px; color: var(--ink-muted); margin-top: 8px; }
+
+.dy-seizoen-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--clay); margin-bottom: 4px; }
+.dy-seizoen-tier { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; color: var(--ink); }
+.dy-seizoen-voordelen { font-size: 12px; color: var(--ink-muted); margin: 4px 0 8px; }
+.dy-seizoen-voortgang { font-size: 11px; color: var(--ink-muted); }
+
+.dy-log-sectie { margin: 0 16px; }
+.dy-log-titel { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 300; color: var(--ink); margin-bottom: 10px; }
+.dy-log-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.dy-log-label { font-size: 13px; color: var(--ink-soft); }
+.dy-log-pts { font-size: 13px; font-weight: 700; color: var(--clay); }
+
+/* ── DSP PAGINA ── */
+.dy-dsp-wrap { padding: 20px 16px; max-width: 600px; margin: 0 auto; }
+.dy-dsp-uitleg-kaart { background: var(--ink); border-radius: var(--radius); padding: 16px; margin: 16px 0; display: flex; flex-direction: column; gap: 14px; }
+.dy-dsp-uitleg-item { display: flex; gap: 12px; align-items: flex-start; }
+.dy-dsp-uitleg-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.dy-dsp-uitleg-item strong { display: block; font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+.dy-dsp-uitleg-item p { font-size: 12px; color: rgba(254,252,245,0.5); line-height: 1.5; }
+
+.dy-dsp-sectie-titel { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; color: var(--ink); margin: 20px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+
+.dy-dsp-niveaus { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+.dy-dsp-niveau-rij { display: flex; align-items: center; gap: 12px; background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; }
+.dy-dsp-niveau-emoji { font-size: 18px; flex-shrink: 0; }
+.dy-dsp-niveau-info { flex: 1; }
+.dy-dsp-niveau-info strong { display: block; font-size: 13px; font-weight: 700; color: var(--ink); }
+.dy-dsp-niveau-info span { font-size: 11px; color: var(--clay); }
+.dy-dsp-niveau-voordelen { font-size: 11px; color: var(--ink-muted); text-align: right; }
+
+.dy-dsp-cat { margin-bottom: 16px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.dy-dsp-cat-titel { padding: 10px 14px; background: var(--warm); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); border-bottom: 1px solid var(--border); }
+.dy-dsp-actie-rij { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border); gap: 12px; }
+.dy-dsp-actie-rij:last-child { border-bottom: none; }
+.dy-dsp-actie-label { font-size: 13px; color: var(--ink-soft); flex: 1; }
+.dy-dsp-actie-rechts { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.dy-dsp-pts { font-size: 13px; font-weight: 700; color: var(--clay); white-space: nowrap; }
+.dy-dsp-limit { font-size: 10px; color: var(--ink-muted); background: var(--warm); border: 1px solid var(--border); border-radius: 10px; padding: 2px 7px; white-space: nowrap; }
+.dy-dsp-disclaimer { font-size: 11px; color: var(--ink-muted); font-style: italic; text-align: center; margin-top: 16px; line-height: 1.5; }
+
+/* ── LOADER ── */
+.dy-loader { display: flex; justify-content: center; padding: 48px; }
+.dy-spinner { width: 28px; height: 28px; border: 2px solid var(--parchment); border-top-color: var(--clay); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── TOAST ── */
+.dy-toast {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink);
+  border: 1px solid var(--clay);
+  border-radius: 24px;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 999;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.dy-toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.dy-toast-pts { font-size: 15px; font-weight: 700; color: var(--clay); }
+.dy-toast-label { font-size: 12px; color: rgba(254,252,245,0.7); }
+
+/* ── INSTALL BANNER ── */
+.dy-install-banner {
+  background: var(--clay);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.dy-install-tekst { font-size: 13px; color: var(--ink); font-weight: 500; }
+.dy-install-btn {
+  background: var(--ink);
+  color: var(--white);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.dy-install-sluiten { background: none; border: none; color: var(--ink); cursor: pointer; font-size: 18px; padding: 0 4px; }
+
+/* ── RESPONSIVE VERFIJNINGEN ── */
+@media (min-width: 480px) {
+  .dy-verhalen-lijst { padding: 16px; }
+  .dy-form-wrap { padding: 24px 20px; }
+}
+
+.dy-kaart-titel {
+  display: block;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+/* Badge naast profielfoto */
+.dy-profiel-avatar-container {
+  position: relative;
+  display: inline-block;
+  margin: 0 auto 12px;
+}
+.dy-profiel-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 26px;
+  height: 26px;
+  background: var(--clay);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 2px solid var(--ink);
+}
+
+/* Niveau voortgang naar volgende */
+.dy-niveau-next {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-top: 6px;
+}
+.dy-niveau-next strong { color: var(--clay); }
+
+/* Alle niveaus op profielpagina */
+.dy-alle-niveaus { margin: 16px; }
+.dy-niveau-rij {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  opacity: 0.5;
+}
+.dy-niveau-rij.actief { opacity: 1; }
+.dy-niveau-rij-emoji { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
+.dy-niveau-rij-info { flex: 1; }
+.dy-niveau-rij-info strong { display: block; font-size: 13px; color: var(--ink); }
+.dy-niveau-rij-info span { font-size: 11px; color: var(--ink-muted); }
+.dy-niveau-rij-pts { font-size: 11px; color: var(--clay); font-weight: 700; white-space: nowrap; }
+.dy-niveau-rij.actief .dy-niveau-rij-info strong { color: var(--clay); }
+
+/* Artikel titel */
+.dy-artikel-titel {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 8px 0 12px;
+  line-height: 1.3;
+}
+
+/* Media upload */
+.dy-media-upload {
+  border: 1px dashed var(--parchment);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--cream);
+}
+.dy-media-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px;
+  cursor: pointer;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+.dy-media-placeholder svg { width: 28px; height: 28px; fill: var(--parchment); }
+.dy-media-remove {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  background: rgba(30,26,15,0.06);
+  border: none;
+  border-top: 1px solid var(--border);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  text-align: center;
+}
+.dy-media-remove:hover { color: #c0392b; }
+
+/* Upload voortgang */
+.dy-upload-voortgang {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+.dy-upload-balk {
+  flex: 1;
+  height: 4px;
+  background: var(--parchment);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.dy-upload-fill {
+  height: 100%;
+  background: var(--clay);
+  border-radius: 2px;
+  transition: width 0.2s;
+  width: 0%;
+}
+#upload-pct, #reactie-upload-pct {
+  font-size: 11px;
+  color: var(--clay);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Reactie media */
+.dy-reactie-media-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.dy-btn-media {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--warm);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.dy-btn-media:hover { border-color: var(--clay); color: var(--clay); }
+
+.dy-reactie-foto {
+  width: 100%;
+  border-radius: 4px;
+  max-height: 200px;
+  object-fit: cover;
+  margin: 6px 0;
+}
+
+/* Video in feed — geen controls, klikbaar */
+.dy-kaart-video {
+  display: block;
+  pointer-events: auto;
+}
+
+/* ── WINKEL ── */
+.dy-winkel-wrap { padding-bottom: 32px; }
+
+.dy-winkel-dsp-banner {
+  margin: 16px;
+  background: var(--ink);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dy-winkel-dsp-niveau {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dy-winkel-dsp-emoji { font-size: 24px; }
+.dy-winkel-dsp-niveau strong { display: block; font-size: 14px; font-weight: 700; color: var(--clay); }
+.dy-winkel-dsp-niveau span { font-size: 12px; color: rgba(254,252,245,0.5); }
+.dy-winkel-dsp-info p { font-size: 12px; color: rgba(254,252,245,0.6); line-height: 1.5; }
+.dy-winkel-dsp-detail { color: rgba(254,252,245,0.45) !important; font-size: 11px !important; margin-top: 4px; }
+.dy-winkel-dsp-detail strong { color: var(--clay); }
+
+.dy-winkel-acties {
+  display: flex;
+  gap: 10px;
+  padding: 0 16px 16px;
+  flex-wrap: wrap;
+}
+.dy-winkel-btn-primary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: var(--clay);
+  color: var(--ink);
+  border: none;
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  min-width: 160px;
+}
+.dy-winkel-btn-primary svg { width: 16px; height: 16px; fill: var(--ink); }
+.dy-winkel-btn-primary:hover { background: var(--clay-dark); }
+
+.dy-winkel-btn-secondary {
+  flex: 1;
+  padding: 14px 20px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  min-width: 140px;
+}
+.dy-winkel-btn-secondary:hover { border-color: var(--clay); color: var(--clay); }
+
+.dy-winkel-cat-titel {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--ink);
+  padding: 0 16px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+.dy-winkel-categorien { margin: 8px 0 16px; }
+.dy-winkel-cat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 16px;
+}
+.dy-winkel-cat-kaart {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 12px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.dy-winkel-cat-kaart:hover { border-color: var(--clay); }
+.dy-winkel-cat-icon { font-size: 24px; margin-bottom: 4px; }
+.dy-winkel-cat-kaart strong { font-size: 13px; font-weight: 700; color: var(--ink); }
+.dy-winkel-cat-kaart span { font-size: 11px; color: var(--ink-muted); }
+
+.dy-bestellingen-wrap { padding: 0 0 16px; }
+.dy-bestelling-kaart {
+  margin: 0 16px 8px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.dy-bestelling-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.dy-bestelling-nummer { font-size: 14px; font-weight: 700; color: var(--ink); }
+.dy-bestelling-pts { font-size: 13px; font-weight: 700; color: var(--clay); }
+.dy-bestelling-meta { display: flex; gap: 12px; font-size: 12px; color: var(--ink-muted); }
+.dy-bestelling-leeg { margin: 16px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; text-align: center; }
+.dy-bestelling-leeg p { font-size: 14px; color: var(--ink-soft); margin-bottom: 8px; }
+.dy-bestelling-leeg-sub { font-size: 12px; color: var(--ink-muted); }
+
+.dy-winkel-dsp-uitleg { margin: 8px 0; }
+.dy-winkel-dsp-tabel { margin: 0 16px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.dy-winkel-dsp-rij {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.dy-winkel-dsp-rij:last-child { border-bottom: none; }
+.dy-winkel-dsp-rij:nth-child(even) { background: var(--warm); }
+.dy-winkel-dsp-pts { font-weight: 700; color: var(--clay); white-space: nowrap; }
